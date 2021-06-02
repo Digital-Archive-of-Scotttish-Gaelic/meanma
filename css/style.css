@@ -1,0 +1,290 @@
+html,body {
+    height: 100%;
+}
+
+.chunk {
+    cursor: pointer;
+}
+
+.hi {
+    background-color: yellow;
+}
+
+.link {
+    cursor: pointer;
+    color: #007bff !important;
+}
+
+.panel-link.active {
+    color: white !important;
+}
+
+.panel {
+    display: none;
+}
+
+#metaPanel {
+    display: block;
+}
+
+#imagePanel {
+    height: 100%;
+}
+
+.hide {
+    display: none;
+}
+
+.floatRight {
+    float: right;
+}
+
+.loginButton {
+    display: none !important;
+}
+
+#wordformOptions {
+    display: none;
+}
+
+#wordformView {
+    padding: 10px;
+}
+
+#viewSwitch {
+    padding: 10px;
+    text-align: right;
+}
+
+.hideDictResults {
+    display:none;
+}
+
+.createSlipLink {
+    color: red;
+}
+
+#loggedInAs {
+    color: white;
+}
+
+#logoutLink {
+    margin-top: -1px;
+}
+
+/**
+    Star icon colours
+ */
+.gold {
+    color: gold;
+}
+
+.silver {
+    color: silver;
+}
+
+.bronze {
+    color: #cd7f32;
+}
+
+/**
+    Date Range slider
+ */
+#selectedDatesDisplay {
+    font-weight: bold;
+    margin: 0 0 5px 60px;
+}
+#dateRangeSelector label {
+    font-size: 10pt;
+    position: absolute;
+    width: 20px;
+    margin-top: 20px;
+    margin-left: -10px;
+    text-align: center;
+}
+
+#dateRangeMin {
+    left:0%;
+}
+
+#dateRangeMax {
+    left:100%;
+}
+
+.browseListTitle {
+    width: 50%;
+    font-weight: bold;
+}
+
+/*
+    Slips
+ */
+#slip {
+    padding: 10px;
+    display: none;
+    width: 50em;
+    height: 40em;
+    background: white;
+    border: 2px solid black;
+    position: absolute;
+    top: 5em;
+    left: 10em;
+    z-index: 10;
+}
+
+#slipChecked {
+    float: right;
+}
+
+#toggleMorphoSyntactic {
+    margin-left: 10px;
+}
+
+#wordClassSelect {
+    margin-top: 10px;
+}
+
+#slipHeadword {
+    font-weight: bold;
+    font-size: 14pt;
+}
+
+.slipContext {
+    font-size: 16pt;
+}
+
+.updateContext {
+    font-size: 20px;
+    cursor: pointer;
+    color: red !important;
+}
+
+a.updateContext:hover {
+    color: green !important;
+}
+
+#slipHeader {
+    text-align: center;
+    margin-bottom: 5em;
+}
+
+#slipHeadwordContainer {
+    float: left;
+}
+
+#slipTextNum {
+   display: inline-block;
+}
+
+#slipTopRight {
+    float: right;
+}
+
+#slipBody {
+    clear: both;
+    margin-bottom: 5em;
+}
+
+/*
+#slipWordInContext {
+    background-color: #fcf8e3;
+}
+*/
+
+#slipTranslation {
+    font-family: "Times New Roman";
+    font-size: 12pt;
+    color: lightseagreen;
+    font-style: italic;
+}
+
+#slipTextRefContainer {
+    text-align: center;
+}
+
+#slipTextRef {
+    display: inline-block;
+}
+
+#slipFooterTitle {
+    font-style: italic;
+}
+
+.contextLink {
+    cursor: pointer;
+}
+
+/* slip collocate styling */
+.collocateLink {
+    color: black;
+}
+
+.collocateLink::after {
+    content: none !important;
+}
+
+.existingCollocate {
+    text-decoration: underline;
+}
+
+.dropdown {
+    margin-right: -4px;
+}
+
+.dropdown-menu a.disabled {
+    color: red;
+}
+
+.editSlipSectionContainer {
+    clear: right;
+    margin: 10px;
+    padding: 10px;
+    background-color: #efefef;
+}
+
+.deleteCat {
+    color: white !important;
+    cursor: pointer;
+}
+
+/* Entries and Citations */
+.citation {
+    display: none;
+}
+
+.spinner {
+    display: none;
+}
+
+/* Senses */
+#modalSlipRemoveSection {
+    display: none;
+}
+
+.senseBadge {
+    cursor: pointer;
+}
+
+[data-title]:hover:after {
+    opacity: 1;
+    transition: all 0.1s ease 0.5s;
+    visibility: visible;
+}
+[data-title]:after {
+    content: attr(data-title);
+    background-color: #000;
+    color: #fff;
+    font-size: 110%;
+    position: absolute;
+    padding: 7px;
+    bottom: -1.6em;
+    left: 100%;
+    white-space: nowrap;
+    opacity: 0.5;
+    z-index: 99999;
+    visibility: hidden;
+}
+[data-title] {
+    position: relative;
+}
+
