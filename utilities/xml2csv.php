@@ -15,7 +15,6 @@ $districts = array();
 
 //get the texts
 
-/*
 $db = new database();
 $sql = <<<SQL
 		SELECT id, filepath, title, date, partOf FROM text
@@ -59,7 +58,7 @@ SQL;
 		$districts[$filepath] = getParentDistrict($partOf);
 	}
 }
-*/
+
 
 /**
  * Recursive function to assemble a title string based on a text title's ancestor(s)
@@ -152,8 +151,8 @@ if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
 	$path = '../../gadelica/xml';
 }
 else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
-	//$path = '../../gadelica/xml';
-	$path = '../../gadelica/xml/804_mss';
+	$path = '../../gadelica/xml';
+	//$path = '../../gadelica/xml/804_mss';
 }
 $it = new \RecursiveDirectoryIterator($path);
 foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
