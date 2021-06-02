@@ -15,6 +15,7 @@ $districts = array();
 
 //get the texts
 
+/*
 $db = new database();
 $sql = <<<SQL
 		SELECT id, filepath, title, date, partOf FROM text
@@ -58,7 +59,7 @@ SQL;
 		$districts[$filepath] = getParentDistrict($partOf);
 	}
 }
-
+*/
 
 /**
  * Recursive function to assemble a title string based on a text title's ancestor(s)
@@ -146,34 +147,36 @@ SQL;
 }
 
 //iterate through the XML files and get the lemmas, etc
-$path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/corpas/xml';
-if (getcwd()=='/Users/stephenbarrett/Sites/gadelica/corpas/code/mm_utilities') {
-	$path = '../../xml';
+$path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/xml';
+if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
+	$path = '../../gadelica/xml';
 }
-else if (getcwd()=='/Users/mark/Sites/gadelica/corpas/code/mm_utilities') {
-	$path = '../../xml';
+else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
+	//$path = '../../gadelica/xml';
+	$path = '../../gadelica/xml/804_mss';
 }
 $it = new \RecursiveDirectoryIterator($path);
 foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 	if ($nextFile->getExtension()=='xml') {
 		$xml = simplexml_load_file($nextFile);
 		$xml->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
-		foreach ($xml->xpath("//dasg:w") as $nextWord) {
-
+		foreach ($xml->xpath("//dasg:w[not(descendant::dasg:w)]") as $nextWord) { // change this
 			$lemma = (string)$nextWord['lemma'];
+			$s = trim($nextWord);
 			if ($lemma) { echo $lemma . ','; }
-			else { echo $nextWord . ','; }
-			if (getcwd()=='/Users/stephenbarrett/Sites/gadelica/corpas/code/mm_utilities') {
-				$filename = substr($nextFile,10);
-			} else if (getcwd()=='/Users/mark/Sites/gadelica/corpas/code/mm_utilities') {
-				$filename = substr($nextFile,10);
+			else if ($s=='') { echo 'NULL' . ','; }
+			else { echo $s . ','; }
+			if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
+				$filename = substr($nextFile,19);
+			} else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
+				$filename = substr($nextFile,19);
 			} else {
-				$filename = substr($nextFile,58);
+				$filename = substr($nextFile,67);
 			}
 			echo $filename . ',';
 			echo $nextWord['id'] . ',';
-			echo $nextWord . ',';
-			echo $nextWord . ',';
+			if ($s=='') { echo 'NULL,NULL,' ; }
+			else { echo $s . ',' . $s . ','; }
 			echo $nextWord['pos'] . ',';
 			if ($dates[$filename]) { echo $dates[$filename] . ','; }
 			else { echo '9999,'; }
@@ -192,15 +195,13 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 			echo $medium . ',';
 			if ($districts[$filename]) { echo $districts[$filename];}
 			else { echo '3333'; }
-			$ps = end($nextWord->xpath("preceding-sibling::dasg:w"));
-			if ($ps) {
-				echo ',' . $ps;
-			}
+			$ps = end($nextWord->xpath("preceding::dasg:w[not(descendant::dasg:w)]")); // think about this later
+			if (trim($ps)) { echo ',' . $ps; }
+			else if ($ps) {echo ',NULL';}
 			else {echo ',ZZ';}
-			$fs = $nextWord->xpath("following-sibling::dasg:w")[0];
-			if ($fs) {
-				echo ',' . $fs;
-			}
+			$fs = $nextWord->xpath("following::dasg:w[not(descendant::dasg:w)]")[0];
+			if (trim($fs)) { echo ',' . $fs; }
+			else if ($fs) {echo ',NULL';}
 			else {echo ',ZZ';}
 			if ($ps) {
 				echo ',' . $ps['lemma'];
@@ -210,7 +211,6 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 				echo ',' . $fs['lemma'];
 			}
 			else {echo ',ZZ';}
-
 			echo PHP_EOL;
 		}
 	}
