@@ -160,12 +160,10 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 	if ($nextFile->getExtension()=='xml') {
 		$xml = simplexml_load_file($nextFile);
 		$xml->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
-		foreach ($xml->xpath("//dasg:w[not(descendant::dasg:w)]") as $nextWord) { // change this
+		foreach ($xml->xpath("//dasg:w[not(descendant::dasg:w)]") as $nextWord) {
 			$lemma = (string)$nextWord['lemma'];
-			$s = trim($nextWord);
 			if ($lemma) { echo $lemma . ','; }
-			else if ($s=='') { echo 'NULL' . ','; }
-			else { echo $s . ','; }
+			else { echo trim(strip_tags($nextWord->asXML())) . ','; }
 			if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
 				$filename = substr($nextFile,19);
 			} else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
@@ -175,8 +173,8 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 			}
 			echo $filename . ',';
 			echo $nextWord['id'] . ',';
-			if ($s=='') { echo 'NULL,NULL,' ; }
-			else { echo $s . ',' . $s . ','; }
+      echo trim(strip_tags($nextWord->asXML())) . ',';
+			echo trim(strip_tags($nextWord->asXML())) . ',';
 			echo $nextWord['pos'] . ',';
 			if ($dates[$filename]) { echo $dates[$filename] . ','; }
 			else { echo '9999,'; }
@@ -193,24 +191,22 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 				$medium = "prose";
 			}
 			echo $medium . ',';
-			if ($districts[$filename]) { echo $districts[$filename];}
-			else { echo '3333'; }
-			$ps = end($nextWord->xpath("preceding::dasg:w[not(descendant::dasg:w)]")); // think about this later
-			if (trim($ps)) { echo ',' . $ps; }
-			else if ($ps) {echo ',NULL';}
-			else {echo ',ZZ';}
+			if ($districts[$filename]) { echo $districts[$filename] . ',';}
+			else { echo '3333,'; }
+			$ps = end($nextWord->xpath("preceding::dasg:w"));
+			if (!$ps) { echo 'ZZ,'; }
+			else { echo trim(strip_tags($ps->asXML())) . ','; }
 			$fs = $nextWord->xpath("following::dasg:w[not(descendant::dasg:w)]")[0];
-			if (trim($fs)) { echo ',' . $fs; }
-			else if ($fs) {echo ',NULL';}
-			else {echo ',ZZ';}
+			if (!$fs) { echo 'ZZ,'; }
+			else { echo trim(strip_tags($fs->asXML())) . ','; }
 			if ($ps) {
-				echo ',' . $ps['lemma'];
+				echo $ps['lemma'] . ',';
 			}
-			else {echo ',ZZ';}
+			else {echo 'ZZ,';}
 			if ($fs) {
-				echo ',' . $fs['lemma'];
+				echo $fs['lemma'];
 			}
-			else {echo ',ZZ';}
+			else {echo 'ZZ';}
 			echo PHP_EOL;
 		}
 	}
