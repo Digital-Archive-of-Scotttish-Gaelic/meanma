@@ -64,7 +64,6 @@ HTML;
 		}
 		$this->_writeJavascript();
 		if ($this->_ms) {   //a manuscript so generate the required code
-			$this->_writeMSModal();
 			$this->_writeMSJavascript();
 		}
 	}
@@ -381,8 +380,7 @@ HTML;
 	          <small><a href="#" onclick="$('.numbers').toggle();">[toggle numbers]</a></small>
 	          <br>
 					</div>
-					{$input}
-				
+					{$input}		
 HTML;
 		return $output;
 	}
@@ -540,7 +538,7 @@ HTML;
           $('#rhs').html(html);
           $('#pageImage').zoomio({
             fadeduration: 500
-          });
+          }); 
         });
       });
     </script>
