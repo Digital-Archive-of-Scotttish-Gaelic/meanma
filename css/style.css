@@ -2,6 +2,10 @@ html,body {
     height: 100%;
 }
 
+.word {
+    cursor: pointer;
+}
+
 .chunk {
     cursor: pointer;
 }
