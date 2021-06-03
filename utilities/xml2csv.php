@@ -28,8 +28,9 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 		$xml->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
 		foreach ($xml->xpath("//dasg:w[not(descendant::dasg:w)]") as $nextWord) {
 			$lemma = (string)$nextWord['lemma'];
+			$form = trim(strip_tags($nextWord->asXML()));
 			if ($lemma) { echo $lemma . ','; }
-			else { echo trim(strip_tags($nextWord->asXML())) . ','; }
+			else { echo $form . ','; }
 			if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
 				$filename = substr($nextFile,19);
 			} else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
@@ -39,8 +40,8 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 			}
 			echo $filename . ',';
 			echo $nextWord['id'] . ',';
-      echo trim(strip_tags($nextWord->asXML())) . ',';
-			echo trim(strip_tags($nextWord->asXML())) . ',';
+      echo $form . ',';
+			echo $form . ',';
 			echo $nextWord['pos'] . ',';
 			if ($dates[$filename]) { echo $dates[$filename] . ','; }
 			else { echo '9999,'; }
@@ -59,10 +60,10 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 			echo $medium . ',';
 			if ($districts[$filename]) { echo $districts[$filename] . ',';}
 			else { echo '3333,'; }
-			$ps = end($nextWord->xpath("preceding::dasg:w"));
+			$ps = end($nextWord->xpath("preceding-sibling::dasg:w"));
 			if (!$ps) { echo 'ZZ,'; }
 			else { echo trim(strip_tags($ps->asXML())) . ','; }
-			$fs = $nextWord->xpath("following::dasg:w[not(descendant::dasg:w)]")[0];
+			$fs = $nextWord->xpath("following-sibling::dasg:w")[0];
 			if (!$fs) { echo 'ZZ,'; }
 			else { echo trim(strip_tags($fs->asXML())) . ','; }
 			if ($ps) {
@@ -83,4 +84,4 @@ $endTime = time();
 
 $duration = $endTime - $startTime;
 
-//echo "\nDuration (seconds) : {$duration}" . PHP_EOL;
+echo "\nDuration (seconds) : {$duration}" . PHP_EOL;
