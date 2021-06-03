@@ -14,13 +14,12 @@ $dates = $data["dates"];
 
 
 //iterate through the XML files and get the lemmas, etc
-$path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/xml/2_Sgeulachdan_Dhoomhnaill_Alasdair';
+$path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/xml';
 if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
 	$path = '../../gadelica/xml';
 }
 else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
-	//$path = '../../gadelica/xml';
-	$path = '../../gadelica/xml/2_Sgeulachdan_Dhoomhnaill_Alasdair';
+	$path = '../../gadelica/xml';
 }
 $it = new \RecursiveDirectoryIterator($path);
 foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
@@ -79,8 +78,9 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 	}
 }
 
+
 $endTime = time();
 
 $duration = $endTime - $startTime;
 
-echo "\nDuration (seconds) : {$duration}" . PHP_EOL;
+//echo "\nDuration (seconds) : {$duration}" . PHP_EOL;
