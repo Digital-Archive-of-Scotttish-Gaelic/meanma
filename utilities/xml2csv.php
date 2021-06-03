@@ -35,7 +35,7 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 			} else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
 				$filename = substr($nextFile,19);
 			} else {
-				$filename = substr($nextFile,57);
+				$filename = substr($nextFile,51);
 			}
 			echo $filename . ',';
 			echo $nextWord['id'] . ',';
