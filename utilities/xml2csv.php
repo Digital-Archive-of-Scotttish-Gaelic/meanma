@@ -14,7 +14,7 @@ $dates = $data["dates"];
 
 
 //iterate through the XML files and get the lemmas, etc
-$path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/xml/400_Gairm/66';
+$path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/xml';
 if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
 	$path = '../../gadelica/xml';
 }
