@@ -93,8 +93,7 @@ SQL;
  * @param int $parentId the parent ID
  * @return string the date
  */
-function getParentDate($parentId)
-{
+function getParentDate($parentId) {
 	global $db;
 	$sql = <<<SQL
 		SELECT filepath, partOf, date FROM text WHERE id = :id
