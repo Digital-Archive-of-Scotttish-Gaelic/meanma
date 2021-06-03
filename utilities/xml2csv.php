@@ -5,6 +5,8 @@ namespace models;
 
 require_once 'metadata.php';
 
+$startTime = time();
+
 //get the metadata from the $data array in metadata.php
 $titles = $data["titles"];
 $districts = $data["districts"];
@@ -76,4 +78,11 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 		}
 	}
 }
+
+$endTime = time();
+
+$duration = $endTime - $startTime;
+
+echo "\nDuration (seconds) : {$duration}";
+
 
