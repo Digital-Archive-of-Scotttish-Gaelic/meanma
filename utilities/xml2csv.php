@@ -3,147 +3,13 @@
 
 namespace models;
 
-define("DB", "corpas");
-define("DB_HOST", "130.209.99.241");
-define("DB_USER", "corpas");
-define("DB_PASSWORD", "XmlCraobh2020");
+require_once 'metadata.php';
 
-$titles = array();
-//$media = array();
-$dates = array();
-$districts = array();
+//load the metadata file into $data array
+$titles = $data["titles"];
+$districts = $data["districts"];
+$dates = $data["dates"];
 
-//get the texts
-
-$db = new database();
-$sql = <<<SQL
-		SELECT id, filepath, title, date, partOf FROM text
-SQL;
-$results = $db->fetch($sql);
-
-//iterate through each text
-foreach ($results as $result) {
-	//query for district
-	$sql = <<<SQL
-		SELECT district_1_id as district FROM writer w
-		JOIN text_writer tw ON w.id = tw.writer_id
-		WHERE tw.text_id = '{$result["id"]}'
-SQL;
-	$districtResult = $db->fetchRow($sql);
-	$district = $districtResult["district"];
-
-	$filepath = $result["filepath"];
-	$title = $result["title"];
-	$date = $result["date"];
-	$partOf = $result["partOf"];
-	if (!$filepath && !$date && !$partOf) { //skip
-		continue;
-	}
-	//populate the dates array
-	if ($date && $filepath) {
-		$dates[$filepath] = $date;
-	} else if ($partOf) {
-		$dates[$filepath] = getParentDate($partOf);
-	}
-	//populate the titles array
-	if ($partOf) {
-		$titles[$filepath] = getParentTitle($title, $partOf);
-	} else {
-		$titles[$filepath] = $title;
-	}
-	//populate the districts array
-	if ($district && $filepath) {
-		$districts[$filepath] = $district;
-	} else if ($partOf) {
-		$districts[$filepath] = getParentDistrict($partOf);
-	}
-}
-
-
-/**
- * Recursive function to assemble a title string based on a text title's ancestor(s)
- * @param string $title the title of this subtext
- * @param int $parentId the ID of its parent text
- * @return string the formatted title
- */
-function getParentTitle($title, $parentId) {
-	$title = $title;
-	global $db;
-	$sql = <<<SQL
-		SELECT partOf, title FROM text WHERE id = :id
-SQL;
-	$results = $db->fetch($sql, array(":id"=>$parentId));
-	$result = $results[0];
-	$parentTitle = $result["title"];
-	$partOf = $result["partOf"];
-	$title = $parentTitle . " – " . $title;
-	if ($partOf) {
-		$title = getParentTitle($title, $partOf);
-	}
-	return $title;
-}
-
-/**
- * Recursive function to get the date for a text from its ancestor(s)
- * @param int $parentId the parent ID
- * @return string the date
- */
-function getParentDate($parentId)
-{
-	global $db;
-	$sql = <<<SQL
-		SELECT filepath, partOf, date FROM text WHERE id = :id
-SQL;
-	$results = $db->fetch($sql, array(":id" => $parentId));
-	$result = $results[0];
-	$filepath = $result["filepath"];
-	$date = $result["date"];
-	$partOf = $result["partOf"];
-
-	if (!$partOf && !$filepath && !$date) {
-		return "";
-	}
-
-	if ($date) {
-		return $date;
-	} else {
-		if ($date = getParentDate($partOf)) {
-			return $date;
-		}
-	}
-}
-
-/**
- * Recursive function to get the district for a writer from its text's ancestor(s)
- * @param int $parentId the parent text ID
- * @return string the date
- */
-function getParentDistrict($parentId) {
-	global $db;
-	$sql = <<<SQL
-		SELECT filepath, partOf, district_1_id as district FROM text t
-			LEFT JOIN text_writer tw ON t.id = tw.text_id
-			LEFT JOIN writer w ON w.id = tw.writer_id
-			WHERE t.id = :id
-SQL;
-	$results = $db->fetch($sql, array(":id"=>$parentId));
-	$result = $results[0];
-	$filepath = $result["filepath"];
-	$district = $result["district"];
-	$partOf = $result["partOf"];
-
-	if (!$partOf && !$filepath && !$district) {
-		return "";
-	}
-
-	if ($district) {
-		return $district;
-	} else {
-		if ($district = getParentDistrict($partOf)) {
-			return $district;
-		}
-	}
-}
 
 //iterate through the XML files and get the lemmas, etc
 $path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/xml';
@@ -242,7 +108,8 @@ class database
 		$this->_sth = null;
 	}
 
-	public function fetchRow($sql, array $values = array()) {
+	public function fetchRow($sql, array $values = array())
+	{
 		try {
 			$this->_sth = $this->_dbh->prepare($sql);
 			$this->_sth->execute($values);
@@ -294,4 +161,3 @@ class database
 		return $this->_dbh->lastInsertId();
 	}
 }
-?>
