@@ -3,8 +3,6 @@
 
 namespace models;
 
-require_once 'metadata.php';
-
 $startTime = time();
 
 define("DB", "corpas");
