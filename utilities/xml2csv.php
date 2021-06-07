@@ -17,6 +17,8 @@ $dates = $data["dates"];
 $path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/xml';
 if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
 	$path = '../../gadelica/xml';
+
+	$path = '../../gadelica/xml/48_sgriobhaidhean_choinnich_mhicleoid/5';
 }
 else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
 	$path = '../../gadelica/xml';
@@ -43,9 +45,9 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
       echo $form . ',';
 			echo $form . ',';
 			echo $nextWord['pos'] . ',';
-			if ($dates[$filename]) { echo $dates[$filename] . ','; }
+			if (isset($dates[$filename])) { echo $dates[$filename] . ','; }
 			else { echo '9999,'; }
-			if ($titles[$filename]) { echo '"' . $titles[$filename] . '",'; }
+			if (isset($titles[$filename])) { echo '"' . $titles[$filename] . '",'; }
 			else { echo '6666,'; }
 			$nextWord->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
 			$pageNum = $nextWord->xpath("preceding::dasg:pb[1]/@n");
@@ -58,7 +60,7 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 				$medium = "prose";
 			}
 			echo $medium . ',';
-			if ($districts[$filename]) { echo $districts[$filename] . ',';}
+			if (isset($districts[$filename])) { echo $districts[$filename] . ',';}
 			else { echo '3333,'; }
 			/*
 			$ps = end($nextWord->xpath("preceding-sibling::dasg:w"));
