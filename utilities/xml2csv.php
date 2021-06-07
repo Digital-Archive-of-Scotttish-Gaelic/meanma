@@ -143,6 +143,13 @@ SQL;
 	}
 }
 
+function cleanForm($xml) {
+	$s = trim(strip_tags($xml->asXML()));
+	$s = preg_replace('/\s/','', $s);
+	//$s = str_replace("\r", "", $s);
+  //$s = str_replace("\n", "", $s);
+	return $s;
+}
 
 //iterate through the XML files and get the lemmas, etc
 $path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/xml';
@@ -150,7 +157,7 @@ if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
 	$path = '../../gadelica/xml';
 }
 else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
-	$path = '../../gadelica/xml';
+	$path = '../../gadelica/xml/804_mss';
 }
 $it = new \RecursiveDirectoryIterator($path);
 foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
@@ -159,7 +166,7 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 		$xml->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
 		foreach ($xml->xpath("//dasg:w[not(descendant::dasg:w)]") as $nextWord) {
 			$lemma = (string)$nextWord['lemma'];
-			$form = trim(strip_tags($nextWord->asXML()));
+			$form = cleanForm($nextWord);
 			if ($lemma) { echo $lemma . ','; }
 			else { echo $form . ','; }
 			if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
