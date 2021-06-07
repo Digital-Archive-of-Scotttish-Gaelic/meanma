@@ -163,7 +163,7 @@ SQL;
 
   private function _applyXSLT() {
 		$xslFilepath = $this->getType() == "ms" ? "xsl/semiDiplomatic.xsl" : "xsl/corpus.xsl";
-		$xmlFilepath = $this->getType() == "ms" ? TRANSCRIPTION_PATH . $this->getFilepath() : INPUT_FILEPATH . $this->getFilepath();
+		$xmlFilepath = INPUT_FILEPATH . $this->getFilepath();
     if ($this->getFilepath() != '') {
     	try {
         if (!$text = new \SimpleXMLElement($xmlFilepath, 0, true)) {

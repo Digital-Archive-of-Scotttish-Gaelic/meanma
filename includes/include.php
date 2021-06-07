@@ -11,7 +11,6 @@ if (!$_SESSION["printSlips"]) {
 
 //constants
 define("INPUT_FILEPATH", "../gadelica/xml/");
-define("TRANSCRIPTION_PATH", "../gadelica/corpas/xml_ms_tmp/");
 define("SCANS_FILEPATH", "../../scans/");
 
 define("DB", "corpas");       //the production database

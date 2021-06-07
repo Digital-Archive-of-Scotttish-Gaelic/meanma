@@ -22,8 +22,8 @@ class manuscript
 	}
 
 	public function loadXml() {
-		$this->_xml = simplexml_load_file(TRANSCRIPTION_PATH . $this->getFilename());
-		$this->_xml->registerXPathNamespace('tei', 'http://www.tei-c.org/ns/1.0');
+		$this->_xml = simplexml_load_file(INPUT_FILEPATH . $this->getFilename());
+		$this->_xml->registerXPathNamespace('tei','https://dasg.ac.uk/corpus/');
 	}
 
 	// GETTERS
@@ -58,9 +58,9 @@ class manuscript
 		$modalData = array();
 		// run XPath
 		$xmlResults = $this->getXml()->xpath("//tei:w[@id='{$chunkId}'] | //tei:name[@id='{$chunkId}']");
-		$teiXml = $xmlResults[0];
+		$dasgXml = $xmlResults[0];
 		//create a copy of the XML
-		$xmlString = $teiXml->asXml();
+		$xmlString = $dasgXml->asXml();
 		$xml = new \SimpleXMLElement($xmlString);
 
 		$modalData["headword"] = $this->_getHeadword($xml);
@@ -102,9 +102,9 @@ class manuscript
 		$modalData = array();
 		// run XPath
 		$xmlResults = $this->getXml()->xpath("//tei:w[@id='{$chunkId}'] | //tei:name[@id='{$chunkId}']");
-		$teiXml = $xmlResults[0];
+		$dasgXml = $xmlResults[0];
 		//create a copy of the XML
-		$xmlString = $teiXml->asXml();
+		$xmlString = $dasgXml->asXml();
 		$xml = new \SimpleXMLElement($xmlString);
 		$dom = new \DOMDocument('1.0');
 		$dom->preserveWhiteSpace = false;
