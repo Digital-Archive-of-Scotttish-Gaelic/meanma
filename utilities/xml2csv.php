@@ -155,7 +155,7 @@ else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
 $it = new \RecursiveDirectoryIterator($path);
 foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 	if ($nextFile->getExtension()=='xml') {
-		$xml = simplexml_load_file($nextFile);
+		$xml = @simplexml_load_file($nextFile); //@ = suppress XML notices
 		$xml->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
 		foreach ($xml->xpath("//dasg:w[not(descendant::dasg:w)]") as $nextWord) {
 			$lemma = (string)$nextWord['lemma'];
@@ -180,7 +180,7 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 			else { echo '6666,'; }
 			$nextWord->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
 			$pageNum = $nextWord->xpath("preceding::dasg:pb[1]/@n");
-			echo $pageNum[0] . ",";
+			if(isset($pageNum[0])) { echo $pageNum[0] . ","; }
 			$medium = "other";
 			if ($nextWord->xpath("ancestor::dasg:lg")) {
 				$medium = "verse";
