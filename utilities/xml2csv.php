@@ -60,6 +60,7 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 			echo $medium . ',';
 			if ($districts[$filename]) { echo $districts[$filename] . ',';}
 			else { echo '3333,'; }
+			/*
 			$ps = end($nextWord->xpath("preceding-sibling::dasg:w"));
 			if (!$ps) { echo 'ZZ,'; }
 			else { echo trim(strip_tags($ps->asXML())) . ','; }
@@ -74,6 +75,8 @@ foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
 				echo $fs['lemma'];
 			}
 			else {echo 'ZZ';}
+			*/
+			echo 'ZZ,ZZ,ZZ,ZZ';
 			echo PHP_EOL;
 		}
 	}
