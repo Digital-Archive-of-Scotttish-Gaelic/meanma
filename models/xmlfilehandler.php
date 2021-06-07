@@ -54,10 +54,11 @@ class xmlfilehandler
     /* -- */
     $xpath = "//dasg:w[@id='{$id}']";
     $word = $this->_xml->xpath($xpath);
+	  $context["headwordId"] = $word[0]->attributes()["id"];
+	  $wordString = trim(strip_tags($word[0]->asXML()));  //required for nested tags in MSS
     $context["word"] = ($tagCollocates || $tagContext)
-	    ? '<div style="display:inline; margin-left:4px;"><mark>' . (string)$word[0] . '</mark></div>'
-      : (string)$word[0];
-    $context["headwordId"] = $word[0]->attributes()["id"];
+	    ? '<div style="display:inline; margin-left:4px;"><mark>' . $wordString . '</mark></div>'
+      : $wordString;
     $xpath = "//dasg:w[@id='{$id}']/following::*[not(name()='s') and not(name()='p') and not(name()='note')]";
     $words = $this->_xml->xpath($xpath);
     /* postContext processing */

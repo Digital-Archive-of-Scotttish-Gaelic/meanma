@@ -193,6 +193,20 @@ SQL;
 		$results = $this->_db->fetch($sql, array(":id" => $this->getId()));
 		foreach ($results as $result) {
 			$childTextsInfo[$result["id"]] = array("title" => $result["title"], "level" => $result["level"]);
+			//check for writers of child texts
+			$writerSql = <<<SQL
+				SELECT w.id AS id, surname_en 
+					FROM writer w
+					JOIN text_writer tw ON tw.writer_id = w.id AND text_id = :id 
+SQL;
+			$writerResults = $this->_db->fetch($writerSql, array(":id" => $result["id"]));
+			if (!empty($writerResults)) {
+				$writersInfo = array();
+				foreach ($writerResults as $w) {
+					$writersInfo[$w["id"]] = $w["surname_en"];
+				}
+				$childTextsInfo[$result["id"]]["writers"] = $writersInfo;
+			}
 		}
 		return $childTextsInfo;
 	}

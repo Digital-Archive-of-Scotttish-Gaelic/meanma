@@ -454,7 +454,13 @@ HTML;
 				$html .= '<div class="list-group-item list-group-item-action">';
 				$html .= '<i class="fas fa-star ' . $levelColours[$childInfo["level"]] . '"></i>' . ' #' . $childId .
 					': <a href="?m=corpus&a=browse&id=' . $childId .'">' . $childInfo["title"];
-				$html .= '</a></div>';
+				$html .= '</a>';
+				if (!empty($childInfo["writers"])) {
+					foreach ($childInfo["writers"] as $writerId => $surname) {
+						$html .= " (" . $surname . ")";
+					}
+				}
+				$html .= "</div>";
 			}
 			$html .= '</div></td></tr>';
 		}
