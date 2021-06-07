@@ -167,7 +167,7 @@ class corpus_search
 			case "dateDesc":
 				$orderBy = "date_of_lang DESC";
 				break;
-			case "precedingWord":
+			/*case "precedingWord":
 				$orderBy = "preceding_word ASC";
 				break;
 			case "precedingWordReverse":
@@ -175,7 +175,7 @@ class corpus_search
 				break;
 			case "followingWord":
 				$orderBy = "following_word ASC";
-				break;
+				break;*/
 			default:
 				$orderBy = "filename, id";
 		}
@@ -223,7 +223,7 @@ SQL;
 		$query["sql"] = <<<SQL
 			SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, date_of_lang, l.title,
                 page, medium, s.auto_id as auto_id, t.id AS tid, t.level as level, district_id,
-               	preceding_word, following_word, e.group_id AS group_id
+               	e.group_id AS group_id
 SQL;
 		if (!$fullSearch) {
 			//we need only the following fields for auto slip creation
@@ -258,6 +258,7 @@ SQL;
 				$query["sql"] .= $this->_getDistrictWhereClause();
 			}
 		}
+		/*
 		if ($params["pw"] != "") {         //multi word search for preceding word
 			$query["sql"] .= $params["preMode"] == "wordform"
 				? " AND preceding_word REGEXP :pw"
@@ -270,7 +271,7 @@ SQL;
 				: " AND following_lemma REGEXP :fw";
 			$pdoParams[":fw"] = "[[:<:]]" . $params["fw"] . "[[:>:]]";
 		}
-
+		*/
 		$this->_queryAll = $query["sql"];
 		$query["sql"] .= <<<SQL
         ORDER BY {$orderBy}

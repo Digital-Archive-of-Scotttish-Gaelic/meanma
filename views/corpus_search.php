@@ -72,11 +72,11 @@ HTML;
             <label class="form-check-label" for="wordformRadio">wordform</label>
           </div>
         </div>
-        <div class="form-group">
+        <!--div class="form-group">
           <a href="#" id="multiWordShow">show multi-word options</a>
           <a href="#" id="multiWordHide">hide multi-word options</a>
-				</div>
-        <div id="multiWord" style="padding:20px; display: none;">
+				</div-->
+        <!--div id="multiWord" style="padding:20px; display: none;">
           <div class="form-group">
             <label for="precedingWord">preceding word</label>
             <input type="text" id="precedingWord" name="pw">
@@ -105,7 +105,7 @@ HTML;
 	            <label class="form-check-label" for="postWordformRadio">wordform</label>
 	          </div>
 	        </div>
-				</div>  <!-- //end multiWord -->
+				</div-->  <!-- //end multiWord -->
         <div id="wordformOptions" class="form-group">
           <div class="form-check form-check-inline">
               <input class="form-check-input" type="checkbox" id="caseSensitiveRadio" name="case" value="sensitive">
@@ -148,7 +148,7 @@ HTML;
             <input class="form-check-input" type="radio" name="order" id="randomDateRadio" value="random">
             <label class="form-check-label" for="randomDateRadio">random</label>
           </div>
-          <div class="form-check form-check-inline">
+          <!--div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="order" id="precedingWordRadio" value="precedingWord">
             <label class="form-check-label" for="precedingWordRadio">preceding word</label>
           </div>
@@ -159,7 +159,7 @@ HTML;
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="order" id="followingWordRadio" value="followingWord">
             <label class="form-check-label" for="followingWordRadio">following word</label>
-          </div>
+          </div-->
         </div>
         {$dateRangeBlock}
         <br>
@@ -546,6 +546,8 @@ HTML;
 
     <script>
     $(function() {
+      
+      /*
       $('#multiWordHide').hide();
       $('#multiWordShow').on('click', function () {
         $('#multiWord').show();
@@ -557,6 +559,7 @@ HTML;
         $('#multiWordHide').hide();
         $('#multiWordShow').show();
       });
+      */
       
       $( "#dateRangeSelector" ).slider({
         range:true,
