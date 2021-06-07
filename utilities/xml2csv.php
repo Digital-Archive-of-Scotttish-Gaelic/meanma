@@ -157,7 +157,7 @@ if (getcwd()=='/Users/stephenbarrett/Sites/meanma/utilities') {
 	$path = '../../gadelica/xml';
 }
 else if (getcwd()=='/Users/mark/Sites/meanma/utilities') {
-	$path = '../../gadelica/xml/804_mss';
+	$path = '../../gadelica/xml';
 }
 $it = new \RecursiveDirectoryIterator($path);
 foreach (new \RecursiveIteratorIterator($it) as $nextFile) {
