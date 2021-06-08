@@ -199,6 +199,7 @@ SQL;
 			//! A hack to restrict MSS searches (and to exclude MSS from regular searches)
 			$mssRestrict = $_SESSION["groupId"] == 4 ? "l.filename LIKE '804_mss%' " : "l.filename NOT LIKE '804_mss%'";
 			$whereClause = <<<SQL
+				(group_id = {$_SESSION["groupId"]} OR group_id IS NULL) AND 
 				{$mssRestrict} AND
 				lemma REGEXP :term
 SQL;
@@ -235,7 +236,7 @@ SQL;
 		$query["sql"] .= <<<SQL
             FROM lemmas AS l
             LEFT JOIN slips s ON l.filename = s.filename AND l.id = s.id
-						LEFT JOIN entry e ON e.id = s.entry_id 
+						LEFT JOIN entry e ON e.id = s.entry_id
             JOIN text t ON t.filepath = l.filename {$textJoinSql}
         		{$writerJoinSql}
             WHERE {$whereClause}
