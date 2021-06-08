@@ -196,7 +196,10 @@ SQL;
 SQL;
 				}
 			}
+			//! A hack to restrict MSS searches (and to exclude MSS from regular searches)
+			$mssRestrict = $_SESSION["groupId"] == 4 ? "l.filename LIKE '804_mss%' " : "l.filename NOT LIKE '804_mss%'";
 			$whereClause = <<<SQL
+				{$mssRestrict} AND
 				lemma REGEXP :term
 SQL;
 							//end lemma query build
