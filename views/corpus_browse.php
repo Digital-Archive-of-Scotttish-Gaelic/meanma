@@ -708,6 +708,7 @@ HTML;
 				  //get the hand info
 				  if (chunk.hand != undefined) {
 				    var hand = chunk.hand;
+				    console.log(hand.contains);
 				    var handHtml = '';
 				    if (chunk.handShift != undefined) {
 				      hand = chunk.handShift;

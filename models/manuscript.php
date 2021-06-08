@@ -159,6 +159,12 @@ class manuscript
 			$handInfo = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
 				"writerId" => $hand->getWriterId());
 		}
+
+		$contains = $this->getXml()->xpath('//tei:handShift/ancestor::tei:w[@id="' . $id . '"]');
+		if ($contains) {
+			$handInfo["contains"] = $result;
+		}
+
 		return $handInfo;
 	}
 
