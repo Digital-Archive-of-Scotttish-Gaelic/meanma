@@ -14,6 +14,10 @@ class corpus
 	public function run($action) {
 
     $id = isset($_GET["id"]) ? $_GET["id"] : "0"; // the root corpus has id = 0
+		// A temporary hack to restrict browsing for Manuscripts workspace to only MSS texts
+		if ($_SESSION["groupId"] == 4 && $id == "0") {
+			$id = "804";
+		}
 
 		switch ($action) {
       case "browse":
