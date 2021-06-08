@@ -34,7 +34,14 @@ class xmlfilehandler
     $out = $this->_xml->xpath($xpath);
     $context["uri"] = (string)$out[0];
     $xpath = "//dasg:w[@id='{$id}']/preceding::*[not(name()='s') and not(name()='p') and not(name()='note')]";
+    // run xpath on p or lg element only?
+    //$plg = $this->_xml->xpath("//dasg:w[@id='{$id}']/ancestor::dasg:p")[0];
+    //$plg = $this->_xml->xpath("//dasg:p//dasg:w[@id='{$id}']")[0];
+    //$plg2 = new \SimpleXMLElement($plg->asXML());
     $words = $this->_xml->xpath($xpath);
+    //$xpath = "//dasg:w[@id='{$id}']/preceding::*[not(name()='s') and not(name()='p') and not(name()='note')]";
+    //$plg2->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
+    //$words = $plg2->xpath($xpath);
     /* preContext processing */
     $context["pre"] = array("output"=>"");
     if ($preScope) {
@@ -154,12 +161,12 @@ class xmlfilehandler
   	$existingCollocate = in_array($wordId, $this->_collocateIds) ? "existingCollocate" : "";
 	  return <<<HTML
 			<div class="dropdown show d-inline collocate" data-wordid="{$wordId}">
-		    <a class="dropdown-toggle collocateLink {$existingCollocate}" href="#" id="dropdown_{$wordId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$word[0]}</a>		
+		    <a class="dropdown-toggle collocateLink {$existingCollocate}" href="#" id="dropdown_{$wordId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$word[0]}</a>
 			  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$wordId}">
 			    <div class="dropdown-header">
 			      <h5><span class="collocateHeadword"></span></h5>
 					</div>
-					<div class="dropdown-divider"></div>  
+					<div class="dropdown-divider"></div>
 				    <a id="subject_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">subject of</a>
 				    <a id="complement_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">complement of</a>
 				    <a id="modifier_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">modifier of</a>
