@@ -55,7 +55,7 @@ class xmlfilehandler
     $xpath = "//dasg:w[@id='{$id}']";
     $word = $this->_xml->xpath($xpath);
 	  $context["headwordId"] = $word[0]->attributes()["id"];
-	  $wordString = trim(strip_tags($word[0]->asXML()));  //required for nested tags in MSS
+	  $wordString = functions::cleanForm($word[0]);
     $context["word"] = ($tagCollocates || $tagContext)
 	    ? '<div style="display:inline; margin-left:4px;"><mark>' . $wordString . '</mark></div>'
       : $wordString;

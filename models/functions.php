@@ -4,6 +4,13 @@ namespace models;
 
 class functions
 {
+	//strips tags and whitespace from xml
+	public static function cleanForm($xml) {
+		$s = strip_tags($xml->asXML());
+		$s = preg_replace('/\s/','', $s);
+		return $s;
+	}
+
 	public static function getWordclassAbbrev($wordclass) {
 		$abbs = array("verb"=>"v.", "noun"=>"n.", "preposition"=>"prep.", "adjective"=>"adj.", "adverb"=>"adv.");
 		return $abbs[$wordclass];
