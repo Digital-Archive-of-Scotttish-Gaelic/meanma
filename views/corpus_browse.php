@@ -708,18 +708,17 @@ HTML;
 				  //get the hand info
 				  if (chunk.hand != undefined) {
 				    var hand = chunk.hand;
-				    console.log(hand.contains);
 				    var handHtml = '';
 				    if (chunk.handShift != undefined) {
 				      hand = chunk.handShift;
+				      handHtml += getScribeHtml(hand);
+				      if (hand.subhands) {				        
+				        $.each(hand.subhands, function (i, subhand) { console.log(i);
+									handHtml += getScribeHtml(subhand);
+				        });
+				      }
 				    }
-				    if (hand.forename[0] != undefined) {
-				      handHtml += hand.forename[0] + ' ';
-				    }
-				    if (hand.surname) {
-				      handHtml += hand.surname[0] == undefined ? 'Anonymous (' + hand.id[0] + ')' : hand.surname[0];
-				    }
-				    html += '<li>scribe: <a href="?m=writers&a=browse&id=' + hand.writerId[0] + '" target="_blank">' + handHtml + '</a></li>'; 
+				    html += '<li>scribe: ' + handHtml + '</li>'; 
 				  }
 				  if (chunk.pos) {
 				    html += '<li>' + chunk.pos[0] + '</li>';
@@ -803,6 +802,19 @@ HTML;
 				  }
 				  html += '</ul>';
 				  return html;		    
+				}
+				
+				function getScribeHtml(hand) {
+				  var html = '';
+				  var handHtml = '';
+				  if (hand.forename[0] != undefined) {
+				      handHtml += hand.forename[0] + ' ';
+				    }
+				    if (hand.surname) {
+				      handHtml += hand.surname[0] == undefined ? 'Anonymous (' + hand.id[0] + ')' : hand.surname[0];
+				    }
+				  html += '<a href="?m=writers&a=browse&id=' + hand.writerId[0] + '" target="_blank">' + handHtml + '</a> '; 
+				  return html;
 				}
 				
 			</script>

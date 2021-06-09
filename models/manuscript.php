@@ -159,10 +159,15 @@ class manuscript
 			$handInfo = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
 				"writerId" => $hand->getWriterId());
 		}
-
-		$contains = $this->getXml()->xpath('//tei:handShift/ancestor::tei:w[@id="' . $id . '"]');
+		//check for handShifts contained within a chunk
+		$contains = $this->getXml()->xpath('//tei:handShift[ancestor::tei:w[@id="' . $id . '"]]');
 		if ($contains) {
-			$handInfo["contains"] = "hit";
+			foreach ($contains as $subhand) {
+				$handId = $subhand->attributes()->new;
+				$hand = new hand($handId);
+				$handInfo["subhands"][] = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
+					"writerId" => $hand->getWriterId());
+			}
 		}
 
 		return $handInfo;
