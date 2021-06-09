@@ -183,7 +183,7 @@ class corpus_search
 		$textJoinSql = "";
 		if ($params["id"]) {    //restrict to this text
 			$textJoinSql = <<<SQL
-				 AND (t.id = '{$params["id"]}' OR t.id LIKE '{$params["id"]}-%')
+				  AND (t.id = '{$params["id"]}' OR t.id LIKE '{$params["id"]}-%')
 SQL;
 		}
 		//district restrictions
@@ -203,7 +203,6 @@ SQL;
 		if ($params["mode"] != "wordform") {    //lemma query
 			$query["search"] = $params["term"];
 			$whereClause = <<<SQL
-				(group_id = {$_SESSION["groupId"]} OR group_id IS NULL) AND 
 				{$mssRestrict} AND
 				lemma REGEXP :term
 SQL;
@@ -228,24 +227,28 @@ SQL;
 			$query["search"] = $search;
 		}         //end wordform query build
 
-		$query["sql"] = <<<SQL
-			SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, date_of_lang, l.title,
-                page, medium, s.auto_id as auto_id, t.id AS tid, t.level as level, district_id,
-               	e.group_id AS group_id
-SQL;
-		if (!$fullSearch) {
-			//we need only the following fields for auto slip creation
-			$query["sql"] = "SELECT s.auto_id AS auto_id, l.filename AS filename, l.id AS id, pos";
-		}
-		$query["sql"] .= <<<SQL
-            FROM lemmas AS l
+		if (!$fullSearch) { // a slightly different query for auto slip creation
+			$query["sql"] = <<<SQL
+				SELECT s.auto_id AS auto_id, l.filename AS filename, l.id AS id, pos
+						FROM lemmas AS l
             LEFT JOIN slips s ON l.filename = s.filename AND l.id = s.id
-						LEFT JOIN entry e ON e.id = s.entry_id
+        		LEFT JOIN entry e ON e.id = s.entry_id
             JOIN text t ON t.filepath = l.filename {$textJoinSql}
+            {$writerJoinSql}
+    		WHERE {$mssRestrict} AND {$whereClause}
+SQL;
+		} else {  // the MAIN search query
+			$query["sql"] = <<<SQL
+				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, date_of_lang, l.title,
+                page, medium, t.id AS tid
+            FROM lemmas AS l
+						JOIN text t ON t.filepath = l.filename 
+            {$textJoinSql}
         		{$writerJoinSql}
             WHERE {$mssRestrict} AND {$whereClause}
 
 SQL;
+		}
 		$query["search"] = $searchPrefix . $query["search"] . "[[:>:]]";  //word boundary
 		$pdoParams = array(":term" => $query["search"]);    //params required to pass for the PDO DB query
 		if ($params["selectedDates"]) {       //restrict by date

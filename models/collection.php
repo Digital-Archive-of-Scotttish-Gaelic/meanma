@@ -301,7 +301,8 @@ HTML;
 	  $slipUrl = "#";
 	  $slipClass = "slipLink2";
 	  $modalCode = "";
-	  if ($data["auto_id"] && ($data["group_id"] == $_SESSION["groupId"])) {  //check if there is a slip for THIS group
+	  $slipId = self::slipExists($_SESSION["groupId"], $data["filename"], $data["id"]);  //check if there is a slip for this group
+	  if ($slipId) {
 		  $slipLinkText = "view";
 		  $createSlipStyle = "";
 		  $modalCode = 'data-toggle="modal" data-target="#slipModal"';
@@ -316,7 +317,7 @@ HTML;
 	  $html = <<<HTML
         <a href="{$slipUrl}" data-url="{$dataUrl}" class="{$slipClass} {$createSlipStyle}"
             {$modalCode}
-            data-auto_id="{$data["auto_id"]}"
+            data-auto_id="{$slipId}"
             data-headword="{$data["lemma"]}"
             data-pos="{$data["pos"]}"
             data-id="{$data["id"]}"

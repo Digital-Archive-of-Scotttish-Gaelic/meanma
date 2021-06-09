@@ -33,8 +33,9 @@ class xmlfilehandler
     $xpath = '/dasg:text/@ref';
     $out = $this->_xml->xpath($xpath);
     $context["uri"] = (string)$out[0];
-    // run xpath on p or lg element only?
-    $plg = $this->_xml->xpath("//dasg:w[@id='{$id}']/ancestor::*[name()='p' or name()='lg']")[0];
+	 // echo "<br>" . $this->_filename . " : {$id}";    // handy for debugging XML issues SB
+	  // run xpath on p or lg element only?
+    $plg = $this->_xml->xpath("//dasg:w[@id='{$id}']/ancestor::*[name()='p' or name()='lg' or name()='h']")[0];
     $plg2 = new \SimpleXMLElement($plg->asXML());
     $xpath = "//w[@id='{$id}']/preceding::*[not(name()='s') and not(name()='p') and not(name()='note')]";
     $words = $plg2->xpath($xpath);
