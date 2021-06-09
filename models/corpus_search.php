@@ -179,25 +179,29 @@ class corpus_search
 			default:
 				$orderBy = "filename, id";
 		}
-		if ($params["mode"] != "wordform") {    //lemma query
-			$query["search"] = $params["term"];
-			$textJoinSql = "";
-			if ($params["id"]) {    //restrict to this text
-				$textJoinSql = <<<SQL
+		//text restrictions
+		$textJoinSql = "";
+		if ($params["id"]) {    //restrict to this text
+			$textJoinSql = <<<SQL
 				 AND (t.id = '{$params["id"]}' OR t.id LIKE '{$params["id"]}-%')
 SQL;
-			}
-			$writerJoinSql = "";
-			if ($params["district"]) {
-				if (count($params["district"]) < 15) {   //restrict by district (location)
-					$writerJoinSql = <<<SQL
+		}
+		//district restrictions
+		$writerJoinSql = "";
+		if ($params["district"]) {
+			if (count($params["district"]) < 15) {   //restrict by district (location)
+				$writerJoinSql = <<<SQL
 						JOIN text_writer tw ON t.id = tw.text_id
 						JOIN writer w ON tw.writer_id = w.id
 SQL;
-				}
 			}
-			//! A hack to restrict MSS searches (and to exclude MSS from regular searches)
-			$mssRestrict = $_SESSION["groupId"] == 4 ? "l.filename LIKE '804_mss%' " : "l.filename NOT LIKE '804_mss%'";
+		}
+
+		//! A hack to restrict MSS searches (and to exclude MSS from regular searches)
+		$mssRestrict = $_SESSION["groupId"] == 4 ? "l.filename LIKE '804_mss%' " : "l.filename NOT LIKE '804_mss%'";
+
+		if ($params["mode"] != "wordform") {    //lemma query
+			$query["search"] = $params["term"];
 			$whereClause = <<<SQL
 				(group_id = {$_SESSION["groupId"]} OR group_id IS NULL) AND 
 				{$mssRestrict} AND
@@ -239,7 +243,7 @@ SQL;
 						LEFT JOIN entry e ON e.id = s.entry_id
             JOIN text t ON t.filepath = l.filename {$textJoinSql}
         		{$writerJoinSql}
-            WHERE {$whereClause}
+            WHERE {$mssRestrict} AND {$whereClause}
 
 SQL;
 		$query["search"] = $searchPrefix . $query["search"] . "[[:>:]]";  //word boundary
