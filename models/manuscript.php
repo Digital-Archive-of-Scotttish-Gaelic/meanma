@@ -162,7 +162,7 @@ class manuscript
 
 		$contains = $this->getXml()->xpath('//tei:handShift/ancestor::tei:w[@id="' . $id . '"]');
 		if ($contains) {
-			$handInfo["contains"] = $result;
+			$handInfo["contains"] = "hit";
 		}
 
 		return $handInfo;

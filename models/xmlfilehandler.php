@@ -33,15 +33,11 @@ class xmlfilehandler
     $xpath = '/dasg:text/@ref';
     $out = $this->_xml->xpath($xpath);
     $context["uri"] = (string)$out[0];
-    $xpath = "//dasg:w[@id='{$id}']/preceding::*[not(name()='s') and not(name()='p') and not(name()='note')]";
     // run xpath on p or lg element only?
-    //$plg = $this->_xml->xpath("//dasg:w[@id='{$id}']/ancestor::dasg:p")[0];
-    //$plg = $this->_xml->xpath("//dasg:p//dasg:w[@id='{$id}']")[0];
-    //$plg2 = new \SimpleXMLElement($plg->asXML());
-    $words = $this->_xml->xpath($xpath);
-    //$xpath = "//dasg:w[@id='{$id}']/preceding::*[not(name()='s') and not(name()='p') and not(name()='note')]";
-    //$plg2->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
-    //$words = $plg2->xpath($xpath);
+    $plg = $this->_xml->xpath("//dasg:w[@id='{$id}']/ancestor::*[name()='p' or name()='lg']")[0];
+    $plg2 = new \SimpleXMLElement($plg->asXML());
+    $xpath = "//w[@id='{$id}']/preceding::*[not(name()='s') and not(name()='p') and not(name()='note')]";
+    $words = $plg2->xpath($xpath);
     /* preContext processing */
     $context["pre"] = array("output"=>"");
     if ($preScope) {
@@ -66,8 +62,9 @@ class xmlfilehandler
     $context["word"] = ($tagCollocates || $tagContext)
 	    ? '<div style="display:inline; margin-left:4px;"><mark>' . $wordString . '</mark></div>'
       : $wordString;
-    $xpath = "//dasg:w[@id='{$id}']/following::*[not(name()='s') and not(name()='p') and not(name()='note')]";
-    $words = $this->_xml->xpath($xpath);
+
+	  $xpath = "//w[@id='{$id}']/following::*[not(name()='s') and not(name()='p') and not(name()='note')]";
+	  $words = $plg2->xpath($xpath);
     /* postContext processing */
     $context["post"] = array("output"=>"");
     if ($postScope) {
