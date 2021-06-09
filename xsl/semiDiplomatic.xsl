@@ -3,10 +3,8 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tei="https://dasg.ac.uk/corpus/"
   exclude-result-prefixes="xs tei" version="1.0">
 
-  <!-- <xsl:strip-space elements="*"/> -->
+  <xsl:strip-space elements="*"/>
   <xsl:output method="html"/>
-
-  <xsl:param name="num"/>
 
   <xsl:template match="/">
     <xsl:apply-templates select="tei:TEI/tei:text/tei:body/tei:div"/>
@@ -71,10 +69,7 @@
   </xsl:template>
 
   <xsl:template match="tei:note">
-    <xsl:if test="$num = 'yes'">
-      <xsl:text>*</xsl:text>
-      <!-- <a href="#" title="{normalize-space(.)}">[*]</a> -->
-    </xsl:if>
+    <sup class="numbers"><a href="#" title="{normalize-space(.)}">[*]</a></sup>
   </xsl:template>
 
   <xsl:template
@@ -88,71 +83,23 @@
   </xsl:template>
 
   <xsl:template
-    match="tei:name[ancestor::tei:name or ancestor::tei:w] | tei:w[ancestor::tei:name or ancestor::tei:w]">
+    match="tei:name[ancestor::tei:name]">
     <xsl:text> </xsl:text>
     <xsl:apply-templates/>
     <xsl:text> </xsl:text>
   </xsl:template>
 
-
-
-  <!--
-  <xsl:template match="tei:w[not(ancestor::tei:w) and not(ancestor::tei:name) and not(descendant::tei:w)]">
-    <xsl:text> </xsl:text>
-    <span class="word chunk syntagm">
-      <xsl:call-template name="addWordAttributes"/>
-      <xsl:apply-templates/>
-    </span>
-    <xsl:text> </xsl:text>
-  </xsl:template>
-
-  <xsl:template match="tei:w[not(ancestor::tei:w) and not(ancestor::tei:name) and descendant::tei:w]">
-    <xsl:text> </xsl:text>
-    <span class="chunk syntagm">
-      <xsl:call-template name="addWordAttributes"/>
-      <xsl:apply-templates/>
-    </span>
-    <xsl:text> </xsl:text>
-  </xsl:template>
-
-  <xsl:template match="tei:w[@pos = 'verb' and not(@lemmaRef = 'http://www.dil.ie/29104') and (ancestor::tei:w or ancestor::tei:name) and not(descendant::tei:w)]">
-    <xsl:text> </xsl:text>
-    <span class="word syntagm">
-      <xsl:call-template name="addWordAttributes"/>
-      <xsl:apply-templates/>
-    </span>
-    <xsl:text> </xsl:text>
-  </xsl:template>
-
-  <xsl:template match="tei:w[(not(@pos = 'verb') or @lemmaRef = 'http://www.dil.ie/29104') and ancestor::tei:name and not(ancestor::tei:w) and not(descendant::tei:w)]">
-    <xsl:text> </xsl:text>
-    <span class="word syntagm apple">
-      <xsl:call-template name="addWordAttributes"/>
-      <xsl:apply-templates/>
-    </span>
-    <xsl:text> </xsl:text>
-  </xsl:template>
-
-  <xsl:template match="tei:w[(not(@pos = 'verb') or @lemmaRef = 'http://www.dil.ie/29104') and ancestor::tei:w and not(descendant::tei:w)]">
-    <span class="word syntagm banana">
-      <xsl:call-template name="addWordAttributes"/>
-      <xsl:apply-templates/>
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:w">
-    <xsl:text> </xsl:text>
-    <span class="syntagm">
-      <xsl:call-template name="addWordAttributes"/>
-      <xsl:apply-templates/>
-    </span>
-    <xsl:text> </xsl:text>
+  <xsl:template
+    match="tei:w[ancestor::tei:w]">
+    <xsl:apply-templates/>
   </xsl:template>
   
-  -->
-
-
-
+  <xsl:template
+    match="tei:w[ancestor::tei:name and not(ancestor::tei:w)]">
+    <xsl:text> </xsl:text>
+    <xsl:apply-templates/>
+    <xsl:text> </xsl:text>
+  </xsl:template>
 
   <xsl:template match="tei:pc[ancestor::tei:w and not(ancestor::tei:supplied)]"/> 
 
