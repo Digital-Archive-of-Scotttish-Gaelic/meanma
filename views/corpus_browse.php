@@ -713,17 +713,19 @@ HTML;
 				      hand = chunk.handShift;
 				      handHtml += getScribeHtml(hand);
 				      if (hand.subhands) {				        
-				        $.each(hand.subhands, function (i, subhand) { console.log(i);
+				        $.each(hand.subhands, function (i, subhand) {
 									handHtml += getScribeHtml(subhand);
 				        });
-				      }
+				      } 
+				    } else {   //no <handShift> so use <hand>
+				      handHtml += getScribeHtml(hand);
 				    }
 				    html += '<li>scribe: ' + handHtml + '</li>'; 
 				  }
 				  if (chunk.pos) {
 				    html += '<li>' + chunk.pos[0] + '</li>';
 				  }
-				  if (chunk.abbrevs.length) { //ligatures and abbreviations
+				  if (chunk.abbrevs != undefined && chunk.abbrevs.length) { //ligatures and abbreviations
 				    html += '<li>scribal abbreviations and ligatures –</li><ul>'
 				    $.each(chunk.abbrevs, function(i, abbr) {
 				      let corresp = abbr.corresp ? abbr.corresp[0] : '';
@@ -805,6 +807,7 @@ HTML;
 				}
 				
 				function getScribeHtml(hand) {
+				  var writerId = hand.writerId != undefined && hand.writerId.length ? hand.writerId[0] : 0; //hack until writers added to DB
 				  var html = '';
 				  var handHtml = '';
 				  if (hand.forename[0] != undefined) {
@@ -813,7 +816,7 @@ HTML;
 				    if (hand.surname) {
 				      handHtml += hand.surname[0] == undefined ? 'Anonymous (' + hand.id[0] + ')' : hand.surname[0];
 				    }
-				  html += '<a href="?m=writers&a=browse&id=' + hand.writerId[0] + '" target="_blank">' + handHtml + '</a> '; 
+				  html += '<a href="?m=writers&a=browse&id=' + writerId + '" target="_blank">' + handHtml + '</a> '; 
 				  return html;
 				}
 				
