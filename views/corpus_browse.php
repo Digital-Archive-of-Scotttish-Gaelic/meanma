@@ -706,20 +706,14 @@ HTML;
 				    html += '<li>language: ' + langs[langCode] + '</li>';    
 				  }		  
 				  //get the hand info
-				  if (chunk.hand != undefined) {
-				    var hand = chunk.hand;
-				    var handHtml = '';
-				    if (chunk.handShift != undefined) {
-				      hand = chunk.handShift;
-				      handHtml += getScribeHtml(hand);
-				      if (hand.subhands) {				        
-				        $.each(hand.subhands, function (i, subhand) {
-									handHtml += getScribeHtml(subhand);
-				        });
-				      } 
-				    } else {   //no <handShift> so use <hand>
-				      handHtml += getScribeHtml(hand);
-				    }
+				  if (chunk.handShift != undefined) {
+				    var hand = chunk.handShift;
+			      var handHtml = getScribeHtml(hand);
+			      if (hand.subhands) {				        
+			        $.each(hand.subhands, function (i, subhand) {
+								handHtml += getScribeHtml(subhand);
+			        });
+			      } 
 				    html += '<li>scribe: ' + handHtml + '</li>'; 
 				  }
 				  if (chunk.pos) {

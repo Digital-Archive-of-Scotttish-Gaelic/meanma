@@ -115,8 +115,6 @@ class manuscript
 		$modalData["emendation"] = $this->_getEmendation($xml);
 		$modalData["interpObscureSection"] = $this->_isPartOfInterpObscureSection($xml);
 		$modalData["obscureSection"] = $this->_isPartOfObscureSection($xml);
-		$modalData["hand"] = $this->_getStartingHandInfo();
-
 		return $modalData;
 	}
 
@@ -134,18 +132,6 @@ class manuscript
 		$modalData["handShift"] = $this->_getHandShiftInfo($xml);
 		$modalData["language"] = $this->_getLanguage($xml);
 		return $modalData;
-	}
-
-	private function _getStartingHandInfo() {
-		$handInfo = null;
-		$result = $this->getXml()->xpath('//tei:div[@hand]');
-		if ($result) {
-			$handId = $result[0]->attributes()->hand;
-			$hand = new hand($handId);
-			$handInfo = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
-				"writerId" => $hand->getWriterId());
-		}
-		return $handInfo;
 	}
 
 	private function _getHandShiftInfo($element) {
