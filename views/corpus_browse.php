@@ -717,7 +717,7 @@ HTML;
 				    html += '<li>scribe: ' + handHtml + '</li>'; 
 				  }
 				  if (chunk.pos) {
-				    html += '<li>' + chunk.pos[0] + '</li>';
+				    html += '<li>' + chunk.pos[0].replace('_', ' ') + '</li>';
 				  }
 				  if (chunk.abbrevs != undefined && chunk.abbrevs.length) { //ligatures and abbreviations
 				    html += '<li>scribal abbreviations and ligatures –</li><ul>'
