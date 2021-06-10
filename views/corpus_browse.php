@@ -807,7 +807,7 @@ HTML;
 				}
 				
 				function getScribeHtml(hand) {
-				  var writerId = hand.writerId != undefined && hand.writerId.length ? hand.writerId[0] : 0; //hack until writers added to DB
+				  var writerId = hand.writerId != undefined ? hand.writerId[0] : 0; //hack until all MSS writers added to DB
 				  var html = '';
 				  var handHtml = '';
 				  if (hand.forename[0] != undefined) {
