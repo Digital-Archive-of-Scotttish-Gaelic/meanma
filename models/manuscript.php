@@ -56,6 +56,7 @@ class manuscript
 
 	private function _getLocalModalData($chunkId) {
 		$modalData = array();
+
 		// run XPath
 		$xmlResults = $this->getXml()->xpath("//tei:w[@id='{$chunkId}'] | //tei:name[@id='{$chunkId}']");
 		$dasgXml = $xmlResults[0];
@@ -302,7 +303,11 @@ XPATH;
 		$results = array();
 		$insertions = $element->xpath("add");
 		foreach ($insertions as $insertion) {
-			$results[] = $insertion;
+			$handId = $insertion->attributes()->hand;
+			$hand = new hand($handId);
+			$handInfo = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
+				"writerId" => $hand->getWriterId());
+			$results[] = array("hand" => $handInfo, "data" => $insertion);
 		}
 		return $results;
 	}

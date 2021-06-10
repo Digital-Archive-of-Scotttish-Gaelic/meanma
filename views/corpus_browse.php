@@ -742,8 +742,8 @@ HTML;
 				  if (chunk.insertions != undefined && chunk.insertions.length) {
 				    html += '<li>insertions –</li><ul>';
 				    $.each(chunk.insertions, function(i, insertion) {
-				      html += '<li>[' + insertion[0] + '] (' + insertion["@attributes"]["hand"] + ', ';
-				      html += insertion["@attributes"]["place"] + ') ';
+				      html += '<li>[' + insertion.data[0] + '] (' + getScribeHtml(insertion.hand) + ', ';
+				      html += insertion.data["@attributes"]["place"] + ') ';
 				    });
 				    html += '</ul>';
 				  }
