@@ -750,7 +750,7 @@ HTML;
 				  if (chunk.deletions != undefined && chunk.deletions.length) {
 				    html += '<li>deletions –</li><ul>';
 				    $.each(chunk.deletions, function(i, deletion) {
-				      html += '<li>[' + deletion[0] + '] (' + deletion["@attributes"]["hand"] + ')';
+				      html += '<li>[' + deletion.data[0] + '] (' + getScribeHtml(deletion.hand) + ')';
 				    });
 				    html += '</ul>';
 				  }

@@ -325,7 +325,11 @@ XPATH;
 		$results = array();
 		$deletions = $element->xpath("del");
 		foreach ($deletions as $deletion) {
-			$results[] = $deletion;
+			$handId = $deletion->attributes()->hand;
+			$hand = new hand($handId);
+			$handInfo = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
+				"writerId" => $hand->getWriterId());
+			$results[] = array("hand" => $handInfo, "data" => $deletion);
 		}
 		return $results;
 	}
