@@ -787,6 +787,9 @@ HTML;
 				  if (chunk.dwelly) {
 				    html += '<li>Dwelly: <a target="_blank" href="' + chunk.dwelly["url"] + '">' + chunk.dwelly["hw"] + '</a></li>';
 				  }
+				  if (chunk.hdsg) {
+				    html += '<li>HDSG: <a target="_blank" href="' + chunk.hdsg["url"][0] + '">' + chunk.hdsg["lemma"][0] + '</a></li>';
+				  }
 				  if (chunk.onomastics) {
 				    html += '<li>' + chunk.onomastics.type; 
 				    if (url = chunk.onomastics.url) {

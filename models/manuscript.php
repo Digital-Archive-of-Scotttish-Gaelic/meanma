@@ -122,6 +122,7 @@ class manuscript
 	private function _populateData($xml) {
 		$modalData["pos"] = $this->_getPOS($xml);
 		$modalData["edil"] = $this->_getEdilUrl($xml);
+		$modalData["hdsg"] = $this->_getSlipRef($xml);
 		$modalData["dwelly"] = $modalData["edil"] ? $this->_getDwelly($modalData["edil"]) : null;
 		$modalData["lemma"] = $this->_getLemma($xml);
 		$modalData["abbrevs"] = $this->_getAbbrevs($xml);
@@ -262,6 +263,13 @@ XPATH;
 		return $element->attributes()->lemmaRef;
 	}
 
+	private function _getSlipRef($element) {
+		if ($slipRef = $element->attributes()->slipRef) {
+			return array("url" => $slipRef, "lemma" => $element->attributes()->lemmaSL);
+		}
+		return null;
+	}
+
 	private function _getOnomastics($element) {
 		$name = array();
 		if ($element->getName() == "name") {
@@ -350,6 +358,12 @@ XPATH;
 		$node = $nodes[0];
 		$lemmaDW = (string)$node["lemmaDW"];
 		$lemmaRefDW = (string)$node["lemmaRefDW"];
+
+		if (!$lemmaDW) {        //why do I have to put in this "hack"?? SB
+			$lemmaDW = (string)$node["lemma"];
+			$lemmaRefDW = (string)$node["lemmaRef"];
+		}
+
 		$dwelly = array("hw" => $lemmaDW, "url" => $lemmaRefDW);
 		return $dwelly;
 	}
