@@ -123,8 +123,12 @@ class manuscript
 		$modalData["pos"] = $this->_getPOS($xml);
 		$modalData["edil"] = $this->_getEdilUrl($xml);
 		$modalData["dwelly"] = $modalData["edil"] ? $this->_getDwelly($modalData["edil"]) : null;
-		if (stristr($modalData["edil"], "faclair.com")) {
+		if (!stristr($modalData["edil"], "dil.ie")) {
+			$modalData["placeLemma"] = $modalData["edil"];
 			unset($modalData["edil"]);    //this is just a Dwelly link so remove
+		}
+		if (!stristr($modalData["dwelly"]["url"], "faclair.com")) {
+			unset ($modalData["dwelly"]); //not a Dwelly link so remove
 		}
 		$modalData["hdsg"] = $this->_getSlipRef($xml);
 		$modalData["lemma"] = $this->_getLemma($xml);

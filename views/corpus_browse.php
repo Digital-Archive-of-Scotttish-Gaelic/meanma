@@ -790,6 +790,9 @@ HTML;
 				  if (chunk.hdsg) {
 				    html += '<li>HDSG: <a target="_blank" href="' + chunk.hdsg["url"][0] + '">' + chunk.hdsg["lemma"][0] + '</a></li>';
 				  }
+				  if (!chunk.edil && chunk.placeLemma) {
+				    html += '<li>lemma: <a target="_blank" href="' + chunk.placeLemma[0] + '">' + chunk.lemma[0] + '</a></li>';
+				  }
 				  if (chunk.onomastics) {
 				    html += '<li>' + chunk.onomastics.type; 
 				    if (url = chunk.onomastics.url) {
