@@ -122,8 +122,11 @@ class manuscript
 	private function _populateData($xml) {
 		$modalData["pos"] = $this->_getPOS($xml);
 		$modalData["edil"] = $this->_getEdilUrl($xml);
-		$modalData["hdsg"] = $this->_getSlipRef($xml);
 		$modalData["dwelly"] = $modalData["edil"] ? $this->_getDwelly($modalData["edil"]) : null;
+		if (stristr($modalData["edil"], "faclair.com")) {
+			unset($modalData["edil"]);    //this is just a Dwelly link so remove
+		}
+		$modalData["hdsg"] = $this->_getSlipRef($xml);
 		$modalData["lemma"] = $this->_getLemma($xml);
 		$modalData["abbrevs"] = $this->_getAbbrevs($xml);
 		$modalData["insertions"] = $this->_getInsertions($xml);
