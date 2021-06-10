@@ -108,13 +108,13 @@
   </xsl:template>
 
   <xsl:template match="tei:pc[not(ancestor::tei:w)]">
-    <span class="chunk">
+    <span class="chunk" id="{@id}">
       <xsl:apply-templates/>
     </span>
   </xsl:template>
 
   <xsl:template match="tei:c | tei:date | tei:num | tei:seg[@type = 'fragment']">
-    <span class="chunk">
+    <span class="chunk" id="{@id}">
       <xsl:apply-templates/>
     </span>
   </xsl:template>
@@ -226,7 +226,7 @@
 
 
   <xsl:template match="tei:gap">
-    <small class="text-muted chunk"> [...] </small>
+    <small class="text-muted"> [...] </small>
   </xsl:template>
 
   <xsl:template match="tei:gap[@unit = 'folio']">
