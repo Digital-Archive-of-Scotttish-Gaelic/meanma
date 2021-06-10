@@ -122,6 +122,7 @@ class manuscript
 	private function _populateData($xml) {
 		$modalData["pos"] = $this->_getPOS($xml);
 		$modalData["edil"] = $this->_getEdilUrl($xml);
+		$modalData["dwelly"] = $modalData["edil"] ? $this->_getDwelly($modalData["edil"]) : null;
 		$modalData["lemma"] = $this->_getLemma($xml);
 		$modalData["abbrevs"] = $this->_getAbbrevs($xml);
 		$modalData["insertions"] = $this->_getInsertions($xml);
@@ -331,7 +332,6 @@ XPATH;
 		return $element->attributes()->pos;
 	}
 
-
 	private function _getHeadword($element) {
 		//apply the XSLT
 		$xsl = new \DOMDocument;
@@ -340,5 +340,17 @@ XPATH;
 		$proc->importStyleSheet($xsl);
 		//return the result
 		return $proc->transformToXML($element);
+	}
+
+	private function _getDwelly($edil) {
+		$filepath = "../mss/Transcribing/hwData.xml";
+		$xml = simplexml_load_file($filepath);
+		$xml->registerXPathNamespace('tei', 'http://www.tei-c.org/ns/1.0');
+		$nodes = $xml->xpath("/tei:TEI/tei:text/tei:body/tei:entryFree[@corresp='{$edil}']/tei:w");
+		$node = $nodes[0];
+		$lemmaDW = (string)$node["lemmaDW"];
+		$lemmaRefDW = (string)$node["lemmaRefDW"];
+		$dwelly = array("hw" => $lemmaDW, "url" => $lemmaRefDW);
+		return $dwelly;
 	}
 }
