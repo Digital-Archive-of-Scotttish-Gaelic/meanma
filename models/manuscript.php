@@ -116,6 +116,7 @@ class manuscript
 		$modalData["emendation"] = $this->_getEmendation($xml);
 		$modalData["interpObscureSection"] = $this->_isPartOfInterpObscureSection($xml);
 		$modalData["obscureSection"] = $this->_isPartOfObscureSection($xml);
+		$modalData["externalSupplied"] = $this->_getExternalSupplied($xml);
 		return $modalData;
 	}
 
@@ -138,7 +139,7 @@ class manuscript
 		$modalData["deletions"] = $this->_getDeletions($xml);
 		$modalData["damaged"] = $this->_getDamaged($xml);
 		$modalData["obscure"] = $this->_getObscured($xml);
-		$modalData["supplied"] = $this->_getSupplied($xml);
+		$modalData["supplied"] = $this->_getLocalSupplied($xml);
 		$modalData["handShift"] = $this->_getHandShiftInfo($xml);
 		$modalData["language"] = $this->_getLanguage($xml);
 		return $modalData;
@@ -250,6 +251,16 @@ XPATH;
 		return $partOfObscure;
 	}
 
+	private function _getExternalSupplied($element) {
+		$externalSupplied = null;
+		$id = $element->attributes()->id;
+		$result = $this->getXml()->xpath("//tei:supplied[descendant::tei:w[@id='{$id}']]");
+		if ($result)	{
+			$externalSupplied = $result[0]->attributes()->resp;
+		}
+		return $externalSupplied;
+	}
+
 	private function _getAbbrevs($element) {
 		$results = array();
 		$abbrevs = $element->xpath("abbr");
@@ -312,7 +323,7 @@ XPATH;
 		return $results;
 	}
 
-	private function _getSupplied($element) {
+	private function _getLocalSupplied($element) {
 		$results = array();
 		$supplied = $element->xpath("supplied");
 		foreach ($supplied as $s) {
