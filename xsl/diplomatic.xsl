@@ -105,28 +105,16 @@
     <xsl:text>}</xsl:text>
   </xsl:template>
 
-  <xsl:template match="tei:unclear[@reason='text_obscure']">
+  <xsl:template match="tei:unclear[@reason='text_obscure' or @reason = 'interp_obscure']">
     <!-- e.g. MS6.2r.1 [t] -->
     <span style="background-color: lightgray;">
       <xsl:apply-templates/>
     </span>
   </xsl:template>
 
-
-
-
-
-
   <xsl:template match="tei:unclear[@reason = 'char']">
     <!-- MS6.2r.7 [i] -->
     <span class="unclearCharDiplo" data-cert="{@cert}" data-resp="{@resp}">
-      <xsl:apply-templates/>
-    </span>
-  </xsl:template>
-
-  <xsl:template match="tei:unclear[@reason = 'interp_obscure']">
-    <!-- ??? -->
-    <span class="unclearInterpObscure" data-cert="{@cert}" data-resp="{@resp}">
       <xsl:apply-templates/>
     </span>
   </xsl:template>

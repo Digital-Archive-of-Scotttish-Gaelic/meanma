@@ -210,18 +210,8 @@
     </span>
   </xsl:template>
 
-  <xsl:template match="tei:unclear[@reason = 'text_obscure']">
+  <xsl:template match="tei:unclear[@reason = 'text_obscure' or @reason = 'interp_obscure']">
     <span style="background-color: lightgray;">
-      <xsl:apply-templates/>
-    </span>
-  </xsl:template>
-
-
-
-
-  <xsl:template match="tei:unclear[@reason = 'interp_obscure']">
-    <!-- e.g. MS6.2r.1 [t] -->
-    <span class="unclearInterpObscure" data-cert="{@cert}" data-resp="{@resp}">
       <xsl:apply-templates/>
     </span>
   </xsl:template>
