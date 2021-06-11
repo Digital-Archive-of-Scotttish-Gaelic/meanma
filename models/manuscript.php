@@ -168,18 +168,14 @@ XPATH;
 		if ($result) {
 			$r = end($result);    //closest preceding element
 			$handId = $r->attributes()->new;
-			$hand = new hand($handId);
-			$handInfo = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
-				"writerId" => $hand->getWriterId());
+			$handInfo = $this->_getHandInfo($handId);
 		}
 		//check for handShifts contained within a chunk
 		$contains = $this->getXml()->xpath('//tei:handShift[ancestor::tei:*[@id="' . $id . '"]]');
 		if ($contains) {
 			foreach ($contains as $subhand) {
 				$handId = $subhand->attributes()->new;
-				$hand = new hand($handId);
-				$handInfo["subhands"][] = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
-					"writerId" => $hand->getWriterId());
+				$handInfo = $this->_getHandInfo($handId);
 			}
 		}
 
@@ -233,6 +229,8 @@ XPATH;
 		if ($result) {
 			$partOfXml = $result[0];
 			$place = $partOfXml->attributes()->place;
+			$handId = $partOfXml->attributes()->hand;
+			$handInfo = $this->_getHandInfo($handId);
 			//create a copy of the XML
 			$xmlString = $partOfXml->asXml();
 			$addXml = new \SimpleXMLElement($xmlString);
@@ -240,7 +238,7 @@ XPATH;
 			$xslt = new \XSLTProcessor;
 			$xslt->importStyleSheet($xsl);
 			$fullWord = $xslt->transformToXML($addXml);
-			$partOfInsertion = array('fullWord' => $fullWord, "place" => $place);
+			$partOfInsertion = array('fullWord' => $fullWord, "place" => $place, "hand" => $handInfo);
 		}
 		return $partOfInsertion;
 	}
@@ -285,9 +283,7 @@ XPATH;
 		$deletions = $this->getXml()->xpath("//tei:del[descendant::tei:*[@id='{$id}']]");
 		foreach ($deletions as $deletion) {
 			$handId = $deletion->attributes()->hand;
-			$hand = new hand($handId);
-			$handInfo = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
-				"writerId" => $hand->getWriterId());
+			$handInfo = $this->_getHandInfo($handId);
 			$results[] = array("hand" => $handInfo, "data" => functions::cleanForm($deletion));
 		}
 		return $results;
@@ -347,9 +343,7 @@ XPATH;
 		$insertions = $element->xpath("add");
 		foreach ($insertions as $insertion) {
 			$handId = $insertion->attributes()->hand;
-			$hand = new hand($handId);
-			$handInfo = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
-				"writerId" => $hand->getWriterId());
+			$handInfo = $this->_getHandInfo($handId);
 			$results[] = array("hand" => $handInfo, "data" => $insertion);
 		}
 		return $results;
@@ -369,9 +363,7 @@ XPATH;
 		$deletions = $element->xpath("del");
 		foreach ($deletions as $deletion) {
 			$handId = $deletion->attributes()->hand;
-			$hand = new hand($handId);
-			$handInfo = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
-				"writerId" => $hand->getWriterId());
+			$handInfo = $this->_getHandInfo($handId);
 			$results[] = array("hand" => $handInfo, "data" => $deletion);
 		}
 		return $results;
@@ -425,5 +417,11 @@ XPATH;
 
 		$dwelly = array("hw" => $lemmaDW, "url" => $lemmaRefDW);
 		return $dwelly;
+	}
+
+	private function _getHandInfo($handId) {
+		$hand = new hand($handId);
+		return array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
+			"writerId" => $hand->getWriterId());
 	}
 }

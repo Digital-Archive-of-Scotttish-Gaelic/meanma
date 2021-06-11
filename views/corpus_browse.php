@@ -729,8 +729,9 @@ HTML;
 				    html += '</ul>';
 				  }
 				  if (chunk.partOfInsertion != undefined) {
+				    let ins = chunk.partOfInsertion;
 				    html += '<li>part of insertion –</li><ul>';
-				    html += '<li>[' + chunk.partOfInsertion.fullWord + '] (' + chunk.partOfInsertion.place[0] + ')</li></ul>';
+				    html += '<li>[' + ins.fullWord + '] (' + getScribeHtml(ins.hand) + ', ' + ins.place[0] + ')</li></ul>';
 				  }
 				  if (chunk.supplied != undefined && chunk.supplied.length) {
 				    html += '<li>text supplied by editor –</li><ul>';
