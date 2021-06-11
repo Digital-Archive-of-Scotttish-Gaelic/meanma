@@ -126,6 +126,7 @@ XPATH;
 		$modalData["interpObscureSection"] = $this->_isPartOfInterpObscureSection($xml);
 		$modalData["obscureSection"] = $this->_isPartOfObscureSection($xml);
 		$modalData["supplied"] = $this->_getExternalSupplied($xml);
+		$modalData["externalDeletions"] = $this->_getExternalDeletions($xml);
 		return $modalData;
 	}
 
@@ -269,13 +270,27 @@ XPATH;
 	private function _getExternalSupplied($element) {
 		$externalSupplied = array();
 		$id = $element->attributes()->id;
-		$results = $this->getXml()->xpath("//tei:supplied[descendant::tei:w[@id='{$id}']  or ancestor::tei:w[@id='{$id}']]");
+		$results = $this->getXml()->xpath("//tei:supplied[descendant::tei:*[@id='{$id}']  or ancestor::tei:*[@id='{$id}']]");
 		if ($results)	{
 			foreach ($results as $result) {
 				$externalSupplied[] = $result;
 			}
 		}
 		return $externalSupplied;
+	}
+
+	private function _getExternalDeletions($element) {
+		$results = array();
+		$id = $element->attributes()->id;
+		$deletions = $this->getXml()->xpath("//tei:del[descendant::tei:*[@id='{$id}']]");
+		foreach ($deletions as $deletion) {
+			$handId = $deletion->attributes()->hand;
+			$hand = new hand($handId);
+			$handInfo = array("id" => $handId, "forename" => $hand->getForename(), "surname" => $hand->getSurname(),
+				"writerId" => $hand->getWriterId());
+			$results[] = array("hand" => $handInfo, "data" => functions::cleanForm($deletion));
+		}
+		return $results;
 	}
 
 	private function _getAbbrevs($element) {

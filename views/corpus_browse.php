@@ -754,6 +754,13 @@ HTML;
 				    });
 				    html += '</ul>';
 				  }
+				  if (chunk.externalDeletions != undefined && chunk.externalDeletions.length) {
+				    html += '<li>part of the following deletion –</li><ul>';
+				    $.each(chunk.externalDeletions, function(i, deletion) {
+				      html += '<li>[ ' + deletion.data + ' ] (' + getScribeHtml(deletion.hand) + ')';
+				    });
+				    html += '</ul>';
+				  }
 				  if (chunk.damaged != undefined && chunk.damaged.length) {
 				    html += '<li>text supplied for lost writing surface –</li><ul>';
 				    $.each(chunk.damaged, function(i, damage) {
