@@ -199,7 +199,7 @@ XPATH;
 		$emendation = null;
 		//test if part of an emendation
 		$id = $element->attributes()->id;
-		$result = $this->getXml()->xpath('//tei:choice[child::tei:sic[child::tei:w[@id="' . $id . '"]]]');
+		$result = $this->getXml()->xpath('//tei:choice[child::tei:corr[child::tei:w[@id="' . $id . '"]]]');
 		if ($result) {
 			$choiceXml = $result[0];
 			$sic = $choiceXml->sic;
