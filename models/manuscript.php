@@ -125,7 +125,7 @@ XPATH;
 		$modalData["emendation"] = $this->_getEmendation($xml);
 		$modalData["interpObscureSection"] = $this->_isPartOfInterpObscureSection($xml);
 		$modalData["obscureSection"] = $this->_isPartOfObscureSection($xml);
-		$modalData["externalSupplied"] = $this->_getExternalSupplied($xml);
+		$modalData["supplied"] = $this->_getExternalSupplied($xml);
 		return $modalData;
 	}
 
@@ -154,7 +154,7 @@ XPATH;
 		$modalData["deletions"] = $this->_getDeletions($xml);
 		$modalData["damaged"] = $this->_getDamaged($xml);
 		$modalData["obscure"] = $this->_getObscured($xml);
-		$modalData["supplied"] = $this->_getLocalSupplied($xml);
+//		$modalData["supplied"] = $this->_getLocalSupplied($xml);  //now in _getExternalSupplied()
 		$modalData["handShift"] = $this->_getHandShiftInfo($xml);
 		$modalData["language"] = $this->_getLanguage($xml);
 		return $modalData;
@@ -267,11 +267,13 @@ XPATH;
 	}
 
 	private function _getExternalSupplied($element) {
-		$externalSupplied = null;
+		$externalSupplied = array();
 		$id = $element->attributes()->id;
-		$result = $this->getXml()->xpath("//tei:supplied[descendant::tei:w[@id='{$id}']]");
-		if ($result)	{
-			$externalSupplied = $result[0]->attributes()->resp;
+		$results = $this->getXml()->xpath("//tei:supplied[descendant::tei:w[@id='{$id}']  or ancestor::tei:w[@id='{$id}']]");
+		if ($results)	{
+			foreach ($results as $result) {
+				$externalSupplied[] = $result;
+			}
 		}
 		return $externalSupplied;
 	}

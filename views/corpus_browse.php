@@ -739,9 +739,6 @@ HTML;
 				    });
 				    html += '</ul>';
 				  }
-				  if (chunk.externalSupplied != undefined) {
-				    html += '<li>supplied by editor (' + chunk.externalSupplied[0] + ')</li>';
-				  }
 				  if (chunk.insertions != undefined && chunk.insertions.length) {
 				    html += '<li>insertions –</li><ul>';
 				    $.each(chunk.insertions, function(i, insertion) {
