@@ -226,7 +226,7 @@
 
 
   <xsl:template match="tei:gap">
-    <small class="text-muted"> [...] </small>
+    <small class="text-muted chunk" id="{@id}"> [...] </small>
   </xsl:template>
 
   <xsl:template match="tei:gap[@unit = 'folio']">
