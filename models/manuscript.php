@@ -56,14 +56,15 @@ class manuscript
 
 	private function _getLocalModalData($chunkId) {
 		$modalData = array();
-
 		// run XPath
-		$xmlResults = $this->getXml()->xpath("//tei:w[@id='{$chunkId}'] | //tei:name[@id='{$chunkId}']");
+		$xpath = <<<XPATH
+			//tei:w[@id='{$chunkId}'] | //tei:name[@id='{$chunkId}'] | //tei:pc[@id='{$chunkId}']
+XPATH;
+		$xmlResults = $this->getXml()->xpath($xpath);
 		$dasgXml = $xmlResults[0];
 		//create a copy of the XML
 		$xmlString = $dasgXml->asXml();
 		$xml = new \SimpleXMLElement($xmlString);
-
 		$modalData["headword"] = $this->_getHeadword($xml);
 		if ($xml->getName()=='name') {
 			$modalData["onomastics"] = $this->_getOnomastics($xml);
@@ -95,6 +96,11 @@ class manuscript
 			} else {
 				$modalData["complexFlag"] = 0;
 			}
+		} else if ($xml->getName()=="pc") {   //punctuation
+			$modalData = array_merge($modalData, $this->_populateData($xml));
+			$modalData["headword"] = (string)$xml;
+			$modalData["complexFlag"] = -1;
+			$modalData["punctuation"] = 1;
 		}
 		return $modalData;
 	}
@@ -102,7 +108,10 @@ class manuscript
 	private function _getExternalModalData($chunkId) {
 		$modalData = array();
 		// run XPath
-		$xmlResults = $this->getXml()->xpath("//tei:w[@id='{$chunkId}'] | //tei:name[@id='{$chunkId}']");
+		$xpath = <<<XPATH
+			//tei:w[@id='{$chunkId}'] | //tei:name[@id='{$chunkId}'] | //tei:pc[@id='{$chunkId}']
+XPATH;
+		$xmlResults = $this->getXml()->xpath($xpath);
 		$dasgXml = $xmlResults[0];
 		//create a copy of the XML
 		$xmlString = $dasgXml->asXml();
@@ -148,7 +157,7 @@ class manuscript
 	private function _getHandShiftInfo($element) {
 		$handInfo = null;
 		$id = $element->attributes()->id;
-		$result = $this->getXml()->xpath('//tei:w[@id="' . $id . '"]/preceding::tei:handShift');
+		$result = $this->getXml()->xpath('//tei:*[@id="' . $id . '"]/preceding::tei:handShift');
 		if ($result) {
 			$r = end($result);    //closest preceding element
 			$handId = $r->attributes()->new;
@@ -157,7 +166,7 @@ class manuscript
 				"writerId" => $hand->getWriterId());
 		}
 		//check for handShifts contained within a chunk
-		$contains = $this->getXml()->xpath('//tei:handShift[ancestor::tei:w[@id="' . $id . '"]]');
+		$contains = $this->getXml()->xpath('//tei:handShift[ancestor::tei:*[@id="' . $id . '"]]');
 		if ($contains) {
 			foreach ($contains as $subhand) {
 				$handId = $subhand->attributes()->new;

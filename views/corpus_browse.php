@@ -803,9 +803,17 @@ HTML;
 				    }
 				    html += '</li>';
 				  }
+				  if (chunk.punctuation) {
+				    html += '<li>is a character string';
+				  }
 				  var complexText = chunk.complexFlag ? 'syntactically complex –' : 'syntactically simple';
-				  html += '<li>' + complexText + '</li>';
-				  if (chunk.complexFlag) {
+				  if (chunk.complexFlag == -1) {
+				    complexText = '';
+				  }
+				  if (complexText) {
+				    html += '<li>' + complexText + '</li>';
+				  }
+				  if (chunk.complexFlag > 0) {
 				    html += '<ul>';
 				  }
 				  html += '</ul>';
