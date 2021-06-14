@@ -778,6 +778,9 @@ XML;
 	private $_element;  //the element with the ID passed to the constructor
 
 	public function __construct($id) {
+		if (!$id) {   //error in the XML - no @ref to look up glyph
+			return null;
+		}
 		$xml = new \SimpleXMLElement($this->_glygatures);
 		$results = $xml->xpath("/xml/glyph[@id='{$id}']");
 		$this->_element = $results[0];
