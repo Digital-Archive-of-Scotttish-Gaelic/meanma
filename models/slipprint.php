@@ -14,6 +14,7 @@ class slipprint
 	 * @param array $slipIds
 	 */
 	public function writePDF($slipIds) {
+		$db = new database;
 		$pdf = new \TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 		// set document information
 		$pdf->SetCreator(PDF_CREATOR);
@@ -41,7 +42,7 @@ class slipprint
 		$i= 0;
 		foreach ($slipIds as $slipId) {
 			$i++;
-			$slipInfo = collection::getSlipInfoBySlipId($slipId)[0];
+			$slipInfo = collection::getSlipInfoBySlipId($slipId, $db)[0];
 			$headword = $slipInfo["lemma"];
 			$filename = $slipInfo["filename"];
 			$filenameElems = explode('_', $filename);
