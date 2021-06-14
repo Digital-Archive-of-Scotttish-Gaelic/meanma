@@ -770,6 +770,18 @@ HTML;
 				    });
 				    html += '</ul>';
 				  }
+				  if (chunk.gapDamaged != undefined) {
+				    let gapAttrs = chunk.gapDamaged["@attributes"];
+				    html += '<li>Damage: ' + gapAttrs["quantity"] + ' ' +gapAttrs["unit"] + ' (' + gapAttrs["resp"] + ')</li>'; 
+				  }
+				  if (chunk.gapObscured != undefined) {
+				    let gapAttrs = chunk.gapObscured["@attributes"];
+				    html += '<li>Obscured: ' + gapAttrs["quantity"] + ' ' +gapAttrs["unit"] + ' (' + gapAttrs["resp"] + ')</li>'; 
+				  }
+				  if (chunk.gapSurfaceLost != undefined) {
+				    let gapAttrs = chunk.gapSurfaceLost["@attributes"];
+				    html += '<li>Lost writing surface: ' + gapAttrs["quantity"] + ' ' +gapAttrs["unit"] + ' (' + gapAttrs["resp"] + ')</li>'; 
+				  }
 				  if (chunk.obscure != undefined && chunk.obscure.length) {
 				    html += '<li>obscured sections –</li><ul>';
 				    $.each(chunk.obscure, function(i, obscure) {

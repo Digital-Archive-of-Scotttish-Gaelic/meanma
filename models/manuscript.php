@@ -58,7 +58,7 @@ class manuscript
 		$modalData = array();
 		// run XPath
 		$xpath = <<<XPATH
-			//tei:w[@id='{$chunkId}'] | //tei:name[@id='{$chunkId}'] | //tei:pc[@id='{$chunkId}']
+			//tei:*[@id='{$chunkId}']
 XPATH;
 		$xmlResults = $this->getXml()->xpath($xpath);
 		$dasgXml = $xmlResults[0];
@@ -96,11 +96,15 @@ XPATH;
 			} else {
 				$modalData["complexFlag"] = 0;
 			}
-		} else if ($xml->getName()=="pc") {   //punctuation
+		} else {   //punctuation, characters, gaps, etc.
 			$modalData = array_merge($modalData, $this->_populateData($xml));
 			$modalData["headword"] = (string)$xml;
 			$modalData["complexFlag"] = -1;
-			$modalData["punctuation"] = 1;
+			if ($xml->getName() == "pc" || $xml->getName() == "c") {
+				$modalData["punctuation"] = 1;
+			} else if ($xml->getName() == "gap") {
+				$modalData["handShift"] = null;   //don't want scribe info for gaps
+			}
 		}
 		return $modalData;
 	}
@@ -109,7 +113,7 @@ XPATH;
 		$modalData = array();
 		// run XPath
 		$xpath = <<<XPATH
-			//tei:w[@id='{$chunkId}'] | //tei:name[@id='{$chunkId}'] | //tei:pc[@id='{$chunkId}']
+			//tei:*[@id='{$chunkId}']
 XPATH;
 		$xmlResults = $this->getXml()->xpath($xpath);
 		$dasgXml = $xmlResults[0];
@@ -154,6 +158,9 @@ XPATH;
 		$modalData["insertions"] = $this->_getInsertions($xml);
 		$modalData["deletions"] = $this->_getDeletions($xml);
 		$modalData["damaged"] = $this->_getDamaged($xml);
+		$modalData["gapDamaged"] = $this->_getGapDamaged($xml);
+		$modalData["gapObscured"] = $this->_getGapObscured($xml);
+		$modalData["gapSurfaceLost"] = $this->_getGapSurfaceLost($xml);
 		$modalData["obscure"] = $this->_getObscured($xml);
 //		$modalData["supplied"] = $this->_getLocalSupplied($xml);  //now in _getExternalSupplied()
 		$modalData["handShift"] = $this->_getHandShiftInfo($xml);
@@ -376,6 +383,36 @@ XPATH;
 			$results[] = $damage;
 		}
 		return $results;
+	}
+
+	private function _getGapDamaged($element) {
+		$gapDamaged = null;
+		$id = $element->attributes()->id;
+		$damaged = $element->xpath("//gap[@id='{$id}' and @reason='damage']");
+		if ($damaged[0]) {
+			$gapDamaged = $damaged[0];
+		}
+		return $gapDamaged;
+	}
+
+	private function _getGapObscured($element) {
+		$gapObscured = null;
+		$id = $element->attributes()->id;
+		$obscured = $element->xpath("//gap[@id='{$id}' and @reason='text_obscure']");
+		if ($obscured[0]) {
+			$gapObscured = $obscured[0];
+		}
+		return $gapObscured;
+	}
+
+	private function _getGapSurfaceLost($element) {
+		$gapSurfaceLost = null;
+		$id = $element->attributes()->id;
+		$surfaceLost = $element->xpath("//gap[@id='{$id}' and @reason='writing_surface_lost']");
+		if ($surfaceLost[0]) {
+			$gapSurfaceLost = $surfaceLost[0];
+		}
+		return $gapSurfaceLost;
 	}
 
 	private function _getObscured($element) {
