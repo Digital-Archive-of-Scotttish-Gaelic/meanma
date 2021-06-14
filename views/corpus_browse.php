@@ -764,23 +764,28 @@ HTML;
 				  }
 				  if (chunk.damaged != undefined && chunk.damaged.length) {
 				    html += '<li>text supplied for lost writing surface –</li><ul>';
-				    $.each(chunk.damaged, function(i, damage) {
-				      html += '<li>[' + damage[0] + '] (' + damage["@attributes"]["resp"] + ', ';
+				    $.each(chunk.damaged, function(i, damage) {			      
+				      let replacedText = damage[0] ? damage[0] : damage.g;
+				      html += '<li>';
+				      if (replacedText) {
+				        html += '[' + replacedText + '] ';
+				      }
+				      html += '(' + damage["@attributes"]["resp"] + ', ';
 				      html += damage["@attributes"]["cert"] + ' certainty)';
 				    });
 				    html += '</ul>';
 				  }
 				  if (chunk.gapDamaged != undefined) {
 				    let gapAttrs = chunk.gapDamaged["@attributes"];
-				    html += '<li>Damage: ' + gapAttrs["quantity"] + ' ' +gapAttrs["unit"] + ' (' + gapAttrs["resp"] + ')</li>'; 
+				    html += '<li>damage: ' + gapAttrs["quantity"] + ' ' +gapAttrs["unit"] + ' (' + gapAttrs["resp"] + ')</li>'; 
 				  }
 				  if (chunk.gapObscured != undefined) {
 				    let gapAttrs = chunk.gapObscured["@attributes"];
-				    html += '<li>Obscured: ' + gapAttrs["quantity"] + ' ' +gapAttrs["unit"] + ' (' + gapAttrs["resp"] + ')</li>'; 
+				    html += '<li>obscured: ' + gapAttrs["quantity"] + ' ' +gapAttrs["unit"] + ' (' + gapAttrs["resp"] + ')</li>'; 
 				  }
 				  if (chunk.gapSurfaceLost != undefined) {
 				    let gapAttrs = chunk.gapSurfaceLost["@attributes"];
-				    html += '<li>Lost writing surface: ' + gapAttrs["quantity"] + ' ' +gapAttrs["unit"] + ' (' + gapAttrs["resp"] + ')</li>'; 
+				    html += '<li>lost writing surface: ' + gapAttrs["quantity"] + ' ' +gapAttrs["unit"] + ' (' + gapAttrs["resp"] + ')</li>'; 
 				  }
 				  if (chunk.obscure != undefined && chunk.obscure.length) {
 				    html += '<li>obscured sections –</li><ul>';

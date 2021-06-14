@@ -378,7 +378,7 @@ XPATH;
 
 	private function _getDamaged($element) {
 		$results = array();
-		$damaged = $element->xpath("unclear[@reason='damage']");
+		$damaged = $element->xpath("./descendant-or-self::unclear[@reason='damage']");
 		foreach ($damaged as $damage) {
 			$results[] = $damage;
 		}
