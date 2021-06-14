@@ -77,9 +77,9 @@ SQL;
 	 * @param $entryId
 	 * @return array of slipIds
 	 */
-	public static function getNonCategorisedSlipIds($entryId) {
+	public static function getNonCategorisedSlipIds($entryId, $db) {
 		$slipIds = array();
-		$db = new database();
+//		$db = new database();
 		$sql = <<<SQL
         SELECT auto_id FROM slips s 
         	JOIN entry e ON e.id = s.entry_id

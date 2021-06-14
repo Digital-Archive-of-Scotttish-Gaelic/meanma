@@ -790,7 +790,12 @@ HTML;
 				  if (chunk.obscure != undefined && chunk.obscure.length) {
 				    html += '<li>obscured sections –</li><ul>';
 				    $.each(chunk.obscure, function(i, obscure) {
-				      html += '<li>[' + obscure[0] + '] (' + obscure["@attributes"]["resp"] + ', ';
+				      let replacedText = obscure.word ? obscure.word : obscure.g;
+				      html += '<li>';
+				      if (replacedText) {
+				        html += '[' + replacedText + '] ';
+				      }
+				      html += '(' + obscure["@attributes"]["resp"] + ', ';
 				      html += obscure["@attributes"]["cert"] + ' certainty)';
 				    });
 				    html += '</ul>';
@@ -839,6 +844,7 @@ HTML;
 				    html += '<ul>';
 				  }
 				  html += '</ul>';
+				  //html += chunk.xml;
 				  return html;		    
 				}
 				

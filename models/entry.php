@@ -69,14 +69,14 @@ class entry
 		return $this->_updated;
 	}
 
-	public function getWordforms() {
-		$wordforms = entries::getWordformsForEntry($this->getId());
+	public function getWordforms($db) {
+		$wordforms = entries::getWordformsForEntry($this->getId(), $db);
 		return $wordforms;
 	}
 
-	public function getSenses() {
+	public function getSenses($db) {
 		if (empty($this->_senses)) {
-			entries::addSenseIdsForEntry($this);
+			entries::addSenseIdsForEntry($this, $db);
 		}
 		return $this->_senses;
 	}
@@ -93,8 +93,8 @@ class entry
 	 * Groups the senses together
 	 * Adds the IDs of the grouped slips into _senseSlipIds for parsing in citations.
 	 */
-	public function getUniqueSenseIds() {
-		foreach ($this->getSenses() as $slipId => $senseGroup) {
+	public function getUniqueSenseIds($db) {
+		foreach ($this->getSenses($db) as $slipId => $senseGroup) {
 			foreach ($senseGroup as $sense) {
 				if (!isset($this->_slipSenses[$slipId])) {
 					$this->_slipSenses[$slipId] .=  $sense->getId();

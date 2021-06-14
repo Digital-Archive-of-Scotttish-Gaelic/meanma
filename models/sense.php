@@ -9,9 +9,9 @@ class sense
 	private $_id, $_name, $_description, $_entryId;
 	private $_db;  //database connection
 
-	public function __construct($id) {
+	public function __construct($id, $db) {
 		$this->_id = $id;
-		$this->_db = isset($this->_db) ? $this->_db : new database();
+		$this->_db = $db;
 		$this->_load();
 	}
 

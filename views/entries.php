@@ -5,7 +5,10 @@ use models;
 
 class entries
 {
+	private $_db;
+
   public function writeEntry($entry) {
+		$this->_db = new models\database();
   	$headword = $entry->getHeadword();
   	$wordclass = $entry->getWordclass();
   	$abbr = models\functions::getWordclassAbbrev($wordclass);
@@ -35,7 +38,7 @@ HTML;
   	$i=0;
 	  $hideText = array("unmarked person", "unmarked number");
 	  $html = "<ul>";
-	  foreach ($entry->getWordforms() as $wordform => $morphGroup) {
+	  foreach ($entry->getWordforms($this->_db) as $wordform => $morphGroup) {
 	  	foreach ($morphGroup as $morphString => $slipIds) {
 	  		$i++;
 			  $morphHtml = str_replace('|', ' ', $morphString);
@@ -64,7 +67,7 @@ HTML;
   private function _getSlipListForForms($slipIds) {
   	$slipData = array();
 	  foreach ($slipIds as $id) {
-		  $slipData[] = models\collection::getSlipInfoBySlipId($id);
+		  $slipData[] = models\collection::getSlipInfoBySlipId($id, $this->_db);
 	  }
 		$slipList = '<table class="table"><tbody>';
 		foreach ($slipData as $data) {
@@ -133,13 +136,13 @@ HTML;
 	private function _getOrphanSensesHtml($entry) {
 		/* Get any citations without senses */
 		$html = "";
-		$nonSenseSlipIds = models\sensecategories::getNonCategorisedSlipIds($entry->getId());
+		$nonSenseSlipIds = models\sensecategories::getNonCategorisedSlipIds($entry->getId(), $this->_db);
 		if (count($nonSenseSlipIds)) {
 			$slipData = array();
 			$index = 0;
 			foreach ($nonSenseSlipIds as $slipId) {
 				$index++;
-				$slipData[] = models\collection::getSlipInfoBySlipId($slipId);
+				$slipData[] = models\collection::getSlipInfoBySlipId($slipId, $this->_db);
 			}
 			$html .= $this->_getSlipListHtml($slipData, array("uncategorised"), "orp_" . $index);
 		}
@@ -154,7 +157,7 @@ HTML;
 			$slipData = array();
 			foreach ($slipIds as $slipId) {
 				$index++;
-				$slipData[] = models\collection::getSlipInfoBySlipId($slipId);
+				$slipData[] = models\collection::getSlipInfoBySlipId($slipId, $this->_db);
 			}
 			$html .= $this->_getSlipListHtml($slipData, $sense, "ind_".$index);
 		}
@@ -164,12 +167,12 @@ HTML;
 	private function _getGroupedSensesHtml($entry) {
 		/* Get the citations with grouped senses */
 		$index = 0;
-		foreach ($entry->getUniqueSenseIds() as $slipId => $senseIds) {
+		foreach ($entry->getUniqueSenseIds($this->_db) as $slipId => $senseIds) {
 			$slipData = array();
 			$senseSlipIds = $entry->getSenseSlipIds($slipId);
 			foreach ($senseSlipIds as $id) {
 				$index++;
-				$slipData[] = models\collection::getSlipInfoBySlipId($id);
+				$slipData[] = models\collection::getSlipInfoBySlipId($id, $this->_db);
 			}
 			$html .= $this->_getSlipListHtml($slipData, $senseIds, "grp_".$index);
 		}
@@ -231,7 +234,7 @@ HTML;
 		} else {
 			$senseIds = explode('|', $senseIds);
 			foreach ($senseIds as $senseId) {
-				$sense = new models\sense($senseId);
+				$sense = new models\sense($senseId, $this->_db);
 				$senseDescription = $sense->getDescription();
 				$senseString .= <<<HTML
 					<span data-toggle="modal" data-target="#senseModal" data-sense="{$senseId}" 

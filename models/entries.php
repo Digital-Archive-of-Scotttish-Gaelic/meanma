@@ -91,8 +91,8 @@ SQL;
     return $entryIds;
   }
 
-  public static function addSenseIdsForEntry($entry) {
-		$db = new database();
+  public static function addSenseIdsForEntry($entry, $db) {
+//		$db = new database();
 		$sql = <<<SQL
 			SELECT se.id as id, auto_id AS slipId FROM sense se
 					JOIN slip_sense ss ON ss.sense_id = se.id
@@ -102,16 +102,16 @@ SQL;
 SQL;
 		$results = $db->fetch($sql, array("entryId"=>$entry->getId()));
 	  foreach ($results as $row) {
-		  $sense = new sense($row["id"]);
+		  $sense = new sense($row["id"], $db);
 		  $slipId = $row["slipId"];
 		  $entry->addSense($sense, $slipId);
 	  }
 		return $entry;
   }
 
-  public static function getWordformsForEntry($entryId) {
+  public static function getWordformsForEntry($entryId, $db) {
   	$wordforms = array();
-  	$db = new database();
+ // 	$db = new database();
   	$sql = <<<SQL
 			SELECT l.wordform AS wordform, auto_id AS slipId
 				FROM lemmas l 
@@ -124,7 +124,7 @@ SQL;
   		$wordform = mb_strtolower($row["wordform"], "UTF-8");
   		$slipId = $row["slipId"];
 
-		  $slipMorphResults = collection::getSlipMorphBySlipId($slipId);
+		  $slipMorphResults = collection::getSlipMorphBySlipId($slipId, $db);
 
 		  $morphString = implode('|', $slipMorphResults);
 

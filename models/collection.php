@@ -134,9 +134,9 @@ SQL;
 	 * @param $slipId
 	 * @return array of DB results
 	 */
-	public static function getSlipInfoBySlipId($slipId) {
+	public static function getSlipInfoBySlipId($slipId, $db) {
 		$slipInfo = array();
-		$db = new database();
+//		$db = new database();
 		$dbh = $db->getDatabaseHandle();
 		try {
 			$sql = <<<SQL
@@ -177,9 +177,9 @@ SQL;
 	 * @param $slipId
 	 * @return array of DB results
 	 */
-	public static function getSlipMorphBySlipId($slipId) {
+	public static function getSlipMorphBySlipId($slipId, $db) {
 		$morphInfo = array();
-		$db = new database();
+//		$db = new database();
 		$dbh = $db->getDatabaseHandle();
 		try {
 			$sql = <<<SQL
