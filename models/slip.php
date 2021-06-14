@@ -72,7 +72,7 @@ SQL;
 		if ($results) {
 			foreach ($results as $key => $value) {
 				$id = $value["id"];
-				$this->_senses[$id] = new sense($id); //create and store sense objects
+				$this->_senses[$id] = new sense($id, $this->_db); //create and store sense objects
 				$this->_sensesInfo[$id]["name"] = $this->_senses[$id]->getName();  //store id and name for AJAX use
 				$this->_sensesInfo[$id]["description"] = $this->_senses[$id]->getDescription();
 			}
@@ -238,7 +238,7 @@ SQL;
 			if (array_key_exists($id, $this->getSenses())) {  //skip exisiting senses for this slip
 				continue;
 			}
-			$senses[$id] = new sense($id);
+			$senses[$id] = new sense($id, $this->_db);
 		}
 		return $senses;
   }
