@@ -18,34 +18,38 @@ class slow_search extends search
 		if ($xpath=="") {   //no results so write the form
 			parent::writeSubHeading();
 			echo <<<HTML
-				<div class="float-right">
-					<small><a href="?m=corpus&a=search&id={$_GET["id"]}">word search</a></small>
-				</div>
-		    <form>
-			    <input type="hidden" name="m" value="corpus">
-			    <input type="hidden" name="a" value="slow_search">
-			    <input type="hidden" name="id" value="{$_GET["id"]}">
-			    <div class="form-group row">
-				    <div class="input-group col-sm-6">
-					    <input type="text" class="form-control" name="xpath" value="@lemma='craobh'">
-					    <div class="input-group-append">
-						    <button class="btn btn-primary" type="submit">search</button>
+				<div class="row">
+					<div class="col">				
+						<div class="float-right">
+							<small><a href="?m=corpus&a=search&id={$_GET["id"]}">word search</a></small>
+						</div>
+				    <form>
+					    <input type="hidden" name="m" value="corpus">
+					    <input type="hidden" name="a" value="slow_search">
+					    <input type="hidden" name="id" value="{$_GET["id"]}">
+					    <div class="form-group row">
+						    <div class="input-group col-sm-6">
+							    <input type="text" class="form-control" name="xpath" value="@lemma='craobh'">
+							    <div class="input-group-append">
+								    <button class="btn btn-primary" type="submit">search</button>
+							    </div>
+						    </div>
 					    </div>
-				    </div>
-			    </div>
-			    <div class="form-group row">
-	          <label class="form-check-label col-sm-1" for="chunkOff">Get all results</label>
-	          <input type="radio" id="chunkOff" class="form-control-default col-sm-1" aria-label="Get all results" name="chunk" value="off">
-					</div>
-					<div class="form-group row">
-	          <label class="form-check-label col-sm-1" for="chunkOn">Chunk results</label>
-	          <input type="radio" id="chunkOn" class="form-control-default col-sm-1" aria-label="Chunk results" name="chunk" value="on" checked>
-	        </div>
-	        <div class="form-group row">
-	          <label class="form-check-label col-sm-1" for="chunkValue">Results per chunk</label>
-	          <input type="text" id="chunkValue" class="form-control-sm col-sm-1" name="chunkValue" value="10">
-					</div>
-		    </form>
+					    <div class="form-group row">
+			          <label class="form-check-label col-sm-1" for="chunkOff">Get all results</label>
+			          <input type="radio" id="chunkOff" class="form-control-default col-sm-1" aria-label="Get all results" name="chunk" value="off">
+							</div>
+							<div class="form-group row">
+			          <label class="form-check-label col-sm-1" for="chunkOn">Chunk results</label>
+			          <input type="radio" id="chunkOn" class="form-control-default col-sm-1" aria-label="Chunk results" name="chunk" value="on" checked>
+			        </div>
+			        <div class="form-group row">
+			          <label class="form-check-label col-sm-1" for="chunkValue">Results per chunk</label>
+			          <input type="text" id="chunkValue" class="form-control-sm col-sm-1" name="chunkValue" value="10">
+							</div>
+				    </form>
+					</div> <!-- end col -->
+				</div>  <!-- end row -->
 HTML;
 		} else {    //there are results so show them
 			models\collection::writeSlipDiv();
