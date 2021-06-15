@@ -85,7 +85,7 @@ HTML;
     models\users::saveUser($this->_user);
     $changeParams = array($this->_user->getEmail(), $passwordAuth);
     $changeParams = base64_encode(implode('|', $changeParams));
-    $url = "https://" . $_SERVER["HTTP_HOST"] . "/gadelica/corpas/code/?loginAction=resetPassword&p=" . $changeParams;
+    $url = "https://" . $_SERVER["HTTP_HOST"] . "/meanma/?loginAction=resetPassword&p=" . $changeParams;
 
     $emailText = <<<HTML
 			<p>Dear {$this->_user->getFirstName()},</p>
