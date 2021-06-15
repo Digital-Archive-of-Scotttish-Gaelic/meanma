@@ -123,6 +123,9 @@ SQL;
         $this->_wordClass = $class;
       }
     }
+    if (empty($this->_wordClass)) {
+    	$this->_wordClass = $pos;   //used for MSS which have full names instead of abbrevs for POS
+    }
   }
 
   public function getScopeDefault() {
