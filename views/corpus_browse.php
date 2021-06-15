@@ -460,6 +460,9 @@ HTML;
 						$html .= " (" . $surname . ")";
 					}
 				}
+				if ($childInfo["date"]) {
+					$html .= " (" . $childInfo["date"] . ")";
+				}
 				$html .= "</div>";
 			}
 			$html .= '</div></td></tr>';

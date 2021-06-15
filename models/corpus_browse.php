@@ -188,11 +188,12 @@ SQL;
 	public function getChildTextsInfo() {
 		$childTextsInfo = array();
 		$sql = <<<SQL
-			SELECT id, title, level FROM text WHERE partOf = :id ORDER BY CAST(id AS UNSIGNED) ASC
+			SELECT id, title, date, level FROM text WHERE partOf = :id ORDER BY CAST(id AS UNSIGNED) ASC
 SQL;
 		$results = $this->_db->fetch($sql, array(":id" => $this->getId()));
 		foreach ($results as $result) {
-			$childTextsInfo[$result["id"]] = array("title" => $result["title"], "level" => $result["level"]);
+			$childTextsInfo[$result["id"]] = array("title" => $result["title"], "date" => $result["date"],
+				"level" => $result["level"]);
 			//check for writers of child texts
 			$writerSql = <<<SQL
 				SELECT w.id AS id, surname_en 
@@ -222,8 +223,8 @@ SQL;
     foreach ($this->_db->fetch($sql) as $textResult) {
       $textsInfo[$textResult["id"]] = $textResult;
       $sql = <<<SQL
-        SELECT * FROM writer
-          JOIN text_writer ON writer_id = id
+        SELECT * FROM writer w
+          JOIN text_writer ON writer_id = w.id
           WHERE text_id = :textId
 SQL;
       $writerResults = $this->_db->fetch($sql, array(":textId" => $textResult["id"]));

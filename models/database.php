@@ -15,6 +15,7 @@ class database {
         "mysql:host=" . DB_HOST . ";dbname=" . $dbName . ";charset=utf8;", DB_USER, DB_PASSWORD, array(
         \PDO::MYSQL_ATTR_LOCAL_INFILE => true,
       ));
+      $this->_dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $e){
       echo $e->getMessage();
     }
