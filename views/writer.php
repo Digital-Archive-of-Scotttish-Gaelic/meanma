@@ -321,7 +321,7 @@ HTML;
 				$html .= <<<HTML
 					<div class="list-group-item list-group-item-action">
 						<a href="?m=corpus&a=browse&id={$text->getId()}">
-							{$text->getTitle()}
+							#{$text->getId()}: {$text->getTitle()}
 						</a>
 					</div>
 HTML;
