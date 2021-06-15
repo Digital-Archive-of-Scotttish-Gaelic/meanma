@@ -67,7 +67,7 @@ echo <<<HTML
 		    var groupId = $(this).children("option:selected"). val();
 		    $.ajax({url: 'ajax.php?action=setGroup&groupId='+groupId})
 		      .done(function () {
-		        window.location.reload(true);
+		        window.location.assign('index.php');
 		    });
 		    return false;
 		  });
