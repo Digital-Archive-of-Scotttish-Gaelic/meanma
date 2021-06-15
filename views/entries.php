@@ -7,8 +7,11 @@ class entries
 {
 	private $_db;
 
-  public function writeEntry($entry) {
-		$this->_db = new models\database();
+	public function __construct($db) {
+		$this->_db = $db;
+	}
+
+	public function writeEntry($entry) {
   	$headword = $entry->getHeadword();
   	$wordclass = $entry->getWordclass();
   	$abbr = models\functions::getWordclassAbbrev($wordclass);
@@ -260,7 +263,7 @@ HTML;
   public function writeBrowseTable($entryIds) {
     $tableBodyHtml = "<tbody>";
     foreach ($entryIds as $id) {
-    	$entry = models\entries::getEntryById($id);
+    	$entry = models\entries::getEntryById($id, $this->_db);
       $entryUrl = "?m=entries&a=view&id={$id}";
       $tableBodyHtml .= <<<HTML
         <tr>

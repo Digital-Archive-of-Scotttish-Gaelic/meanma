@@ -28,8 +28,8 @@ SQL;
 		return $entry;
 	}
 
-	public static function getEntryById($id) {
-		$db = new database();
+	public static function getEntryById($id, $db) {
+//		$db = new database();
 		$sql = <<<SQL
         SELECT * FROM entry WHERE id = :id 
 SQL;
@@ -74,9 +74,9 @@ SQL;
 		return $entry;
 	}
 
-  public static function getActiveEntryIds() {
+  public static function getActiveEntryIds($db) {
     $entryIds = array();
-    $db = new database();
+//    $db = new database();
     //only get IDs for this group
     $sql = <<<SQL
         SELECT DISTINCT e.id as id FROM entry e    

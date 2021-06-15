@@ -56,7 +56,7 @@ SQL;
 SQL;
     $result = $this->_db->fetch($sql, array(":auto_id" => $this->_auto_id));
     $slipData = $result[0];
-	  $this->_entry = entries::getEntryById($slipData["entry_id"]);
+	  $this->_entry = entries::getEntryById($slipData["entry_id"], $this->_db);
     $this->_populateClass($slipData);
     $this->_loadSlipMorph();  //load the slipMorph data from the DB
     $this->_loadSenses(); //load the sense objects
