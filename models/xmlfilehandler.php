@@ -4,7 +4,13 @@ namespace models;
 
 class xmlfilehandler
 {
-  private $_filename, $_xml, $_collocateIds, $_preScope, $_postScope;
+
+  private $_filename; //the filepath of the XML document
+	private $_xml;  //SimpleXMLElement: content of the XML document
+
+	private $_collocateIds; //
+	private $_preScope; //int : the number of tokens in the pre context
+	private $_postScope;  //int: the number of tokens in the post context
 
   public function __construct($filename) {
   	if ($filename != $this->_filename) {  //check if the file has already been loaded
@@ -24,21 +30,62 @@ class xmlfilehandler
     return (string)$out[0];
   }
 
-  public function getContext($id, $preScope = 12, $postScope = 12, $normalisePunc = true, $tagCollocates = false, $tagContext = false) {
+	/**
+	 * @param $id : word ID
+	 * @param int $preScope : the number of tokens for the pre context (default = 20 for results view)
+	 * @param int $postScope : the number of tokens for the post context (default = 20 for results view)
+	 * @param bool $normalisePunc : (deprecated?) flag to set whether to output with punctuation normalised
+	 * @param false $tagCollocates : flag to set whether to output with HTML markup for handling collocates
+	 * @param false $tagContext : flag to set whether the output should be HTML markup with tokens clickable by user to trim context
+	 * @return associative array of strings:
+	 *  id : wordId in XML doc
+	 *  filename : path of XML document
+	 *  headwordId (deprecate?)
+	 *  [pre] context (array),
+	 *    output : literal string of pre context
+	 *    startJoin (deprecate?) : possible values : left, right, both, none
+	 *    endJoin : (make boolean?)
+	 *  [prelimit] : how many words to start of XML from start of pre context
+	 *  word : wordform
+	 *  [post] context (array)
+	 *    output : literal string of post context
+	 *    startJoin
+	 *    endJoin (deprecate?)
+	 *    limit
+	 *  [postlimit] : not sure what this does
+	 */
+	public function getContext_new($id, $preScope = 20, $postScope = 20, $normalisePunc = true, $tagCollocates = false, $tagContext = false) {
+		$this->_preScope = $preScope;
+		$this->_postScope = $postScope;
+		$context = array();
+		$context["id"] = $id;
+		$context["filename"] = $this->getFilename();
+
+		return $context;
+	}
+
+  public function getContext($id, $preScope = 20, $postScope = 20, $normalisePunc = true, $tagCollocates = false, $tagContext = false) {
   	$this->_preScope = $preScope;
   	$this->_postScope = $postScope;
     $context = array();
     $context["id"] = $id;
     $context["filename"] = $this->getFilename();
-    $xpath = '/dasg:text/@ref';
-    $out = $this->_xml->xpath($xpath);
-    $context["uri"] = (string)$out[0];
 	 // echo "<br>" . $this->_filename . " : {$id}";    // handy for debugging XML issues SB
-	  // run xpath on p or lg element only?
-    $plg = $this->_xml->xpath("//dasg:w[@id='{$id}']/ancestor::*[name()='p' or name()='lg' or name()='h']")[0];
-    $plg2 = new \SimpleXMLElement($plg->asXML());
-    $xpath = "//w[@id='{$id}']/preceding::*[not(name()='s') and not(name()='p') and not(name()='note')]";
-    $words = $plg2->xpath($xpath);
+	  // run xpath on p or lg or h or list element - possibly revert after MSS project
+	  $xpath = <<<XPATH
+			//dasg:w[@id='{$id}']/ancestor::*[name()='p' or name()='lg' or name()='h' or name()='list']
+XPATH;
+    $subXML = $this->_xml->xpath($xpath)[0];
+    $subXML = new \SimpleXMLElement($subXML->asXML());
+    $xpath = <<<XPATH
+			//w[@id='{$id}']/preceding::*[(name()='w' and not(descendant::w)) or name()='pc' or name()='o']
+XPATH;
+
+
+    //!!!!!         //
+
+
+    $words = $subXML->xpath($xpath);
     /* preContext processing */
     $context["pre"] = array("output"=>"");
     if ($preScope) {
@@ -65,7 +112,7 @@ class xmlfilehandler
       : $wordString;
 
 	  $xpath = "//w[@id='{$id}']/following::*[not(name()='s') and not(name()='p') and not(name()='note')]";
-	  $words = $plg2->xpath($xpath);
+	  $words = $subXML->xpath($xpath);
     /* postContext processing */
     $context["post"] = array("output"=>"");
     if ($postScope) {
