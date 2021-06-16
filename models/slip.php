@@ -25,7 +25,6 @@ class slip
   public function __construct($filename, $id, $auto_id = null, $pos, $preScope = self::SCOPE_DEFAULT, $postScope = self::SCOPE_DEFAULT) {
     $this->_filename = $filename;
     $this->_id = $id;
-    $this->_headword = lemmas::getLemma($this->_id, $this->_filename)[0];
     //test if a slip already exists (if there is a slip with the same groupId, filename, id combination)
     $this->_auto_id = $auto_id ? $auto_id : collection::slipExists($_SESSION["groupId"], $filename, $id);
     $this->_pos = $pos;
@@ -39,6 +38,7 @@ class slip
     $this->_slipMorph = new slipmorphfeature($this->_pos);
     if (!$this->getAutoId()) {  //create a new slip entry
       $this->_isNew = true;
+	    $this->_headword = lemmas::getLemma($this->_id, $this->_filename)[0];
       $this->_extractWordClass($this->_pos);
       //get the entry
 	    $this->_entry = entries::getEntryByHeadwordAndWordclass($this->getHeadword(), $this->getWordClass());
@@ -254,6 +254,7 @@ SQL;
     $this->_notes = $params["notes"];
     $this->_preContextScope = $params["preContextScope"];
     $this->_postContextScope = $params["postContextScope"];
+    $this->_headword = $this->_entry->getHeadword();
     $this->_wordClass = $this->_entry->getWordclass();
     $this->_entryId = $params["entryId"];
     $this->_locked = $params["locked"];
@@ -301,7 +302,11 @@ SQL;
 		  $this->_slipMorph = new slipmorphfeature($this->_pos);  //attach the morph data for the new POS
 		  $this->_clearSlipMorphEntries();
 	  }
-	  $this->_headword = $headword;
+  	if ($headword != $this->getHeadword()) {
+		  $this->_headword = $headword;
+		  //remove all the senses
+		  sensecategories::deleteSensesForSlip($this->getAutoId());
+	  }
 	  $this->_entry = entries::getEntryByHeadwordAndWordclass($headword, $wordclass);
   }
 

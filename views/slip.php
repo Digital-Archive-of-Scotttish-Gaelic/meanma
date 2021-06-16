@@ -53,7 +53,7 @@ HTML;
         </div>
         <div id="morphoSyntactic" class="collapse editSlipSectionContainer">
           <div class="form-group row">
-            <label class="col-form-label col-sm-1" for="slipeadword">Headword:</label>
+            <label class="col-form-label col-sm-1" for="slipHeadword">Headword:</label>
             <input class="col-sm-3 form-control" type="text" id="slipHeadword" name="slipHeadword" value="{$this->_slip->getHeadword()}"> 
           </div>
 HTML;
@@ -687,7 +687,7 @@ HTML;
                     $('#senseCategorySelect').append(html);
                   });
               })
-              .done(function () {   //raise and save an issue with the slip and wordclass information
+              .done(function () {   //raise and save an issue with the slip and headword/wordclass information
                     var params = {
                       description: 'The ' + changedField + ' for §{$this->_slip->getAutoId()} has been changed to <strong>' + changedValue + '</strong>',
                       userEmail: '{$_SESSION["user"]}', status: 'new', updated: ''}; 
