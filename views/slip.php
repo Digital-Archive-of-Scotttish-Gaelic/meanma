@@ -536,8 +536,7 @@ HTML;
 		          let filename = $('#slipFilename').text();
               let id = $('#wordId').text();
               var preScope = {$this->_slip->getScopeDefault()};
-              var postScope = {$this->_slip->getScopeDefault()};
-              
+              var postScope = {$this->_slip->getScopeDefault()};        
               $.getJSON("ajax.php?action=getContext&filename="+filename+"&id="+id+"&preScope="+preScope+"&postScope="+postScope, function (data) {
 					      //handle reaching the start/end of the document
 					      if (data.prelimit) {

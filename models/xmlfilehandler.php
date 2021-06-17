@@ -15,7 +15,7 @@ class xmlfilehandler
   public function __construct($filename) {
   	if ($filename != $this->_filename) {  //check if the file has already been loaded
   		$this->_filename = $filename;
-  		$this->_xml = simplexml_load_file(INPUT_FILEPATH . $this->_filename);
+  		$this->_xml = simplexml_load_file(INPUT_FILEPATH . $this->_filename, null, LIBXML_NOBLANKS);
 		  $this->_xml->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
 	  }
   }
@@ -40,12 +40,12 @@ class xmlfilehandler
 	 * @return associative array of strings:
 	 *  id : wordId in XML doc
 	 *  filename : path of XML document
-	 *  headwordId (deprecate?)
 	 *  [pre] context (array),
 	 *    output : literal string of pre context
 	 *    startJoin (deprecate?) : possible values : left, right, both, none
 	 *    endJoin : (make boolean?)
-	 *  [prelimit] : how many words to start of XML from start of pre context - used for +/- buttons in slip edit form
+	 *  [prelimit] : if start of context is start of "document" will return the number of tokens in pre context
+	 *        used for +/- buttons in slip edit form ALSO used for [reset context]
 	 *  word : wordform
 	 *  [post] context (array)
 	 *    output : literal string of post context
@@ -66,7 +66,9 @@ class xmlfilehandler
 			//dasg:w[@id='{$id}']/ancestor::*[name()='p' or name()='lg' or name()='h' or name()='list']
 XPATH;
 		$subXML = $this->_xml->xpath($xpath)[0];
-		$subXML = new \SimpleXMLElement($subXML->asXML());
+		$subXMLString = $subXML->asXML();
+		$subXMLString = str_replace("</l><l>", '<pc join="none">/</pc>', $subXMLString);
+		$subXML = new \SimpleXMLElement($subXMLString);
 		$xpath = <<<XPATH
 			//w[@id='{$id}']/preceding::*[(name()='w' and not(descendant::w)) or name()='pc' or name()='o']
 XPATH;
