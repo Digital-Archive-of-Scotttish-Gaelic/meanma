@@ -238,62 +238,62 @@ $(function () {
       window.close();
     }, 2000);
   });
-
-  function resetSlip() {
-    $('#slipNumber').html('');
-    $('#slipContext').attr('data-precontextscope', 20);
-    $('#slipContext').attr('data-postcontextscope', 20);
-    $('#slipStarred').prop('checked', false);
-    $('#slipTranslation').html('');
-    $('#slipNotes').html('');
-  }
-
-  function saveSlip() {
-    var wordclass = $('#wordClass').val();
-    var starred = $('#slipStarred').prop('checked') ? 1 : 0;
-    var locked = $('#locked').val();
-    var translation = CKEDITOR.instances['slipTranslation'].getData();
-    var notes = CKEDITOR.instances['slipNotes'].getData();
-    var status = $('#status').val();
-    var data = {action: "saveSlip", filename: $('#slipFilename').text(), id: $('#wordId').text(),
-      auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred, translation: translation,
-      notes: notes, status: status, preContextScope: $('#slipContext').attr('data-precontextscope'),
-      postContextScope: $('#slipContext').attr('data-postcontextscope'), wordClass: wordclass,
-      locked: locked};
-    console.log(data);
-    switch (wordclass) {
-      case "noun":
-        data['numgen'] = $('#posNumberGender').val();
-        data['case'] = $('#posCase').val();
-        break;
-      case "verb":
-        var mode = $('#posMode').val();
-        data['mode'] = mode;
-        if (mode == "imperative") {
-          data['imp_person'] = $('#posImpPerson').val();
-          data['imp_number'] = $('#posImpNumber').val();
-        } else if (mode == "finite") {
-          data['fin_person'] = $('#posFinPerson').val();
-          data['fin_number'] = $('#posFinNumber').val();
-          data['status'] = $('#posStatus').val();
-          data['tense'] = $('#posTense').val();
-          data['mood'] = $('#posMood').val();
-        }
-        break;
-      case "preposition":
-          data["prep_mode"] = $('#posPrepMode').val();
-          if (data["prep_mode"] == 'conjugated' || data["prep_mode"] == 'possessive') {
-            data["prep_person"] = $('#posPrepPerson').val();
-            data["prep_number"] = $('#posPrepNumber').val();
-            if (data["prep_person"] == 'third person' && data["prep_number"] == 'singular') {
-              data["prep_gender"] = $('#posPrepGender').val();
-            }
-          }
-        break;
-    }
-    $.post("ajax.php", data, function (response) {
-      //refresh the parent page to show updated slip info
-      window.opener.document.location.reload(true);
-    });
-  }
 });
+
+function resetSlip() {
+  $('#slipNumber').html('');
+  $('#slipContext').attr('data-precontextscope', 80);
+  $('#slipContext').attr('data-postcontextscope', 80);
+  $('#slipStarred').prop('checked', false);
+  $('#slipTranslation').html('');
+  $('#slipNotes').html('');
+}
+
+function saveSlip() {
+  var wordclass = $('#wordClass').val();
+  var starred = $('#slipStarred').prop('checked') ? 1 : 0;
+  var locked = $('#locked').val();
+  var translation = CKEDITOR.instances['slipTranslation'].getData();
+  var notes = CKEDITOR.instances['slipNotes'].getData();
+  var status = $('#status').val();
+  var data = {action: "saveSlip", filename: $('#slipFilename').text(), id: $('#wordId').text(),
+    auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred, translation: translation,
+    notes: notes, status: status, preContextScope: $('#slipContext').attr('data-precontextscope'),
+    postContextScope: $('#slipContext').attr('data-postcontextscope'), wordClass: wordclass,
+    locked: locked};
+  console.log(data);
+  switch (wordclass) {
+    case "noun":
+      data['numgen'] = $('#posNumberGender').val();
+      data['case'] = $('#posCase').val();
+      break;
+    case "verb":
+      var mode = $('#posMode').val();
+      data['mode'] = mode;
+      if (mode == "imperative") {
+        data['imp_person'] = $('#posImpPerson').val();
+        data['imp_number'] = $('#posImpNumber').val();
+      } else if (mode == "finite") {
+        data['fin_person'] = $('#posFinPerson').val();
+        data['fin_number'] = $('#posFinNumber').val();
+        data['status'] = $('#posStatus').val();
+        data['tense'] = $('#posTense').val();
+        data['mood'] = $('#posMood').val();
+      }
+      break;
+    case "preposition":
+      data["prep_mode"] = $('#posPrepMode').val();
+      if (data["prep_mode"] == 'conjugated' || data["prep_mode"] == 'possessive') {
+        data["prep_person"] = $('#posPrepPerson').val();
+        data["prep_number"] = $('#posPrepNumber').val();
+        if (data["prep_person"] == 'third person' && data["prep_number"] == 'singular') {
+          data["prep_gender"] = $('#posPrepGender').val();
+        }
+      }
+      break;
+  }
+  $.post("ajax.php", data, function (response) {
+    //refresh the parent page to show updated slip info
+    window.opener.document.location.reload(true);
+  });
+}

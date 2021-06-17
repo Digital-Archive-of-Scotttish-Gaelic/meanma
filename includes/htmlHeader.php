@@ -61,6 +61,7 @@ echo <<<HTML
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/zoomio@2.0.2/zoomio.min.js"></script>
+	<script type="text/javascript" src="js/main.js"></script>
 	<script>
 		$(function () {
 		  $('.selectpicker').change(function () {

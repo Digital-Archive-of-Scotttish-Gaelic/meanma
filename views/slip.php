@@ -74,8 +74,8 @@ HTML;
           <textarea class="form-control" name="slipTranslation" id="slipTranslation" rows="3">{$this->_slip->getTranslation()}</textarea>
           <script>
             CKEDITOR.replace('slipTranslation', {
-              contentsCss: 'https://dasg.ac.uk/gadelica/corpas/code/css/ckCSS.css',
-              customConfig: 'https://dasg.ac.uk/gadelica/corpas/code/js/ckConfig.js'
+              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
             });
           </script>
         </div>
@@ -89,8 +89,8 @@ HTML;
           <textarea class="form-control" name="slipNotes" id="slipNotes" rows="3">{$this->_slip->getNotes()}</textarea>
           <script>
             CKEDITOR.replace('slipNotes', {
-              contentsCss: 'https://dasg.ac.uk/gadelica/corpas/code/css/ckCSS.css',
-              customConfig: 'https://dasg.ac.uk/gadelica/corpas/code/js/ckConfig.js'
+              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
             });
           </script>
         </div>
@@ -426,10 +426,16 @@ HTML;
     $postScope = $this->_slip->getPostContextScope();
     $context = $handler->getContext($this->_slip->getId(), $preScope, $postScope, true, false, true);
     $preHref = "href=\"#\"";
+    $updateSlip = false;  //flag used to track if the pre or post scopes !== defaults
     //check for start/end of document
-    if (isset($context["prelimit"])) {
-      $preScope = $context["prelimit"];
+    if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
+      $this->_slip->setPreContextScope($context["prelimit"]);
       $preHref = "";
+      $updateSlip = true;
+    }
+    if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
+    	$this->_slip->setPostContextScope($context["postlimit"]);
+    	$updateSlip = true;
     }
     $contextHtml = $context["pre"]["output"];
     if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
@@ -442,6 +448,11 @@ HTML;
       $contextHtml .= ' ';
     }
     $contextHtml .= $context["post"]["output"];
+    $preScope = $this->_slip->getPreContextScope();
+    $postScope = $this->_slip->getPostContextScope();
+    if ($updateSlip) {
+    	$this->_slip->updateContexts();
+    }
     echo <<<HTML
             <div id="slipContextContainer" class="editSlipSectionContainer">
               <div class="floatRight">
@@ -498,7 +509,8 @@ HTML;
 
   private function _writeJavascript() {
     echo <<<HTML
-        <script>                        
+        <script>  
+          $(function () {            
 		        //update the slip context on click of token
 		        $(document).on('click', '.contextLink',  function () {
 		          $(this).tooltip('hide')
@@ -521,15 +533,27 @@ HTML;
 		        
 		        //reset the context
 		        $('#resetContext').on('click', function () {
-		          var filename = $('#slipFilename').text();
-              var id = $('#wordId').text();
+		          let filename = $('#slipFilename').text();
+              let id = $('#wordId').text();
               var preScope = {$this->_slip->getScopeDefault()};
               var postScope = {$this->_slip->getScopeDefault()};
-              $('#slipContext').attr('data-precontextscope', preScope);
-					    $('#slipContext').attr('data-postcontextscope', postScope);
-					    $('#preContextScope').val(preScope);
-					    $('#postContextScope').val(postScope);
-					    writeSlipContext(filename, id);
+              
+              $.getJSON("ajax.php?action=getContext&filename="+filename+"&id="+id+"&preScope="+preScope+"&postScope="+postScope, function (data) {
+					      //handle reaching the start/end of the document
+					      if (data.prelimit) {
+					        preScope = data.prelimit;
+					      } 
+					      if (data.postlimit) {
+					        postScope = data.postlimit;
+					      } 
+					    })
+					      .done(function () {
+					         $('#slipContext').attr('data-precontextscope', preScope);
+					         $('#slipContext').attr('data-postcontextscope', postScope);
+					         $('#preContextScope').val(preScope);
+					         $('#postContextScope').val(postScope);
+					         writeSlipContext(filename, id);
+					      });
 		        });
 		        
 						//lock slip functionality
@@ -823,6 +847,7 @@ HTML;
 					      $('#slip').show();
 					    });
 					  }
+					 }); 
         </script>
 HTML;
   }

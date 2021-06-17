@@ -145,7 +145,7 @@ SQL;
 
 function cleanForm($xml) {
 	$s = trim(strip_tags($xml->asXML()));
-	$s = preg_replace('/\s/','', $s);
+	$s = preg_replace('/\s/',' ', $s);  //maybe revisit this later
 	//$s = str_replace("\r", "", $s);
   //$s = str_replace("\n", "", $s);
 	return $s;

@@ -246,6 +246,16 @@ SQL;
 		return $senses;
   }
 
+  // SETTERS
+
+	public function setPreContextScope($number) {
+  	$this->_preContextScope = $number;
+	}
+
+	public function setPostContextScope($number) {
+  	$this->_postContextScope = $number;
+	}
+
   private function _populateClass($params) {
     $this->_auto_id = $this->getAutoId() ? $this->getAutoId() : $params["auto_id"];
     $this->_isNew = false;
@@ -283,6 +293,19 @@ SQL;
 	    $this->getNotes(), $this->getEntryId(), $this->getPreContextScope(), $this->getPostContextScope(),
 	    $this->getStatus(), $this->getLastUpdatedBy(), $this->getAutoId()));
     return $this;
+  }
+
+	/**
+	 * Updates the pre and post context scope values in the database
+	 */
+  public function updateContexts() {
+  	$sql = <<<SQL
+			UPDATE slips 
+				SET preContextScope = :pre, postContextScope = :post
+				WHERE auto_id = :id
+SQL;
+  	$this->_db->exec($sql, array(":pre" => $this->getPreContextScope(), ":post" => $this->getPostContextScope(),
+		  ":id" => $this->getAutoId()));
   }
 
   /*
