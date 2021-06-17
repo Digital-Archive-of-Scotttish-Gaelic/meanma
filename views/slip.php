@@ -815,7 +815,7 @@ HTML;
 					      } else {
 					        $('#decrementPre').removeClass("disabled");
 					      }
-					      if (postScope == 1) {
+					      if (postScope == 0) {
 					        postOutput = "";
 					        $('#decrementPost').addClass("disabled");
 					      } else {

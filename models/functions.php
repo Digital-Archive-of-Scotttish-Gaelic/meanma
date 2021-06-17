@@ -7,7 +7,7 @@ class functions
 	//strips tags and whitespace from xml
 	public static function cleanForm($xml) {
 		$s = strip_tags($xml->asXML());
-		$s = preg_replace('/\s/',' ', $s);  //maybe come back to this later
+//s		$s = preg_replace('/\s/',' ', $s);  //maybe come back to this later
 		return $s;
 	}
 

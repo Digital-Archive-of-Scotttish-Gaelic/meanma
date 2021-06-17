@@ -67,46 +67,40 @@ class xmlfilehandler
 XPATH;
 		$subXML = $this->_xml->xpath($xpath)[0];
 		$subXMLString = $subXML->asXML();
+		//following line to replace verse lines with slashes
 		$subXMLString = str_replace("</l><l>", '<pc join="none">/</pc>', $subXMLString);
 		$subXML = new \SimpleXMLElement($subXMLString);
 		$xpath = <<<XPATH
 			//w[@id='{$id}']/preceding::*[(name()='w' and not(descendant::w)) or name()='pc' or name()='o']
 XPATH;
-		//for future: how do we add linebreaks for verse??
 		$words = $subXML->xpath($xpath);
 		/* preContext processing */
 		$context["pre"] = array("output"=>"");
 		if ($preScope) {
 			$pre = array_slice($words, -$preScope);
-
-
 			//check if we're one token away from the start of the document
 			$nextIndex = $preScope + 1;
 			$limitCheck = array_slice($words, -$nextIndex);
 			if (count($limitCheck) != count($pre)+1) {
 				$context["prelimit"] = count($pre);
 			}
-
-
-			if ($normalisePunc) {
-				$context["pre"] = $this->_normalisePunctuation($pre, $tagCollocates, $tagContext, $section = "pre");
-			} else {
-				$context["pre"]["output"] = implode(' ', $pre);
-			}
+			$context["pre"] = $this->_normalisePunctuation($pre, $tagCollocates, $tagContext, $section = "pre");
 		}
-		/* -- */
+		/* - end pre context processing - */
 		$xpath = "//dasg:w[@id='{$id}']";
 		$word = $this->_xml->xpath($xpath);
-		$wordString = functions::cleanForm($word[0]);   //strips tags and whitespace
+		$wordString = functions::cleanForm($word[0]);   //strips tags
 		$context["word"] = ($tagCollocates || $tagContext)
 			? '<div style="display:inline; margin-left:4px;"><mark>' . $wordString . '</mark></div>'
 			: $wordString;
 
-		$xpath = "//w[@id='{$id}']/following::*[not(name()='s') and not(name()='p') and not(name()='note')]";
+		$xpath = <<<XPATH
+			//w[@id='{$id}']/following::*[(name()='w' and not(descendant::w)) or name()='pc' or name()='o']			
+XPATH;
 		$words = $subXML->xpath($xpath);
 		/* postContext processing */
 		$context["post"] = array("output"=>"");
-/*		if ($postScope) {
+		if ($postScope) {
 			$post = array_slice($words,0, $postScope);
 			//check if we're one token away from the end of the document
 			$nextIndex = $postScope + 1;
@@ -114,16 +108,13 @@ XPATH;
 			if (count($limitCheck) != count($post)+1) {
 				$context["postlimit"] = count($post);
 			}
-			if ($normalisePunc) {
-				$context["post"] = $this->_normalisePunctuation($post, $tagCollocates, $tagContext, $section = "post");
-			} else {
-				$context["post"]["output"] = implode(' ', $post);
-			}
+			$context["post"] = $this->_normalisePunctuation($post, $tagCollocates, $tagContext, $section = "post");
+
 			//check if the scope has reached the end of the document
-			if (count($post) < $postScope) {
-				$context["post"]["limit"] = count($post);
-			}
-		}*/
+//			if (count($post) < $postScope) {      //why is this here??
+//				$context["post"]["limit"] = count($post);
+//			}
+		}
 		return $context;
 	}
 
