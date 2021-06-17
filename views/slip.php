@@ -425,16 +425,17 @@ HTML;
     $preScope = $this->_slip->getPreContextScope();
     $postScope = $this->_slip->getPostContextScope();
     $context = $handler->getContext($this->_slip->getId(), $preScope, $postScope, true, false, true);
-    $preHref = "href=\"#\"";
+    $preIncrementDisable = $postIncrementDisable = "";
     $updateSlip = false;  //flag used to track if the pre or post scopes !== defaults
     //check for start/end of document
     if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
       $this->_slip->setPreContextScope($context["prelimit"]);
-      $preHref = "";
+      $preIncrementDisable = "disabled";
       $updateSlip = true;
     }
     if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
     	$this->_slip->setPostContextScope($context["postlimit"]);
+    	$postIncrementDisable = "disabled";
     	$updateSlip = true;
     }
     $contextHtml = $context["pre"]["output"];
@@ -461,14 +462,14 @@ HTML;
               <h5>Adjust citation context</h5>
               <div>
 								<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
-								<a {$preHref} class="updateContext btn-link" id="incrementPre"><i class="fas fa-plus"></i></a>
+								<a class="updateContext btn-link {$preIncrementDisable}" id="incrementPre"><i class="fas fa-plus"></i></a>
               </div>
               <span data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="slipContext" class="slipContext">
                 {$contextHtml}
               </span>
               <div>
                 <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
-								<a class="updateContext btn-link" id="incrementPost"><i class="fas fa-plus"></i></a>
+								<a class="updateContext btn-link {$postIncrementDisable}" id="incrementPost"><i class="fas fa-plus"></i></a>
               </div>
               <div style="height: 20px;">
                 <a href="#" class="float-right" id="resetContext">reset context</a>
@@ -778,10 +779,8 @@ HTML;
 					        }
 					        break;
 					      case "incrementPre":
-					        if ($(this).attr('href')) {
-					          preScope++;
-					          $('#decrementPre').removeClass("disabled");
-					        }
+					        preScope++;
+					        $('#decrementPre').removeClass("disabled");
 					        break;
 					      case "decrementPost":
 					        postScope--;
@@ -823,14 +822,14 @@ HTML;
 					      }
 					      //handle reaching the start/end of the document
 					      if (data.prelimit) {
-					        $('#incrementPre').removeAttr("href");
+					        $('#incrementPre').addClass("disabled");
 					      } else {
-					        $('#incrementPre').attr("href", "#");
+					        $('#incrementPre').removeClass("disabled");
 					      }
 					      if (data.postlimit) {
-					        $('#incrementPost').removeAttr("href");
+					        $('#incrementPost').addClass("disabled");
 					      } else {
-					        $('#incrementPost').attr("href", "#");
+					        $('#incrementPost').removeClass("disabled");
 					      }
 					      html = preOutput;
 					      if (data.pre["endJoin"] != "right" && data.pre["endJoin"] != "both") {
