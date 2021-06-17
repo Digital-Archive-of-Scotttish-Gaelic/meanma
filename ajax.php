@@ -30,7 +30,7 @@ switch ($_REQUEST["action"]) {
   case "getContext":
   	$tagContext = $_GET["simpleContext"] ? false : true;
     $handler = new xmlfilehandler($_GET["filename"]);
-    $context = $handler->getContext($_GET["id"], $_GET["preScope"], $_GET["postScope"], true, false, $tagContext);
+    $context = $handler->getContext($_GET["id"], $_GET["preScope"], $_GET["postScope"], false, $tagContext);
     echo json_encode($context);
     break;
 	case "getSlips":

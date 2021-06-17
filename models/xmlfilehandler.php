@@ -34,7 +34,6 @@ class xmlfilehandler
 	 * @param $id : word ID
 	 * @param int $preScope : the number of tokens for the pre context (default = 20 for results view)
 	 * @param int $postScope : the number of tokens for the post context (default = 20 for results view)
-	 * @param bool $normalisePunc : (deprecated?) flag to set whether to output with punctuation normalised
 	 * @param false $tagCollocates : flag to set whether to output with HTML markup for handling collocates
 	 * @param false $tagContext : flag to set whether the output should be HTML markup with tokens clickable by user to trim context
 	 * @return associative array of strings:
@@ -44,17 +43,17 @@ class xmlfilehandler
 	 *    output : literal string of pre context
 	 *    startJoin (deprecate?) : possible values : left, right, both, none
 	 *    endJoin : (make boolean?)
-	 *  [prelimit] : if start of context is start of "document" will return the number of tokens in pre context
+	 *  [prelimit] : int : if start of context is start of "document" will return the number of tokens in pre context
 	 *        used for +/- buttons in slip edit form ALSO used for [reset context]
 	 *  word : wordform
 	 *  [post] context (array)
 	 *    output : literal string of post context
 	 *    startJoin
 	 *    endJoin (deprecate?)
-	 *    limit
-	 *  [postlimit] : not sure what this does
+	 *  [postlimit] : int : if end of context is end of "document" will return the number of tokens in post context
+	 *        used for +/- buttons in slip edit form ALSO used for [reset context]
 	 */
-	public function getContext($id, $preScope = 20, $postScope = 20, $normalisePunc = true, $tagCollocates = false, $tagContext = false) {
+	public function getContext($id, $preScope = 20, $postScope = 20, $tagCollocates = false, $tagContext = false) {
 		$this->_preScope = $preScope;
 		$this->_postScope = $postScope;
 		$context = array();
@@ -109,11 +108,6 @@ XPATH;
 				$context["postlimit"] = count($post);
 			}
 			$context["post"] = $this->_normalisePunctuation($post, $tagCollocates, $tagContext, $section = "post");
-
-			//check if the scope has reached the end of the document
-//			if (count($post) < $postScope) {      //why is this here??
-//				$context["post"]["limit"] = count($post);
-//			}
 		}
 		return $context;
 	}

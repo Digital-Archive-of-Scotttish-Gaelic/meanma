@@ -424,7 +424,7 @@ HTML;
     $handler = new models\xmlfilehandler($this->_slip->getFilename());
     $preScope = $this->_slip->getPreContextScope();
     $postScope = $this->_slip->getPostContextScope();
-    $context = $handler->getContext($this->_slip->getId(), $preScope, $postScope, true, false, true);
+    $context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
     $preIncrementDisable = $postIncrementDisable = "";
     $updateSlip = false;  //flag used to track if the pre or post scopes !== defaults
     //check for start/end of document
@@ -482,7 +482,7 @@ HTML;
 		$handler = new models\xmlfilehandler($this->_slip->getFilename());
 		$preScope = $this->_slip->getPreContextScope();
 		$postScope = $this->_slip->getPostContextScope();
-		$context = $handler->getContext($this->_slip->getId(), $preScope, $postScope, true, true);
+		$context = $handler->getContext($this->_slip->getId(), $preScope, $postScope, true, false);
 
 		$contextHtml = $context["pre"]["output"];
 		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
