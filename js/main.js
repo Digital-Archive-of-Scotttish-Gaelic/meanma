@@ -18,6 +18,7 @@ $(function () {
         $('#passwordLabel').show();
         $('#emailSelectContainer').hide();
         $('#passwordContainer').show();
+        $('#password').focus();
         $('#login').removeClass('loginButton');
         $('#loginCancel').removeClass('loginButton');
       });
