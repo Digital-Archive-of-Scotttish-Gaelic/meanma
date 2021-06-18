@@ -75,7 +75,7 @@ HTML;
 		$slipList = '<table class="table"><tbody>';
 		foreach ($slipData as $data) {
 			foreach ($data as $row) {
-				$translation = $this->_formatTranslation($row["translation"]);
+				$translation = $row["translation"];
 				$slipLinkData = array(
 					"auto_id" => $row["auto_id"],
 					"lemma" => $row["lemma"],
@@ -187,7 +187,7 @@ HTML;
 		foreach($slipData as $data) {
 			foreach ($data as $row) {
 				$filenameElems = explode('_', $row["filename"]);
-				$translation = $this->_formatTranslation($row["translation"]);
+				$translation = $row["translation"];
 				$slipLinkData = array(
 					"auto_id" => $row["auto_id"],
 					"lemma" => $row["lemma"],
@@ -254,7 +254,7 @@ HTML;
 		return $html;
 	}
 
-	private function _formatTranslation($html) {
+	private function _formatTranslation($html) {  //not currently in use - revisit SB
   	$text = strip_tags($html);
   	$text = addslashes($text);
   	return $text;
