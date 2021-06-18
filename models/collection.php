@@ -80,6 +80,9 @@ SQL;
 				$rows[$index]["printSlip"] = <<<HTML
 					<input type="checkbox" class="chooseSlip" {$checked} id="printSlip_{$slipId}"> 
 HTML;
+				$rows[$index]["deleteSlip"] = <<<HTML
+					<input type="checkbox" class="markToDelete" id="deleteSlip_{$slipId}"> 
+HTML;
 
       	//create the slip link code
 	      $slipUrl = <<<HTML

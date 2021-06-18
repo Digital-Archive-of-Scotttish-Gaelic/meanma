@@ -14,6 +14,16 @@ class collection
 	}
 
   private function _writeBrowseTable() {
+		$user = models\users::getUser($_SESSION["email"]);
+		$deleteHeading = $deleteHtml = "";
+		if ($user->getSuperuser()) {
+			$deleteHeading = '<th class="bg-danger" data-field="deleteSlip"><span class="text-white">Delete</span></th>';
+			$deleteHtml = <<<HTML
+				<div class="col">
+          <a href="#" id="deleteSlips" class="btn btn-danger disabled">delete</a>
+				</div>
+HTML;
+		}
     echo <<<HTML
       <table id="table" data-toggle="table" data-ajax="ajaxRequest"
         data-search="true"
@@ -30,10 +40,16 @@ class collection
                   <th data-field="fullname" data-sortable="true">Owned By</th>
                   <th data-field="lastUpdated" data-sortable="true">Date</th>
                   <th data-field="printSlip">Print</th>
+                  {$deleteHeading}
               </tr>
           </thead>
       </table>
-      <a href="printSlip.php?action=writePDF" target="_blank" id="printSlips" class="btn btn-primary disabled">print</a>
+      <div class="row">
+        <div class="col">
+          <a href="printSlip.php?action=writePDF" target="_blank" id="printSlips" class="btn btn-primary disabled">print</a>
+				</div>
+				{$deleteHtml}
+			</div>
 HTML;
 
     models\collection::writeSlipDiv();
@@ -76,7 +92,25 @@ HTML;
 				  $(this).addClass('disabled');
 				  $('.chooseSlip').prop('checked', '');
 				});
-
+				
+				// delete slip(s) functions - should only work for superuser
+				$(document).on('click', '.markToDelete', function () {    alert('clicked');
+				  if ($(this).hasClass('deleteSlip')) {
+				    $(this).removeClass('deleteSlip');
+				  } else {
+				    
+				    $('#deleteSlips').removeClass('disabled');    // !! revisit
+				    
+				    $(this).addClass('deleteSlip');
+				  }
+				});
+				
+				$('#deleteSlips').on('click', function () {
+				  $('.deleteSlip').each(function() {
+				    console.log($(this));
+				  });
+				});
+				
 				/**
 				* Runs an AJAX request to populate the Bootstrap table
 				* @param params
