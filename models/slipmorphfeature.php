@@ -73,8 +73,8 @@ class slipmorphfeature
 	    case 'A':
 	    	$this->_type = "adverb";
 	    	break;
-	    case 'x':
-	    	$this->_type = "other"; //TODO check with MM on this and the above
+	    case '':
+	    	$this->_type = "other";
 	      break;
     }
   }

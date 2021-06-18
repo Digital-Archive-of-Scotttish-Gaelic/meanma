@@ -162,7 +162,7 @@ class corpus_search
 				$orderBy = "RAND()";
 				break;
 			case "dateAsc":
-				$orderBy = "date_of_lang ASC";
+				$orderBy = "date_of_lang ASC, page ASC";
 				break;
 			case "dateDesc":
 				$orderBy = "date_of_lang DESC";
@@ -177,7 +177,7 @@ class corpus_search
 				$orderBy = "following_word ASC";
 				break;*/
 			default:
-				$orderBy = "filename, id";
+				$orderBy = "filename, page ASC";
 		}
 		//text restrictions
 		$textJoinSql = "";
