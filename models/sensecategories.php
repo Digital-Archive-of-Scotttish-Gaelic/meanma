@@ -82,10 +82,11 @@ SQL;
 //		$db = new database();
 		$sql = <<<SQL
         SELECT auto_id FROM slips s 
+        	JOIN lemmas l ON l.id = s.id AND l.filename = s.filename
         	JOIN entry e ON e.id = s.entry_id
         	WHERE auto_id NOT IN (SELECT slip_id FROM slip_sense) AND s.entry_id = :entryId 
         	AND group_id = {$_SESSION["groupId"]}
-        	ORDER by auto_id ASC
+        	ORDER by date_of_lang ASC
 SQL;
 		$results = $db->fetch($sql, array(":entryId"=>$entryId));
 		foreach ($results as $row) {

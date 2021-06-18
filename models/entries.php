@@ -97,8 +97,10 @@ SQL;
 			SELECT se.id as id, auto_id AS slipId FROM sense se
 					JOIN slip_sense ss ON ss.sense_id = se.id
 					JOIN slips s ON s.auto_id = ss.slip_id
+			    JOIN lemmas l ON l.id = s.id AND l.filename = s.filename
 					JOIN entry e ON e.id = s.entry_id
         	WHERE group_id = {$_SESSION["groupId"]} AND e.id = :entryId
+					ORDER BY date_of_lang
 SQL;
 		$results = $db->fetch($sql, array("entryId"=>$entry->getId()));
 	  foreach ($results as $row) {
@@ -118,6 +120,7 @@ SQL;
 				JOIN slips s ON s.id = l.id AND s.filename = l.filename
 				JOIN entry e ON e.id = s.entry_id
 				WHERE e.id = :entryId
+				ORDER BY date_of_lang
 SQL;
   	$results = $db->fetch($sql, array(":entryId"=>$entryId));
   	foreach ($results as $row) {
