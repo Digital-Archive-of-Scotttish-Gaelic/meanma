@@ -345,9 +345,9 @@ HTML;
 		$context = $result["context"];
 		$pos = new models\partofspeech($result["pos"]);
 
-		$shortTitle = mb_strlen($result["title"]) < 30
+		$shortTitle = mb_strlen($result["title"], "UTF-8") < 30
 			? $result["title"]
-			: mb_substr($result["title"], 0, 29) . "...";
+			: mb_substr($result["title"], 0, 29, "UTF-8") . "...";
 
 		$title = <<<HTML
         Headword: {$result["lemma"]}<br>
