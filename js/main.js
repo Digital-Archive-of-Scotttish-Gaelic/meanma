@@ -68,7 +68,7 @@ $(function () {
     var description = $('#modalSenseDescription').val();
     var id = $('#senseId').val();
     var url = 'ajax.php?action=editSense&id=' + id;
-    url += '&name=' + name + '&description=' + description;
+    url += '&name=' + encodeURIComponent(name) + '&description=' + encodeURIComponent(description);
     //check if a slip association is to be removed
     if ($('#modalSenseSlipRemove').prop('checked')) {
       url += '&slipId=' + $('#modalSlipId').val();
