@@ -68,6 +68,14 @@ switch ($_REQUEST["action"]) {
     echo json_encode($results);
     break;
     //the following used for the gramar site
+	case "deleteSlips":
+				//! only superusers can do this
+		$user = users::getUser($_SESSION["email"]);
+		if (!$user->getSuperuser()) {
+			return json_encode(array("message" => "not authorised"));
+		}
+		collection::deleteSlips($_GET["slipIds"]);
+		break;
 	case "loadSlipData":
 		$result = collection::getSlipInfoBySlipId($_GET["id"]);
 		$slipInfo = $result[0];

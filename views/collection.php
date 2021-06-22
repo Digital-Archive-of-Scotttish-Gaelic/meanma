@@ -94,7 +94,7 @@ HTML;
 				});
 				
 				// delete slip(s) functions - should only work for superuser
-				$(document).on('click', '.markToDelete', function () {    alert('clicked');
+				$(document).on('click', '.markToDelete', function () {
 				  if ($(this).hasClass('deleteSlip')) {
 				    $(this).removeClass('deleteSlip');
 				  } else {
@@ -106,9 +106,15 @@ HTML;
 				});
 				
 				$('#deleteSlips').on('click', function () {
+				  var slipIds = [];
 				  $('.deleteSlip').each(function() {
-				    console.log($(this));
+				    let linkId = $(this).attr('id');
+				    let slipId = linkId.split('_')[1];
+				    slipIds.push(slipId);
 				  });
+				  let url = 'ajax.php';
+				  let data = {action: 'deleteSlips', slipIds: slipIds};
+				  $.ajax({url: url, data: data});
 				});
 				
 				/**

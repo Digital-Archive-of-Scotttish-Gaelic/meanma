@@ -144,7 +144,7 @@ SQL;
 		try {
 			$sql = <<<SQL
         SELECT s.filename as filename, s.id as id, auto_id, pos, lemma, preContextScope, postContextScope,
-                translation, date_of_lang, l.title AS title, page, starred, t.id AS tid
+                translation, date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id
             FROM slips s
             JOIN entry e ON e.id = s.entry_id
             JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
@@ -174,6 +174,30 @@ SQL;
 		return $results[0]["wordform"];
 	}
 
+
+	public static function deleteSlips($slipIds) {
+		$db = new database();
+		foreach ($slipIds as $slipId) {
+			$slipInfo = self::getSlipInfoBySlipId($slipId, $db);
+			$entryId = $slipInfo[0]["entry_id"];
+			// delete morpho info for this slip
+			$sql = <<<SQL
+    		DELETE FROM slipMorph WHERE slip_id = :slipId
+SQL;
+			$db->exec($sql, array(":slipId" => $slipId));
+			// delete sense categories for this slip
+			sensecategories::deleteSensesForSlip($slipId);
+			// delete the slip itself
+			$sql = <<<SQL
+    		DELETE FROM slips WHERE auto_id = :slipId
+SQL;
+			$db->exec($sql, array(":slipId" => $slipId));
+			// check the entry for this slip and delete if now empty
+			if (entries::isEntryEmpty($entryId)) {
+				entries::deleteEntry($entryId);
+			}
+		}
+	}
 
 	/**
 	 * Gets morph info from the DB to populate an Entry with data required for citations

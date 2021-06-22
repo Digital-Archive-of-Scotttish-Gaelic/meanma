@@ -91,6 +91,39 @@ SQL;
     return $entryIds;
   }
 
+	/**
+	 * Deletes an entry from the DB - !! should only be used on empty entries (with no slips) – see ::getIsEntryEmpty()
+	 * @param $id : the entry ID
+	 */
+  public static function deleteEntry($id) {
+		$db = new database();
+		// delete senses for this entry
+	  $sql = <<<SQL
+			DELETE FROM sense WHERE entry_id = :id
+SQL;
+	  $db->exec($sql, array(":id" => $id));
+	  // and delete the entry itself
+		$sql = <<<SQL
+			DELETE FROM entry WHERE id = :id
+SQL;
+		$db->exec($sql, array(":id" => $id));
+  }
+
+	/**
+	 * Runs a DB check to see if an entry has no slips
+	 * @param $id : the entry ID
+	 * @return bool : true if the entry is empty
+	 */
+  public static function isEntryEmpty($id) {
+  	$db = new database();
+		$sql = <<<SQL
+			SELECT count(*) as c FROM slips s WHERE entry_id = :id
+SQL;
+		$result = $db->fetch($sql, array(":id" => $id));
+		$isEmpty = $result[0]["c"] == "0";
+		return $isEmpty;
+  }
+
   public static function addSenseIdsForEntry($entry, $db) {
 //		$db = new database();
 		$sql = <<<SQL
