@@ -165,7 +165,7 @@ class corpus_search
 				$orderBy = "date_of_lang ASC, page ASC";
 				break;
 			case "dateDesc":
-				$orderBy = "date_of_lang DESC";
+				$orderBy = "date_of_lang DESC, page ASC";
 				break;
 			/*case "precedingWord":
 				$orderBy = "preceding_word ASC";
@@ -177,7 +177,7 @@ class corpus_search
 				$orderBy = "following_word ASC";
 				break;*/
 			default:
-				$orderBy = "filename, page ASC";
+				$orderBy = "date_of_lang ASC, page ASC";
 		}
 		//text restrictions
 		$textJoinSql = "";
