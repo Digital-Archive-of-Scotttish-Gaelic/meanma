@@ -103,7 +103,7 @@ HTML;
             <input type="hidden" id="pos" name="pos" value="{$_REQUEST["pos"]}">
             <input type="hidden" id="preContextScope" name="preContextScope" value="{$this->_slip->getPreContextScope()}">
             <input type="hidden" id="postContextScope" name="postContextScope" value="{$this->_slip->getPostContextScope()}">
-            <input type="hidden" name="action" value="save"/>
+            <input type="hidden" name="action" value="save">
             {$lockedHtml}
             <div class="mx-2">
               <button name="close" class="windowClose btn btn-secondary">close</button>
@@ -426,7 +426,7 @@ HTML;
     $postScope = $this->_slip->getPostContextScope();
     $context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
     $preIncrementDisable = $postIncrementDisable = "";
-    $updateSlip = false;  //flag used to track if the pre or post scopes !== defaults
+    $updateSlip = false;  //flag used to track if the pre or post scopes != defaults
     //check for start/end of document
     if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
       $this->_slip->setPreContextScope($context["prelimit"]);
@@ -520,11 +520,16 @@ HTML;
 		          var preScope = $('#preContextScope').val();
 		          var postScope = $('#postContextScope').val();
 		        
+		          console.log('initial prescope : ' + preScope);
+		          
 		          if ($(this).hasClass('pre')) {
 		            preScope = $(this).attr('data-position');
 		          } else {
 		            postScope = $(this).attr('data-position');
-		          }  
+		          }
+		          
+		          console.log('\\n\\ncalculated prescope : ' + preScope);
+		          
 		          $('#slipContext').attr('data-precontextscope', preScope);
 					    $('#slipContext').attr('data-postcontextscope', postScope);
 					    $('#preContextScope').val(preScope);

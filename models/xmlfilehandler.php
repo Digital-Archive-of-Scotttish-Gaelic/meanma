@@ -76,9 +76,13 @@ XPATH;
 		/* preContext processing */
 		$context["pre"] = array("output"=>"");
 		if ($preScope) {
-			$pre = array_slice($words, -$preScope);
+			$pre = array_slice($words, -$this->_preScope);
+			//check if preScope value is less than the number of available tokens
+			if (count($pre) < $preScope) {
+				$this->_preScope = count($pre);   // ... if it is, set to number of available tokens
+			}
 			//check if we're one token away from the start of the document
-			$nextIndex = $preScope + 1;
+			$nextIndex = $this->_preScope + 1;
 			$limitCheck = array_slice($words, -$nextIndex);
 			if (count($limitCheck) != count($pre)+1) {
 				$context["prelimit"] = count($pre);
