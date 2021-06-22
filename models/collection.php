@@ -351,7 +351,6 @@ HTML;
             data-xml="{$data["filename"]}"
             data-uri="{$data["context"]["uri"]}"
             data-date="{$data["date_of_lang"]}"
-            data-title="{$data["title"]}"
             data-page="{$data["page"]}"
             data-resultindex="{$index}">
             {$slipLinkText}
