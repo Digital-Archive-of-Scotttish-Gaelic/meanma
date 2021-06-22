@@ -261,7 +261,7 @@ HTML;
 		foreach ($writersInfo as $writerInfo) {
 			$nickname = (empty($writerInfo["nickname"])) ? "" : " (" . $writerInfo["nickname"] . ")";
 			$writerList[] = <<<HTML
-            <a href="?m=writers&a=browse&id={$writerInfo["id"]}">
+            <a href="?m=writers&a=browse&id={$writerInfo["writer_id"]}">
 							{$writerInfo["forenames_en"]} {$writerInfo["surname_en"]}
 						</a> {$nickname}
 HTML;
