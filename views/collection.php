@@ -106,6 +106,9 @@ HTML;
 				});
 				
 				$('#deleteSlips').on('click', function () {
+				  if (!confirm('Are you sure you want to delete selected slips(s)?')) {
+				    return;
+				  }
 				  var slipIds = [];
 				  $('.deleteSlip').each(function() {
 				    let linkId = $(this).attr('id');
@@ -114,7 +117,8 @@ HTML;
 				  });
 				  let url = 'ajax.php';
 				  let data = {action: 'deleteSlips', slipIds: slipIds};
-				  $.ajax({url: url, data: data});
+				  $.ajax({url: url, data: data})
+				    .done(function () {location.reload();});
 				});
 				
 				/**
