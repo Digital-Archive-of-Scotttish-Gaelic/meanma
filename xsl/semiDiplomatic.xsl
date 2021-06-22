@@ -69,7 +69,7 @@
   </xsl:template>
 
   <xsl:template match="tei:note">
-    <sup class="numbers"><a href="#" title="{normalize-space(.)}">[*]</a></sup>
+    <sup><a href="#" title="{normalize-space(.)}">[*]</a></sup>
   </xsl:template>
 
   <xsl:template
@@ -93,7 +93,7 @@
     match="tei:w[ancestor::tei:w]">
     <xsl:apply-templates/>
   </xsl:template>
-  
+
   <xsl:template
     match="tei:w[ancestor::tei:name and not(ancestor::tei:w)]">
     <xsl:text> </xsl:text>
@@ -101,7 +101,7 @@
     <xsl:text> </xsl:text>
   </xsl:template>
 
-  <xsl:template match="tei:pc[ancestor::tei:w and not(ancestor::tei:supplied)]"/> 
+  <xsl:template match="tei:pc[ancestor::tei:w and not(ancestor::tei:supplied)]"/>
 
   <xsl:template match="tei:pc[ancestor::tei:w and ancestor::tei:supplied]">
     <xsl:value-of select="."/>
