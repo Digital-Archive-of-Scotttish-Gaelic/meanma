@@ -280,8 +280,12 @@ XPATH;
 		$id = $element->attributes()->id;
 		$results = $this->getXml()->xpath("//tei:supplied[descendant::tei:*[@id='{$id}']  or ancestor::tei:*[@id='{$id}']]");
 		if ($results)	{
+			$i = 0;
 			foreach ($results as $result) {
-				$externalSupplied[] = $result;
+				//if there is a child then return its contents as the text supplied, otherwise just return the current element's contents
+				$externalSupplied[$i]["text"] = $result->children()[0] ? $result->children()[0] : $result;
+				$externalSupplied[$i]["resp"] = $result->attributes()->resp;
+				$i++;
 			}
 		}
 		return $externalSupplied;

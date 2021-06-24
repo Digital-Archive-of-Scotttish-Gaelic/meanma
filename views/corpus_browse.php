@@ -739,7 +739,7 @@ HTML;
 				  if (chunk.supplied != undefined && chunk.supplied.length) {
 				    html += '<li>text supplied by editor –</li><ul>';
 				    $.each(chunk.supplied, function(i, supp) {
-				      html += '<li>[' + supp[0] + '] (' + supp["@attributes"]["resp"] + ')</li>';
+				      html += '<li>[' + supp.text[0] + '] (' + supp.resp[0] + ')</li>';
 				    });
 				    html += '</ul>';
 				  }
