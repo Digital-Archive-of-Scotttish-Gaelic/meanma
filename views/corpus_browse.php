@@ -737,12 +737,20 @@ HTML;
 				    html += '<li>[' + ins.fullWord + '] (' + getScribeHtml(ins.hand) + ', ' + ins.place[0] + ')</li></ul>';
 				  }
 				  if (chunk.supplied != undefined && chunk.supplied.length) {
-				    html += '<li>text supplied by editor –</li><ul>';
+				    html += '<li>supplied by editor –<ul>';
 				    $.each(chunk.supplied, function(i, supp) {
-				      html += '<li>[' + supp.text[0] + '] (' + supp.resp[0] + ')</li>';
+				      html += '<li>[' + supp[0] + '] (' + supp["@attributes"]["resp"] + ')</li>';
 				    });
 				    html += '</ul>';
 				  }
+				  
+				  if (chunk.externalSupplied != undefined && chunk.externalSupplied.length) {
+				    html += '<li>supplied by editor ';
+				    $.each(chunk.externalSupplied, function(i, supp) {
+				      html += '(' + supp.resp[0] + ')</li>';
+				    });
+				  }
+				  
 				  if (chunk.insertions != undefined && chunk.insertions.length) {
 				    html += '<li>insertions –</li><ul>';
 				    $.each(chunk.insertions, function(i, insertion) {
