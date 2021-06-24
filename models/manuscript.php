@@ -300,10 +300,12 @@ XPATH;
 		$results = array();
 		$abbrevs = $element->xpath("abbr");
 		foreach ($abbrevs as $abbr) {
-			if ($abbr->g->attributes()->ref) {
-				$glyg = new glygature($abbr->g->attributes()->ref);
-				$results[] = array("g" => $abbr->g, "cert" => $abbr["cert"] ? $abbr["cert"] : ['undefined'],
-					"name" => $glyg->getName(), "note" => $glyg->getNote(), "corresp" => $glyg->getCorresp(), "id" => $abbr->g["id"]);
+			foreach ($abbr->g as $g) {
+				if ($g->attributes()->ref) {
+					$glyg = new glygature($g->attributes()->ref);
+					$results[] = array("g" => $g, "cert" => $abbr["cert"] ? $abbr["cert"] : ['undefined'],
+						"name" => $glyg->getName(), "note" => $glyg->getNote(), "corresp" => $glyg->getCorresp(), "id" => $g["id"]);
+				}
 			}
 		}
 		return $results;
