@@ -140,7 +140,11 @@ XPATH;
 		// deal with all the possible permutations of links to edil, dwelly, and place data
 		$modalData["edil"] = $this->_getEdilUrl($xml);
 		$modalData["dwelly"] = $modalData["edil"] ? $this->_getDwelly($modalData["edil"]) : null;
-		if (!stristr($modalData["edil"], "dil.ie") && !stristr($modalData["dwelly"]["url"], "faclair.com")) {
+		//if both lemmaDW and lemmaRefDW are provided then don't use hwData to get info
+		if ($xml->attributes()->lemmaDW && $xml->attributes()->lemmaRefDW) {
+			$modalData["dwelly"]["hw"] = (string)$xml->attributes()->lemmaDW;
+			$modalData["dwelly"]["url"] = (string)$xml->attributes()->lemmaRefDW;
+		} else if (!stristr($modalData["edil"], "dil.ie") && !stristr($modalData["dwelly"]["url"], "faclair.com")) {
 			$modalData["placeLemma"] = $modalData["edil"];    //this is just a placename link
 			unset($modalData["edil"]);    //this is just a Dwelly link so remove
 			unset ($modalData["dwelly"]); //not a Dwelly link so remove
