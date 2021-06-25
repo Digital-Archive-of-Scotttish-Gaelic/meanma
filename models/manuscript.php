@@ -87,10 +87,13 @@ XPATH;
 			}
 		} else if ($xml->getName()=='w') {
 			$modalData = array_merge($modalData, $this->_populateData($xml));
-			$wordCount = count($xml->w);
+
+			$wordCheck = $xml->xpath("//w[ancestor::*[@id='{$chunkId}']]");
+			$wordCount = count($wordCheck);
+//			$wordCount = count($xml->w);
 			if ($wordCount > 1) {
 				$modalData["complexFlag"] = 1;
-				foreach ($xml->w as $w) {
+				foreach ($wordCheck as $w) {
 					$modalData["child"][] = $this->_getLocalModalData($w->attributes()->id);
 				}
 			} else {
@@ -126,7 +129,7 @@ XPATH;
 		$dom->loadXML($xml->asXML());
 		$modalData["xml"] = htmlentities($dom->saveXML());
 		$modalData["partOfInsertion"] = $this->_getPartOfInsertion($xml);
-		$modalData["emendation"] = $this->_getEmendation($xml);
+		$modalData["externalEmendation"] = $this->_getEmendation($xml, "external");
 		$modalData["interpObscureSection"] = $this->_isPartOfInterpObscureSection($xml);
 		$modalData["obscureSection"] = $this->_isPartOfObscureSection($xml);
 		$modalData["externalSupplied"] = $this->_getExternalSupplied($xml);
@@ -160,6 +163,7 @@ XPATH;
 		$modalData["lemma"] = $this->_getLemma($xml);
 		$modalData["abbrevs"] = $this->_getAbbrevs($xml);
 		$modalData["insertions"] = $this->_getInsertions($xml);
+		$modalData["emendation"] = $this->_getEmendation($xml, "local");
 		$modalData["deletions"] = $this->_getDeletions($xml);
 		$modalData["damaged"] = $this->_getDamaged($xml);
 		$modalData["gapDamaged"] = $this->_getGapDamaged($xml);
@@ -203,13 +207,18 @@ XPATH;
 		return $language;
 	}
 
-	private function _getEmendation($element) {
+	/**
+	 * @param $element
+	 * @param string $scope : local or external - alters the XPath depending on the requirement
+	 * @return array|null
+	 */
+	private function _getEmendation($element, $scope) {
 		$emendation = null;
 		//test if part of an emendation
 		$id = $element->attributes()->id;
-		$xpath = <<<XPATH
-			//tei:choice[child::tei:corr[child::*[@id="{$id}"]] or ancestor::*[@id="{$id}"]]
-XPATH;
+		$xpath = $scope == "external"
+			? '//tei:choice[child::tei:corr[child::*[@id="' . $id . '"]]]'
+			: '//tei:choice[ancestor::*[@id="' . $id . '"]]';
 		$result = $this->getXml()->xpath($xpath);
 		if ($result) {
 			$choiceXml = $result[0];

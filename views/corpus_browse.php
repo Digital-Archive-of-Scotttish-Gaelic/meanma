@@ -811,6 +811,11 @@ HTML;
 				    });
 				    html += '</ul>';
 				  }
+				  if (chunk.externalEmendation) {
+				    let emendation = chunk.externalEmendation;
+				    html += '<li>editorial emendation – \'' + emendation.sic + '\' to \'';
+				    html += emendation.corr + '\' (' + emendation.resp[0] + ')</li>';
+				  }
 				  if (chunk.emendation) {
 				    html += '<li>editorial emendation – \'' + chunk.emendation.sic + '\' to \'';
 				    html += chunk.emendation.corr + '\' (' + chunk.emendation.resp[0] + ')</li>';
