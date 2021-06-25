@@ -16,7 +16,7 @@ class slip
     "adjective" => array("a", "ar"),
     "preposition" => array("p", "P"),
     "adverb" => array("A"),
-    "other" => array("d", "c", "z", "o", "D", "Dx", "ax", "px", "q"));
+    "other" => array("d", "c", "z", "o", "D", "Dx", "ax", "px", "q", ""));
   private $_entry;  //an instance of models\entry
   private $_slipMorph;  //an instance of models\slipmorphfeature
   private $_senses = array();

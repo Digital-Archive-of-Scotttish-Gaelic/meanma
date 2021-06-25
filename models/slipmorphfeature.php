@@ -73,9 +73,8 @@ class slipmorphfeature
 	    case 'A':
 	    	$this->_type = "adverb";
 	    	break;
-	    case '':
+	    default:
 	    	$this->_type = "other";
-	      break;
     }
   }
 
