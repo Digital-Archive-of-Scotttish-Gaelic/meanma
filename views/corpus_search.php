@@ -483,20 +483,6 @@ HTML;
 		      });
       
           /*
-            Open the add new slip form in a new tab        
-           */
-             $('.createSlipLink').on('click', function() {
-               var url = $(this).attr('data-url');
-               var win = window.open(url, '_blank');
-               if (win) {
-						      //Browser has allowed it to be opened
-						      win.focus();
-						    } else {
-						      //Browser has blocked it
-						      alert('Please allow popups for this website');
-						    }
-             });
-          /*
             Date range slider
            */
              $( "#dateRange" ).slider({

@@ -76,6 +76,12 @@
 
   <xsl:template match="dasg:w[name(following-sibling::*[1])='w' or name(following-sibling::*[1])='o' or name(following-sibling::*[1])='i' or name(following-sibling::*[1])='footnote']">
     <span class="word" data-toggle="tooltip" data-placement="top">
+      <xsl:attribute name="data-pos">
+        <xsl:value-of select="@pos"/>
+      </xsl:attribute>
+      <xsl:attribute name="data-lemma">
+        <xsl:value-of select="@lemma"/>
+      </xsl:attribute>
       <xsl:attribute name="id">
         <xsl:value-of select="@id"/>
       </xsl:attribute>
@@ -99,6 +105,12 @@
   
   <xsl:template match="dasg:w">
     <span class="word" data-toggle="tooltip" data-placement="top">
+      <xsl:attribute name="data-pos">
+        <xsl:value-of select="@pos"/>
+      </xsl:attribute>
+      <xsl:attribute name="data-lemma">
+        <xsl:value-of select="@lemma"/>
+      </xsl:attribute>
       <xsl:attribute name="id">
         <xsl:value-of select="@id"/>
       </xsl:attribute>

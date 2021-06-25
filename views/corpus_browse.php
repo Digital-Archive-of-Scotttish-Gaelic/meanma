@@ -66,6 +66,7 @@ HTML;
 		if ($this->_ms) {   //a manuscript so generate the required code
 			$this->_writeMSJavascript();
 		}
+		models\collection::writeSlipDiv();
 	}
 
 	private function _writeEditForm() {
@@ -325,16 +326,18 @@ HTML;
 				echo <<<HTML
 					{$this->_getMetaTableHtml()}
 HTML;
-			} else {  // child text so populate metadata panel and write image panel
+			} else {  // child text so populate metadata panel and write word info and image panels
 				$rightPanelHtml = <<<HTML
 				<ul class="nav nav-pills nav-justified" style="padding-bottom: 20px;">			
 					<li class="nav-item"><a id="metaPanelSelect" class="link nav-link panel-link active">metadata</a></li>	
+					<li class="nav-item"><a id="wordPanelSelect" class="link nav-link panel-link">word info</a></li>	
 				  <li class="nav-item"><a id="imagePanelSelect" class="link nav-link panel-link">image</a></li>		  
 				 </ul>
 				 
 				 <div id="metaPanel" class="panel">
 					{$this->_getMetaTableHtml()}
 				 </div>
+				 <div id="wordPanel" class="panel"><< please select a word</div>
 				 <div id="imagePanel" class="panel"><< please select a page</div>	
 HTML;
 			}
@@ -516,16 +519,43 @@ HTML;
           document.getElementById(hi).scrollIntoView({behavior: 'smooth', block: 'center'})
         }
         
+        //populate the word panel on word click
+        $('.word').on('click', function () {
+          let wordId = $(this).attr('id');
+          let filepath = encodeURIComponent('{$this->_model->getFilepath()}');
+          let pos = $(this).attr('data-pos');
+          let lemma = $(this).attr('data-lemma');
+          //create the slip link (either existing "view" or  new "add")
+          var request = $.ajax({
+            url: 'ajax.php?action=getSlipLinkHtml&filename='+filepath+'&id='+wordId+'&pos='+pos+'&lemma='+lemma, 
+            dataType: "html"}
+          );
+          request.done(function(html) {
+            $('#wordPanel').html(html);
+            $('.panel').hide();
+			      $('.panel-link').removeClass('active');
+			      $(this).addClass('active');	
+			      $('#wordPanel').show();
+          });
+        });
+        
         $('#imagePanelSelect').on('click', function() {
 			     $('.panel').hide();
-			     $('#metaPanelSelect').removeClass('active');
+			     $('.panel-link').removeClass('active');
 			     $(this).addClass('active');	
 			     $('#imagePanel').show();
 				});
         
+        $('#wordPanelSelect').on('click', function() {
+			     $('.panel').hide();
+			     $('.panel-link').removeClass('active');
+			     $(this).addClass('active');	
+			     $('#wordPanel').show();
+				});
+        
         $('#metaPanelSelect').on('click', function() {
 			     $('.panel').hide();
-			     $('#imagePanelSelect').removeClass('active');
+			     $('.panel-link').removeClass('active');
 			     $(this).addClass('active');	
 			     $('#metaPanel').show();
 				});
@@ -550,6 +580,7 @@ HTML;
           }); 
         });
       });
+      
     </script>
 HTML;
 	}
@@ -581,21 +612,21 @@ HTML;
 				   
 				   $('#wordPanelSelect').on('click', function() {
 				     $('.panel').hide();
-				     $('#diploPanelSelect, #metaPanelSelect, #imagePanelSelect').removeClass('active');
+				     $('.panel-link').removeClass('active');
 				     $(this).addClass('active');	
 				     $('#wordPanel').show();
 				   });
 				   
 				   $('#metaPanelSelect').on('click', function() {
 				     $('.panel').hide();
-				     $('#diploPanelSelect, #wordPanelSelect, #imagePanelSelect').removeClass('active');
+				     $('.panel-link').removeClass('active');
 				     $(this).addClass('active');	
 				     $('#metaPanel').show();
 				   });
 				   
 				   $('#imagePanelSelect').on('click', function() {
 				     $('.panel').hide();
-				     $('#diploPanelSelect, #metaPanelSelect, #wordPanelSelect').removeClass('active');
+				     $('.panel-link').removeClass('active');
 				     $(this).addClass('active');	
 				     $('#imagePanel').show();
 				   });

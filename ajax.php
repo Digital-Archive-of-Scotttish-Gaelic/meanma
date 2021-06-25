@@ -4,6 +4,8 @@ namespace models;
 
 require_once 'includes/include.php';
 
+$db = new database(); //TODO: consider remodelling SB
+
 switch ($_REQUEST["action"]) {
 	case "msPopulateModal":
 		$ms = manuscripts::getMSById($_GET["id"]);
@@ -102,6 +104,13 @@ switch ($_REQUEST["action"]) {
     $slip->saveSlip($_POST);
     echo "success";
     break;
+	case "getSlipLinkHtml":
+		$slipId = collection::slipExists($_SESSION["groupId"], $_GET["filename"], $_GET["id"]);
+		$data = $slipId
+			? collection::getSlipInfoBySlipId($slipId, $db)[0]    //there is a slip so use the data
+			: array("filename"=>$_GET["filename"], "id"=>$_GET["id"], "pos"=>$_GET["pos"], "lemma"=>$_GET["lemma"]);  //new slip
+		echo collection::getSlipLinkHtml($data);
+		break;
 	case "autoCreateSlips":
 		$search = new corpus_search($_GET, false);
 		$results = $search->getDBResults();
