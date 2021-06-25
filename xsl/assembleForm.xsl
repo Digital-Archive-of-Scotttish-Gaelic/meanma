@@ -46,5 +46,11 @@
   <xsl:template match="pc"/> <!-- maybe restrict to within bottom-level words? -->
     
   <xsl:template match="note"/>  
+  
+  <xsl:template match="choice">
+    <xsl:text>{</xsl:text>
+    <xsl:apply-templates select="corr"/>
+    <xsl:text>}</xsl:text>
+  </xsl:template>
 
 </xsl:stylesheet>
