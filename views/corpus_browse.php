@@ -521,6 +521,9 @@ HTML;
         
         //populate the word panel on word click
         $('.word').on('click', function () {
+          var html = '<h1>' + $(this).text() + '</h1><ul><li>';
+          html += 'lemma: ' + $(this).attr('data-lemma') + '</li>';
+          html += '<li>POS: ' + $(this).attr('data-pos') + '</li>';
           let wordId = $(this).attr('id');
           let filepath = encodeURIComponent('{$this->_model->getFilepath()}');
           let pos = $(this).attr('data-pos');
@@ -530,11 +533,12 @@ HTML;
             url: 'ajax.php?action=getSlipLinkHtml&filename='+filepath+'&id='+wordId+'&pos='+pos+'&lemma='+lemma, 
             dataType: "html"}
           );
-          request.done(function(html) {
+          request.done(function(slipHtml) {
+            html += '<li>' + slipHtml + '</li></ul>';
             $('#wordPanel').html(html);
             $('.panel').hide();
 			      $('.panel-link').removeClass('active');
-			      $(this).addClass('active');	
+			      $('#wordPanelSelect').addClass('active');	
 			      $('#wordPanel').show();
           });
         });
