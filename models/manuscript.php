@@ -72,11 +72,13 @@ XPATH;
 			$wordCheck = $xml->xpath("//w[ancestor::*[@id='{$chunkId}']]");
 			$wordCount = count($wordCheck);
 			$nameCount = count($xml->name);
+
+			$modalData["wordCount"] = $wordCount;
 			if ($wordCount==1 && $nameCount==0) {
 				$modalData["complexFlag"] =  0;
 				$xml2 = $xml->w[0];
 				$modalData = array_merge($modalData, $this->_populateData($xml2));
-			} else if ($wordCount>1 && $nameCount==0) { //there are nested words so don't repeat the headword etc
+			} else if ($wordCount>2 && $nameCount==0) { //there are nested words so don't repeat the headword etc
 				$modalData["abbrevs"] = [];
 				$modalData["complexFlag"] = 1;
 				foreach ($wordCheck[0]->children() as $c) {
