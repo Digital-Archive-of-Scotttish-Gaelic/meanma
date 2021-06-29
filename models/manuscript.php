@@ -138,7 +138,7 @@ XPATH;
 		$dom->preserveWhiteSpace = false;
 		$dom->formatOutput = true;
 		$dom->loadXML($xml->asXML());
-		$modalData["xml"] = htmlentities($dom->saveXML());
+//		$modalData["xml"] = htmlentities($dom->saveXML());
 		$modalData["partOfInsertion"] = $this->_getPartOfInsertion($xml);
 		$modalData["externalEmendation"] = $this->_getEmendation($xml, "external");
 		$modalData["interpObscureSection"] = $this->_isPartOfInterpObscureSection($xml);
@@ -481,7 +481,7 @@ XPATH;
 	private function _getDwelly($edil) {
 		$filepath = "../mss/Transcribing/hwData.xml";
 		$xml = simplexml_load_file($filepath);
-		$xml->registerXPathNamespace('tei', 'http://www.tei-c.org/ns/1.0');
+		$xml->registerXPathNamespace('tei', 'https://dasg.ac.uk/corpus/');
 		$nodes = $xml->xpath("/tei:TEI/tei:text/tei:body/tei:entryFree[@corresp='{$edil}']/tei:w");
 		$node = $nodes[0];
 		$lemmaDW = (string)$node["lemmaDW"];

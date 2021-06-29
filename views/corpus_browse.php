@@ -521,13 +521,14 @@ HTML;
         
         //populate the word panel on word click
         $('.word').on('click', function () {
-          var html = '<h1>' + $(this).text() + '</h1><ul><li>';
-          html += 'lemma: ' + $(this).attr('data-lemma') + '</li>';
-          html += '<li>POS: ' + $(this).attr('data-pos') + '</li>';
           let wordId = $(this).attr('id');
           let filepath = encodeURIComponent('{$this->_model->getFilepath()}');
           let pos = $(this).attr('data-pos');
           let lemma = $(this).attr('data-lemma');
+          var html = '<h1>' + $(this).text() + '</h1><ul><li>';
+          html += 'lemma: ' + lemma + '</li>';
+          html += '<li>POS: ' + pos + '</li>';
+         
           //create the slip link (either existing "view" or  new "add")
           var request = $.ajax({
             url: 'ajax.php?action=getSlipLinkHtml&filename='+filepath+'&id='+wordId+'&pos='+pos+'&lemma='+lemma, 
@@ -592,7 +593,12 @@ HTML;
 	private function _writeMSJavascript() {
 		echo <<<HTML
 			<script>
-					
+				
+				//reverse lookup for POS names to get abbrevations for slip constructor
+				let partsOfSpeech = {
+				  noun: "n", verb: "v", preposition: "p", adjective: "a", adverb: "A", other: "",
+				};
+				
 				$(function() {
 				   
 				   $('.chunk').hover(
@@ -646,17 +652,35 @@ HTML;
 				     })
 				     .done(function(data) {						       
 				       let xml = '<pre>'+data.xml+'</pre>';
-				       var html = getModalHtmlChunk(data, true);				       
+				       var html = getModalHtmlChunk(data, true);	       
 				       html += '<ul>';
 				       if (data.child) {
 				         html += getChildChunkHtml(data.child, '');
 				       }
-				       html += '</ul>';
-			         $('#wordPanel').html(html);  //add the html to the rhs panel
-			         $('#diploPanelSelect, #metaPanelSelect, #imagePanelSelect').removeClass('active');
-							 $('#wordPanelSelect').addClass('active');
-							 $('.panel').hide();
-			         $('#wordPanel').show();
+				       
+				      //create the slip link (either existing "view" or  new "add") 
+              let filepath = encodeURIComponent('{$this->_model->getFilepath()}');
+				      var pos = '';
+				      if (data.pos != undefined) {
+                pos = partsOfSpeech[data.pos[0]] ? partsOfSpeech[data.pos[0]] : '';
+              }
+				      var lemma = data.headword;
+				      if (data.lemma != undefined) {
+                lemma = data.lemma[0] ? data.lemma[0] : data.headword;  //TODO: revisit with MM (SB)
+              }
+              var request = $.ajax({
+                url: 'ajax.php?action=getSlipLinkHtml&filename='+filepath+'&id='+chunkId+'&pos='+pos+'&lemma='+lemma, 
+                dataType: "html"}
+              );
+              request.done(function(slipHtml) {
+                html += '<li>' + slipHtml + '</li>';
+								html += '</ul>';
+			          $('#wordPanel').html(html);  //add the html to the rhs panel
+			          $('.panel-link').removeClass('active');
+							  $('#wordPanelSelect').addClass('active');
+							  $('.panel').hide();
+			          $('#wordPanel').show();
+              });
 				     })
 				   });
 				   
@@ -864,7 +888,7 @@ HTML;
 				  }
 				  if (chunk.edil) {
 				    html += '<li>eDil: <a target="_blank" href="' + chunk.edil[0] + '">' + chunk.lemma[0] + '</a></li>';
-				  }
+				  }       
 				  if (chunk.dwelly) {
 				    html += '<li>Dwelly: <a target="_blank" href="' + chunk.dwelly["url"] + '">' + chunk.dwelly["hw"] + '</a></li>';
 				  }
