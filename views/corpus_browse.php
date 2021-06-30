@@ -935,7 +935,7 @@ HTML;
 				    if (hand.surname) {
 				      handHtml += hand.surname[0] == undefined ? 'Anonymous (' + hand.id[0] + ')' : hand.surname[0];
 				    }
-				  html += '<a href="?m=writers&a=browse&id=' + writerId + '" target="_blank">' + handHtml + '</a> '; 
+				  html += '<a href="?m=writers&a=browse&id=' + writerId + '" target="_blank">' + handHtml + '</a>'; 
 				  return html;
 				}
 				
