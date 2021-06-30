@@ -658,22 +658,22 @@ HTML;
 				         html += getChildChunkHtml(data.child, '');
 				       }
 				       
-				      //create the slip link (either existing "view" or  new "add") 
+				      //create the slip link (either existing "view" or  new "add") 				       
               let filepath = encodeURIComponent('{$this->_model->getFilepath()}');
 				      var pos = '';
 				      if (data.pos != undefined) {
                 pos = partsOfSpeech[data.pos[0]] ? partsOfSpeech[data.pos[0]] : '';
               }
-				      var lemma = data.headword;
+				      var lemma = data.headword.replace(/(<([^>]+)>)/gi, ""); //strip out tags from headword
 				      if (data.lemma != undefined) {
-                lemma = data.lemma[0] ? data.lemma[0] : data.headword;  //TODO: revisit with MM (SB)
+                lemma = data.lemma[0] ? data.lemma[0] : lemma;  //TODO: revisit with MM (SB)
               }
               var request = $.ajax({
                 url: 'ajax.php?action=getSlipLinkHtml&filename='+filepath+'&id='+chunkId+'&pos='+pos+'&lemma='+lemma, 
                 dataType: "html"}
               );
               request.done(function(slipHtml) {
-                html += '<li>' + slipHtml + '</li>';
+                //html += '<li>' + slipHtml + '</li>';  //don't show on production yet
 								html += '</ul>';
 			          $('#wordPanel').html(html);  //add the html to the rhs panel
 			          $('.panel-link').removeClass('active');
@@ -792,8 +792,9 @@ HTML;
 				  }
 				  if (chunk.partOfInsertion != undefined) {
 				    let ins = chunk.partOfInsertion;
+				    let handHtml = ins.hand.id != null ?   + getScribeHtml(ins.hand) + ', ' : '';
 				    html += '<li>part of insertion –</li><ul>';
-				    html += '<li>[' + ins.fullWord + '] (' + getScribeHtml(ins.hand) + ', ' + ins.place[0] + ')</li></ul>';
+				    html += '<li>[' + ins.fullWord + '] (' + handHtml + ins.place[0] + ')</li></ul>';
 				  }
 				  if (chunk.supplied != undefined && chunk.supplied.length) {
 				    html += '<li>supplied by editor –<ul>';
@@ -813,7 +814,8 @@ HTML;
 				  if (chunk.insertions != undefined && chunk.insertions.length) {
 				    html += '<li>insertions –</li><ul>';
 				    $.each(chunk.insertions, function(i, insertion) {
-				      html += '<li>[' + insertion.data[0] + '] (' + getScribeHtml(insertion.hand) + ', ';
+				      let handHtml = insertion.hand.id != null ? getScribeHtml(insertion.hand) + ', ' : '';
+				      html += '<li>[' + insertion.word + '] (' + handHtml;
 				      html += insertion.data["@attributes"]["place"] + ') ';
 				    });
 				    html += '</ul>';

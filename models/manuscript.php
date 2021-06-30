@@ -78,6 +78,7 @@ XPATH;
 				$xml2 = $xml->w[0];
 				$modalData = array_merge($modalData, $this->_populateData($xml2));
 			} else if ($wordCount>2 && $nameCount==0 && !$xml->choice) { //there are nested words so don't repeat the headword etc
+				                                      //and don't process emendations (<choice>) - TODO: !hack! talk to MM
 				$modalData["abbrevs"] = [];
 				$modalData["complexFlag"] = 1;
 				foreach ($wordCheck[0]->children() as $c) {
@@ -227,7 +228,7 @@ XPATH;
 		//test if part of an emendation
 		$id = $element->attributes()->id;
 		$xpath = $scope == "external"
-			? '//tei:choice[child::tei:corr[child::*[@id="' . $id . '"]] or ancestor::*[@id="' . $id . '"]]'
+			? '//tei:choice[child::tei:corr[child::*[@id="' . $id . '"]]]'
 			: '//tei:choice[ancestor::*[@id="' . $id . '"]]';
 		$result = $this->getXml()->xpath($xpath);
 		if ($result) {
@@ -388,7 +389,7 @@ XPATH;
 		foreach ($insertions as $insertion) {
 			$handId = $insertion->attributes()->hand;
 			$handInfo = $this->_getHandInfo($handId);
-			$results[] = array("hand" => $handInfo, "data" => $insertion);
+			$results[] = array("hand" => $handInfo, "data" => $insertion, "word" => functions::cleanForm($insertion));
 		}
 		return $results;
 	}
