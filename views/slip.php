@@ -26,7 +26,7 @@ class slip
   	$checked = $this->_slip->getStarred() ? "checked" : "";
   	$statusOptionHtml = "";
   	for ($i=1; $i<11; $i++) {
-  		$selected = $i == $this->_slip->getStatus() ? "selected" : "";
+  		$selected = $i == $this->_slip->getSlipStatus() ? "selected" : "";
   		$statusOptionHtml .= <<<HTML
 				<option value="{$i}" {$selected}>{$i}</option>
 HTML;
@@ -41,8 +41,8 @@ HTML;
           </div>
         </div>
         <div class="form-group row">
-					<label for="status" class="col-form-label col-sm-1">Status:</label>
-					<select id="status">
+					<label for="slipStatus" class="col-form-label col-sm-1">Status:</label>
+					<select id="slipStatus">
 						{$statusOptionHtml}
 					</select>
 				</div>
