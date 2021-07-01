@@ -95,13 +95,13 @@ class entry
 	 */
 	public function getUniqueSenseIds($db) {
 		foreach ($this->getSenses($db) as $slipId => $senseGroup) {
+			$senseIds = array();
 			foreach ($senseGroup as $sense) {
-				if (!isset($this->_slipSenses[$slipId])) {
-					$this->_slipSenses[$slipId] .=  $sense->getId();
-				} else {
-					$this->_slipSenses[$slipId] .= '|' . $sense->getId();
-				}
+				array_push($senseIds, $sense->getId());
 			}
+			$this->_slipSenses[$slipId] = $senseIds;
+			sort($this->_slipSenses[$slipId]);
+			$this->_slipSenses[$slipId] = implode('|', $this->_slipSenses[$slipId]);
 		}
 		$uniqueIds = array();
 		foreach ($this->_slipSenses as $slipId => $senseIds) {
