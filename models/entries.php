@@ -82,7 +82,7 @@ SQL;
         SELECT DISTINCT e.id as id FROM entry e    
         	JOIN slips s ON e.id = s.entry_id 
         	WHERE group_id = {$_SESSION["groupId"]}
-            ORDER BY id ASC
+            ORDER BY headword ASC
 SQL;
     $results = $db->fetch($sql);
     foreach ($results as $row) {
