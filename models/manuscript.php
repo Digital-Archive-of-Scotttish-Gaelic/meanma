@@ -367,7 +367,7 @@ XPATH;
 		if ($element->getName() == "name") {
 			switch ($element->attributes()->type) {
 				case "personal":
-					$name["type"] = "anthroponym";
+					$name["type"] = "anthroponym or moniker";
 					break;
 				case "place":
 					$name["type"] = "toponym";
