@@ -333,6 +333,9 @@ XPATH;
 		return $results;
 	}
 
+	/*
+	 * Replaced by _getGlygatures()
+	 *
 	private function _getAbbrevs($element) {
 		$results = array();
 		$abbrevs = $element->xpath("abbr");
@@ -346,20 +349,28 @@ XPATH;
 			}
 		}
 		return $results;
-	}
+	}*/
 
 	private function _getGlygatures($element) {
 		$results = array();
-		$glygs = $element->xpath(".//g");
+		$glygs = $element->xpath("//g");
+		$glyphIds = [];
 		foreach ($glygs as $g) {
-			if ($g->attributes()->ref) {
-				$glyg = new glygature($g->attributes()->ref);
-				$abbr = $element->xpath("//abbr[child::g[@ref='{$g->attributes()->ref}']]");
+			if ($ref = (string)$g->attributes()->ref) {
+				//check for duplicate glyph
+				if (!empty($glyphIds[$ref])) {
+					$glyphIds[$ref] .= "|" . $g["id"];
+				} else {
+					$glyphIds[$ref] = (string)$g["id"];
+				}
+				$glyg = new glygature($ref);
+				$abbr = $element->xpath("//abbr[child::g[@ref='{$ref}']]");
 				$certainty = $abbr ? $abbr[0]->attributes()->cert : array("unknown");
-				$results[] = array("g" => $g, "cert" => $certainty ? $certainty : ['undefined'],
+				$results["glyphs"][] = array("g" => $g, "cert" => $certainty ? $certainty : ['undefined'],
 					"name" => $glyg->getName(), "note" => $glyg->getNote(), "corresp" => $glyg->getCorresp(), "id" => $g["id"]);
 			}
 		}
+		$results["glyphIds"] = $glyphIds;
 		return $results;
 	}
 

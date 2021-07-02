@@ -700,16 +700,22 @@ HTML;
 				   
 				   //highlight abbreviations and ligatures
 				   $(document).on('mouseover', '.mouseover', function() {
-				     let id = $(this).attr('id');
-				     $('.'+id).css('background-color', 'yellow');
-				     $('#'+id).css('text-decoration','underline');
+				     let glyphId = $(this).attr('id');
+				     let ids = glyphId.split('|');      //provides for duplicate glyphs  
+				     ids.forEach((id) => {				      				       
+				        $('.'+id).css('background-color', 'yellow');
+				        $('#'+id).css('text-decoration','underline');
+				     });
 				   });
 				  
 				   //remove highlight from abbreviations and ligatures
 				   $(document).on('mouseout', '.mouseover', function() {
-				     let id = $(this).attr('id');
-				     $('.'+id).css('background-color', 'inherit');
-				     $('#'+id).css('text-decoration','inherit');
+				     let glyphId = $(this).attr('id');
+				     let ids = glyphId.split('|');      //provides for duplicate glyphs  
+				     ids.forEach((id) => {			
+				        $('.'+id).css('background-color', 'inherit');
+				        $('#'+id).css('text-decoration','inherit');
+				     });
 				   });
 				   
 				   $('.page').click(function(e){
@@ -781,14 +787,20 @@ HTML;
 				  if (chunk.pos) {
 				    html += '<li>' + chunk.pos[0].replace('_', ' ') + '</li>';
 				  }
-				  if (chunk.abbrevs != undefined && chunk.abbrevs.length) { //ligatures and abbreviations
+				  if (chunk.abbrevs.glyphs != undefined && chunk.abbrevs.glyphs.length) { //ligatures and abbreviations
 				    html += '<li>scribal abbreviations and ligatures –</li><ul>'
-				    $.each(chunk.abbrevs, function(i, abbr) {
+				    var glyphRefs = []; //used to track used glyphs to hancle duplicates
+				    $.each(chunk.abbrevs.glyphs, function(i, abbr) {
+				      let ref = abbr.g["@attributes"]["ref"];
+				      if (glyphRefs.includes(ref)) {  //ignore duplicate glyphs
+				        return true;
+				      }
+				      glyphRefs.push(ref);
 				      let corresp = abbr.corresp ? abbr.corresp[0] : '';
-				      html += '<li><a target="_blank" id="' + abbr.id[0] + '" class="mouseover" href="' + corresp + '">' + abbr.name[0] + '</a>: ';
+				      html += '<li><a target="_blank" id="' + chunk.abbrevs.glyphIds[ref] + '" class="mouseover" href="' + corresp + '">' + abbr.name[0] + '</a>: ';
 				      html += abbr.note[0] + ' (' + abbr.cert[0] + ' certainty)</li>';
 				    });
-				    html += '</ul>';
+				    html += '</ul>';				    
 				  }
 				  if (chunk.partOfInsertion != undefined) {
 				    let ins = chunk.partOfInsertion;
