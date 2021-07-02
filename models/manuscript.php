@@ -172,7 +172,8 @@ XPATH;
 		}
 		$modalData["hdsg"] = $this->_getSlipRef($xml);
 		$modalData["lemma"] = $this->_getLemma($xml);
-		$modalData["abbrevs"] = $this->_getAbbrevs($xml);
+	//	$modalData["abbrevs"] = $this->_getAbbrevs($xml);
+		$modalData["abbrevs"] = $this->_getGlygatures($xml);
 		$modalData["insertions"] = $this->_getInsertions($xml);
 		$modalData["emendation"] = $this->_getEmendation($xml, "local");
 		$modalData["deletions"] = $this->_getDeletions($xml);
@@ -342,6 +343,21 @@ XPATH;
 					$results[] = array("g" => $g, "cert" => $abbr["cert"] ? $abbr["cert"] : ['undefined'],
 						"name" => $glyg->getName(), "note" => $glyg->getNote(), "corresp" => $glyg->getCorresp(), "id" => $g["id"]);
 				}
+			}
+		}
+		return $results;
+	}
+
+	private function _getGlygatures($element) {
+		$results = array();
+		$glygs = $element->xpath(".//g");
+		foreach ($glygs as $g) {
+			if ($g->attributes()->ref) {
+				$glyg = new glygature($g->attributes()->ref);
+				$abbr = $element->xpath("//abbr[child::g[@ref='{$g->attributes()->ref}']]");
+				$certainty = $abbr ? $abbr[0]->attributes()->cert : array("unknown");
+				$results[] = array("g" => $g, "cert" => $certainty ? $certainty : ['undefined'],
+					"name" => $glyg->getName(), "note" => $glyg->getNote(), "corresp" => $glyg->getCorresp(), "id" => $g["id"]);
 			}
 		}
 		return $results;
