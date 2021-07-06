@@ -228,7 +228,7 @@
     </p>
   </xsl:template>
   
-  <xsl:template match="dasg:n">
+  <xsl:template match="dasg:x">
     <xsl:if test="not(name(preceding::*[1])='pc' and preceding::*[1]/@join='right')">
       <xsl:text> </xsl:text>
     </xsl:if>
