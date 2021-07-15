@@ -79,7 +79,8 @@ switch ($_REQUEST["action"]) {
 		collection::deleteSlips($_GET["slipIds"]);
 		break;
 	case "loadSlipData":
-		$result = collection::getSlipInfoBySlipId($_GET["id"]);
+		$db = new database();   //TODO: put this somewhere global SB
+		$result = collection::getSlipInfoBySlipId($_GET["id"], $db);
 		$slipInfo = $result[0];
 		$handler = new xmlfilehandler($slipInfo["filename"]);
 		$context = $handler->getContext($slipInfo["id"], $slipInfo["preContextScope"], $slipInfo["postContextScope"]);
@@ -106,9 +107,10 @@ switch ($_REQUEST["action"]) {
     break;
 	case "getSlipLinkHtml":
 		$slipId = collection::slipExists($_SESSION["groupId"], $_GET["filename"], $_GET["id"]);
+		$lemma = urldecode($_GET["lemma"]); // decode required for MSS weird chrs
 		$data = $slipId
 			? collection::getSlipInfoBySlipId($slipId, $db)[0]    //there is a slip so use the data
-			: array("filename"=>$_GET["filename"], "id"=>$_GET["id"], "pos"=>$_GET["pos"], "lemma"=>$_GET["lemma"]);  //new slip
+			: array("filename"=>$_GET["filename"], "id"=>$_GET["id"], "pos"=>$_GET["pos"], "lemma"=>$lemma);  //new slip
 		echo collection::getSlipLinkHtml($data);
 		break;
 	case "autoCreateSlips":

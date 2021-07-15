@@ -668,12 +668,13 @@ HTML;
 				      if (data.lemma != undefined) {
                 lemma = data.lemma[0] ? data.lemma[0] : lemma;  //TODO: revisit with MM (SB)
               }
+				      lemma = encodeURIComponent(lemma);  //enode any strange chrs (used for MSS)
               var request = $.ajax({
                 url: 'ajax.php?action=getSlipLinkHtml&filename='+filepath+'&id='+chunkId+'&pos='+pos+'&lemma='+lemma, 
                 dataType: "html"}
               );
               request.done(function(slipHtml) {
-                //html += '<li>' + slipHtml + '</li>';  //don't show on production yet
+        //        html += '<li>' + slipHtml + '</li>';  //don't show on production yet
 								html += '</ul>';
 			          $('#wordPanel').html(html);  //add the html to the rhs panel
 			          $('.panel-link').removeClass('active');
