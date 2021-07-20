@@ -594,11 +594,6 @@ HTML;
 		echo <<<HTML
 			<script>
 				
-				//reverse lookup for POS names to get abbrevations for slip constructor
-				let partsOfSpeech = {
-				  noun: "n", verb: "v", preposition: "p", adjective: "a", adverb: "A", other: "",
-				};
-				
 				$(function() {
 				   
 				   $('.chunk').hover(
@@ -656,33 +651,14 @@ HTML;
 				       html += '<ul>';
 				       if (data.child) {
 				         html += getChildChunkHtml(data.child, '');
-				       }
-				       
-				      //create the slip link (either existing "view" or  new "add") 				       
-              let filepath = encodeURIComponent('{$this->_model->getFilepath()}');
-				      var pos = '';
-				      if (data.pos != undefined) {
-                pos = partsOfSpeech[data.pos[0]] ? partsOfSpeech[data.pos[0]] : '';
-              }
-				      var lemma = data.headword.replace(/(<([^>]+)>)/gi, ""); //strip out tags from headword
-				      if (data.lemma != undefined) {
-                lemma = data.lemma[0] ? data.lemma[0] : lemma;  //TODO: revisit with MM (SB)
-              }
-				      lemma = encodeURIComponent(lemma);  //enode any strange chrs (used for MSS)
-              var request = $.ajax({
-                url: 'ajax.php?action=getSlipLinkHtml&filename='+filepath+'&id='+chunkId+'&pos='+pos+'&lemma='+lemma, 
-                dataType: "html"}
-              );
-              request.done(function(slipHtml) {
-        //        html += '<li>' + slipHtml + '</li>';  //don't show on production yet
-								html += '</ul>';
-			          $('#wordPanel').html(html);  //add the html to the rhs panel
-			          $('.panel-link').removeClass('active');
-							  $('#wordPanelSelect').addClass('active');
-							  $('.panel').hide();
-			          $('#wordPanel').show();
-              });
-				     })
+				         html += '</ul>';
+				       }		      
+				       $('#wordPanel').html(html);  //add the html to the rhs panel
+				       $('.panel-link').removeClass('active');
+							 $('#wordPanelSelect').addClass('active');
+							 $('.panel').hide();
+				       $('#wordPanel').show();
+				     });
 				   });
 				   
 				   $(document).on('click', '#toggleXmlView', function () {
@@ -748,7 +724,7 @@ HTML;
 					    $('#imagePanel').show();
             });
 				});
-				
+		
 				function getChildChunkHtml(child, html) {
 				  $.each(child, function(i, elem) {
 				    html += getModalHtmlChunk(elem);
@@ -932,6 +908,9 @@ HTML;
 				  }
 				  if (chunk.complexFlag > 0) {
 				    html += '<ul>';
+				  }
+				  if (chunk.slipLinkHtml && !chunk.complexFlag) {
+				    html += chunk.slipLinkHtml;
 				  }
 				  html += '</ul>';
 				  //html += chunk.xml;

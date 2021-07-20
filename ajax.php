@@ -79,7 +79,6 @@ switch ($_REQUEST["action"]) {
 		collection::deleteSlips($_GET["slipIds"]);
 		break;
 	case "loadSlipData":
-		$db = new database();   //TODO: put this somewhere global SB
 		$result = collection::getSlipInfoBySlipId($_GET["id"], $db);
 		$slipInfo = $result[0];
 		$handler = new xmlfilehandler($slipInfo["filename"]);

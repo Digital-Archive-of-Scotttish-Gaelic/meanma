@@ -7,9 +7,15 @@ namespace models;
 class manuscript
 {
 	private $_id, $_title, $_filename, $_xml;
+	private $_db, $_headword; //instance props required for slip link html call
+	private $_partsOfSpeech = array("noun"=> "n", "verb"=> "v", "preposition"=> "p", "adjective"=> "a",
+		"adverb"=> "A", "other"=> ""); //reverse lookup for POS names to get abbrevations for slip constructor
 
 	public function __construct($id) {
 		$this->_id = $id;
+		if (!$this->_db) {
+			$this->_db = new database();
+		}
 	}
 
 	// SETTERS
@@ -65,7 +71,7 @@ XPATH;
 		//create a copy of the XML
 		$xmlString = $dasgXml->asXml();
 		$xml = new \SimpleXMLElement($xmlString);
-		$modalData["headword"] = $this->_getHeadword($xml);
+		$modalData["headword"] = $this->_headword = $this->_getHeadword($xml);
 		if ($xml->getName()=='name') {
 			$modalData["onomastics"] = $this->_getOnomastics($xml);
 			//check for words within words
@@ -151,7 +157,12 @@ XPATH;
 	//Just to cut down on repetition for <w> and <name> elements
 	private function _populateData($xml) {
 		$modalData["pos"] = $this->_getPOS($xml);
-		// deal with all the possible permutations of links to edil, dwelly, and place data
+
+		//get the slip link HTML
+		$headword = strip_tags($this->_headword);
+		$modalData["slipLinkHtml"] = $this->_getSlipLinkHtml($xml, $headword, $modalData["pos"]);
+
+		//deal with all the possible permutations of links to edil, dwelly, and place data
 		$modalData["edil"] = $this->_getEdilUrl($xml);
 		$modalData["dwelly"] = $modalData["edil"] ? $this->_getDwelly($modalData["edil"]) : null;
 		//if both lemmaDW and lemmaRefDW are provided then don't use hwData to get info
@@ -186,6 +197,21 @@ XPATH;
 		$modalData["handShift"] = $this->_getHandShiftInfo($xml);
 		$modalData["language"] = $this->_getLanguage($xml);
 		return $modalData;
+	}
+
+	/**
+	 * Fetch the HTML required for the 'add' or 'view' slip link for a word
+	 * @param $element
+	 * @param $headword
+	 * @param $pos
+	 */
+	private function _getSlipLinkHtml($element, $headword, $pos) {
+		$wordId = $element->attributes()->id;
+		$slipId = collection::slipExists($_SESSION["groupId"], $this->getFilename(), $wordId);
+		$data = $slipId
+			? collection::getSlipInfoBySlipId($slipId, $this->_db)[0]    //there is a slip so use the data
+			: array("filename"=>$this->getFilename(), "id"=>$wordId, "pos"=>$pos, "lemma"=>$headword);  //new slip
+		return collection::getSlipLinkHtml($data);
 	}
 
 	private function _getHandShiftInfo($element) {
