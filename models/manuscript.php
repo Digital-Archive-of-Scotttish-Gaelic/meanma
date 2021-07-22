@@ -84,7 +84,9 @@ XPATH;
 				$xml2 = $xml->w[0];
 				$modalData = array_merge($modalData, $this->_populateData($xml2));
 			} else if ($wordCount>2 && $nameCount==0 && !$xml->choice) { //there are nested words so don't repeat the headword etc
-				                                      //and don't process emendations (<choice>) - TODO: !hack! talk to MM
+				                                      //and don't process emendations (<choice>) - TODO: talk to MM
+
+				$modalData["worcCheck"] = $wordCheck;
 				$modalData["abbrevs"] = [];
 				$modalData["complexFlag"] = 1;
 				foreach ($wordCheck[0]->children() as $c) {

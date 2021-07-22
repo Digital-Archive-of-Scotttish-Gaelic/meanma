@@ -14,7 +14,7 @@ class login
     } else if ($_REQUEST["loginAction"] == "login") {
       $this->_authenticateUser($_POST); //need to run this twice to show the logout button!
     } else if ($_REQUEST["loginAction"] == "logout") {
-      $this->_logout();
+      $this->logout();
     }
   }
 
@@ -30,7 +30,7 @@ HTML;
         }
         break;
       case "logout":
-        $this->_logout();
+        $this->logout();
         break;
       case "forgotPassword":
 	      $user = models\users::getUser($_SESSION["email"]);
@@ -109,6 +109,8 @@ HTML;
       return false;
     }
     $this->_user = $user;
+    session_regenerate_id();  //prevent session fixation attack
+    $_SESSION["loginTime"] = time();
     $_SESSION["user"] = $user->getEmail();
     models\users::saveUser($user);   //update last login in DB
     return true;
@@ -123,8 +125,9 @@ HTML;
     return isset($_SESSION["user"]);
   }
 
-  private function _logout() {
+  public function logout() {
     unset($this->_user);
+    unset($_SESSION["loginTime"]);
     unset($_SESSION["user"]);
     unset($_SESSION["email"]);
     $this->_view->writeModal("login");
@@ -132,5 +135,9 @@ HTML;
 
   public function writeLoginModal() {
     $this->_view->writeModal("login");
+  }
+
+  public function getLoginTime() {
+  	return $this->_loggedInTime;
   }
 }

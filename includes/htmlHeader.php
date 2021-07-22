@@ -10,27 +10,32 @@ $groupTheme = "007bff"; //default colour scheme (Faclair theme)
 
 $loginControl = new controllers\login();
 if ($loginControl->isLoggedIn() || ($_SESSION["email"] && $_POST["loginAction"] == "savePassword")) {
-	$email = $_SESSION["user"] ? $_SESSION["user"] : $_SESSION["email"];
-	$user = models\users::getUser($email);
-	$userGroups = $user->getGroups();
-	$lastUsedGroup = $user->getLastUsedGroup();
-	$groupTheme = $lastUsedGroup->getTheme();
-	$_SESSION["groupId"] = $lastUsedGroup->getId() ? $lastUsedGroup->getId() : 1;
-	$groupHtml = "";
-	if (count($userGroups ) > 1) {
-		$groupHtml = <<<HTML
+	//check for session timeout and logout if necessary to minimise session fixation attack
+	if (time() - $_SESSION["loginTime"] > (60 * 60 * 10)) { //expire after 10 hours
+		$loginControl->logout();
+	} else {
+		$email = $_SESSION["user"] ? $_SESSION["user"] : $_SESSION["email"];
+		$user = models\users::getUser($email);
+		$userGroups = $user->getGroups();
+		$lastUsedGroup = $user->getLastUsedGroup();
+		$groupTheme = $lastUsedGroup->getTheme();
+		$_SESSION["groupId"] = $lastUsedGroup->getId() ? $lastUsedGroup->getId() : 1;
+		$groupHtml = "";
+		if (count($userGroups) > 1) {
+			$groupHtml = <<<HTML
 			<select class="selectpicker show-tick" data-width="150px">
 HTML;
 
-		foreach ($userGroups as $group) {
-			$groupHtml .= <<<HTML
+			foreach ($userGroups as $group) {
+				$groupHtml .= <<<HTML
 				<option style="background:#{$group->getTheme()}; color:#fff;" value="{$group->getId()}">{$group->getName()}</option>
 HTML;
+			}
+			$groupHtml .= "</select>";
 		}
-		$groupHtml .= "</select>";
+		$name = $user->getFirstName() . ' ' . $user->getLastName();
+		$loggedInHide = "";
 	}
-	$name = $user->getFirstName() . ' ' . $user->getLastName();
-	$loggedInHide = "";
 }
 
 echo <<<HTML
