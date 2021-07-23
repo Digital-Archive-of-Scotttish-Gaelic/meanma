@@ -75,7 +75,7 @@ XPATH;
 		if ($xml->getName()=='name') {
 			$modalData["onomastics"] = $this->_getOnomastics($xml);
 			//check for words within words
-			$wordCheck = $xml->xpath("//w[ancestor::*[@id='{$chunkId}']]");
+//			$wordCheck = $xml->xpath("//w[ancestor::*[@id='{$chunkId}']]");
 			$wordCount = count($wordCheck);
 			$nameCount = count($xml->name);
 			$modalData["wordCount"] = $wordCount;
@@ -83,18 +83,18 @@ XPATH;
 				$modalData["complexFlag"] =  0;
 				$xml2 = $xml->w[0];
 				$modalData = array_merge($modalData, $this->_populateData($xml2));
-			} else if ($wordCount>2 && $nameCount==0 && !$xml->choice) { //there are nested words so don't repeat the headword etc
+/*			} else if ($wordCount>2 && $nameCount==0 && !$xml->choice) { //there are nested words so don't repeat the headword etc
 				                                      //and don't process emendations (<choice>) - TODO: talk to MM
 
 				$modalData["worcCheck"] = $wordCheck;
 				$modalData["abbrevs"] = [];
 				$modalData["complexFlag"] = 1;
-				foreach ($wordCheck[0]->children() as $c) {
+				foreach ($xml->children() as $c) {
 					$n = $c->getName();
 					if ($n=='w' || $n=='name') {
 						$modalData["child"][] = $this->_getLocalModalData($c->attributes()->id);
 					}
-				}
+				} */
 			}	else {
 				$modalData["abbrevs"] = [];
 				$modalData["complexFlag"] = 1;
