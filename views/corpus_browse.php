@@ -677,22 +677,24 @@ HTML;
 				   
 				   //highlight abbreviations and ligatures
 				   $(document).on('mouseover', '.mouseover', function() {
-				     let glyphId = $(this).attr('id');
-				     let ids = glyphId.split('|');      //provides for duplicate glyphs  
-				     ids.forEach((id) => {				      				       
+				     let id = $(this).attr('id');
+			// ! leaving in the duplicate handling code just in case - will probably delete ... SB
+			//	     let ids = glyphId.split('|');      //provides for duplicate glyphs  
+			//	     ids.forEach((id) => {				      				       
 				        $('.'+id).css('background-color', 'yellow');
 				        $('#'+id).css('text-decoration','underline');
-				     });
+			//	     });
 				   });
 				  
 				   //remove highlight from abbreviations and ligatures
 				   $(document).on('mouseout', '.mouseover', function() {
-				     let glyphId = $(this).attr('id');
-				     let ids = glyphId.split('|');      //provides for duplicate glyphs  
-				     ids.forEach((id) => {			
+				     let id = $(this).attr('id');
+			// ! leaving in the duplicate handling code just in case - will probably delete ... SB
+			//	     let ids = glyphId.split('|');      //provides for duplicate glyphs  
+			//	     ids.forEach((id) => {			
 				        $('.'+id).css('background-color', 'inherit');
 				        $('#'+id).css('text-decoration','inherit');
-				     });
+			//	     });
 				   });
 				   
 				   $('.page').click(function(e){
@@ -766,15 +768,16 @@ HTML;
 				  }
 				  if (chunk.abbrevs.glyphs != undefined && chunk.abbrevs.glyphs.length) { //ligatures and abbreviations
 				    html += '<li>scribal abbreviations and ligatures –</li><ul>'
-				    var glyphRefs = []; //used to track used glyphs to hancle duplicates
+			//	    var glyphRefs = []; //used to track used glyphs to hancle duplicates
 				    $.each(chunk.abbrevs.glyphs, function(i, abbr) {
-				      let ref = abbr.g["@attributes"]["ref"];
-				      if (glyphRefs.includes(ref)) {  //ignore duplicate glyphs
-				        return true;
-				      }
-				      glyphRefs.push(ref);
+			// ! leaving in the duplicate handling code just in case - will probably delete ... SB
+			//	      let ref = abbr.g["@attributes"]["ref"];
+			//	      if (glyphRefs.includes(ref)) {  //ignore duplicate glyphs
+			//	        return true;
+			//	      }
+			//	      glyphRefs.push(ref);
 				      let corresp = abbr.corresp ? abbr.corresp[0] : '';
-				      html += '<li><a target="_blank" id="' + chunk.abbrevs.glyphIds[ref] + '" class="mouseover" href="' + corresp + '">' + abbr.name[0] + '</a>: ';
+				      html += '<li><a target="_blank" id="' + abbr.g["@attributes"]["id"] + '" class="mouseover" href="' + corresp + '">' + abbr.name[0] + '</a>: ';
 				      html += abbr.note[0] + ' (' + abbr.cert[0] + ' certainty)</li>';
 				    });
 				    html += '</ul>';				    

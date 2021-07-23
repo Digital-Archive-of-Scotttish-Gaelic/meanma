@@ -382,23 +382,25 @@ XPATH;
 	private function _getGlygatures($element) {
 		$results = array();
 		$glygs = $element->xpath("//g");
-		$glyphIds = [];
+		//$glyphIds = [];   // ! leaving in the duplicate handling code just in case - will probably delete ... SB
 		foreach ($glygs as $g) {
 			if ($ref = (string)$g->attributes()->ref) {
-				//check for duplicate glyph
+				//check for duplicate glyph     // ! leaving in the duplicate handling code just in case - will probably delete ... SB
+				/*
 				if (!empty($glyphIds[$ref])) {
 					$glyphIds[$ref] .= "|" . $g["id"];
 				} else {
 					$glyphIds[$ref] = (string)$g["id"];
 				}
+				*/
 				$glyg = new glygature($ref);
-				$abbr = $element->xpath("//abbr[child::g[@ref='{$ref}']]");
+				$abbr = $element->xpath("//abbr[child::g[@id='{$g["id"]}']]");
 				$certainty = $abbr ? $abbr[0]->attributes()->cert : array("unknown");
 				$results["glyphs"][] = array("g" => $g, "cert" => $certainty ? $certainty : ['undefined'],
 					"name" => $glyg->getName(), "note" => $glyg->getNote(), "corresp" => $glyg->getCorresp(), "id" => $g["id"]);
 			}
 		}
-		$results["glyphIds"] = $glyphIds;
+	//	$results["glyphIds"] = $glyphIds;
 		return $results;
 	}
 
