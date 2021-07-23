@@ -75,7 +75,7 @@ XPATH;
 		if ($xml->getName()=='name') {
 			$modalData["onomastics"] = $this->_getOnomastics($xml);
 			//check for words within words
-//			$wordCheck = $xml->xpath("//w[ancestor::*[@id='{$chunkId}']]");
+			$wordCheck = $xml->xpath("//w[ancestor::*[@id='{$chunkId}']]");
 			$wordCount = count($wordCheck);
 			$nameCount = count($xml->name);
 			$modalData["wordCount"] = $wordCount;
@@ -111,6 +111,7 @@ XPATH;
 			$wordCheck = $xml->xpath("//w[ancestor::*[@id='{$chunkId}']]");
 			$wordCount = count($wordCheck);
 			if ($wordCount > 1) {
+				$modalData["abbrevs"] = [];   //do not display glygatures at parent level
 				$modalData["complexFlag"] = 1;
 				foreach ($wordCheck as $w) {
 					$modalData["child"][] = $this->_getLocalModalData($w->attributes()->id);
