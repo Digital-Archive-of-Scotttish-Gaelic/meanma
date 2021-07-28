@@ -6,15 +6,15 @@ namespace models;
 
 class slow_search
 {
-	private $_filepathOffset = 58;  //used to find the filename in a path
-	private $_path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/corpas/xml'; //server path to XML files
+	private $_filepathOffset = 51;  //used to find the filename in a path
+	private $_path = '/var/www/html/dasg.arts.gla.ac.uk/www/gadelica/xml'; //server path to XML files
 	private $_id;   //the text ID
 	private $_db;   //database
 
 	public function __construct($id) {
 		if (substr(getcwd(), 0, 6) == "/Users") {   //for local testing
-			$this->_filepathOffset = 7;
-			$this->_path = "../xml";
+			$this->_filepathOffset = 16;
+			$this->_path = "../gadelica/xml";
 		}
 		$this->_id = $id ? $id : 0;
 		$this->_db = isset($this->_db) ? $this->_db : new database();
