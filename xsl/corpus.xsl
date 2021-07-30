@@ -244,11 +244,12 @@
   <xsl:template match="dasg:w/dasg:lb">
     <small class="text-muted"><xsl:text>(</xsl:text><xsl:value-of select="@n"/><xsl:text>)</xsl:text></small>
   </xsl:template>
+  -->
+  
   
   <xsl:template match="dasg:lb">
-    <small class="text-muted"><xsl:text> (</xsl:text><xsl:value-of select="@n"/><xsl:text>) </xsl:text></small>
+    <br/>
   </xsl:template>
-  -->
   
   <xsl:template match="dasg:s">
     <xsl:text> </xsl:text>
