@@ -34,6 +34,21 @@ HTML;
     echo <<<HTML
 				{$this->_writeContext()}
 				{$this->_writeCollocatesView()}
+				<div style="margin-left: 10px;">
+					<small><a href="#translationContainer" id="toggleTranslation" data-toggle="collapse" aria-expanded="false" aria-controls="translationContainer">
+            show/hide translation
+          </a></small>
+        </div>
+				<div id="translationContainer" class="collapse form-group">
+          <label for="slipTranslation">English translation:</label>
+          <textarea class="form-control" name="slipTranslation" id="slipTranslation" rows="3">{$this->_slip->getTranslation()}</textarea>
+          <script>
+            CKEDITOR.replace('slipTranslation', {
+              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
+            });
+          </script>
+        </div>
         <div class="form-group" id="slipChecked">
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="checkbox" name="starred" id="slipStarred" {$checked}>
@@ -47,11 +62,11 @@ HTML;
 					</select>
 				</div>
         <div>
-          <small><a href="#morphoSyntactic" id="toggleMorphoSyntactic" data-toggle="collapse" aria-expanded="false" aria-controls="morphoSyntactic">
+          <small><a href="#morphoSyntactic" id="toggleMorphoSyntactic" data-toggle="collapse" aria-expanded="true" aria-controls="morphoSyntactic">
             show/hide morphosyntax
           </a></small>
         </div>
-        <div id="morphoSyntactic" class="collapse editSlipSectionContainer">
+        <div id="morphoSyntactic" class="collapse editSlipSectionContainer show">
           <div class="form-group row">
             <label class="col-form-label col-sm-1" for="slipHeadword">Headword:</label>
             <input class="col-sm-3 form-control" type="text" id="slipHeadword" name="slipHeadword" value="{$this->_slip->getHeadword()}"> 
@@ -64,27 +79,12 @@ HTML;
 
 	  $this->_writeSenseCategories();
     echo <<<HTML
-				<div style="margin-left: 10px;">
-					<small><a href="#translationContainer" id="toggleTranslation" data-toggle="collapse" aria-expanded="false" aria-controls="translationContainer">
-            show/hide translation
-          </a></small>
-        </div>
-        <div id="translationContainer" class="collapse form-group">
-          <label for="slipTranslation">English translation:</label>
-          <textarea class="form-control" name="slipTranslation" id="slipTranslation" rows="3">{$this->_slip->getTranslation()}</textarea>
-          <script>
-            CKEDITOR.replace('slipTranslation', {
-              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
-              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
-            });
-          </script>
-        </div>
-        <div style="margin: 0 0 10px 10px;">
-          <small><a href="#notesSection" id="toggleNotes" data-toggle="collapse" aria-expanded="false" aria-controls="notesSection">
+				<div style="margin: 0 0 10px 10px;">
+          <small><a href="#notesSection" id="toggleNotes" data-toggle="collapse" aria-expanded="true" aria-controls="notesSection">
             show/hide notes
           </a></small>
         </div>
-        <div id="notesSection" class="form-group collapse">
+        <div id="notesSection" class="form-group collapse show">
           <label for="slipNotes">Notes:</label>
           <textarea class="form-control" name="slipNotes" id="slipNotes" rows="3">{$this->_slip->getNotes()}</textarea>
           <script>
@@ -378,11 +378,11 @@ HTML;
     }
     echo <<<HTML
 				<div style="margin-left: 10px;">
-					<small><a href="#senses" id="toggleSenses" data-toggle="collapse" aria-expanded="false" aria-controls="senses">
+					<small><a href="#senses" id="toggleSenses" data-toggle="collapse" aria-expanded="true" aria-controls="senses">
             show/hide senses
           </a></small>
         </div>
-        <div id="senses" class="editSlipSectionContainer collapse">
+        <div id="senses" class="editSlipSectionContainer collapse show">
           <h5>Sense Categories</h5>
           <div class="form-group row">
             <div class="col-md-3">
