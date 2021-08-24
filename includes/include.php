@@ -12,6 +12,7 @@ if (!$_SESSION["printSlips"]) {
 //constants
 define("INPUT_FILEPATH", "../gadelica/xml/");
 define("SCANS_FILEPATH", "../../scans/");
+define("REST_PATH", "http://localhost:8080/exist/rest/db/query.xql");  //the eXist DB API
 
 define("DB", "corpas");       //the production database
 //define("DB", "corpas_dev");       //the test database
