@@ -135,11 +135,15 @@ SQL;
 	/**
 	 * Gets slip info from the DB
 	 * @param $slipId
+	 * @param $db the current models\database object
+	 * @param $groupId a workspace/group ID passed through an API call
 	 * @return array of DB results
 	 */
-	public static function getSlipInfoBySlipId($slipId, $db) {
+	public static function getSlipInfoBySlipId($slipId, $db, $groupId = null) {
+		if ($groupId) {
+			$_SESSION["groupId"] = $groupId; //used in API calls to Meanma for other apps (such as briathradan)
+		}
 		$slipInfo = array();
-//		$db = new database();
 		$dbh = $db->getDatabaseHandle();
 		try {
 			$sql = <<<SQL

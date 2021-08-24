@@ -79,7 +79,7 @@ switch ($_REQUEST["action"]) {
 		collection::deleteSlips($_GET["slipIds"]);
 		break;
 	case "loadSlipData":
-		$result = collection::getSlipInfoBySlipId($_GET["id"], $db);
+		$result = collection::getSlipInfoBySlipId($_GET["id"], $db, $_GET["groupId"]);
 		$slipInfo = $result[0];
 		$handler = new xmlfilehandler($slipInfo["filename"]);
 		$context = $handler->getContext($slipInfo["id"], $slipInfo["preContextScope"], $slipInfo["postContextScope"]);
