@@ -32,7 +32,7 @@ HTML;
           <thead>
               <tr>
                   <th data-field="auto_id" data-sortable="true">ID</th>
-                  <th data-field="lemma" data-sortable="true">Headword</th>
+                  <th data-field="headword" data-sortable="true">Headword</th>
                   <th data-field="wordform" data-sortable="true">Wordform</th>
                   <th data-field="wordclass" data-sortable="true">Part-of-speech</th>
                   <th data-field="senses">Senses</th>

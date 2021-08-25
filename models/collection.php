@@ -33,7 +33,7 @@ SQL;
 	    $sql = <<<SQL
         SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, wordform, firstname, lastname,
                 date_of_lang, title, page, CONCAT(firstname, ' ', lastname) as fullname, locked,
-             		l.pos as pos, s.lastUpdated as lastUpdated, updatedBy, wordclass
+             		l.pos as pos, s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
             FROM slips s
             JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
             JOIN entry e ON e.id = s.entry_id
@@ -83,13 +83,14 @@ HTML;
 				$rows[$index]["deleteSlip"] = <<<HTML
 					<input type="checkbox" class="markToDelete" id="deleteSlip_{$slipId}"> 
 HTML;
-
+				$headword = $slip["headword"] ? $slip["headword"] : $slip["lemma"]; //if there is an entry then use its hw
+	                                                                    //otherwise use the default DB lemma
       	//create the slip link code
 	      $slipUrl = <<<HTML
                 <a href="#" class="slipLink2"
                     data-toggle="modal" data-target="#slipModal"
                     data-auto_id="{$slip["auto_id"]}"
-                    data-headword="{$slip["lemma"]}"
+                    data-headword="{$headword}"
                     data-pos="{$slip["pos"]}"
                     data-id="{$slip["id"]}"
                     data-xml="{$slip["filename"]}"
@@ -148,7 +149,8 @@ SQL;
 		try {
 			$sql = <<<SQL
         SELECT s.filename as filename, s.id as id, auto_id, pos, lemma, preContextScope, postContextScope,
-                translation, date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id
+                translation, date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id, 
+               	e.headword AS headword
             FROM slips s
             JOIN entry e ON e.id = s.entry_id
             JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
@@ -349,7 +351,7 @@ HTML;
         <a href="{$slipUrl}" data-url="{$dataUrl}" class="{$slipClass} {$createSlipStyle}"
             {$modalCode}
             data-auto_id="{$slipId}"
-            data-headword="{$data["lemma"]}"
+            data-headword="{$data["headword"]}"
             data-pos="{$data["pos"]}"
             data-id="{$data["id"]}"
             data-xml="{$data["filename"]}"
