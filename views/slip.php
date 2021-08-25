@@ -663,6 +663,9 @@ HTML;
               });
             });
 
+            /*
+              ** Change of wordclass or headword
+             */
             $('#wordClass,#slipHeadword').on('change', function() {
               let check = confirm('Changing the headword and/or wordclass will remove any senses. Are you sure you want to proceed?');
               let previousHeadword = '{$this->_slip->getHeadword()}';

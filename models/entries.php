@@ -120,7 +120,7 @@ SQL;
 			SELECT count(*) as c FROM slips s WHERE entry_id = :id
 SQL;
 		$result = $db->fetch($sql, array(":id" => $id));
-		$isEmpty = $result[0]["c"] == "0";
+		$isEmpty = $result[0]["c"] == 0;
 		return $isEmpty;
   }
 

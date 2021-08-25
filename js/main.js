@@ -277,7 +277,6 @@ function saveSlip() {
     notes: notes, status: status, preContextScope: $('#slipContext').attr('data-precontextscope'),
     postContextScope: $('#slipContext').attr('data-postcontextscope'), wordClass: wordclass,
     locked: locked};
-  console.log(data);
   switch (wordclass) {
     case "noun":
       data['numgen'] = $('#posNumberGender').val();

@@ -88,8 +88,13 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "getSenseCategoriesForNewWordclass":
 		$slip = new slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"]);
+		$oldEntryId = $slip->getEntryId();
 		$slip->updateEntry($_GET["headword"], $_GET["wordclass"]);  //update entry with new wordclass
 		$slip->saveSlip($_GET);
+		// check the old entry for this slip and delete if now empty
+		if (entries::isEntryEmpty($oldEntryId)) {
+			entries::deleteEntry($oldEntryId);
+		}
 		$senses = $slip->getUnusedSenses();
 		$unusedSenseInfo = array();
 		foreach ($senses as $sense) {
