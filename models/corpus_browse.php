@@ -284,4 +284,12 @@ SQL;
 			":id"=>$id, ":title"=>$data["subTextTitle"], ":partOf"=>$partOf, ":filepath"=>$data["filepath"],
 				":date"=>$data["subTextDate"], ":level"=>$data["subTextLevel"], ":notes"=>$data["subTextNotes"]));
 	}
+
+	public static function getTextIdFromFilepath($filepath, $db) {
+		$sql = <<<SQL
+			SELECT id AS text_id FROM text WHERE filepath = :filepath
+SQL;
+		$result = $db->fetch($sql, array(":filepath" => $filepath));
+		return $result[0]["text_id"];
+	}
 }

@@ -6,7 +6,7 @@ class slip
 {
 	const SCOPE_DEFAULT = 80;
 
-  private $_auto_id, $_filename, $_id, $_pos, $_db;
+  private $_auto_id, $_textId, $_filename, $_id, $_pos, $_db;
   private $_starred, $_translation, $_notes, $_locked, $_ownedBy, $_entryId, $_headword, $_slipStatus;
   private $_preContextScope, $_postContextScope, $_wordClass, $_lastUpdatedBy, $_lastUpdated;
   private $_isNew;
@@ -35,6 +35,7 @@ class slip
   }
 
   private function _loadSlip($preScope, $postScope) {
+    $this->_textId = corpus_browse::getTextIdFromFilepath($this->getFilename(), $this->_db);
     $this->_slipMorph = new slipmorphfeature($this->_pos);
     if (!$this->getAutoId()) {  //create a new slip entry
       $this->_isNew = true;
@@ -224,6 +225,10 @@ SQL;
     return $this->_lastUpdated;
   }
 
+  public function getTextId() {
+  	return $this->_textId;
+  }
+
 	/**
 	 * Fetches a list of all unused senses for this headword and wordclass combination
 	 * @return array of sense objects
@@ -284,12 +289,12 @@ SQL;
     $this->_saveSlipMorph();
     $sql = <<<SQL
         UPDATE slips 
-            SET locked = ?, starred = ?, translation = ?, notes = ?, 
+            SET text_id = ?, locked = ?, starred = ?, translation = ?, notes = ?, 
                 entry_id = ?, preContextScope = ?, postContextScope = ?, slipStatus = ?,
              		updatedBy = ?, lastUpdated = now()
             WHERE auto_id = ?
 SQL;
-    $this->_db->exec($sql, array($this->getLocked(), $this->getStarred(), $this->getTranslation(),
+    $this->_db->exec($sql, array($this->getTextId(), $this->getLocked(), $this->getStarred(), $this->getTranslation(),
 	    $this->getNotes(), $this->getEntryId(), $this->getPreContextScope(), $this->getPostContextScope(),
 	    $this->getSlipStatus(), $this->getLastUpdatedBy(), $this->getAutoId()));
     return $this;
