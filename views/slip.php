@@ -103,6 +103,7 @@ HTML;
             <input type="hidden" id="pos" name="pos" value="{$_REQUEST["pos"]}">
             <input type="hidden" id="preContextScope" name="preContextScope" value="{$this->_slip->getPreContextScope()}">
             <input type="hidden" id="postContextScope" name="postContextScope" value="{$this->_slip->getPostContextScope()}">
+            <input type="hidden" id="textId" name="textId" value="{$this->_slip->getTextId()}">
             <input type="hidden" name="action" value="save">
             {$lockedHtml}
             <div class="mx-2">

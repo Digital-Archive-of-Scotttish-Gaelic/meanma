@@ -44,10 +44,11 @@ class slip
       //get the entry
 	    $this->_entry = entries::getEntryByHeadwordAndWordclass($this->getHeadword(), $this->getWordClass());
       $sql = <<<SQL
-        INSERT INTO slips (filename, id, entry_id, preContextScope, postContextScope, ownedBy) VALUES (?, ?, ?, ?, ?, ?);
+        INSERT INTO slips (filename, text_id, id, entry_id, preContextScope, postContextScope, ownedBy) 
+        	VALUES (?, ?, ?, ?, ?, ?, ?);
 SQL;
-      $this->_db->exec($sql, array($this->_filename, $this->_id, $this->_entry->getId(), $preScope, $postScope,
-	      $_SESSION["user"]));
+      $this->_db->exec($sql, array($this->_filename, $this->getTextId(),  $this->_id, $this->_entry->getId(),
+	      $preScope, $postScope, $_SESSION["user"]));
       $this->_auto_id = $this->_db->getLastInsertId();
       $this->_saveSlipMorph();    //save the defaults to the DB
     }
