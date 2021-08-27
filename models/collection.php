@@ -9,9 +9,13 @@ class collection
    *
    * @return array of DB results
    */
-  public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort, $order) {
-  	$sort = $sort ? $sort : "auto_id";
-  	$order = $order ? $order : "ASC";
+  public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "date_of_lang", $order = "ASC") {
+  	if (stristr("'", $sort) || stristr('"')) {
+  		return false;   //possible attack
+	  }
+  	if ($order != "ASC" AND $order != "DESC") {
+  		return false;   //possible attack
+	  }
   	$params = array(":limit" => (int)$limit, ":offset" => (int)$offset);
     $db = new database();
     $dbh = $db->getDatabaseHandle();
