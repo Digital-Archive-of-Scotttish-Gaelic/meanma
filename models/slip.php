@@ -21,6 +21,7 @@ class slip
   private $_slipMorph;  //an instance of models\slipmorphfeature
   private $_senses = array();
   private $_sensesInfo = array();   //used to store sense info (in place of object data) for AJAX use
+	private $_citations;  //an array of citation objects
 
   public function __construct($filename, $id, $auto_id = null, $pos, $preScope = self::SCOPE_DEFAULT, $postScope = self::SCOPE_DEFAULT) {
     $this->_filename = $filename;
