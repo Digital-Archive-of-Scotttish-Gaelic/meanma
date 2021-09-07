@@ -59,8 +59,13 @@ switch ($_REQUEST["action"]) {
       "wordClass"=>$slip->getWordClass(), "senses"=>$slip->getSensesInfo(),
       "lastUpdated"=>$slip->getLastUpdated(), "textId"=>$textId, "slipMorph"=>$slip->getSlipMorph()->getProps());
     //code required for modal slips
+
+    //new citation code
+    $citations = $slip->getCitations();
+		$citation = $citations[0];  //first citation
+	  //
     $handler = new xmlfilehandler($_GET["filename"]);
-    $context = $handler->getContext($_GET["id"], $results["preContextScope"], $results["postContextScope"]);
+    $context = $handler->getContext($_GET["id"], $citation->getPreContextScope(), $citation->getPostContextScope());
     $results["context"] = $context;
     $results['isOwner'] = $slip->getOwnedBy() == $_SESSION["user"];
     $user = users::getUser($_SESSION["user"]);

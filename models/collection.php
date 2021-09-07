@@ -10,10 +10,14 @@ class collection
    * @return array of DB results
    */
   public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "date_of_lang", $order = "ASC") {
-  	if (stristr("'", $sort) || stristr('"')) {
+  	$sort = empty($sort) ? "date_of_lang" : $sort;
+  	$order = empty($order) ? "ASC" : $order;
+  	if (stristr("'", $sort) || stristr('"', $sort)) {
+  		echo json_encode(array("error" => "invalid sort param"));
   		return false;   //possible attack
 	  }
   	if ($order != "ASC" AND $order != "DESC") {
+		  echo json_encode(array("error" => "invalid order param"));
   		return false;   //possible attack
 	  }
   	$params = array(":limit" => (int)$limit, ":offset" => (int)$offset);

@@ -84,7 +84,7 @@ $(function () {
   /**
    * Load and display slip data in a modal
    */
-  $('#slipModal').on('show.bs.modal', function (event) { // added by MM
+  $('#slipModal').on('show.bs.modal', function (event) {
     var modal = $(this);
     var slipLink = $(event.relatedTarget);
     //reset lock buttons

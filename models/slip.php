@@ -131,6 +131,17 @@ SQL;
     }
   }
 
+  public function getCitations() {
+		$sql = <<<SQL
+			SELECT citation_id FROM slip_citation WHERE slip_id = :id
+SQL;
+		$results = $this->_db->fetch($sql, array(":id" => $this->getAutoId()));
+		foreach ($results as $result) {
+			$this->_citations[] = new citation($this->_db, $result["citation_id"]);
+		}
+		return $this->_citations;
+  }
+
   public function getScopeDefault() {
   	return self::SCOPE_DEFAULT;
   }
