@@ -6,9 +6,10 @@ use models;
 class slip
 {
   private $_slip;   //an instance of the Slip class
-
+	private $_citations;  //an array of citation objects; instance property to prevent unnecessary duplicate DB calls
   public function __construct($slip) {
     $this->_slip = $slip;
+	  $this->_citations = $this->_slip->getCitations();
   }
 
   public function show($action) {
@@ -422,9 +423,18 @@ HTML;
   }
 
   private function _writeContext() {
+  	$citationTypeHtml = '<select id="citation[0]" name="citation[0]" class="form-control col-1">';
+  	foreach (models\citation::$types as $citationType) {
+  		$selected = $this->_citations[0]->getType() == $citationType ? "selected" : "";
+			$citationTypeHtml .= <<<HTML
+				<option value="{$citationType}" {$selected}>{$citationType}</option>
+HTML;
+	  }
+		$citationTypeHtml .= "</select>";
+
     $handler = new models\xmlfilehandler($this->_slip->getFilename());
-    $preScope = $this->_slip->getPreContextScope();
-    $postScope = $this->_slip->getPostContextScope();
+    $preScope = $this->_citations[0]->getPreContextScope(); //get the context for the first citation
+    $postScope = $this->_citations[0]->getPostContextScope();
     $context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
     $preIncrementDisable = $postIncrementDisable = "";
     $updateSlip = false;  //flag used to track if the pre or post scopes != defaults
@@ -474,6 +484,15 @@ HTML;
               </div>
               <div style="height: 20px;">
                 <a href="#" class="float-right" id="resetContext">reset context</a>
+							</div>
+							<div class="row">		
+								<label class="col-2" for="citation[0]">Citation type:</label>
+                {$citationTypeHtml}
+                <label class="col-2" for="addCitation[0]">Add citation:</label>
+                <div class="col-1">
+                  <a href="#" title="add citation" style="font-size: 24px;"><i class="fas fa-plus" style="color: #007bff;">
+										</i></a> 
+									</div>
 							</div>
             </div>
 HTML;

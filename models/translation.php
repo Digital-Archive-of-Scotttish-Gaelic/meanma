@@ -7,6 +7,8 @@ class translation
 	private $_id, $_content, $_type, $_lastUpdated;
 	private $_db; //an instance of models\database
 
+	public static $types = array("working");  //the possible values for translation type
+
 	public function __construct($db, $id = null) {
 		$this->_db = $db;
 		if ($id) {

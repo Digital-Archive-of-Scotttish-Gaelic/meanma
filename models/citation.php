@@ -9,6 +9,8 @@ class citation
 	private $_lastUpdated;
 	private $_translations = array(); //an array of translation objects
 
+	public static $types = array("long", "short");  //the possible values for citation type
+
 	public function __construct($db, $id = null) {
 		$this->_db = $db;
 		if ($id) {
