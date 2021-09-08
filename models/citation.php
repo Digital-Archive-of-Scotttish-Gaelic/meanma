@@ -8,6 +8,9 @@ class citation
 	private $_id, $_type, $_preContextScope, $_postContextScope, $_preContextString, $_postContextString;
 	private $_lastUpdated;
 	private $_translations = array(); //an array of translation objects
+	private $_slipId;
+
+	const SCOPE_DEFAULT = 80;
 
 	public static $types = array("long", "short");  //the possible values for citation type
 
@@ -16,7 +19,18 @@ class citation
 		if ($id) {
 			$this->_id = $id;
 			$this->_load();
+		} else {
+			$this->_init();
 		}
+	}
+
+	private function _init() {
+		$sql = <<<SQL
+			INSERT INTO citation (`preContextScope`, `postContextScope`) VALUES(:pre, :post);
+SQL;
+		$this->_db->exec($sql, array(":pre" => $this->getScopeDefault(), ":post" => $this->getScopeDefault()));
+		$id = $this->_db->getLastInsertId();
+		$this->_id = $id;
 	}
 
 	private function _load() {
@@ -42,6 +56,13 @@ SQL;
 		foreach ($result as $row) {
 			$this->_translations[] = new translation($this->_db, $row["translation_id"]);
 		}
+	}
+
+	public function attachToSlip($slipId) {
+		$sql = <<<SQL
+			INSERT INTO slip_citation (`slip_id`, `citation_id`) VALUES (:slipId, :citationId)
+SQL;
+		$this->_db->exec($sql, array(":slipId" => $slipId, ":citationId" => $this->getId()));
 	}
 
 	//GETTERS
@@ -75,5 +96,20 @@ SQL;
 
 	public function getLastUpdated() {
 		return $this->_lastUpdated;
+	}
+
+	public function getScopeDefault() {
+		return $this->SCOPE_DEFAULT;
+	}
+
+	public function getSlipId() {
+		if (empty($this->_slipId)) {
+			$sql = <<<SQL
+				SELECT slip_id FROM slip_citation WHERE citation_id = :id
+SQL;
+			$result = $this->_db->fetch($sql, array(":id" => $this->getId()));
+			$this->_slipId = $result[0]["slip_id"];
+		}
+		return $this->_slipId;
 	}
 }

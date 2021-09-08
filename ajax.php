@@ -74,7 +74,11 @@ switch ($_REQUEST["action"]) {
     //
     echo json_encode($results);
     break;
-    //the following used for the gramar site
+	case "createCitation":
+		$citation = new citation($db);
+		$citation->attachToSlip($_GET["slipId"]);
+		echo json_encode(array("id" => $citation->getId()));
+		break;
 	case "deleteSlips":
 				//! only superusers can do this
 		$user = users::getUser($_SESSION["email"]);

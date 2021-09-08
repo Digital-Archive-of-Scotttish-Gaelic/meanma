@@ -423,7 +423,7 @@ HTML;
   }
 
   private function _writeContext() {
-  	$citationTypeHtml = '<select id="citation[0]" name="citation[0]" class="form-control col-1">';
+  	$citationTypeHtml = '<select id="citationType" name="citationType" class="form-control col-1">';
   	foreach (models\citation::$types as $citationType) {
   		$selected = $this->_citations[0]->getType() == $citationType ? "selected" : "";
 			$citationTypeHtml .= <<<HTML
@@ -436,33 +436,11 @@ HTML;
     $preScope = $this->_citations[0]->getPreContextScope(); //get the context for the first citation
     $postScope = $this->_citations[0]->getPostContextScope();
     $context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
-    $preIncrementDisable = $postIncrementDisable = "";
-    $updateSlip = false;  //flag used to track if the pre or post scopes != defaults
-    //check for start/end of document
-    if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
-      $this->_slip->setPreContextScope($context["prelimit"]);
-      $preIncrementDisable = "disabled";
-      $updateSlip = true;
-    }
-    if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
-    	$this->_slip->setPostContextScope($context["postlimit"]);
-    	$postIncrementDisable = "disabled";
-    	$updateSlip = true;
-    }
-    $contextHtml = $context["pre"]["output"];
-    if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
-      $contextHtml .= ' ';
-    }
-    $contextHtml .= <<<HTML
-      <mark id="slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
-HTML;
-    if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
-      $contextHtml .= ' ';
-    }
-    $contextHtml .= $context["post"]["output"];
+
+		$contextData = $this->_getContextData($context);
     $preScope = $this->_slip->getPreContextScope();
     $postScope = $this->_slip->getPostContextScope();
-    if ($updateSlip) {
+    if ($contextData["updateSlip"]) {
     	$this->_slip->updateContexts();
     }
     echo <<<HTML
@@ -473,29 +451,74 @@ HTML;
               <h5>Adjust citation context</h5>
               <div>
 								<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
-								<a class="updateContext btn-link {$preIncrementDisable}" id="incrementPre"><i class="fas fa-plus"></i></a>
+								<a class="updateContext btn-link {$contextData["preIncrementDisable"]}" id="incrementPre"><i class="fas fa-plus"></i></a>
               </div>
               <span data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="slipContext" class="slipContext">
-                {$contextHtml}
+                {$contextData["html"]}
               </span>
               <div>
                 <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
-								<a class="updateContext btn-link {$postIncrementDisable}" id="incrementPost"><i class="fas fa-plus"></i></a>
+								<a class="updateContext btn-link {$contextData["postIncrementDisable"]}" id="incrementPost"><i class="fas fa-plus"></i></a>
               </div>
               <div style="height: 20px;">
                 <a href="#" class="float-right" id="resetContext">reset context</a>
 							</div>
 							<div class="row">		
-								<label class="col-2" for="citation[0]">Citation type:</label>
+								<label class="col-2" for="citationType">Citation type:</label>
                 {$citationTypeHtml}
-                <label class="col-2" for="addCitation[0]">Add citation:</label>
+                <label class="col-2" for="addCitation">Add citation:</label>
                 <div class="col-1">
-                  <a href="#" title="add citation" style="font-size: 24px;"><i class="fas fa-plus" style="color: #007bff;">
+                  <a href="#" class="addCitationLink" title="add citation" style="font-size: 24px;"><i class="fas fa-plus" style="color: #007bff;">
 										</i></a> 
 									</div>
 							</div>
+							<!-- citation links -->
+							<div>
+								<ul id="citationLinks" class="list-group list-group-horizontal">
+									<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #0000FF">
+									  <a href="#"><span class="badge badge-primary badge-pill">1</span></a>
+									</li>
+								</ul>
+							</div>
             </div>
 HTML;
+  }
+
+	/**
+	 * @param $context : the array passed back by xmlfilehandler which includes pre and post context, the word, and join info
+	 * @return mixed array : an mixed associative array comprising context html and flags for processing:
+	 *    : string html : the generated HTML based on the pre and post contexts, the word, and any required joins
+	 *    : string preIncrementDisable : empty or 'disabled' if the start of the document has been reached
+	 *    : string postIncrementDisable : empty or 'disabled' if the end of the document has been reached
+	 *    : boolean updateSlip : a flag to determine whether to write the context scope to the database
+	 */
+  private function _getContextData($context) {
+	  $preIncrementDisable = $postIncrementDisable = "";
+	  $updateSlip = false;  //flag used to track if the pre or post scopes != defaults
+	  //check for start/end of document
+	  if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
+		  $this->_slip->setPreContextScope($context["prelimit"]);
+		  $preIncrementDisable = "disabled";
+		  $updateSlip = true;
+	  }
+	  if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
+		  $this->_slip->setPostContextScope($context["postlimit"]);
+		  $postIncrementDisable = "disabled";
+		  $updateSlip = true;
+	  }
+	  $contextHtml = $context["pre"]["output"];
+	  if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
+		  $contextHtml .= ' ';
+	  }
+	  $contextHtml .= <<<HTML
+      <mark id="slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
+HTML;
+	  if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
+		  $contextHtml .= ' ';
+	  }
+	  $contextHtml .= $context["post"]["output"];
+	  return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
+		  $postIncrementDisable, "updateSlip" => $updateSlip);
   }
 
 	private function _writeCollocatesView() {
@@ -531,7 +554,16 @@ HTML;
   private function _writeJavascript() {
     echo <<<HTML
         <script>  
-          $(function () {            
+          $(function () {        
+            
+            //add citation 
+            $('.addCitationLink').on('click', function () {
+              html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #0000FF">';
+							html += '<a href="#"><span class="badge badge-primary badge-pill">2</span></a></li>';
+              $('#citationLinks').append(html)
+              
+            });
+       
 		        //update the slip context on click of token
 		        $(document).on('click', '.contextLink',  function () {
 		          $(this).tooltip('hide')
@@ -795,6 +827,8 @@ HTML;
             });
             
             $('.updateContext').on('click', function () {
+              
+           console.log('updateContext');   
 					    var preScope = $('#slipContext').attr('data-precontextscope');
 					    var postScope = $('#slipContext').attr('data-postcontextscope');
 					    var filename = $('#slipFilename').text();
