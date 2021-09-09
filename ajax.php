@@ -77,7 +77,9 @@ switch ($_REQUEST["action"]) {
 	case "createCitation":
 		$citation = new citation($db);
 		$citation->attachToSlip($_GET["slipId"]);
-		echo json_encode(array("id" => $citation->getId()));
+		$context = $citation->getContext();
+		echo json_encode(array("id"=>$citation->getId(), "preScope"=>$citation->getPostContextScope(),
+			"postScope"=>$citation->getPostContextScope(), "context" => $context));
 		break;
 	case "deleteSlips":
 				//! only superusers can do this

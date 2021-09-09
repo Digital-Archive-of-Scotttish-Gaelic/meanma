@@ -512,8 +512,21 @@ HTML;
             
             //add citation 
             $('.addCitationLink').on('click', function () {
-              $.ajax('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
+              $.getJSON('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
               .done(function(data) {
+                let context = data.context;
+                  //update the context scope
+                $('#contextScope').attr('data-precontextscope', data.preScope);
+                $('#contextScope').attr('data-postcontextscope', data.preScope);
+                $('#incrementPre').addClass(context.preIncrementDisable);
+                $('#incrementPost').addClass(context.postIncrementDisable);
+                  //update the context html
+                $('#slipContext').html(context.html);
+                  //update the citationType select
+                $('#citationType').val('short');
+                  //update the other citation links and deactivate current badge
+                
+                  //write the citation badge
                 html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #0000FF">';
 								html += '<a href="#"><span class="badge badge-primary badge-pill">2</span></a></li>';
                 $('#citationLinks').append(html)

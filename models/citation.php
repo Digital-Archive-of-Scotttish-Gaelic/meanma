@@ -25,10 +25,12 @@ class citation
 	}
 
 	private function _init() {
+		$this->_preContextScope = self::SCOPE_DEFAULT;
+		$this->_postContextScope = self::SCOPE_DEFAULT;
 		$sql = <<<SQL
 			INSERT INTO citation (`preContextScope`, `postContextScope`) VALUES(:pre, :post);
 SQL;
-		$this->_db->exec($sql, array(":pre" => $this->getScopeDefault(), ":post" => $this->getScopeDefault()));
+		$this->_db->exec($sql, array(":pre" => $this->_postContextScope, ":post" => $this->_postContextScope));
 		$id = $this->_db->getLastInsertId();
 		$this->_id = $id;
 	}
@@ -76,8 +78,8 @@ SQL;
 	 */
 	public function getContext() {
 		$handler = new xmlfilehandler($this->_slip->getFilename());
-		$preScope = $this->_slip->getPreContextScope();
-		$postScope = $this->_slip->getPostContextScope();
+		$preScope = $this->getPreContextScope();
+		$postScope = $this->getPostContextScope();
 		$context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
 		$preIncrementDisable = $postIncrementDisable = "";
 		$updateSlip = false;  //flag used to track if the pre or post scopes != defaults
