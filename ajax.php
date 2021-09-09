@@ -86,6 +86,11 @@ switch ($_REQUEST["action"]) {
 		echo json_encode(array("preScope"=>$citation->getPostContextScope(),
 			"postScope"=>$citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
 		break;
+	case "changeCitationType":
+		$citation = new citation($db, $_GET["id"]);
+		$citation->setType($_GET["type"]);
+		$citation->save();
+		break;
 	case "deleteSlips":
 				//! only superusers can do this
 		$user = users::getUser($_SESSION["email"]);

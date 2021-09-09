@@ -547,6 +547,13 @@ HTML;
                 updateCitation(data);							
               });      
             });
+            
+            //update the citation type when changed
+            $('#citationType').on('change', function() {
+              let id = $('#citationContext').attr('data-citationid');
+              let type = $(this).val();
+              $.ajax('ajax.php?action=changeCitationType&id='+id+'&type='+type);
+            });
        
 		        //update the citation context on click of token
 		        $(document).on('click', '.contextLink',  function () {
