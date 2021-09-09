@@ -189,12 +189,12 @@ SQL;
 
 
 		$sql = <<<SQL
-      SELECT filename, id AS wid, pos, preContextScope AS pre, postContextScope AS post,
-        FROM slips
+      SELECT s.filename AS filename, s.id AS wid, pos, preContextScope AS pre, postContextScope AS post
+        FROM slips s
+      	JOIN lemmas l ON s.filename = l.filename AND s.id = l.id 
         WHERE auto_id = :slipId
-        ORDER BY auto_id ASC
 SQL;
-		$result = $db->fetch($sql, array(":id" => $slipId));
+		$result = $db->fetch($sql, array(":slipId" => $slipId));
 		$row = $result[0];
 		return new slip($row["filename"], $row["wid"], $slipId, $row["pos"], $row["pre"], $row["post"]);
 	}

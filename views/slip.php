@@ -431,24 +431,9 @@ HTML;
 HTML;
 	  }
 		$citationTypeHtml .= "</select>";
-
-    $handler = new models\xmlfilehandler($this->_slip->getFilename());
-    $preScope = $this->_citations[0]->getPreContextScope(); //get the context for the first citation
+    $context = $this->_citations[0]->getContext();
+    $preScope = $this->_citations[0]->getPreContextScope();
     $postScope = $this->_citations[0]->getPostContextScope();
-    $context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
-
-		$contextData = $this->_getContextData($context);
-
-
-    $preScope = $this->_slip->getPreContextScope();
-    $postScope = $this->_slip->getPostContextScope();
-
-
-    if ($contextData["updateSlip"]) {
-    	$this->_slip->updateContexts();
-    }
-
-
     echo <<<HTML
             <div id="slipContextContainer" class="editSlipSectionContainer">
               <div class="floatRight">
@@ -457,14 +442,14 @@ HTML;
               <h5>Adjust citation context</h5>
               <div>
 								<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
-								<a class="updateContext btn-link {$contextData["preIncrementDisable"]}" id="incrementPre"><i class="fas fa-plus"></i></a>
+								<a class="updateContext btn-link {$context["preIncrementDisable"]}" id="incrementPre"><i class="fas fa-plus"></i></a>
               </div>
               <span data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="slipContext" class="slipContext">
-                {$contextData["html"]}
+                {$context["html"]}
               </span>
               <div>
                 <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
-								<a class="updateContext btn-link {$contextData["postIncrementDisable"]}" id="incrementPost"><i class="fas fa-plus"></i></a>
+								<a class="updateContext btn-link {$context["postIncrementDisable"]}" id="incrementPost"><i class="fas fa-plus"></i></a>
               </div>
               <div style="height: 20px;">
                 <a href="#" class="float-right" id="resetContext">reset context</a>
@@ -489,8 +474,6 @@ HTML;
             </div>
 HTML;
   }
-
-
 
 	private function _writeCollocatesView() {
 		$handler = new models\xmlfilehandler($this->_slip->getFilename());

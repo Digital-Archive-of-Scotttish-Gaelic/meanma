@@ -45,6 +45,7 @@ SQL;
 		$this->_preContextString = $row["preContextString"];
 		$this->_postContextString = $row["postContextString"];
 		$this->_lastUpdated = $row["lastUpdated"];
+		$this->getSlip();
 		$this->_loadTranslations();
 	}
 
@@ -59,26 +60,59 @@ SQL;
 	}
 
 	public function attachToSlip($slipId) {
+		$this->_slip = collection::getSlipBySlipId($slipId, $this->_db);
 		$sql = <<<SQL
 			INSERT INTO slip_citation (`slip_id`, `citation_id`) VALUES (:slipId, :citationId)
 SQL;
 		$this->_db->exec($sql, array(":slipId" => $slipId, ":citationId" => $this->getId()));
 	}
 
-
+	/**
+	 * Gets the data required to correctly format the context as a citation
+	 * @return string array : an associative array of strngs comprising context output and flags for processing:
+	 *    : string html : the generated html based on the pre and post contexts, the word, and any required joins
+	 *    : string preIncrementDisable : empty or 'disabled' if the start of the document has been reached
+	 *    : string postIncrementDisable : empty or 'disabled' if the end of the document has been reached
+	 */
 	public function getContext() {
+		$handler = new xmlfilehandler($this->_slip->getFilename());
+		$preScope = $this->_slip->getPreContextScope();
+		$postScope = $this->_slip->getPostContextScope();
+		$context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
+		$preIncrementDisable = $postIncrementDisable = "";
+		$updateSlip = false;  //flag used to track if the pre or post scopes != defaults
+		//check for start/end of document
+		if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
+			$this->_slip->setPreContextScope($context["prelimit"]);
+			$preIncrementDisable = "disabled";
+			$updateSlip = true;
+		}
+		if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
+			$this->_slip->setPostContextScope($context["postlimit"]);
+			$postIncrementDisable = "disabled";
+			$updateSlip = true;
+		}
+		$contextHtml = $context["pre"]["output"];
+		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
+			$contextHtml .= ' ';
+		}
+		$contextHtml .= <<<HTML
+      <mark id="slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
+HTML;
+		if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
+			$contextHtml .= ' ';
+		}
+		$contextHtml .= $context["post"]["output"];
+		if ($updateSlip) {
+			$this->_slip->updateContexts();
+		}
+		return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
+			$postIncrementDisable);
 
 	}
 
 
-	/**
-	 * @param $context : the array passed back by xmlfilehandler which includes pre and post context, the word, and join info
-	 * @return mixed array : an mixed associative array comprising context html and flags for processing:
-	 *    : string html : the generated HTML based on the pre and post contexts, the word, and any required joins
-	 *    : string preIncrementDisable : empty or 'disabled' if the start of the document has been reached
-	 *    : string postIncrementDisable : empty or 'disabled' if the end of the document has been reached
-	 *    : boolean updateSlip : a flag to determine whether to write the context scope to the database
-	 */
+
 	private function _getContextData($context) {
 		$preIncrementDisable = $postIncrementDisable = "";
 		$updateSlip = false;  //flag used to track if the pre or post scopes != defaults
@@ -146,14 +180,14 @@ HTML;
 		return self::SCOPE_DEFAULT;
 	}
 
-	public function getSlipId() {
-		if (empty($this->_slipId)) {
+	public function getSlip() {
+		if (empty($this->_slip)) {
 			$sql = <<<SQL
 				SELECT slip_id FROM slip_citation WHERE citation_id = :id
 SQL;
 			$result = $this->_db->fetch($sql, array(":id" => $this->getId()));
-			$this->_slipId = $result[0]["slip_id"];
+			$this->_slip = collection::getSlipBySlipId($result[0]["slip_id"], $this->_db);
 		}
-		return $this->_slipId;
+		return $this->_slip;
 	}
 }
