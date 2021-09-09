@@ -34,6 +34,7 @@ SQL;
 		$this->_db->exec($sql, array(":pre" => $this->_postContextScope, ":post" => $this->_postContextScope));
 		$id = $this->_db->getLastInsertId();
 		$this->_id = $id;
+
 	}
 
 	public function save() {
@@ -77,6 +78,7 @@ SQL;
 			INSERT INTO slip_citation (`slip_id`, `citation_id`) VALUES (:slipId, :citationId)
 SQL;
 		$this->_db->exec($sql, array(":slipId" => $slipId, ":citationId" => $this->getId()));
+		$this->_slip->addCitation($this);
 	}
 
 	/**
@@ -86,11 +88,11 @@ SQL;
 	 *    : string preIncrementDisable : empty or 'disabled' if the start of the document has been reached
 	 *    : string postIncrementDisable : empty or 'disabled' if the end of the document has been reached
 	 */
-	public function getContext() {
+	public function getContext($tagContext = false) {
 		$handler = new xmlfilehandler($this->_slip->getFilename());
 		$preScope = $this->getPreContextScope();
 		$postScope = $this->getPostContextScope();
-		$context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
+		$context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, $tagContext);
 		$preIncrementDisable = $postIncrementDisable = "";
 		//check for start/end of document
 		if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
@@ -108,6 +110,7 @@ SQL;
 		$contextHtml .= <<<HTML
       <mark id="slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
 HTML;
+
 		if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
 			$contextHtml .= ' ';
 		}

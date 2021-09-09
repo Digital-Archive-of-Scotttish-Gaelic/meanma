@@ -131,14 +131,20 @@ SQL;
     }
   }
 
+  public function addCitation($citation) {
+  	$this->_citations[] = $citation;
+  }
+
   public function getCitations() {
-		$sql = <<<SQL
+  	if (empty($this->_citations)) {
+		  $sql = <<<SQL
 			SELECT citation_id FROM slip_citation WHERE slip_id = :id
 SQL;
-		$results = $this->_db->fetch($sql, array(":id" => $this->getAutoId()));
-		foreach ($results as $result) {
-			$this->_citations[] = new citation($this->_db, $result["citation_id"]);
-		}
+		  $results = $this->_db->fetch($sql, array(":id" => $this->getAutoId()));
+		  foreach ($results as $result) {
+			  $this->_citations[] = new citation($this->_db, $result["citation_id"]);
+		  }
+	  }
 		return $this->_citations;
   }
 

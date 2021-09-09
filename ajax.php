@@ -34,7 +34,7 @@ switch ($_REQUEST["action"]) {
   	$citation->setType($_GET["type"]);
   	$citation->setPreContextScope($_GET["preScope"]);
   	$citation->setPostContextScope($_GET["postScope"]);
-	  $context = $citation->getContext();
+	  $context = $citation->getContext(true);
   	$citation->save();
     echo json_encode($context);
     break;
@@ -63,13 +63,15 @@ switch ($_REQUEST["action"]) {
       "lastUpdated"=>$slip->getLastUpdated(), "textId"=>$textId, "slipMorph"=>$slip->getSlipMorph()->getProps());
     //code required for modal slips
 
-    //new citation code
+    //citation code
     $citations = $slip->getCitations();
 		$citation = $citations[0];  //first citation
+    $context = $citation->getContext(false);
+    $results["context"] = $context["html"];
 	  //
-    $handler = new xmlfilehandler($_GET["filename"]);
-    $context = $handler->getContext($_GET["id"], $citation->getPreContextScope(), $citation->getPostContextScope());
-    $results["context"] = $context;
+   // $handler = new xmlfilehandler($_GET["filename"]);
+   // $context = $handler->getContext($_GET["id"], $citation->getPreContextScope(), $citation->getPostContextScope());
+   // $results["context"] = $context;
     $results['isOwner'] = $slip->getOwnedBy() == $_SESSION["user"];
     $user = users::getUser($_SESSION["user"]);
     $superuser = $user->getSuperuser();
@@ -80,8 +82,14 @@ switch ($_REQUEST["action"]) {
 	case "createCitation":
 		$citation = new citation($db);
 		$citation->attachToSlip($_GET["slipId"]);
-		$context = $citation->getContext();
+		$context = $citation->getContext(true);
 		echo json_encode(array("id"=>$citation->getId(), "preScope"=>$citation->getPostContextScope(),
+			"postScope"=>$citation->getPostContextScope(), "context" => $context));
+		break;
+	case "loadCitation":
+		$citation = new citation($db, $_GET["id"]);
+		$context = $citation->getContext(true);
+		echo json_encode(array("preScope"=>$citation->getPostContextScope(),
 			"postScope"=>$citation->getPostContextScope(), "context" => $context));
 		break;
 	case "deleteSlips":

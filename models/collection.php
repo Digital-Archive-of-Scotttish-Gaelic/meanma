@@ -153,28 +153,22 @@ SQL;
 			$_SESSION["groupId"] = $groupId; //used in API calls to Meanma for other apps (such as briathradan)
 		}
 		$slipInfo = array();
-		$dbh = $db->getDatabaseHandle();
-		try {
-			$sql = <<<SQL
-        SELECT s.filename as filename, s.id as id, auto_id, pos, lemma, preContextScope, postContextScope,
-                translation, date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id, 
-               	e.headword AS headword
-            FROM slips s
-            JOIN entry e ON e.id = s.entry_id
-            JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
-            JOIN text t ON s.filename = t.filepath
-            WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId
-            ORDER BY auto_id ASC
+		$sql = <<<SQL
+      SELECT s.filename as filename, s.id as id, auto_id, pos, lemma,
+              translation, date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id, 
+              e.headword AS headword
+          FROM slips s
+          JOIN entry e ON e.id = s.entry_id
+          JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
+          JOIN text t ON s.filename = t.filepath
+          WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId
+          ORDER BY auto_id ASC
 SQL;
-			$sth = $dbh->prepare($sql);
-			$sth->execute(array(":slipId"=>$slipId));
-			while ($row = $sth->fetch()) {
-				$slipInfo[] = $row;
-			}
-			return $slipInfo;
-		} catch (\PDOException $e) {
-			echo $e->getMessage();
+
+		while ($row = $db->fetch($sql, array(":slipId" => $slipId))) {
+			$slipInfo[] = $row;
 		}
+		return $slipInfo;
 	}
 
 	/**

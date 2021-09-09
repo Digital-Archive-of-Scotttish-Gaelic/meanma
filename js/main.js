@@ -131,7 +131,8 @@ $(function () {
       }
       //check if user can edit slip
       canEdit = data.canEdit ? true : false;
-      var context = data.context.pre["output"] + ' <mark>' + data.context.word + '</mark> ' + data.context.post["output"];
+     // var context = data.context.pre["output"] + ' <mark>' + data.context.word + '</mark> ' + data.context.post["output"];
+      let context = data.context;
       body += '<p>' + context + '</p>';
       if (data.translation) {
         body += '<div><small><a href="#translation" data-toggle="collapse" aria-expanded="false" aria-controls="translation">';

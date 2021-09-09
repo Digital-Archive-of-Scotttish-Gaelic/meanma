@@ -423,6 +423,7 @@ HTML;
   }
 
   private function _writeContext() {
+	  $citationId = $this->_citations[0]->getId();  //the first citation's ID – the default display on load
   	$citationTypeHtml = '<select id="citationType" name="citationType" class="form-control col-1">';
   	foreach (models\citation::$types as $citationType) {
   		$selected = $this->_citations[0]->getType() == $citationType ? "selected" : "";
@@ -430,9 +431,26 @@ HTML;
 				<option value="{$citationType}" {$selected}>{$citationType}</option>
 HTML;
 	  }
+  	$citationLinkHtml = <<<HTML
+			<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: #efefef">
+				<a href="#" data-cid="{$citationId}" class="citationLink">
+					<span class="badge badge-primary badge-pill">1</span>
+				</a>
+			</li>
+HTML;
+		for ($i = 1; $i < count($this->_citations); $i++) {
+			$citationId = $this->_citations[$i]->getId();
+			$citationIndex = $i+1;
+			$citationLinkHtml .= <<<HTML
+				<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: #efefef">
+					<a href="#" data-cid="{$citationId}" class="citationLink">
+						<span class="badge badge-primary badge-pill">{$citationIndex}</span>
+					</a>
+				</li>
+HTML;
+		}
 		$citationTypeHtml .= "</select>";
-  	$citationId = $this->_citations[0]->getId();
-    $context = $this->_citations[0]->getContext();
+    $context = $this->_citations[0]->getContext(true);
     $preScope = $this->_citations[0]->getPreContextScope();
     $postScope = $this->_citations[0]->getPostContextScope();
     echo <<<HTML
@@ -467,9 +485,7 @@ HTML;
 							<!-- citation links -->
 							<div>
 								<ul id="citationLinks" class="list-group list-group-horizontal">
-									<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #0000FF">
-									  <a href="#"><span class="badge badge-primary badge-pill">1</span></a>
-									</li>
+									{$citationLinkHtml}
 								</ul>
 							</div>
             </div>
@@ -533,6 +549,12 @@ HTML;
 								html += '<a href="#"><span class="badge badge-primary badge-pill">2</span></a></li>';
                 $('#citationLinks').append(html)
               });      
+            });
+            
+            //update the citation based on a citationLink click
+            $(document).on('click', '.citationLink', function () {
+              let citationId = $(this).attr('data-cid');
+              
             });
        
 		        //update the citation context on click of token
