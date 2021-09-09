@@ -8,7 +8,7 @@ class citation
 	private $_id, $_type, $_preContextScope, $_postContextScope, $_preContextString, $_postContextString;
 	private $_lastUpdated;
 	private $_translations = array(); //an array of translation objects
-	private $_slipId;
+	private $_slip; //an instance of \models\slip - the slip this citation is attached to
 
 	const SCOPE_DEFAULT = 80;
 
@@ -65,6 +65,50 @@ SQL;
 		$this->_db->exec($sql, array(":slipId" => $slipId, ":citationId" => $this->getId()));
 	}
 
+
+	public function getContext() {
+
+	}
+
+
+	/**
+	 * @param $context : the array passed back by xmlfilehandler which includes pre and post context, the word, and join info
+	 * @return mixed array : an mixed associative array comprising context html and flags for processing:
+	 *    : string html : the generated HTML based on the pre and post contexts, the word, and any required joins
+	 *    : string preIncrementDisable : empty or 'disabled' if the start of the document has been reached
+	 *    : string postIncrementDisable : empty or 'disabled' if the end of the document has been reached
+	 *    : boolean updateSlip : a flag to determine whether to write the context scope to the database
+	 */
+	private function _getContextData($context) {
+		$preIncrementDisable = $postIncrementDisable = "";
+		$updateSlip = false;  //flag used to track if the pre or post scopes != defaults
+		//check for start/end of document
+		if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
+			$this->_slip->setPreContextScope($context["prelimit"]);
+			$preIncrementDisable = "disabled";
+			$updateSlip = true;
+		}
+		if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
+			$this->_slip->setPostContextScope($context["postlimit"]);
+			$postIncrementDisable = "disabled";
+			$updateSlip = true;
+		}
+		$contextHtml = $context["pre"]["output"];
+		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
+			$contextHtml .= ' ';
+		}
+		$contextHtml .= <<<HTML
+      <mark id="slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
+HTML;
+		if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
+			$contextHtml .= ' ';
+		}
+		$contextHtml .= $context["post"]["output"];
+		return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
+			$postIncrementDisable, "updateSlip" => $updateSlip);
+	}
+
+
 	//GETTERS
 	public function getId() {
 		return $this->_id;
@@ -99,7 +143,7 @@ SQL;
 	}
 
 	public function getScopeDefault() {
-		return $this->SCOPE_DEFAULT;
+		return self::SCOPE_DEFAULT;
 	}
 
 	public function getSlipId() {

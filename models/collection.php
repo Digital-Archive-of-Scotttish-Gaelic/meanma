@@ -177,6 +177,28 @@ SQL;
 		}
 	}
 
+	/**
+	 * Gets slip info from the DB
+	 * @param $slipId
+	 * @param $db the current models\database object
+	 * @return slip object
+	 */
+	public static function getSlipBySlipId($slipId, $db) {
+
+	//	$filename, $id, $auto_id = null, $pos, $preScope = self::SCOPE_DEFAULT, $postScope = self::SCOPE_DEFAULT
+
+
+		$sql = <<<SQL
+      SELECT filename, id AS wid, pos, preContextScope AS pre, postContextScope AS post,
+        FROM slips
+        WHERE auto_id = :slipId
+        ORDER BY auto_id ASC
+SQL;
+		$result = $db->fetch($sql, array(":id" => $slipId));
+		$row = $result[0];
+		return new slip($row["filename"], $row["wid"], $slipId, $row["pos"], $row["pre"], $row["post"]);
+	}
+
 	public static function getWordformBySlipId($slipId) {
 		$db = new database();
 		$sql = <<<SQL

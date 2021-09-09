@@ -438,11 +438,17 @@ HTML;
     $context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
 
 		$contextData = $this->_getContextData($context);
+
+
     $preScope = $this->_slip->getPreContextScope();
     $postScope = $this->_slip->getPostContextScope();
+
+
     if ($contextData["updateSlip"]) {
     	$this->_slip->updateContexts();
     }
+
+
     echo <<<HTML
             <div id="slipContextContainer" class="editSlipSectionContainer">
               <div class="floatRight">
@@ -484,42 +490,7 @@ HTML;
 HTML;
   }
 
-	/**
-	 * @param $context : the array passed back by xmlfilehandler which includes pre and post context, the word, and join info
-	 * @return mixed array : an mixed associative array comprising context html and flags for processing:
-	 *    : string html : the generated HTML based on the pre and post contexts, the word, and any required joins
-	 *    : string preIncrementDisable : empty or 'disabled' if the start of the document has been reached
-	 *    : string postIncrementDisable : empty or 'disabled' if the end of the document has been reached
-	 *    : boolean updateSlip : a flag to determine whether to write the context scope to the database
-	 */
-  private function _getContextData($context) {
-	  $preIncrementDisable = $postIncrementDisable = "";
-	  $updateSlip = false;  //flag used to track if the pre or post scopes != defaults
-	  //check for start/end of document
-	  if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
-		  $this->_slip->setPreContextScope($context["prelimit"]);
-		  $preIncrementDisable = "disabled";
-		  $updateSlip = true;
-	  }
-	  if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
-		  $this->_slip->setPostContextScope($context["postlimit"]);
-		  $postIncrementDisable = "disabled";
-		  $updateSlip = true;
-	  }
-	  $contextHtml = $context["pre"]["output"];
-	  if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
-		  $contextHtml .= ' ';
-	  }
-	  $contextHtml .= <<<HTML
-      <mark id="slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
-HTML;
-	  if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
-		  $contextHtml .= ' ';
-	  }
-	  $contextHtml .= $context["post"]["output"];
-	  return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
-		  $postIncrementDisable, "updateSlip" => $updateSlip);
-  }
+
 
 	private function _writeCollocatesView() {
 		$handler = new models\xmlfilehandler($this->_slip->getFilename());
@@ -558,10 +529,12 @@ HTML;
             
             //add citation 
             $('.addCitationLink').on('click', function () {
-              html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #0000FF">';
-							html += '<a href="#"><span class="badge badge-primary badge-pill">2</span></a></li>';
-              $('#citationLinks').append(html)
-              
+              $.ajax('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
+              .done(function(data) {
+                html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #0000FF">';
+								html += '<a href="#"><span class="badge badge-primary badge-pill">2</span></a></li>';
+                $('#citationLinks').append(html)
+              });      
             });
        
 		        //update the slip context on click of token
