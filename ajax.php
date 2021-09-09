@@ -30,9 +30,12 @@ switch ($_REQUEST["action"]) {
 		echo json_encode(array("firstname"=>$user->getFirstName(), "lastname"=>$user->getLastName()));
 		break;
   case "getContext":
-  	$tagContext = $_GET["simpleContext"] ? false : true;
-    $handler = new xmlfilehandler($_GET["filename"]);
-    $context = $handler->getContext($_GET["id"], $_GET["preScope"], $_GET["postScope"], false, $tagContext);
+  	$citation = new citation($db, $_GET["citationId"]);
+  	$citation->setType($_GET["type"]);
+  	$citation->setPreContextScope($_GET["preScope"]);
+  	$citation->setPostContextScope($_GET["postScope"]);
+	  $context = $citation->getContext();
+  	$citation->save();
     echo json_encode($context);
     break;
 	case "getSlips":

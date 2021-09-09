@@ -27,12 +27,22 @@ class citation
 	private function _init() {
 		$this->_preContextScope = self::SCOPE_DEFAULT;
 		$this->_postContextScope = self::SCOPE_DEFAULT;
+		$this->_type = "short";   //default for new citation
 		$sql = <<<SQL
 			INSERT INTO citation (`preContextScope`, `postContextScope`) VALUES(:pre, :post);
 SQL;
 		$this->_db->exec($sql, array(":pre" => $this->_postContextScope, ":post" => $this->_postContextScope));
 		$id = $this->_db->getLastInsertId();
 		$this->_id = $id;
+	}
+
+	public function save() {
+		$sql = <<<SQL
+			UPDATE citation SET `type` = :type, `preContextScope` = :pre, `postContextScope` = :post
+				WHERE id = :id
+SQL;
+		$this->_db->exec($sql, array(":type" => $this->getType(), ":pre" => $this->getPreContextScope(),
+			":post" => $this->getPostContextScope(), ":id" => $this->getId()));
 	}
 
 	private function _load() {
@@ -82,17 +92,14 @@ SQL;
 		$postScope = $this->getPostContextScope();
 		$context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
 		$preIncrementDisable = $postIncrementDisable = "";
-		$updateSlip = false;  //flag used to track if the pre or post scopes != defaults
 		//check for start/end of document
 		if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
-			$this->_slip->setPreContextScope($context["prelimit"]);
+			$this->setPreContextScope($context["prelimit"]);
 			$preIncrementDisable = "disabled";
-			$updateSlip = true;
 		}
 		if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
-			$this->_slip->setPostContextScope($context["postlimit"]);
+			$this->setPostContextScope($context["postlimit"]);
 			$postIncrementDisable = "disabled";
-			$updateSlip = true;
 		}
 		$contextHtml = $context["pre"]["output"];
 		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
@@ -105,9 +112,6 @@ HTML;
 			$contextHtml .= ' ';
 		}
 		$contextHtml .= $context["post"]["output"];
-		if ($updateSlip) {
-			$this->_slip->updateContexts();
-		}
 		return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
 			$postIncrementDisable);
 
@@ -192,4 +196,27 @@ SQL;
 		}
 		return $this->_slip;
 	}
+
+	//SETTERS
+	public function setType($type) {
+		$this->_type = $type;
+	}
+
+	public function setPreContextScope($pre) {
+		$this->_preContextScope = $pre;
+	}
+
+	public function setPostContextScope($post) {
+		$this->_postContextScope = $post;
+	}
+
+	public function setPreContextString($string) {
+		$this->_preContextString = $string;
+	}
+
+	public function setPostContextString($string) {
+		$this->_postContextString = $string;
+	}
+
+
 }

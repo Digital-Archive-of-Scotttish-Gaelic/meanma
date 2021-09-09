@@ -316,6 +316,8 @@ SQL;
 	/**
 	 * Updates the pre and post context scope values in the database
 	 */
+	/*    !!DEPRECATED - handled in citation class now: TODO: remove all references to context scope in this class
+	 *
   public function updateContexts() {
   	$sql = <<<SQL
 			UPDATE slips 
@@ -325,6 +327,7 @@ SQL;
   	$this->_db->exec($sql, array(":pre" => $this->getPreContextScope(), ":post" => $this->getPostContextScope(),
 		  ":id" => $this->getAutoId()));
   }
+	*/
 
   /*
    * Changes the entry for this slip when the headword or wordclass is changed

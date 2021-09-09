@@ -431,6 +431,7 @@ HTML;
 HTML;
 	  }
 		$citationTypeHtml .= "</select>";
+  	$citationId = $this->_citations[0]->getId();
     $context = $this->_citations[0]->getContext();
     $preScope = $this->_citations[0]->getPreContextScope();
     $postScope = $this->_citations[0]->getPostContextScope();
@@ -444,7 +445,7 @@ HTML;
 								<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
 								<a class="updateContext btn-link {$context["preIncrementDisable"]}" id="incrementPre"><i class="fas fa-plus"></i></a>
               </div>
-              <span data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="slipContext" class="slipContext">
+              <span data-citationid="{$citationId}" data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="citationContext" class="citationContext">
                 {$context["html"]}
               </span>
               <div>
@@ -498,7 +499,7 @@ HTML;
                 <a class="btn btn-success" href="#" id="showCitationView">citation view</a>
               </div>
               <h5>Tag citation collocates</h5>
-              <span class="slipContext">
+              <span class="citationContext">
                 {$contextHtml}
               </span>
             </div>
@@ -516,12 +517,13 @@ HTML;
               .done(function(data) {
                 let context = data.context;
                   //update the context scope
-                $('#contextScope').attr('data-precontextscope', data.preScope);
-                $('#contextScope').attr('data-postcontextscope', data.preScope);
+                $('#citationContext').attr('data-precontextscope', data.preScope);
+                $('#citationContext').attr('data-postcontextscope', data.preScope);
                 $('#incrementPre').addClass(context.preIncrementDisable);
                 $('#incrementPost').addClass(context.postIncrementDisable);
                   //update the context html
-                $('#slipContext').html(context.html);
+                $('#citationContext').attr('data-citationid', data.id);
+                $('#citationContext').html(context.html);
                   //update the citationType select
                 $('#citationType').val('short');
                   //update the other citation links and deactivate current badge
@@ -533,29 +535,23 @@ HTML;
               });      
             });
        
-		        //update the slip context on click of token
+		        //update the citation context on click of token
 		        $(document).on('click', '.contextLink',  function () {
 		          $(this).tooltip('hide')
 		          var filename = $('#slipFilename').text();
               var id = $('#wordId').text();
 		          var preScope = $('#preContextScope').val();
-		          var postScope = $('#postContextScope').val();
-		        
-		          console.log('initial prescope : ' + preScope);
-		          
+		          var postScope = $('#postContextScope').val();		          
 		          if ($(this).hasClass('pre')) {
 		            preScope = $(this).attr('data-position');
 		          } else {
 		            postScope = $(this).attr('data-position');
-		          }
-		          
-		          console.log('\\n\\ncalculated prescope : ' + preScope);
-		          
-		          $('#slipContext').attr('data-precontextscope', preScope);
-					    $('#slipContext').attr('data-postcontextscope', postScope);
+		          }		          
+		          $('#citationContext').attr('data-precontextscope', preScope);
+					    $('#citationContext').attr('data-postcontextscope', postScope);
 					    $('#preContextScope').val(preScope);
 					    $('#postContextScope').val(postScope);
-					    writeSlipContext(filename, id);
+					    writeCitationContext(filename, id);
 		        });
 		        
 		        //reset the context
@@ -574,11 +570,11 @@ HTML;
 					      } 
 					    })
 					      .done(function () {
-					         $('#slipContext').attr('data-precontextscope', preScope);
-					         $('#slipContext').attr('data-postcontextscope', postScope);
+					         $('#citationContext').attr('data-precontextscope', preScope);
+					         $('#citationContext').attr('data-postcontextscope', postScope);
 					         $('#preContextScope').val(preScope);
 					         $('#postContextScope').val(postScope);
-					         writeSlipContext(filename, id);
+					         writeCitationContext(filename, id);
 					      });
 		        });
 		        
@@ -600,7 +596,6 @@ HTML;
             });
 
             $('#showCollocatesView').on('click', function () {
-              console.log('hit');
               $('#slipContextContainer').hide();
               $('#slipCollocatesContainer').show();
             });
@@ -795,11 +790,12 @@ HTML;
               }
             });
             
-            $('.updateContext').on('click', function () {
-              
-           console.log('updateContext');   
-					    var preScope = $('#slipContext').attr('data-precontextscope');
-					    var postScope = $('#slipContext').attr('data-postcontextscope');
+            /*
+              Increment and Decrement button handlers - update the context  
+             */
+            $('.updateContext').on('click', function () {         
+					    var preScope = $('#citationContext').attr('data-precontextscope');
+					    var postScope = $('#citationContext').attr('data-postcontextscope');
 					    var filename = $('#slipFilename').text();
 					    var id = $('#wordId').text();
 					    switch ($(this).attr('id')) {
@@ -824,18 +820,25 @@ HTML;
 					        $('#decrementPost').removeClass("disabled");
 					        break;
 					    }
-					    $('#slipContext').attr('data-precontextscope', preScope);
-					    $('#slipContext').attr('data-postcontextscope', postScope);
+					    $('#citationContext').attr('data-precontextscope', preScope);
+					    $('#citationContext').attr('data-postcontextscope', postScope);
 					    $('#preContextScope').val(preScope);
-					    $('#postContextScope').val(postScope);
-					    writeSlipContext(filename, id);
+					    $('#postContextScope').val(postScope); 
+					    writeCitationContext(filename, id);
 					  });
             
-            function writeSlipContext(filename, id) {
+            function writeCitationContext(filename, id) {
 					    var html = '';
-					    var preScope  = $('#slipContext').attr('data-precontextscope');
-					    var postScope = $('#slipContext').attr('data-postcontextscope');
-					    $.getJSON("ajax.php?action=getContext&filename="+filename+"&id="+id+"&preScope="+preScope+"&postScope="+postScope, function (data) {
+					    let citationId = $('#citationContext').attr('data-citationid');
+					    let preScope  = $('#citationContext').attr('data-precontextscope');
+					    let postScope = $('#citationContext').attr('data-postcontextscope');
+					    let citationType = $('#citationType').val();
+					    var url = "ajax.php?action=getContext";
+					    url += "&citationId="+citationId+"&type="+citationType+"&preScope="+preScope+"&postScope="+postScope;
+					    url += "&filename="+filename+"&id="+id; 
+					    $.getJSON(url, function (data) {
+					      html = data.html;
+					      /*
 					      var preOutput = data.pre["output"];
 					      var postOutput = data.post["output"];
 					      //handle zero pre/post context sizes
@@ -872,7 +875,9 @@ HTML;
 					        html += ' ';
 					      }
 					      html += postOutput;
-					      $('#slipContext').html(html);
+					      */
+					      
+					      $('#citationContext').html(html);
 					      $('#slip').show();
 					    });
 					  }
