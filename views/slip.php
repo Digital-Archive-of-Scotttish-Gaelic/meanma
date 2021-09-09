@@ -531,19 +531,7 @@ HTML;
             $('.addCitationLink').on('click', function () {
               $.getJSON('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
               .done(function(data) {
-                let context = data.context;
-                  //update the context scope
-                $('#citationContext').attr('data-precontextscope', data.preScope);
-                $('#citationContext').attr('data-postcontextscope', data.preScope);
-                $('#incrementPre').addClass(context.preIncrementDisable);
-                $('#incrementPost').addClass(context.postIncrementDisable);
-                  //update the context html
-                $('#citationContext').attr('data-citationid', data.id);
-                $('#citationContext').html(context.html);
-                  //update the citationType select
-                $('#citationType').val('short');
-                  //update the other citation links and deactivate current badge
-                
+                updateCitation(data);          
                   //write the citation badge
                 html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #0000FF">';
 								html += '<a href="#"><span class="badge badge-primary badge-pill">2</span></a></li>';
@@ -554,7 +542,10 @@ HTML;
             //update the citation based on a citationLink click
             $(document).on('click', '.citationLink', function () {
               let citationId = $(this).attr('data-cid');
-              
+              $.getJSON('ajax.php?action=loadCitation&id='+citationId)
+              .done(function(data) {
+                updateCitation(data);							
+              });      
             });
        
 		        //update the citation context on click of token
@@ -849,6 +840,22 @@ HTML;
 					    writeCitationContext(filename, id);
 					  });
             
+            function updateCitation(data) {
+              let context = data.context;
+                //update the context scope
+              $('#citationContext').attr('data-precontextscope', data.preScope);
+              $('#citationContext').attr('data-postcontextscope', data.preScope);
+              $('#incrementPre').addClass(context.preIncrementDisable);
+              $('#incrementPost').addClass(context.postIncrementDisable);
+                //update the context html
+              $('#citationContext').attr('data-citationid', data.id);
+              $('#citationContext').html(context.html);
+                //update the citationType select
+              $('#citationType').val(data.type);
+                //update the other citation links and deactivate current badge
+								//TODO: !!              
+            }
+            
             function writeCitationContext(filename, id) {
 					    var html = '';
 					    let citationId = $('#citationContext').attr('data-citationid');
@@ -858,48 +865,8 @@ HTML;
 					    var url = "ajax.php?action=getContext";
 					    url += "&citationId="+citationId+"&type="+citationType+"&preScope="+preScope+"&postScope="+postScope;
 					    url += "&filename="+filename+"&id="+id; 
-					    $.getJSON(url, function (data) {
-					      html = data.html;
-					      /*
-					      var preOutput = data.pre["output"];
-					      var postOutput = data.post["output"];
-					      //handle zero pre/post context sizes
-					      if (preScope == 0) {
-					        preOutput = "";
-					        $('#decrementPre').addClass("disabled");
-					      } else {
-					        $('#decrementPre').removeClass("disabled");
-					      }
-					      if (postScope == 0) {
-					        postOutput = "";
-					        $('#decrementPost').addClass("disabled");
-					      } else {
-					        $('#decrementPost').removeClass("disabled");
-					      }
-					      //handle reaching the start/end of the document
-					      if (data.prelimit) {
-					        $('#incrementPre').addClass("disabled");
-					      } else {
-					        $('#incrementPre').removeClass("disabled");
-					      }
-					      if (data.postlimit) {
-					        $('#incrementPost').addClass("disabled");
-					      } else {
-					        $('#incrementPost').removeClass("disabled");
-					      }
-					      html = preOutput;
-					      if (data.pre["endJoin"] != "right" && data.pre["endJoin"] != "both") {
-					        html += ' ';
-					      }
-					      //html += '<span id="slipWordInContext">' + data.word + '</span>';
-					      html += '<mark id="slipWordInContext">' + data.word + '</mark>'; // MM
-					      if (data.post["startJoin"] != "left" && data.post["startJoin"] != "both") {
-					        html += ' ';
-					      }
-					      html += postOutput;
-					      */
-					      
-					      $('#citationContext').html(html);
+					    $.getJSON(url, function (data) {					     
+					      $('#citationContext').html(data.html);
 					      $('#slip').show();
 					    });
 					  }

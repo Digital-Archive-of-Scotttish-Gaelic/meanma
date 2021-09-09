@@ -62,16 +62,10 @@ switch ($_REQUEST["action"]) {
       "wordClass"=>$slip->getWordClass(), "senses"=>$slip->getSensesInfo(),
       "lastUpdated"=>$slip->getLastUpdated(), "textId"=>$textId, "slipMorph"=>$slip->getSlipMorph()->getProps());
     //code required for modal slips
-
-    //citation code
     $citations = $slip->getCitations();
 		$citation = $citations[0];  //first citation
     $context = $citation->getContext(false);
     $results["context"] = $context["html"];
-	  //
-   // $handler = new xmlfilehandler($_GET["filename"]);
-   // $context = $handler->getContext($_GET["id"], $citation->getPreContextScope(), $citation->getPostContextScope());
-   // $results["context"] = $context;
     $results['isOwner'] = $slip->getOwnedBy() == $_SESSION["user"];
     $user = users::getUser($_SESSION["user"]);
     $superuser = $user->getSuperuser();
@@ -84,13 +78,13 @@ switch ($_REQUEST["action"]) {
 		$citation->attachToSlip($_GET["slipId"]);
 		$context = $citation->getContext(true);
 		echo json_encode(array("id"=>$citation->getId(), "preScope"=>$citation->getPostContextScope(),
-			"postScope"=>$citation->getPostContextScope(), "context" => $context));
+			"postScope"=>$citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
 		break;
 	case "loadCitation":
 		$citation = new citation($db, $_GET["id"]);
 		$context = $citation->getContext(true);
 		echo json_encode(array("preScope"=>$citation->getPostContextScope(),
-			"postScope"=>$citation->getPostContextScope(), "context" => $context));
+			"postScope"=>$citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
 		break;
 	case "deleteSlips":
 				//! only superusers can do this
