@@ -34,7 +34,6 @@ SQL;
 		$this->_db->exec($sql, array(":pre" => $this->_postContextScope, ":post" => $this->_postContextScope));
 		$id = $this->_db->getLastInsertId();
 		$this->_id = $id;
-
 	}
 
 	public function save() {
@@ -70,6 +69,10 @@ SQL;
 		foreach ($result as $row) {
 			$this->_translations[] = new translation($this->_db, $row["translation_id"]);
 		}
+	}
+
+	public function addTranslation($translation) {
+		$this->_translations[] = $translation;
 	}
 
 	public function attachToSlip($slipId) {

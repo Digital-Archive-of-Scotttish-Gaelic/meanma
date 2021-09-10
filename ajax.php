@@ -77,19 +77,35 @@ switch ($_REQUEST["action"]) {
 		$citation = new citation($db);
 		$citation->attachToSlip($_GET["slipId"]);
 		$context = $citation->getContext(true);
-		echo json_encode(array("id"=>$citation->getId(), "preScope"=>$citation->getPostContextScope(),
-			"postScope"=>$citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
+		echo json_encode(array("id" => $citation->getId(), "preScope" => $citation->getPostContextScope(),
+			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
 		break;
 	case "loadCitation":
 		$citation = new citation($db, $_GET["id"]);
 		$context = $citation->getContext(true);
-		echo json_encode(array("preScope"=>$citation->getPostContextScope(),
-			"postScope"=>$citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
+		echo json_encode(array("preScope" => $citation->getPostContextScope(),
+			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
 		break;
 	case "changeCitationType":
 		$citation = new citation($db, $_GET["id"]);
 		$citation->setType($_GET["type"]);
 		$citation->save();
+		break;
+	case "createTranslation":
+		$translation = new translation($db, null, $_GET["citationId"]);
+		$translationCount = count($translation->getCitation()->getTranslations());
+		echo json_encode(array("id" => $translation->getId(), "type" => $translation->getType(),
+			"content" => "", "translationCount" => $translationCount));
+		break;
+	case "loadTranslation":
+		$translation = new translation($db, $_GET["id"]);
+		echo json_encode(array("type" => $translation->getType(), "content" => $translation->getContent()));
+		break;
+	case "saveTranslation":
+		$translation = new translation($db, $_POST["id"]);
+		$translation->setType($_POST["type"]);
+		$translation->setContent($_POST["content"]);
+		$translation->save();
 		break;
 	case "deleteSlips":
 				//! only superusers can do this

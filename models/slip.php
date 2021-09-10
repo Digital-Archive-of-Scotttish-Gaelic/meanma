@@ -138,7 +138,7 @@ SQL;
   public function getCitations() {
   	if (empty($this->_citations)) {
 		  $sql = <<<SQL
-			SELECT citation_id FROM slip_citation WHERE slip_id = :id
+			SELECT citation_id FROM slip_citation WHERE slip_id = :id ORDER BY citation_id ASC
 SQL;
 		  $results = $this->_db->fetch($sql, array(":id" => $this->getAutoId()));
 		  foreach ($results as $result) {

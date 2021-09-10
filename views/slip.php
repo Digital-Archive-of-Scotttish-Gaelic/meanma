@@ -32,23 +32,76 @@ class slip
 				<option value="{$i}" {$selected}>{$i}</option>
 HTML;
 	  }
+	  /**
+	   * translations HTML
+	   */
+  	$translations = $this->_citations[0]->getTranslations();  //first citation displays by default
+  	$firstTranslationId = $translations[0]->getId(); //first translation displays by default
+	  $translationTypeHtml = '<select id="translationType" name="translationType" class="form-control col-1">';
+	  foreach (models\translation::$types as $translationType) {
+		  $selected = $translations[0]->getType() == $translationType ? "selected" : "";
+		  $translationTypeHtml .= <<<HTML
+				<option value="{$translationType}" {$selected}>{$translationType}</option>
+HTML;
+	  }
+	  $translationTypeHtml .= "</select>";
+	  $translationLinksHtml = <<<HTML
+			<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">
+				<a href="#" data-tid="{$firstTranslationId}" class="translationLink">
+					<span class="badge badge-primary badge-pill">1</span>
+				</a>
+			</li>
+HTML;
+	  for ($i = 1; $i < count($translations); $i++) {
+		  $translationId = $translations[$i]->getId();
+		  $translationIndex = $i+1;
+		  $translationLinksHtml .= <<<HTML
+				<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">
+					<a href="#" data-tid="{$translationId}" class="translationLink">
+						<span class="badge badge-primary badge-pill">{$translationIndex}</span>
+					</a>
+				</li>
+HTML;
+	  }
+	  /*
+	   */
     echo <<<HTML
 				{$this->_writeContext()}
 				{$this->_writeCollocatesView()}
 				<div style="margin-left: 10px;">
 					<small><a href="#translationContainer" id="toggleTranslation" data-toggle="collapse" aria-expanded="false" aria-controls="translationContainer">
-            show/hide translation
+	            show/hide translation
           </a></small>
-        </div>
-				<div id="translationContainer" class="collapse form-group">
-          <label for="slipTranslation">English translation:</label>
-          <textarea class="form-control" name="slipTranslation" id="slipTranslation" rows="3">{$this->_slip->getTranslation()}</textarea>
-          <script>
-            CKEDITOR.replace('slipTranslation', {
-              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
-              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
-            });
-          </script>
+          <div id="translationContainer" class="collapse form-group" style="padding: 5px; border: 1px solid gray;">
+            <label for="slipTranslation">English translation:</label>
+            <textarea class="form-control" name="slipTranslation" id="slipTranslation" data-translationid="{$translationId}" rows="3">
+								{$this->_slip->getTranslation()}
+						</textarea>
+            <script>
+              CKEDITOR.replace('slipTranslation', {
+                contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+                customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
+              });
+            </script>
+	          <!-- translation links -->
+	          <div>
+	            <label for="translationType">Translation type:</label>
+	            {$translationTypeHtml}
+						</div>
+						<div class="container">
+							<div class="row">
+								<div class="col-1 justify-content-center align-self-center">
+									<a href="#" class="addTranslationLink" title="add translation" style="font-size: 30px;"><i class="fas fa-plus" style="color: #007bff;">
+									</i></a>
+								</div>
+								<div class="col-11 justify-content-center"> 
+									<ul id="translationLinks" class="list-group list-group-horizontal">
+										{$translationLinksHtml}
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
         </div>
         <div class="form-group" id="slipChecked">
           <div class="form-check form-check-inline">
@@ -423,7 +476,7 @@ HTML;
   }
 
   private function _writeContext() {
-	  $citationId = $this->_citations[0]->getId();  //the first citation's ID – the default display on load
+	  $firstCitationId = $this->_citations[0]->getId();  //the first citation's ID – the default display on load
   	$citationTypeHtml = '<select id="citationType" name="citationType" class="form-control col-1">';
   	foreach (models\citation::$types as $citationType) {
   		$selected = $this->_citations[0]->getType() == $citationType ? "selected" : "";
@@ -433,7 +486,7 @@ HTML;
 	  }
   	$citationLinkHtml = <<<HTML
 			<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: #efefef">
-				<a href="#" data-cid="{$citationId}" class="citationLink">
+				<a href="#" data-cid="{$firstCitationId}" class="citationLink">
 					<span class="badge badge-primary badge-pill">1</span>
 				</a>
 			</li>
@@ -463,7 +516,7 @@ HTML;
 								<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
 								<a class="updateContext btn-link {$context["preIncrementDisable"]}" id="incrementPre"><i class="fas fa-plus"></i></a>
               </div>
-              <span data-citationid="{$citationId}" data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="citationContext" class="citationContext">
+              <span data-citationid="{$firstCitationId}" data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="citationContext" class="citationContext">
                 {$context["html"]}
               </span>
               <div>
@@ -475,18 +528,21 @@ HTML;
 							</div>
 							<div class="row">		
 								<label class="col-2" for="citationType">Citation type:</label>
-                {$citationTypeHtml}
-                <label class="col-2" for="addCitation">Add citation:</label>
-                <div class="col-1">
-                  <a href="#" class="addCitationLink" title="add citation" style="font-size: 24px;"><i class="fas fa-plus" style="color: #007bff;">
-										</i></a> 
-									</div>
+                {$citationTypeHtml}                
 							</div>
 							<!-- citation links -->
-							<div>
-								<ul id="citationLinks" class="list-group list-group-horizontal">
-									{$citationLinkHtml}
-								</ul>
+							<div class="container">
+								<div class="row">
+									<div class="col-1">
+										<a href="#" class="addCitationLink" title="add citation" style="font-size: 30px;"><i class="fas fa-plus" style="color: #007bff;">
+										</i></a>
+									</div>
+									<div class="col-11">	
+										<ul id="citationLinks" class="list-group list-group-horizontal">
+										{$citationLinkHtml}
+										</ul>
+									</div>
+								</div>
 							</div>
             </div>
 HTML;
@@ -528,6 +584,22 @@ HTML;
         <script>  
           $(function () {        
             
+            //save translation on focus out from translation CKEditor
+            CKEDITOR.instances['slipTranslation'].on("blur", function() {
+              saveTranslation();  
+						});
+            
+            //add translation
+            $('.addTranslationLink').on('click', function () {
+              let citationId = $('#citationContext').attr('data-citationid');
+              createTranslation(citationId);  
+            });
+            
+            //load translation
+            $(document).on('click', '.translationLink', function () {
+              loadTranslation($(this).attr('data-tid'));
+            });
+            
             //add citation 
             $('.addCitationLink').on('click', function () {
               $.getJSON('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
@@ -538,7 +610,8 @@ HTML;
                 let nextCitationIndex = citationCount+1;
                 html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border: none;background-color: #efefef;">';
 								html += '<a href="#"><span class="badge badge-primary badge-pill">'+nextCitationIndex+'</span></a></li>';
-                $('#citationLinks').append(html)
+                $('#citationLinks').append(html);
+                return false;
               });      
             });
             
@@ -548,7 +621,8 @@ HTML;
               $.getJSON('ajax.php?action=loadCitation&id='+citationId)
               .done(function(data) {
                 updateCitation(data);							
-              });      
+              });
+              return false;
             });
             
             //update the citation type when changed
@@ -864,6 +938,52 @@ HTML;
               $('#citationType').val(data.type);
                 //update the other citation links and deactivate current badge
 								//TODO: !!              
+            }
+            
+            function createTranslation(citationId) {        
+              $.getJSON('ajax.php?action=createTranslation&citationId='+citationId)
+              .done(function(data) {
+                updateTranslation(data);          
+                  //write the translation badge
+                let translationCount = data.translationCount;
+                let nextTranslationIndex = translationCount+1;
+                html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border: none;background-color: white;">';
+								html += '<a href="#"><span class="badge badge-primary badge-pill">'+nextTranslationIndex+'</span></a></li>';
+                $('#translationLinks').append(html);
+                return false;
+              });    
+            }
+            
+            function saveTranslation() {
+              let translationId = $('#slipTranslation').attr('data-translationid');
+              let content = CKEDITOR.instances.slipTranslation.getData();
+              let type = $('#translationType').val();
+              let params = {
+                url: 'ajax.php',
+                method: 'post',
+                data: {
+                  action: 'saveTranslation',
+	                translationId: translationId,
+	                content: content,
+	                type: type
+                }
+              }
+              $.ajax(params);
+            }
+            
+            function loadTranslation(id) {
+              $.getJSON('ajax.php?action=loadTranslation&id='+id)
+              .done(function (data) {
+                  //update the content html
+                $('#slipTranslation').attr('data-translationid', data.id);
+                CKEDITOR.instances.slipTranslation.setData(data.content);
+                  //update the translationType select
+                $('#translationType').val(data.type);   
+              });
+            }
+            
+            function updateTranslation(data) {
+                          
             }
             
             function writeCitationContext(filename, id) {
