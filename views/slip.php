@@ -523,6 +523,7 @@ HTML;
 	}
 
   private function _writeJavascript() {
+  	$citationCount = count($this->_citations);
     echo <<<HTML
         <script>  
           $(function () {        
@@ -533,8 +534,10 @@ HTML;
               .done(function(data) {
                 updateCitation(data);          
                   //write the citation badge
-                html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #0000FF">';
-								html += '<a href="#"><span class="badge badge-primary badge-pill">2</span></a></li>';
+                let citationCount = {$citationCount};
+                let nextCitationIndex = citationCount+1;
+                html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border: none;background-color: #efefef;">';
+								html += '<a href="#"><span class="badge badge-primary badge-pill">'+nextCitationIndex+'</span></a></li>';
                 $('#citationLinks').append(html)
               });      
             });
