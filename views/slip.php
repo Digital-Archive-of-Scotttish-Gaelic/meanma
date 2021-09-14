@@ -620,7 +620,26 @@ HTML;
               let citationId = $(this).attr('data-cid');
               $.getJSON('ajax.php?action=loadCitation&id='+citationId)
               .done(function(data) {
-                updateCitation(data);							
+                updateCitation(data);		
+                if (data.translationCount) {
+                    //add the translation links
+                  let transIds = data.translationIds.split('|'); 
+                  var linkHtml = "";
+                  for (var i=0; i<data.translationCount; i++) {
+                    let index = i+1;
+                    linkHtml += '<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">';
+										linkHtml += '<a href="#" data-tid="'+transIds[i]+'" class="translationLink">';
+										linkHtml += '<span class="badge badge-primary badge-pill">'+index+'</span></a></li>';
+                  }
+                  $('#translationLinks').html(linkHtml);
+                    //add the first translation content to the textarea
+                  CKEDITOR.instances.slipTranslation.setData(data.firstTranslationContent);
+                    //set the first translation type
+                  $('#translationType').val(data.firstTranslationType);
+                } else {
+                  $('#translationLinks').html('');
+                  CKEDITOR.instances.slipTranslation.setData(''); //clear the translation content for new empty translation
+                }
               });
               return false;
             });

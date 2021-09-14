@@ -83,8 +83,18 @@ switch ($_REQUEST["action"]) {
 	case "loadCitation":
 		$citation = new citation($db, $_GET["id"]);
 		$context = $citation->getContext(true);
+		$translations = $citation->getTranslations();
+		$translationCount = count($translations);
+		$translationIds = $firstTranslationContent = $firstTranslationType = "";
+		if ($translationCount) {
+			$translationIds = $citation->getTranslationIdsString();
+			$firstTranslationContent = $translations[0]->getContent();
+			$firstTranslationType = $translations[0]->getType();
+		}
 		echo json_encode(array("preScope" => $citation->getPostContextScope(),
-			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
+			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context,
+			"firstTranslationContent" => $firstTranslationContent, "firstTranslationType" => $firstTranslationType,
+			"translationCount" => $translationCount, "translationIds" => $translationIds));
 		break;
 	case "changeCitationType":
 		$citation = new citation($db, $_GET["id"]);

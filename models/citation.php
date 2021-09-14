@@ -184,6 +184,14 @@ HTML;
 		return $this->_translations;
 	}
 
+	public function getTranslationIdsString() {
+		$tids = [];
+		foreach ($this->getTranslations() as $translation) {
+			$tids[] = $translation->getId();
+		}
+		return implode('|', $tids);
+	}
+
 	public function getLastUpdated() {
 		return $this->_lastUpdated;
 	}
