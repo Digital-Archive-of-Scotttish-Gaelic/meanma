@@ -112,7 +112,7 @@ switch ($_REQUEST["action"]) {
 		echo json_encode(array("type" => $translation->getType(), "content" => $translation->getContent()));
 		break;
 	case "saveTranslation":
-		$translation = new translation($db, $_POST["id"]);
+		$translation = new translation($db, $_POST["translationId"], $_POST["citationId"]);
 		$translation->setType($_POST["type"]);
 		$translation->setContent($_POST["content"]);
 		$translation->save();

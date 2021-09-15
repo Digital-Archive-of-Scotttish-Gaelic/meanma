@@ -36,10 +36,16 @@ HTML;
 	   * translations HTML
 	   */
   	$translations = $this->_citations[0]->getTranslations();  //first citation displays by default
-  	$firstTranslationId = $translations[0]->getId(); //first translation displays by default
+		if (empty($translations)) {
+			$firstTranslationId = "";
+			$firstTranslationType = "";
+		} else {
+			$firstTranslationId = $translations[0]->getId();
+			$firstTranslationType = $translations[0]->getType();
+		}
 	  $translationTypeHtml = '<select id="translationType" name="translationType" class="form-control col-1">';
 	  foreach (models\translation::$types as $translationType) {
-		  $selected = $translations[0]->getType() == $translationType ? "selected" : "";
+		  $selected = $translationType == $firstTranslationType ? "selected" : "";
 		  $translationTypeHtml .= <<<HTML
 				<option value="{$translationType}" {$selected}>{$translationType}</option>
 HTML;
@@ -604,6 +610,7 @@ HTML;
             $('.addCitationLink').on('click', function () {
               $.getJSON('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
               .done(function(data) {
+                $('#citationContext').attr('data-citationid', data.id);
                 updateCitation(data);          
                   //write the citation badge
                 let citationCount = {$citationCount};
@@ -611,6 +618,7 @@ HTML;
                 html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border: none;background-color: #efefef;">';
 								html += '<a href="#"><span class="badge badge-primary badge-pill">'+nextCitationIndex+'</span></a></li>';
                 $('#citationLinks').append(html);
+                addTranslationLink();
                 return false;
               });      
             });
@@ -618,6 +626,7 @@ HTML;
             //update the citation based on a citationLink click
             $(document).on('click', '.citationLink', function () {
               let citationId = $(this).attr('data-cid');
+              $('#citationContext').attr('data-citationid', citationId);
               $.getJSON('ajax.php?action=loadCitation&id='+citationId)
               .done(function(data) {
                 updateCitation(data);		
@@ -637,8 +646,7 @@ HTML;
                     //set the first translation type
                   $('#translationType').val(data.firstTranslationType);
                 } else {
-                  $('#translationLinks').html('');
-                  CKEDITOR.instances.slipTranslation.setData(''); //clear the translation content for new empty translation
+                  addTranslationLink();
                 }
               });
               return false;
@@ -942,8 +950,9 @@ HTML;
 					    $('#postContextScope').val(postScope); 
 					    writeCitationContext(filename, id);
 					  });
-            
-            function updateCitation(data) {
+					 }); 
+          
+          function updateCitation(data) {
               let context = data.context;
                 //update the context scope
               $('#citationContext').attr('data-precontextscope', data.preScope);
@@ -951,7 +960,7 @@ HTML;
               $('#incrementPre').addClass(context.preIncrementDisable);
               $('#incrementPost').addClass(context.postIncrementDisable);
                 //update the context html
-              $('#citationContext').attr('data-citationid', data.id);
+              $('#citationContext').attr('data-citationid', data.id);              
               $('#citationContext').html(context.html);
                 //update the citationType select
               $('#citationType').val(data.type);
@@ -962,18 +971,16 @@ HTML;
             function createTranslation(citationId) {        
               $.getJSON('ajax.php?action=createTranslation&citationId='+citationId)
               .done(function(data) {
-                updateTranslation(data);          
                   //write the translation badge
                 let translationCount = data.translationCount;
                 let nextTranslationIndex = translationCount+1;
-                html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border: none;background-color: white;">';
-								html += '<a href="#"><span class="badge badge-primary badge-pill">'+nextTranslationIndex+'</span></a></li>';
-                $('#translationLinks').append(html);
+                addTranslationLink(nextTranslationIndex);
                 return false;
               });    
             }
             
             function saveTranslation() {
+              let citationId = $('#citationContext').attr('data-citationid');              
               let translationId = $('#slipTranslation').attr('data-translationid');
               let content = CKEDITOR.instances.slipTranslation.getData();
               let type = $('#translationType').val();
@@ -982,6 +989,7 @@ HTML;
                 method: 'post',
                 data: {
                   action: 'saveTranslation',
+                  citationId: citationId,
 	                translationId: translationId,
 	                content: content,
 	                type: type
@@ -1001,8 +1009,20 @@ HTML;
               });
             }
             
-            function updateTranslation(data) {
-                          
+            //new translation badge 
+            function addTranslationLink(index = 1) {
+              if (index == 1) {  //new translation link list
+                $('#translationLinks').html('');  //clear any previous badges
+              }
+                //write a new translation badge
+              var html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">';
+              html += '<a href="#" data-tid="" class="translationLink">';
+							html += '<span class="badge badge-primary badge-pill">'+index+'</span></a></li>';
+							$('#translationLinks').append(html);
+                //clear the translation editor
+              CKEDITOR.instances.slipTranslation.setData(''); //clear the translation content for new empty translation
+                //clear the stored translation ID
+              $('#slipTranslation').attr('data-translationid', '');
             }
             
             function writeCitationContext(filename, id) {
@@ -1019,7 +1039,6 @@ HTML;
 					      $('#slip').show();
 					    });
 					  }
-					 }); 
         </script>
 HTML;
   }

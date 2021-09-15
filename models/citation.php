@@ -29,9 +29,10 @@ class citation
 		$this->_postContextScope = self::SCOPE_DEFAULT;
 		$this->_type = "short";   //default for new citation
 		$sql = <<<SQL
-			INSERT INTO citation (`preContextScope`, `postContextScope`) VALUES(:pre, :post);
+			INSERT INTO citation (`preContextScope`, `postContextScope`, `type`) VALUES(:pre, :post, :type);
 SQL;
-		$this->_db->exec($sql, array(":pre" => $this->_postContextScope, ":post" => $this->_postContextScope));
+		$this->_db->exec($sql, array(":pre" => $this->_postContextScope, ":post" => $this->_postContextScope,
+			":type" => $this->_type));
 		$id = $this->_db->getLastInsertId();
 		$this->_id = $id;
 	}
