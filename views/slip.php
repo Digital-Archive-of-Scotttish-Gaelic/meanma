@@ -610,13 +610,15 @@ HTML;
             $('.addCitationLink').on('click', function () {
               $.getJSON('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
               .done(function(data) {
-                $('#citationContext').attr('data-citationid', data.id);
+                let citationId = data.id;
+                $('#citationContext').attr('data-citationid', citationId);
                 updateCitation(data);          
                   //write the citation badge
                 let citationCount = {$citationCount};
                 let nextCitationIndex = citationCount+1;
                 html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border: none;background-color: #efefef;">';
-								html += '<a href="#"><span class="badge badge-primary badge-pill">'+nextCitationIndex+'</span></a></li>';
+								html += '<a href="#" data-cid="'+citationId+'" class="citationLink">';
+								html += '<span class="badge badge-primary badge-pill">'+nextCitationIndex+'</span></a></li>';
                 $('#citationLinks').append(html);
                 addTranslationLink();
                 return false;
