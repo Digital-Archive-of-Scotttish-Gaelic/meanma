@@ -483,6 +483,7 @@ HTML;
 
   private function _writeContext() {
 	  $firstCitationId = $this->_citations[0]->getId();  //the first citation's ID – the default display on load
+	  $citationCount = count($this->_citations);
   	$citationTypeHtml = '<select id="citationType" name="citationType" class="form-control col-1">';
   	foreach (models\citation::$types as $citationType) {
   		$selected = $this->_citations[0]->getType() == $citationType ? "selected" : "";
@@ -522,7 +523,7 @@ HTML;
 								<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
 								<a class="updateContext btn-link {$context["preIncrementDisable"]}" id="incrementPre"><i class="fas fa-plus"></i></a>
               </div>
-              <span data-citationid="{$firstCitationId}" data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="citationContext" class="citationContext">
+              <span data-citationid="{$firstCitationId}" data-citationcount="{$citationCount}" data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="citationContext" class="citationContext">
                 {$context["html"]}
               </span>
               <div>
@@ -611,14 +612,15 @@ HTML;
               $.getJSON('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
               .done(function(data) {
                 let citationId = data.id;
+                var citationCount = $('#citationContext').attr('data-citationcount');
+                citationCount++;
+                $('#citationContext').attr('data-citationcount', citationCount);
                 $('#citationContext').attr('data-citationid', citationId);
                 updateCitation(data);          
                   //write the citation badge
-                let citationCount = {$citationCount};
-                let nextCitationIndex = citationCount+1;
                 html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border: none;background-color: #efefef;">';
 								html += '<a href="#" data-cid="'+citationId+'" class="citationLink">';
-								html += '<span class="badge badge-primary badge-pill">'+nextCitationIndex+'</span></a></li>';
+								html += '<span class="badge badge-primary badge-pill">'+citationCount+'</span></a></li>';
                 $('#citationLinks').append(html);
                 addTranslationLink();
                 return false;
