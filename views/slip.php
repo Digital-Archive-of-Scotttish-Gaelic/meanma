@@ -604,7 +604,9 @@ HTML;
             
             //load translation
             $(document).on('click', '.translationLink', function () {
-              loadTranslation($(this).attr('data-tid'));
+              let tid = $(this).attr('data-tid');
+              $('#slipTranslation').attr('data-translationid', tid);
+              loadTranslation(tid);
             });
             
             //add citation 
@@ -977,8 +979,8 @@ HTML;
               .done(function(data) {
                   //write the translation badge
                 let translationCount = data.translationCount;
-                let nextTranslationIndex = translationCount+1;
-                addTranslationLink(nextTranslationIndex);
+                $('#slipTranslation').attr('data-translationid', data.id);
+                addTranslationLink(data.id, translationCount);
                 return false;
               });    
             }
@@ -1014,19 +1016,18 @@ HTML;
             }
             
             //new translation badge 
-            function addTranslationLink(index = 1) {
+            function addTranslationLink(translationId = '', index = 1) {
               if (index == 1) {  //new translation link list
                 $('#translationLinks').html('');  //clear any previous badges
               }
                 //write a new translation badge
               var html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">';
-              html += '<a href="#" data-tid="" class="translationLink">';
+              html += '<a href="#" data-tid="'+translationId+'" class="translationLink">';
 							html += '<span class="badge badge-primary badge-pill">'+index+'</span></a></li>';
 							$('#translationLinks').append(html);
                 //clear the translation editor
               CKEDITOR.instances.slipTranslation.setData(''); //clear the translation content for new empty translation
                 //clear the stored translation ID
-              $('#slipTranslation').attr('data-translationid', '');
             }
             
             function writeCitationContext(filename, id) {
