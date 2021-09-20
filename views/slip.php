@@ -986,7 +986,7 @@ HTML;
             }
             
             function saveTranslation() {
-              let citationId = $('#citationContext').attr('data-citationid');              
+              let citationId = $('#citationContext').attr('data-citationid');    
               let translationId = $('#slipTranslation').attr('data-translationid');
               let content = CKEDITOR.instances.slipTranslation.getData();
               let type = $('#translationType').val();
@@ -1016,8 +1016,8 @@ HTML;
             }
             
             //new translation badge 
-            function addTranslationLink(translationId = '', index = 1) {
-              if (index == 1) {  //new translation link list
+            function addTranslationLink(translationId = '', index = 0) {
+              if (index == 0) {  //new translation link list
                 $('#translationLinks').html('');  //clear any previous badges
               }
                 //write a new translation badge
