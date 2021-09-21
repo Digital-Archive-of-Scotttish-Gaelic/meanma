@@ -81,7 +81,7 @@ HTML;
           <div id="translationContainer" class="collapse form-group" style="padding: 5px; border: 1px solid gray;">
             <label for="slipTranslation">English translation:</label>
             <textarea class="form-control" name="slipTranslation" id="slipTranslation" data-translationid="{$translationId}" rows="3">
-								{$this->_slip->getTranslation()}
+								{$translations[0]->getContent()}
 						</textarea>
             <script>
               CKEDITOR.replace('slipTranslation', {
