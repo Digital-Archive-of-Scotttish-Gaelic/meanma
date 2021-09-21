@@ -42,7 +42,7 @@ HTML;
 			$firstTranslationType = "";
 		} else {
 			$firstTranslationId = $translations[0]->getId();
-			$firstTranslationContent = $translation[0]->getContent();
+			$firstTranslationContent = $translations[0]->getContent();
 			$firstTranslationType = $translations[0]->getType();
 		}
 	  $translationTypeHtml = '<select id="translationType" name="translationType" class="form-control col-1">';
@@ -1021,6 +1021,7 @@ HTML;
             function addTranslationLink(translationId = '', index = 0) {
               if (index == 0) {  //new translation link list
                 $('#translationLinks').html('');  //clear any previous badges
+                index = 1;
               }
                 //write a new translation badge
               var html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">';
