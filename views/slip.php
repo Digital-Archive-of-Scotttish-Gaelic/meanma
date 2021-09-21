@@ -38,9 +38,11 @@ HTML;
   	$translations = $this->_citations[0]->getTranslations();  //first citation displays by default
 		if (empty($translations)) {
 			$firstTranslationId = "";
+			$firstTranslationContent = "";
 			$firstTranslationType = "";
 		} else {
 			$firstTranslationId = $translations[0]->getId();
+			$firstTranslationContent = $translation[0]->getContent();
 			$firstTranslationType = $translations[0]->getType();
 		}
 	  $translationTypeHtml = '<select id="translationType" name="translationType" class="form-control col-1">';
@@ -81,7 +83,7 @@ HTML;
           <div id="translationContainer" class="collapse form-group" style="padding: 5px; border: 1px solid gray;">
             <label for="slipTranslation">English translation:</label>
             <textarea class="form-control" name="slipTranslation" id="slipTranslation" data-translationid="{$translationId}" rows="3">
-								{$translations[0]->getContent()}
+								{$firstTranslationContent}
 						</textarea>
             <script>
               CKEDITOR.replace('slipTranslation', {
