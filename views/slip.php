@@ -626,7 +626,7 @@ HTML;
 								html += '<a href="#" data-cid="'+citationId+'" class="citationLink">';
 								html += '<span class="badge badge-primary badge-pill">'+citationCount+'</span></a></li>';
                 $('#citationLinks').append(html);
-                addTranslationLink();
+                createTranslation(citationId);
                 return false;
               });      
             });
@@ -981,6 +981,9 @@ HTML;
               .done(function(data) {
                   //write the translation badge
                 let translationCount = data.translationCount;
+                if (translationCount == 1) {  //new translation link list
+                  $('#translationLinks').html('');  //clear any previous badges
+                }
                 $('#slipTranslation').attr('data-translationid', data.id);
                 addTranslationLink(data.id, translationCount);
                 return false;
@@ -1019,10 +1022,6 @@ HTML;
             
             //new translation badge 
             function addTranslationLink(translationId = '', index = 0) {
-              if (index == 0) {  //new translation link list
-                $('#translationLinks').html('');  //clear any previous badges
-                index = 1;
-              }
                 //write a new translation badge
               var html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">';
               html += '<a href="#" data-tid="'+translationId+'" class="translationLink">';
