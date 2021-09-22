@@ -616,6 +616,11 @@ HTML;
               $.getJSON('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
               .done(function(data) {
                 let citationId = data.id;
+                $('#citationContext').attr('data-citationid', citationId);
+					      $('#citationContext').attr('data-precontextscope', data.prescope);
+					      $('#citationContext').attr('data-postcontextscope', data.postscope);
+					      $('#preContextScope').val(data.prescope);
+					      $('#postContextScope').val(data.postscope);
                 var citationCount = $('#citationContext').attr('data-citationcount');
                 citationCount++;
                 $('#citationContext').attr('data-citationcount', citationCount);

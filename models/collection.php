@@ -178,19 +178,15 @@ SQL;
 	 * @return slip object
 	 */
 	public static function getSlipBySlipId($slipId, $db) {
-
-	//	$filename, $id, $auto_id = null, $pos, $preScope = self::SCOPE_DEFAULT, $postScope = self::SCOPE_DEFAULT
-
-
 		$sql = <<<SQL
-      SELECT s.filename AS filename, s.id AS wid, pos, preContextScope AS pre, postContextScope AS post
+      SELECT s.filename AS filename, s.id AS wid, pos
         FROM slips s
       	JOIN lemmas l ON s.filename = l.filename AND s.id = l.id 
         WHERE auto_id = :slipId
 SQL;
 		$result = $db->fetch($sql, array(":slipId" => $slipId));
 		$row = $result[0];
-		return new slip($row["filename"], $row["wid"], $slipId, $row["pos"], $row["pre"], $row["post"]);
+		return new slip($row["filename"], $row["wid"], $slipId, $row["pos"]);
 	}
 
 	public static function getWordformBySlipId($slipId) {

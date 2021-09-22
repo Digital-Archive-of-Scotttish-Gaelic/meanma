@@ -77,7 +77,7 @@ switch ($_REQUEST["action"]) {
 		$citation = new citation($db);
 		$citation->attachToSlip($_GET["slipId"]);
 		$context = $citation->getContext(true);
-		echo json_encode(array("id" => $citation->getId(), "preScope" => $citation->getPostContextScope(),
+		echo json_encode(array("id" => $citation->getId(), "preScope" => $citation->getPreContextScope(),
 			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
 		break;
 	case "loadCitation":

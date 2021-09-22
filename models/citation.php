@@ -124,38 +124,6 @@ HTML;
 
 	}
 
-
-
-	private function _getContextData($context) {
-		$preIncrementDisable = $postIncrementDisable = "";
-		$updateSlip = false;  //flag used to track if the pre or post scopes != defaults
-		//check for start/end of document
-		if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
-			$this->_slip->setPreContextScope($context["prelimit"]);
-			$preIncrementDisable = "disabled";
-			$updateSlip = true;
-		}
-		if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
-			$this->_slip->setPostContextScope($context["postlimit"]);
-			$postIncrementDisable = "disabled";
-			$updateSlip = true;
-		}
-		$contextHtml = $context["pre"]["output"];
-		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
-			$contextHtml .= ' ';
-		}
-		$contextHtml .= <<<HTML
-      <mark id="slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
-HTML;
-		if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
-			$contextHtml .= ' ';
-		}
-		$contextHtml .= $context["post"]["output"];
-		return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
-			$postIncrementDisable, "updateSlip" => $updateSlip);
-	}
-
-
 	//GETTERS
 	public function getId() {
 		return $this->_id;
