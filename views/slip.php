@@ -1046,7 +1046,29 @@ HTML;
 					    var url = "ajax.php?action=getContext";
 					    url += "&citationId="+citationId+"&type="+citationType+"&preScope="+preScope+"&postScope="+postScope;
 					    url += "&filename="+filename+"&id="+id; 
-					    $.getJSON(url, function (data) {					     
+					    $.getJSON(url, function (data) {					      
+					      //handle zero pre/post context sizes
+					      if (preScope == 0) {
+					        $('#decrementPre').addClass("disabled");
+					      } else {
+					        $('#decrementPre').removeClass("disabled");
+					      }
+					      if (postScope == 0) {
+					        $('#decrementPost').addClass("disabled");
+					      } else {
+					        $('#decrementPost').removeClass("disabled");
+					      }
+					      //handle reaching the start/end of the document
+					      if (data.preIncrementDisable) {
+					        $('#incrementPre').addClass("disabled");
+					      } else {
+					        $('#incrementPre').removeClass("disabled");
+					      }
+					      if (data.postIncrementDisable) {
+					        $('#incrementPost').addClass("disabled");
+					      } else {
+					        $('#incrementPost').removeClass("disabled");
+					      }      
 					      $('#citationContext').html(data.html);
 					      $('#slip').show();
 					    });

@@ -121,7 +121,6 @@ HTML;
 		$contextHtml .= $context["post"]["output"];
 		return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
 			$postIncrementDisable);
-
 	}
 
 	//GETTERS
