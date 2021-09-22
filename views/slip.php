@@ -74,73 +74,71 @@ HTML;
 	  /*
 	   */
     echo <<<HTML
-				{$this->_writeContext()}
-				{$this->_writeCollocatesView()}
-				<div style="margin-left: 10px;">
-					<small><a href="#translationContainer" id="toggleTranslation" data-toggle="collapse" aria-expanded="false" aria-controls="translationContainer">
-	            show/hide translation
-          </a></small>
-          <div id="translationContainer" class="collapse form-group" style="padding: 5px; border: 1px solid gray;">
-            <label for="slipTranslation">English translation:</label>
-            <textarea class="form-control" name="slipTranslation" id="slipTranslation" data-translationid="{$translationId}" rows="3">
-								{$firstTranslationContent}
-						</textarea>
-            <script>
-              CKEDITOR.replace('slipTranslation', {
-                contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
-                customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
-              });
-            </script>
-	          <!-- translation links -->
-	          <div>
-	            <label for="translationType">Translation type:</label>
-	            {$translationTypeHtml}
-						</div>
-						<div class="container">
-							<div class="row">
-								<div class="col-1 justify-content-center align-self-center">
-									<a href="#" class="addTranslationLink" title="add translation" style="font-size: 30px;"><i class="fas fa-plus" style="color: #007bff;">
-									</i></a>
-								</div>
-								<div class="col-11 justify-content-center"> 
-									<ul id="translationLinks" class="list-group list-group-horizontal">
-										{$translationLinksHtml}
-									</ul>
+				<div class="row flex-fill" style="min-height: 0;">
+					<div id="lhs" class="col-6 mh-100" style="overflow-y: scroll; border: 1px solid red;">
+						{$this->_writeContext()}
+						{$this->_writeCollocatesView()}
+						<small><a href="#translationContainer" id="toggleTranslation" data-toggle="collapse" aria-expanded="false" aria-controls="translationContainer">
+		            show/hide translation
+	          </a></small>
+	          <div id="translationContainer" class="collapse form-group" style="padding: 5px; border: 1px solid gray;">
+	            <label for="slipTranslation">English translation:</label>
+	            <textarea class="form-control" name="slipTranslation" id="slipTranslation" data-translationid="{$translationId}" rows="3">
+									{$firstTranslationContent}
+							</textarea>
+	            <script>
+	              CKEDITOR.replace('slipTranslation', {
+	                contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+	                customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
+	              });
+	            </script>
+		          <!-- translation links -->
+		          <div>
+		            <label for="translationType">Translation type:</label>
+		            {$translationTypeHtml}
+							</div>
+							<div class="container">
+								<div class="row">
+									<div class="col-1 justify-content-center align-self-center">
+										<a href="#" class="addTranslationLink" title="add translation" style="font-size: 30px;"><i class="fas fa-plus" style="color: #007bff;">
+										</i></a>
+									</div>
+									<div class="col-11 justify-content-center"> 
+										<ul id="translationLinks" class="list-group list-group-horizontal">
+											{$translationLinksHtml}
+										</ul>
+									</div>
 								</div>
 							</div>
 						</div>
+        </div>  <!-- end LHS -->
+        
+				<div id="rhs" class="col-6 mh-100" style="overflow-y: scroll; border: 1px solid green;"> <!-- RHS panel -->
+	        <div class="form-group" id="slipChecked">
+	          <div class="form-check form-check-inline">
+	            <input class="form-check-input" type="checkbox" name="starred" id="slipStarred" {$checked}>
+	            <label class="form-check-label" for="slipStarred">checked</label>
+	          </div>
+	        </div>
+	        <div class="form-group row">
+						<label for="slipStatus" class="col-form-label col-sm-1">Status:</label>
+						<select id="slipStatus">
+							{$statusOptionHtml}
+						</select>
 					</div>
-        </div>
-        <div class="form-group" id="slipChecked">
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" name="starred" id="slipStarred" {$checked}>
-            <label class="form-check-label" for="slipStarred">checked</label>
-          </div>
-        </div>
-        <div class="form-group row">
-					<label for="slipStatus" class="col-form-label col-sm-1">Status:</label>
-					<select id="slipStatus">
-						{$statusOptionHtml}
-					</select>
-				</div>
-        <div>
-          <small><a href="#morphoSyntactic" id="toggleMorphoSyntactic" data-toggle="collapse" aria-expanded="true" aria-controls="morphoSyntactic">
-            show/hide morphosyntax
-          </a></small>
-        </div>
-        <div id="morphoSyntactic" class="collapse editSlipSectionContainer show">
-          <div class="form-group row">
-            <label class="col-form-label col-sm-1" for="slipHeadword">Headword:</label>
-            <input class="col-sm-3 form-control" type="text" id="slipHeadword" name="slipHeadword" value="{$this->_slip->getHeadword()}"> 
-          </div>
-HTML;
-    $this->_writePartOfSpeechSelects();
-    echo <<<HTML
+	        <div>
+	          <small><a href="#morphoSyntactic" id="toggleMorphoSyntactic" data-toggle="collapse" aria-expanded="true" aria-controls="morphoSyntactic">
+	            show/hide morphosyntax
+	          </a></small>
+	        </div>
+	        <div id="morphoSyntactic" class="collapse editSlipSectionContainer show">
+	          <div class="form-group row">
+	            <label class="col-form-label col-sm-1" for="slipHeadword">Headword:</label>
+	            <input class="col-sm-3 form-control" type="text" id="slipHeadword" name="slipHeadword" value="{$this->_slip->getHeadword()}"> 
+	          </div>
+            {$this->_writePartOfSpeechSelects()}
 				</div> <!-- end morphoSyntactic -->
-HTML;
-
-	  $this->_writeSenseCategories();
-    echo <<<HTML
+				{$this->_writeSenseCategories()}
 				<div style="margin: 0 0 10px 10px;">
           <small><a href="#notesSection" id="toggleNotes" data-toggle="collapse" aria-expanded="true" aria-controls="notesSection">
             show/hide notes
@@ -174,10 +172,12 @@ HTML;
              </div>
           </div>
         </div>
+				{$this->_writeUpdatedBy()}
+        {$this->_writeFooter()}
+			</div>  <!-- end RHS -->
+		</div> <!-- end container -->
+		{$this->_writeSavedModal()}
 HTML;
-    $this->_writeUpdatedBy();
-    $this->_writeFooter();;
-    $this->_writeSavedModal();
     models\sensecategories::writeSenseModal();
   }
 
@@ -207,15 +207,16 @@ HTML;
     }
     $user = models\users::getUser($email);
     $time = $this->_slip->getLastUpdated();
-    echo <<<HTML
+    $html = <<<HTML
         <div>
             <p>Last updated {$time} by {$user->getFirstName()} {$user->getLastName()}</p>
         </div>
 HTML;
+    return $html;
   }
 
   private function _writeSavedModal() {
-    echo <<<HTML
+    $html = <<<HTML
         <div id="slipSavedModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-sm">
             <div class="modal-content">
@@ -226,24 +227,27 @@ HTML;
           </div>
         </div>
 HTML;
+    return $html;
   }
 
   private function _writeFooter() {
     $pos = new models\partofspeech($_REQUEST["pos"]);
     $label = $_REQUEST["pos"] ? " ({$pos->getLabel()})" : "";
-    echo <<<HTML
+    $html = <<<HTML
         <div>
             slip ID:<span id="auto_id">{$this->_slip->getAutoId()}</span><br>
             POS tag:<span id="slipPOS">{$_REQUEST["pos"]}{$label}</span><br><br>
             filename: <span id="slipFilename">{$this->_slip->getFilename()}</span><br>
             id: <span id="wordId">{$_REQUEST["wid"]}</span><br>
         </div>
+
+				{$this->_writeJavascript()}
 HTML;
-    $this->_writeJavascript();
+    return $html;
   }
 
   private function _writePartOfSpeechSelects() {
-    echo $this->_writeWordClassesSelect();
+    $html = $this->_writeWordClassesSelect();
     $props = $this->_slip->getSlipMorph()->getProps();  //the morph data
     $relations = array("numgen", "case", "mode", "fin_person", "imp_person", "fin_number",
 	    "imp_number", "status", "tense", "mood", "prep_mode", "prep_person", "prep_number", "prep_gender");
@@ -286,7 +290,7 @@ HTML;
     if ($conjPosPrepHide != "hide") {
     	$genderPrepHide = ($props["prep_person"] != "third person") || ($props["prep_number"] != "singular") ? "hide" : "";
     }
-    echo <<<HTML
+    $html .= <<<HTML
         <div>
           <h5>Morphological information</h5>
             <div id="prepSelects" class="{$prepSelectHide}">
@@ -391,7 +395,7 @@ HTML;
             </div>
         </div>
 HTML;
-
+		return $html;
   }
 
   private function _writeWordClassesSelect() {
@@ -409,7 +413,7 @@ HTML;
           <select name="wordClass" id="wordClass" class="form-control col-3">
             {$optionHtml}
           </select>
-      </div>
+        </div>
 HTML;
     return $html;
   }
@@ -439,7 +443,7 @@ HTML;
 				</li>
 HTML;
     }
-    echo <<<HTML
+    $html = <<<HTML
 				<div style="margin-left: 10px;">
 					<small><a href="#senses" id="toggleSenses" data-toggle="collapse" aria-expanded="true" aria-controls="senses">
             show/hide senses
@@ -481,6 +485,7 @@ HTML;
           </div>
         </div>
 HTML;
+    return $html;
   }
 
   private function _writeContext() {
@@ -515,11 +520,11 @@ HTML;
     $context = $this->_citations[0]->getContext(true);
     $preScope = $this->_citations[0]->getPreContextScope();
     $postScope = $this->_citations[0]->getPostContextScope();
-    echo <<<HTML
+    $html = <<<HTML
             <div id="slipContextContainer" class="editSlipSectionContainer">
-              <div class="floatRight">
+              <!--div class="floatRight">
                 <a href="#" class="btn btn-success" id="showCollocatesView">collocates view</a>
-              </div>
+              </div-->
               <h5>Adjust citation context</h5>
               <div>
 								<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
@@ -542,6 +547,7 @@ HTML;
 							<!-- citation links -->
 							<div class="container">
 								<div class="row">
+									
 									<div class="col-1">
 										<a href="#" class="addCitationLink" title="add citation" style="font-size: 30px;"><i class="fas fa-plus" style="color: #007bff;">
 										</i></a>
@@ -551,10 +557,12 @@ HTML;
 										{$citationLinkHtml}
 										</ul>
 									</div>
-								</div>
-							</div>
-            </div>
+									
+								</div>  <!-- end row -->
+							</div>  <!-- end "container" -->
+            </div>  <!-- end slipContextContainer -->
 HTML;
+    return $html;
   }
 
 	private function _writeCollocatesView() {
@@ -574,7 +582,7 @@ HTML;
 			$contextHtml .= ' ';  //  <div style="display:inline;">
 		}
 		$contextHtml .= $context["post"]["output"];
-		echo <<<HTML
+		$html = <<<HTML
             <div id="slipCollocatesContainer" class="hide editSlipSectionContainer">
               <div class="floatRight">
                 <a class="btn btn-success" href="#" id="showCitationView">citation view</a>
@@ -585,11 +593,11 @@ HTML;
               </span>
             </div>
 HTML;
+		return $html;
 	}
 
   private function _writeJavascript() {
-  	$citationCount = count($this->_citations);
-    echo <<<HTML
+    $html = <<<HTML
         <script>  
           $(function () {        
             
@@ -1078,5 +1086,6 @@ HTML;
 					  }
         </script>
 HTML;
+    return $html;
   }
 }
