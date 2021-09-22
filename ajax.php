@@ -31,6 +31,7 @@ switch ($_REQUEST["action"]) {
 		break;
   case "getContext":
   	$citation = new citation($db, $_GET["citationId"]);
+	  $citation->attachToSlip($_GET["slipId"]);
   	$citation->setType($_GET["type"]);
   	$citation->setPreContextScope($_GET["preScope"]);
   	$citation->setPostContextScope($_GET["postScope"]);

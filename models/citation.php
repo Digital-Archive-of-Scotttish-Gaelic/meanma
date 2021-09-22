@@ -79,7 +79,7 @@ SQL;
 	public function attachToSlip($slipId) {
 		$this->_slip = collection::getSlipBySlipId($slipId, $this->_db);
 		$sql = <<<SQL
-			INSERT INTO slip_citation (`slip_id`, `citation_id`) VALUES (:slipId, :citationId)
+			REPLACE INTO slip_citation (`slip_id`, `citation_id`) VALUES (:slipId, :citationId)
 SQL;
 		$this->_db->exec($sql, array(":slipId" => $slipId, ":citationId" => $this->getId()));
 		$this->_slip->addCitation($this);

@@ -693,11 +693,13 @@ HTML;
 		        
 		        //reset the context
 		        $('#resetContext').on('click', function () {
-		          let filename = $('#slipFilename').text();
-              let id = $('#wordId').text();
+              let slipId = {$this->_slip->getAutoId()}
+              let filename = '{$this->_slip->getFilename()}';
+              let id = '{$this->_slip->getId()}';
+              let type = $('#citationType').val();
               var preScope = {$this->_slip->getScopeDefault()};
               var postScope = {$this->_slip->getScopeDefault()};        
-              $.getJSON("ajax.php?action=getContext&filename="+filename+"&id="+id+"&preScope="+preScope+"&postScope="+postScope, function (data) {
+              $.getJSON("ajax.php?action=getContext&slipId="+slipId+"&type="+type+"&preScope="+preScope+"&postScope="+postScope, function (data) {
 					      //handle reaching the start/end of the document
 					      if (data.prelimit) {
 					        preScope = data.prelimit;
@@ -1042,9 +1044,10 @@ HTML;
 					    let citationId = $('#citationContext').attr('data-citationid');
 					    let preScope  = $('#citationContext').attr('data-precontextscope');
 					    let postScope = $('#citationContext').attr('data-postcontextscope');
+					    let slipId = {$this->_slip->getAutoId()};
 					    let citationType = $('#citationType').val();
 					    var url = "ajax.php?action=getContext";
-					    url += "&citationId="+citationId+"&type="+citationType+"&preScope="+preScope+"&postScope="+postScope;
+					    url += "&citationId="+citationId+"&slipId="+slipId+"&type="+citationType+"&preScope="+preScope+"&postScope="+postScope;
 					    url += "&filename="+filename+"&id="+id; 
 					    $.getJSON(url, function (data) {					      
 					      //handle zero pre/post context sizes
