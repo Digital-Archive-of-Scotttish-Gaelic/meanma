@@ -230,6 +230,21 @@ HTML;
     return $html;
   }
 
+	private function _writeCitationEditModal() {
+		$html = <<<HTML
+        <div id="citationEditModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="citationEditModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h2>Edit citation</h2>
+                </div>
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
+
   private function _writeFooter() {
     $pos = new models\partofspeech($_REQUEST["pos"]);
     $label = $_REQUEST["pos"] ? " ({$pos->getLabel()})" : "";
