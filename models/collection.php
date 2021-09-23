@@ -155,7 +155,7 @@ SQL;
 		$slipInfo = array();
 		$sql = <<<SQL
       SELECT s.filename as filename, s.id as id, auto_id, pos, lemma,
-              translation, date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id, 
+              date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id, 
               e.headword AS headword
           FROM slips s
           JOIN entry e ON e.id = s.entry_id
@@ -165,9 +165,7 @@ SQL;
           ORDER BY auto_id ASC
 SQL;
 
-		while ($row = $db->fetch($sql, array(":slipId" => $slipId))) {
-			$slipInfo[] = $row;
-		}
+		$slipInfo = $db->fetch($sql, array(":slipId" => $slipId));
 		return $slipInfo;
 	}
 

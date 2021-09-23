@@ -117,9 +117,8 @@ $(function () {
     var canEdit;
     var isOwner;
     //get the slip info from the DB
-    $.getJSON('ajax.php?action=loadSlip&filename='+xml+'&id='+id+'&index='+resultindex
-      +'&preContextScope='+$('#slipContext').attr('data-precontextscope')+'&auto_id='+auto_id
-      +'&postContextScope='+$('#slipContext').attr('data-postcontextscope') + '&pos=' + pos, function (data) {
+    $.getJSON('ajax.php?action=loadSlip&filename='+xml+'&id='+id+'&index='+resultindex+'&auto_id='+auto_id
+      +'&pos='+pos, function (data) {
       if (data.wordClass) {
         var wc = data.wordClass;
         if (wc=='noun') {
@@ -131,15 +130,17 @@ $(function () {
       }
       //check if user can edit slip
       canEdit = data.canEdit ? true : false;
-     // var context = data.context.pre["output"] + ' <mark>' + data.context.word + '</mark> ' + data.context.post["output"];
-      let context = data.context;
-      body += '<p>' + context + '</p>';
-      if (data.translation) {
-        body += '<div><small><a href="#translation" data-toggle="collapse" aria-expanded="false" aria-controls="translation">';
-        body += 'show/hide translation</a></small></div>';
-        body += '<div id="translation" class="collapse"><small class="text-muted">' + data.translation + '</small></div>';
-      }
-      //body += '<p class="small">[#' + textId + ': <em>' + title + '</em> p.' + page + ']</p>';
+      $.each(data.citation, function(cid, citation) {
+        body += '<div>' + citation.context;
+        body += ' <small><em>('+citation.type+')</em></small>';
+        $.each(citation.translation, function (tid, translation) {
+          if (translation.content != '') {
+            body += '<p><small><a href="#" data-tid="trans_'+tid+'" class="toggleTranslation text-muted">show/hide translation</a></small></p>';
+            body += '<div class="slipTranslation d-none" id="trans_'+tid+'">'+translation.content+' (<small><em>'+translation.type+')</em></small></div>';
+          }
+        });
+        body += '</div>';
+      });
       body += '<p class="text-muted"><span data-toggle="tooltip" data-html="true" title="' + '<em>' + title + '</em> p.' + page + '">#' + textId + ': ' + date + '</span></p>';
       body += '<hr/>';
       body += '<ul class="list-inline">';
@@ -189,6 +190,16 @@ $(function () {
         }
         */
       });
+  });
+
+  //show/hide translations
+  $(document).on('click', '.toggleTranslation', function () {
+    let tid = '#' + $(this).attr('data-tid');
+    if ($(tid).hasClass('d-none')) {
+      $(tid).removeClass('d-none');
+    } else {
+      $(tid).addClass('d-none');
+    }
   });
 
   /*

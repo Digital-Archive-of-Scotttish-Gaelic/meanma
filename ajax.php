@@ -53,20 +53,27 @@ switch ($_REQUEST["action"]) {
 			echo json_encode(array("count" => count($_SESSION["printSlips"])));
 		break;
   case "loadSlip":
-    $slip = new slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $_GET["preContextScope"], $_GET["postContextScope"]);
+    $slip = new slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"]);
     $slip->updateResults($_GET["index"]); //ensure that "view slip" (and not "create slip") displays
     $filenameElems = explode('_', $slip->getFilename());
     $textId = $filenameElems[0];
     $results = array("locked"=>$slip->getLocked(), "auto_id"=>$slip->getAutoId(), "owner"=>$slip->getOwnedBy(),
-	    "starred"=>$slip->getStarred(), "translation"=>$slip->getTranslation(), "notes"=>$slip->getNotes(),
-      "preContextScope"=>$slip->getPreContextScope(), "postContextScope"=>$slip->getPostContextScope(),
+	    "starred"=>$slip->getStarred(), "notes"=>$slip->getNotes(),
       "wordClass"=>$slip->getWordClass(), "senses"=>$slip->getSensesInfo(),
       "lastUpdated"=>$slip->getLastUpdated(), "textId"=>$textId, "slipMorph"=>$slip->getSlipMorph()->getProps());
     //code required for modal slips
     $citations = $slip->getCitations();
-		$citation = $citations[0];  //first citation
-    $context = $citation->getContext(false);
-    $results["context"] = $context["html"];
+    foreach ($citations as $citation) {
+    	$citationId = $citation->getId();
+	    $context = $citation->getContext(false);
+	    $results["citation"][$citationId]["type"] = $citation->getType();
+	    $results["citation"][$citationId]["context"] = $context["html"];
+	    foreach ($citation->getTranslations() as $translation) {
+	    	$tid = $translation->getId();
+		    $results["citation"][$citationId]["translation"][$tid]["content"] = $translation->getContent();
+		    $results["citation"][$citationId]["translation"][$tid]["type"] = $translation->getType();
+	    }
+    }
     $results['isOwner'] = $slip->getOwnedBy() == $_SESSION["user"];
     $user = users::getUser($_SESSION["user"]);
     $superuser = $user->getSuperuser();
