@@ -76,8 +76,8 @@ HTML;
     echo <<<HTML
 				<div class="row flex-fill" style="min-height: 0;">
 					<div id="lhs" class="col-6 mh-100" style="overflow-y: scroll; border: 1px solid red;">
-						{$this->_writeContext()}
-						{$this->_writeCollocatesView()}
+						{$this->_writeCitations()}
+						<!-- {$this->_writeCollocatesView()} -->
 						<small><a href="#translationContainer" id="toggleTranslation" data-toggle="collapse" aria-expanded="false" aria-controls="translationContainer">
 		            show/hide translation
 	          </a></small>
@@ -173,6 +173,7 @@ HTML;
           </div>
         </div>
 				{$this->_writeUpdatedBy()}
+				{$this->_writeCitationEditModal()}
         {$this->_writeFooter()}
 			</div>  <!-- end RHS -->
 		</div> <!-- end container -->
@@ -232,11 +233,31 @@ HTML;
 
 	private function _writeCitationEditModal() {
 		$html = <<<HTML
-        <div id="citationEditModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="citationEditModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-sm">
+        <div id="citationEditModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="citationEditModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    <h2>Edit citation</h2>
+                    <h5>Adjust citation context</h5>
+			              <div>
+											<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
+											<a class="updateContext btn-link" id="incrementPre"><i class="fas fa-plus"></i></a>
+			              </div>
+			              <span data-citationid="" data-citationcount="" data-precontextscope="" data-postcontextscope="" id="citationContext" class="citationContext">
+			              </span>
+			              <div>
+			                <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
+											<a class="updateContext btn-link" id="incrementPost"><i class="fas fa-plus"></i></a>
+			              </div>
+			              <div style="height: 20px;">
+			                <a href="#" class="float-right" id="resetContext">reset context</a>
+										</div>
+										<div class="row">		
+											<label class="col-2" for="citationType">Citation type:</label>
+			                <select id="citationType" name="citationType" class="form-control col-1">
+			                  <option value="long">long</option>
+			                  <option value="short">short</option>
+			                </select>               
+										</div>
                 </div>
             </div>
           </div>
@@ -503,6 +524,21 @@ HTML;
     return $html;
   }
 
+  private function _writeCitations() {
+    $html = "<div><ul>";
+    $citations = $this->_citations;
+    foreach ($citations as $citation) {
+			$html .= <<<HTML
+				<li>
+					{$citation->getContext()["html"]}
+					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal">edit</a>
+				</li>
+HTML;
+    }
+    $html .= "</ul></div>";
+    return $html;
+  }
+
   private function _writeContext() {
 	  $firstCitationId = $this->_citations[0]->getId();  //the first citation's ID – the default display on load
 	  $citationCount = count($this->_citations);
@@ -615,6 +651,14 @@ HTML;
     $html = <<<HTML
         <script>  
           $(function () {        
+            
+            //populate editCitation modal on button click
+            $('#citationEditModal').on('show.bs.modal', function (event) {
+              var modal = $(this);
+              var editLink = $(event.relatedTarget);
+              let cid = editLink.attr('data-citationid');
+              $('#citationContext').html('this is where the context would go');
+            });
             
             //save translation on focus out from translation CKEditor
             CKEDITOR.instances['slipTranslation'].on("blur", function() {
