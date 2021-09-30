@@ -99,7 +99,7 @@ switch ($_REQUEST["action"]) {
 			$firstTranslationContent = $translations[0]->getContent();
 			$firstTranslationType = $translations[0]->getType();
 		}
-		echo json_encode(array("id" => $citation->getId(), "preScope" => $citation->getPostContextScope(),
+		echo json_encode(array("id" => $citation->getId(), "preScope" => $citation->getPreContextScope(),
 			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context,
 			"firstTranslationContent" => $firstTranslationContent, "firstTranslationType" => $firstTranslationType,
 			"translationCount" => $translationCount, "translationIds" => $translationIds));

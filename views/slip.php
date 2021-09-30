@@ -657,7 +657,12 @@ HTML;
               var modal = $(this);
               var editLink = $(event.relatedTarget);
               let cid = editLink.attr('data-citationid');
-              $('#citationContext').html('this is where the context would go');
+              $.getJSON('ajax.php?action=loadCitation&id='+cid)
+              .done(function(data) {
+                $('#citationContext').attr('data-precontextscope', data.preScope);
+                $('#citationContext').attr('data-postcontextscope', data.postScope);
+                $('#citationContext').html(data.context['html']);
+              });
             });
             
             //save translation on focus out from translation CKEditor
