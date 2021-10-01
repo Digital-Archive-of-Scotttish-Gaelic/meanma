@@ -676,7 +676,7 @@ HTML;
               let preScope = $('#citationContext').attr('data-precontextscope');
               let postScope = $('#citationContext').attr('data-postcontextscope');
               let type = $('#citationType').val();      
-              $.ajax('ajax.php?action=saveCitation&id='+id+'&preScope='+preScope+'&postScope='+postScope+'&type='+type)
+              $.ajax('ajax.php?action=saveCitation&id='+cid+'&preScope='+preScope+'&postScope='+postScope+'&type='+type)
               .done(function () {
                 $('#citationEditModal').modal('hide');
               });
