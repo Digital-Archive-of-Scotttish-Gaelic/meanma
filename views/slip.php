@@ -252,13 +252,17 @@ HTML;
 			                <a href="#" class="float-right" id="resetContext">reset context</a>
 										</div>
 										<div class="row">		
-											<label class="col-2" for="citationType">Citation type:</label>
-			                <select id="citationType" name="citationType" class="form-control col-1">
+											<label class="col-2" for="citationType">Type:</label>
+			                <select id="citationType" name="citationType" class="form-control col-3">
 			                  <option value="long">long</option>
 			                  <option value="short">short</option>
 			                </select>               
 										</div>
                 </div>
+                <div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
+                  <button type="button" id="saveCitation" class="btn btn-primary">save</button>
+								</div>
             </div>
           </div>
         </div>
@@ -661,7 +665,20 @@ HTML;
               .done(function(data) {
                 $('#citationContext').attr('data-precontextscope', data.preScope);
                 $('#citationContext').attr('data-postcontextscope', data.postScope);
+                $('#citationContext').attr('data-citationid', cid);
                 $('#citationContext').html(data.context['html']);
+              });
+            });
+            
+            //save the citation from the modal
+            $('#saveCitation').on('click', function() {
+              let cid = $('#citationContext').attr('data-citationid');
+              let preScope = $('#citationContext').attr('data-precontextscope');
+              let postScope = $('#citationContext').attr('data-postcontextscope');
+              let type = $('#citationType').val();      
+              $.ajax('ajax.php?action=saveCitation&id='+id+'&preScope='+preScope+'&postScope='+postScope+'&type='+type)
+              .done(function () {
+                $('#citationEditModal').modal('hide');
               });
             });
             
@@ -735,13 +752,6 @@ HTML;
                 }
               });
               return false;
-            });
-            
-            //update the citation type when changed
-            $('#citationType').on('change', function() {
-              let id = $('#citationContext').attr('data-citationid');
-              let type = $(this).val();
-              $.ajax('ajax.php?action=changeCitationType&id='+id+'&type='+type);
             });
        
 		        //update the citation context on click of token
@@ -1050,9 +1060,7 @@ HTML;
               $('#citationContext').attr('data-citationid', data.id);              
               $('#citationContext').html(context.html);
                 //update the citationType select
-              $('#citationType').val(data.type);
-                //update the other citation links and deactivate current badge
-								//TODO: !!              
+              $('#citationType').val(data.type);             
             }
             
             function createTranslation(citationId) {        

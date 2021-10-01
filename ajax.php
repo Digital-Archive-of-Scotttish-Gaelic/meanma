@@ -104,9 +104,11 @@ switch ($_REQUEST["action"]) {
 			"firstTranslationContent" => $firstTranslationContent, "firstTranslationType" => $firstTranslationType,
 			"translationCount" => $translationCount, "translationIds" => $translationIds));
 		break;
-	case "changeCitationType":
+	case "saveCitation":
 		$citation = new citation($db, $_GET["id"]);
 		$citation->setType($_GET["type"]);
+		$citation->setPreContextScope($_GET["preScope"]);
+		$citation->setPostContextScope($_GET["postScope"]);
 		$citation->save();
 		break;
 	case "createTranslation":
