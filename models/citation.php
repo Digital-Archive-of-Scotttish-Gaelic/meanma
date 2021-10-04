@@ -120,7 +120,7 @@ HTML;
 		}
 		$contextHtml .= $context["post"]["output"];
 		return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
-			$postIncrementDisable);
+			$postIncrementDisable, "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"]);
 	}
 
 	//GETTERS

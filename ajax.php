@@ -36,7 +36,6 @@ switch ($_REQUEST["action"]) {
   	$citation->setPreContextScope($_GET["preScope"]);
   	$citation->setPostContextScope($_GET["postScope"]);
 	  $context = $citation->getContext(true);
-  	$citation->save();
     echo json_encode($context);
     break;
 	case "getSlips":

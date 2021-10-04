@@ -753,7 +753,45 @@ HTML;
               });
               return false;
             });
-       
+            
+            /*
+              Increment and Decrement button handlers - update the context  
+             */
+            $('.updateContext').on('click', function () {         
+					    var preScope = $('#citationContext').attr('data-precontextscope');
+					    var postScope = $('#citationContext').attr('data-postcontextscope');
+					    var filename = $('#slipFilename').text();
+					    var id = $('#wordId').text();
+					    switch ($(this).attr('id')) {
+					      case "decrementPre":
+					        preScope--;
+					        if (preScope == 0) {
+					          $('#decrementPre').addClass("disabled");
+					        }
+					        break;
+					      case "incrementPre":
+					        preScope++;
+					        $('#decrementPre').removeClass("disabled");
+					        break;
+					      case "decrementPost":
+					        postScope--;
+					        if (postScope == 0) {
+					          $('#decrementPost').addClass("disabled");
+					        }
+					        break;
+					      case "incrementPost":
+					        postScope++;
+					        $('#decrementPost').removeClass("disabled");
+					        break;
+					    }
+					    $('#citationContext').attr('data-precontextscope', preScope);
+					    $('#citationContext').attr('data-postcontextscope', postScope);
+					    $('#preContextScope').val(preScope);
+					    $('#postContextScope').val(postScope); 
+					    writeCitationContext(filename, id);
+					  });
+					 }); 
+          
 		        //update the citation context on click of token
 		        $(document).on('click', '.contextLink',  function () {
 		          $(this).tooltip('hide')
@@ -1010,44 +1048,6 @@ HTML;
                 $('#genderPrepOptions').hide();
               }
             });
-            
-            /*
-              Increment and Decrement button handlers - update the context  
-             */
-            $('.updateContext').on('click', function () {         
-					    var preScope = $('#citationContext').attr('data-precontextscope');
-					    var postScope = $('#citationContext').attr('data-postcontextscope');
-					    var filename = $('#slipFilename').text();
-					    var id = $('#wordId').text();
-					    switch ($(this).attr('id')) {
-					      case "decrementPre":
-					        preScope--;
-					        if (preScope == 0) {
-					          $('#decrementPre').addClass("disabled");
-					        }
-					        break;
-					      case "incrementPre":
-					        preScope++;
-					        $('#decrementPre').removeClass("disabled");
-					        break;
-					      case "decrementPost":
-					        postScope--;
-					        if (postScope == 0) {
-					          $('#decrementPost').addClass("disabled");
-					        }
-					        break;
-					      case "incrementPost":
-					        postScope++;
-					        $('#decrementPost').removeClass("disabled");
-					        break;
-					    }
-					    $('#citationContext').attr('data-precontextscope', preScope);
-					    $('#citationContext').attr('data-postcontextscope', postScope);
-					    $('#preContextScope').val(preScope);
-					    $('#postContextScope').val(postScope); 
-					    writeCitationContext(filename, id);
-					  });
-					 }); 
           
           function updateCitation(data) {
               let context = data.context;
