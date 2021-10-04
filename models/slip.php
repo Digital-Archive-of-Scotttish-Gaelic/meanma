@@ -132,7 +132,7 @@ SQL;
   }
 
   public function addCitation($citation) {
-  	$this->_citations[] = $citation;
+  	$this->_citations[$citation->getId()] = $citation;
   }
 
   public function getCitations() {
@@ -142,10 +142,15 @@ SQL;
 SQL;
 		  $results = $this->_db->fetch($sql, array(":id" => $this->getAutoId()));
 		  foreach ($results as $result) {
-			  $this->_citations[] = new citation($this->_db, $result["citation_id"]);
+		  	$citationId = $result["citation_id"];
+			  $this->_citations[$citationId] = new citation($this->_db, $citationId);
 		  }
 	  }
 		return $this->_citations;
+  }
+
+  public function getSlipIsAttachedTiCitation($citationId) {
+		return array_key_exists($citationId, $this->getCitations());
   }
 
   public function getScopeDefault() {

@@ -35,7 +35,7 @@ HTML;
 	  /**
 	   * translations HTML
 	   */
-  	$translations = $this->_citations[0]->getTranslations();  //first citation displays by default
+  	$translations = reset($this->_citations)->getTranslations();  //first citation displays by default
 		if (empty($translations)) {
 			$firstTranslationId = "";
 			$firstTranslationContent = "";

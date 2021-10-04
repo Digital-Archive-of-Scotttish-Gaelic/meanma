@@ -78,6 +78,9 @@ SQL;
 
 	public function attachToSlip($slipId) {
 		$this->_slip = collection::getSlipBySlipId($slipId, $this->_db);
+		if ($this->_slip->getSlipIsAttachedTiCitation($this->getId())) {
+			return;   //slip is already attached
+		}
 		$sql = <<<SQL
 			REPLACE INTO slip_citation (`slip_id`, `citation_id`) VALUES (:slipId, :citationId)
 SQL;
