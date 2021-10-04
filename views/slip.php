@@ -534,7 +534,9 @@ HTML;
     foreach ($citations as $citation) {
 			$html .= <<<HTML
 				<li>
-					{$citation->getContext()["html"]}
+					<span id="citation_{$citation->getId()}">
+						{$citation->getContext()["html"]}
+					</span>
 					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal">edit</a>
 				</li>
 HTML;
@@ -672,12 +674,15 @@ HTML;
             
             //save the citation from the modal
             $('#saveCitation').on('click', function() {
-              let cid = $('#citationContext').attr('data-citationid');
-              let preScope = $('#citationContext').attr('data-precontextscope');
-              let postScope = $('#citationContext').attr('data-postcontextscope');
+              let context = $('#citationContext');
+              let cid = context.attr('data-citationid');
+              let html = context.html();
+              let preScope = context.attr('data-precontextscope');
+              let postScope = context.attr('data-postcontextscope');
               let type = $('#citationType').val();      
               $.ajax('ajax.php?action=saveCitation&id='+cid+'&preScope='+preScope+'&postScope='+postScope+'&type='+type)
               .done(function () {
+                $('#citation_'+cid).html(html);
                 $('#citationEditModal').modal('hide');
               });
             });
