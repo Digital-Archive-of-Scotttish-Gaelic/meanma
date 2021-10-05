@@ -537,6 +537,11 @@ HTML;
 					<span id="citation_{$citation->getId()}">
 						{$citation->getContext()["html"]}
 					</span>
+					<em>
+						<span id="citationType_{$citation->getId()}">
+							({$citation->getType()})
+						</span>
+					</em>
 					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal">edit</a>
 				</li>
 HTML;
@@ -683,6 +688,7 @@ HTML;
               $.ajax('ajax.php?action=saveCitation&id='+cid+'&preScope='+preScope+'&postScope='+postScope+'&type='+type)
               .done(function () {
                 $('#citation_'+cid).html(html);
+                $('#citationType_'+cid).html('('+type+')');
                 $('#citationEditModal').modal('hide');
               });
             });
