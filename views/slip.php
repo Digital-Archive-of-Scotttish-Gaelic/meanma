@@ -529,7 +529,9 @@ HTML;
   }
 
   private function _writeCitations() {
-    $html = "<div><ul>";
+    $html = <<<HTML
+			<div><h3>Citations</h3><ul id="citationList" style="list-style-type:none;">
+HTML;
     $citations = $this->_citations;
     foreach ($citations as $citation) {
 			$html .= <<<HTML
@@ -546,10 +548,18 @@ HTML;
 				</li>
 HTML;
     }
-    $html .= "</ul></div>";
+    $html .= <<<HTML
+				</ul></div>
+	      <div class="col-1">
+					<a href="#" class="addCitationLink" data-citationid="-1" data-toggle="modal" data-target="#citationEditModal" title="add citation" style="font-size: 30px;">
+						<i class="fas fa-plus" style="color: #007bff;"></i>
+					</a>
+				</div>
+HTML;
     return $html;
   }
 
+  /*
   private function _writeContext() {
 	  $firstCitationId = $this->_citations[0]->getId();  //the first citation's ID – the default display on load
 	  $citationCount = count($this->_citations);
@@ -626,6 +636,7 @@ HTML;
 HTML;
     return $html;
   }
+*/
 
 	private function _writeCollocatesView() {
 		$handler = new models\xmlfilehandler($this->_slip->getFilename());
@@ -664,15 +675,16 @@ HTML;
           $(function () {        
             
             //populate editCitation modal on button click
-            $('#citationEditModal').on('show.bs.modal', function (event) {
+            $(document).on('show.bs.modal', '#citationEditModal', function (event) {
               var modal = $(this);
               var editLink = $(event.relatedTarget);
               let cid = editLink.attr('data-citationid');
-              $.getJSON('ajax.php?action=loadCitation&id='+cid)
+              let slipId = {$this->_slip->getAutoId()};
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId)
               .done(function(data) {
                 $('#citationContext').attr('data-precontextscope', data.preScope);
                 $('#citationContext').attr('data-postcontextscope', data.postScope);
-                $('#citationContext').attr('data-citationid', cid);
+                $('#citationContext').attr('data-citationid', data.id);
                 $('#citationContext').html(data.context['html']);
               });
             });
@@ -687,8 +699,17 @@ HTML;
               let type = $('#citationType').val();      
               $.ajax('ajax.php?action=saveCitation&id='+cid+'&preScope='+preScope+'&postScope='+postScope+'&type='+type)
               .done(function () {
-                $('#citation_'+cid).html(html);
-                $('#citationType_'+cid).html('('+type+')');
+                //check if citation is already in list
+                if ($('#citation_'+cid).length) {   //citation existis so update it 
+                  $('#citation_'+cid).html(html);
+                  $('#citationType_'+cid).html('('+type+')');
+                } else {                           //citation does not yet exist so add it
+                    var citHtml = '<li><span id="citation_'+cid+'">'+html+'</span>';
+                    citHtml += '<em><span id="citationType_'+cid+'">&nbsp;('+type+')&nbsp;</span></em>';
+                    citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal">edit</a>';
+                    citHtml += '</li>';
+                    $('#citationList').append(citHtml);
+                }     
                 $('#citationEditModal').modal('hide');
               });
             });
@@ -712,7 +733,7 @@ HTML;
             });
             
             //add citation 
-            $('.addCitationLink').on('click', function () {
+    /*        $('.addCitationLink').on('click', function () {
               $.getJSON('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
               .done(function(data) {
                 let citationId = data.id;
@@ -735,9 +756,9 @@ HTML;
                 return false;
               });      
             });
-            
+     */       
             //update the citation based on a citationLink click
-            $(document).on('click', '.citationLink', function () {
+      /*      $(document).on('click', '.citationLink', function () {
               let citationId = $(this).attr('data-cid');
               $('#citationContext').attr('data-citationid', citationId);
               $.getJSON('ajax.php?action=loadCitation&id='+citationId)
@@ -764,7 +785,7 @@ HTML;
               });
               return false;
             });
-            
+        */    
             /*
               Increment and Decrement button handlers - update the context  
              */

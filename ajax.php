@@ -80,15 +80,20 @@ switch ($_REQUEST["action"]) {
     //
     echo json_encode($results);
     break;
-	case "createCitation":
+	/*case "createCitation":
 		$citation = new citation($db);
 		$citation->attachToSlip($_GET["slipId"]);
 		$context = $citation->getContext(true);
 		echo json_encode(array("id" => $citation->getId(), "preScope" => $citation->getPreContextScope(),
 			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
-		break;
+		break;  */
 	case "loadCitation":
-		$citation = new citation($db, $_GET["id"]);
+		if ($_GET["id"] == "-1") {  //create a new citation
+			$citation = new citation($db);
+			$citation->attachToSlip($_GET["slipId"]);
+		} else {
+			$citation = new citation($db, $_GET["id"]);
+		}
 		$context = $citation->getContext(true);
 		$translations = $citation->getTranslations();
 		$translationCount = count($translations);
