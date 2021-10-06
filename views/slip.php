@@ -174,6 +174,7 @@ HTML;
         </div>
 				{$this->_writeUpdatedBy()}
 				{$this->_writeCitationEditModal()}
+				{$this->_writeTranslationEditModal()}
         {$this->_writeFooter()}
 			</div>  <!-- end RHS -->
 		</div> <!-- end container -->
@@ -257,6 +258,44 @@ HTML;
 			                  <option value="long">long</option>
 			                  <option value="short">short</option>
 			                </select>               
+										</div>
+                </div>
+                <div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
+                  <button type="button" id="saveCitation" class="btn btn-primary">save</button>
+								</div>
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
+
+	private function _writeTranslationEditModal() {
+		$translationTypeHtml = '<select id="translationType" name="translationType" class="form-control col-1">';
+		foreach (models\translation::$types as $translationType) {
+			$translationTypeHtml .= <<<HTML
+				<option value="{$translationType}">{$translationType}</option>
+HTML;
+		}
+		$translationTypeHtml .= "</select>";
+		$html = <<<HTML
+        <div id="translationEditModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="translationEditModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5>Translation</h5>
+			              <textarea class="form-control" name="citationTranslation" id="citationTranslation" data-translationid="" rows="3">
+										</textarea>
+				            <script>
+				              CKEDITOR.replace('citationTranslation', {
+				                contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+				                customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
+				              });
+				            </script>
+					          <div>
+					            <label for="translationType">Translation type:</label>
+					            {$translationTypeHtml}
 										</div>
                 </div>
                 <div class="modal-footer">
@@ -534,6 +573,19 @@ HTML;
 HTML;
     $citations = $this->_citations;
     foreach ($citations as $citation) {
+    	if ($translations = $citation->getTranslations()) {
+    		$transHtml = <<<HTML
+					<a href="#">show/hide translation(s)</a>
+					<ul style="list-style-type: none;">
+HTML;
+				foreach ($translations as $translation) {
+					$tid = $translation->getId();
+					$transHtml .= <<<HTML
+						<li><span id="trans_{$tid}"{$translation->getContent()} <em><span id="transType_{$tid}">({$translation->getType()})</span></em></li>
+HTML;
+
+				}
+	    }
 			$html .= <<<HTML
 				<li>
 					<span id="citation_{$citation->getId()}">
