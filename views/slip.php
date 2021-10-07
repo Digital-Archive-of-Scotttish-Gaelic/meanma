@@ -584,7 +584,10 @@ HTML;
 				foreach ($translations as $translation) {
 					$tid = $translation->getId();
 					$transHtml .= <<<HTML
-						<li><span id="trans_{$tid}"{$translation->getContent()} <em><span id="transType_{$tid}">({$translation->getType()})</span></em></li>
+						<li xmlns="http://www.w3.org/1999/html">
+							<span id="trans_{$tid}"{$translation->getContent()}</span> <em><span id="transType_{$tid}">({$translation->getType()})</span></em>&nbsp;
+              <a href="#" id="editTrans_{$tid}" class="editTrans" data-translationid="{$tid}">edit</a>
+						</li>
 HTML;
 				}
 	    }
@@ -622,85 +625,6 @@ HTML;
 HTML;
     return $html;
   }
-
-  /*
-  private function _writeContext() {
-	  $firstCitationId = $this->_citations[0]->getId();  //the first citation's ID – the default display on load
-	  $citationCount = count($this->_citations);
-  	$citationTypeHtml = '<select id="citationType" name="citationType" class="form-control col-1">';
-  	foreach (models\citation::$types as $citationType) {
-  		$selected = $this->_citations[0]->getType() == $citationType ? "selected" : "";
-			$citationTypeHtml .= <<<HTML
-				<option value="{$citationType}" {$selected}>{$citationType}</option>
-HTML;
-	  }
-  	$citationLinkHtml = <<<HTML
-			<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: #efefef">
-				<a href="#" data-cid="{$firstCitationId}" class="citationLink">
-					<span class="badge badge-primary badge-pill">1</span>
-				</a>
-			</li>
-HTML;
-		for ($i = 1; $i < count($this->_citations); $i++) {
-			$citationId = $this->_citations[$i]->getId();
-			$citationIndex = $i+1;
-			$citationLinkHtml .= <<<HTML
-				<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: #efefef">
-					<a href="#" data-cid="{$citationId}" class="citationLink">
-						<span class="badge badge-primary badge-pill">{$citationIndex}</span>
-					</a>
-				</li>
-HTML;
-		}
-		$citationTypeHtml .= "</select>";
-    $context = $this->_citations[0]->getContext(true);
-    $preScope = $this->_citations[0]->getPreContextScope();
-    $postScope = $this->_citations[0]->getPostContextScope();
-    $html = <<<HTML
-            <div id="slipContextContainer" class="editSlipSectionContainer">
-              <!--div class="floatRight">
-                <a href="#" class="btn btn-success" id="showCollocatesView">collocates view</a>
-              </div-->
-              <h5>Adjust citation context</h5>
-              <div>
-								<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
-								<a class="updateContext btn-link {$context["preIncrementDisable"]}" id="incrementPre"><i class="fas fa-plus"></i></a>
-              </div>
-              <span data-citationid="{$firstCitationId}" data-citationcount="{$citationCount}" data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="citationContext" class="citationContext">
-                {$context["html"]}
-              </span>
-              <div>
-                <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
-								<a class="updateContext btn-link {$context["postIncrementDisable"]}" id="incrementPost"><i class="fas fa-plus"></i></a>
-              </div>
-              <div style="height: 20px;">
-                <a href="#" class="float-right" id="resetContext">reset context</a>
-							</div>
-							<div class="row">		
-								<label class="col-2" for="citationType">Citation type:</label>
-                {$citationTypeHtml}                
-							</div>
-							<!-- citation links -->
-							<div class="container">
-								<div class="row">
-									
-									<div class="col-1">
-										<a href="#" class="addCitationLink" title="add citation" style="font-size: 30px;"><i class="fas fa-plus" style="color: #007bff;">
-										</i></a>
-									</div>
-									<div class="col-11">	
-										<ul id="citationLinks" class="list-group list-group-horizontal">
-										{$citationLinkHtml}
-										</ul>
-									</div>
-									
-								</div>  <!-- end row -->
-							</div>  <!-- end "container" -->
-            </div>  <!-- end slipContextContainer -->
-HTML;
-    return $html;
-  }
-*/
 
 	private function _writeCollocatesView() {
 		$handler = new models\xmlfilehandler($this->_slip->getFilename());
@@ -797,50 +721,42 @@ HTML;
               .done(function(data) {
                 $('#saveTranslation').attr('data-citationid', citationId);
                 $('#saveTranslation').attr('data-translationid', data.id);
+                //append a placeholder to the citation's translation list 
+                var html = '<li><span id="trans_'+data.id+'"></span> <em><span id="transType_'+data.id+'"></span></em>&nbsp;';
+                html += '<a href="#" id="editTrans_'+data.id+'" class="editTrans" data-translationid="'+data.id+'">edit</a>';
+                $('#transList_'+citationId).append(html);
                 CKEDITOR.instances.citationTranslation.setData(''); //clear the translation content for new empty translation
 								$('#translationEditModal').modal('show');
 								return false;
 							});
             });
-      /*      
-            function createTranslation(citationId) {        
-              $.getJSON('ajax.php?action=createTranslation&citationId='+citationId)
-              .done(function(data) {
-                $('#saveTranslation').attr('data-citationid', citationId);
-                $('#saveTranslation').attr('data-translationid', data.id);
-                CKEDITOR.instances.slipTranslation.setData(''); //clear the translation content for new empty translation
-								$('#translationEditModal').modal('show');
-
-                  //write the translation badge
-                let translationCount = data.translationCount;
-                if (translationCount == 1) {  //new translation link list
-                  $('#translationLinks').html('');  //clear any previous badges
-                }
-                $('#slipTranslation').attr('data-translationid', data.id);
-                addTranslationLink(data.id, translationCount);
-               
-                return false;
-              });    
-            } */
           
-            function loadTranslation(id) {
-              $.getJSON('ajax.php?action=loadTranslation&id='+id)
+            $(document).on('click', '.editTrans', function () {
+              let tid = $(this).attr('data-translationid');  
+              $.getJSON('ajax.php?action=loadTranslation&id='+tid)
               .done(function (data) {
+                  //set the IDs required for save
+                $('#saveTranslation').attr('data-citationid', data.cid);
+                $('#saveTranslation').attr('data-translationid', tid);
                   //update the content html
-                $('#slipTranslation').attr('data-translationid', data.id);
-                CKEDITOR.instances.slipTranslation.setData(data.content);
+                CKEDITOR.instances.citationTranslation.setData(data.content);
                   //update the translationType select
-                $('#translationType').val(data.type);   
+                $('#translationType').val(data.type);
+                $('#translationEditModal').modal('show');
               });
-            }
-            
+            });
+    
             //save translation
             $('#saveTranslation').on('click', function() {  
               let citationId = $(this).attr('data-citationid');    
               let translationId = $(this).attr('data-translationid');
               let content = CKEDITOR.instances.citationTranslation.getData();
-              alert(content);
               let type = $('#translationType').val();
+              //update the translation info in the slip edit list
+              $('#trans_'+translationId).html(content);
+              $('#transType_'+translationId).html('('+type+')');
+              $('#translationEditModal').modal('hide');
+              //update the database 
               let params = {
                 url: 'ajax.php',
                 method: 'post',
@@ -852,11 +768,7 @@ HTML;
 	                type: type
                 }
               }
-              $.ajax(params);
-              //update the translation in the slip edit list 
-              
-              
-              $('#translationEditModal').modal('hide');
+              $.ajax(params)    
             });
             
             //load translation

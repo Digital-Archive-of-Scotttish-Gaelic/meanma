@@ -123,7 +123,8 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "loadTranslation":
 		$translation = new translation($db, $_GET["id"]);
-		echo json_encode(array("type" => $translation->getType(), "content" => $translation->getContent()));
+		$citation = $translation->getCitation();
+		echo json_encode(array("type" => $translation->getType(), "content" => $translation->getContent(), "cid" => $citation->getId()));
 		break;
 	case "saveTranslation":
 		$translation = new translation($db, $_POST["translationId"], $_POST["citationId"]);
