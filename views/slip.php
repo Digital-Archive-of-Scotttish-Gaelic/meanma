@@ -285,7 +285,7 @@ HTML;
             <div class="modal-content">
                 <div class="modal-body">
                     <h5>Translation</h5>
-			              <textarea class="form-control" name="citationTranslation" id="citationTranslation" data-translationid="" rows="3">
+			              <textarea class="form-control" name="citationTranslation" id="citationTranslation" rows="3">
 										</textarea>
 				            <script>
 				              CKEDITOR.replace('citationTranslation', {
@@ -300,7 +300,7 @@ HTML;
                 </div>
                 <div class="modal-footer">
 									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
-                  <button type="button" id="saveCitation" class="btn btn-primary">save</button>
+                  <button type="button" id="saveTranslation" data-translationid="" data-citationid="" class="btn btn-primary">save</button>
 								</div>
             </div>
           </div>
@@ -573,19 +573,30 @@ HTML;
 HTML;
     $citations = $this->_citations;
     foreach ($citations as $citation) {
-    	if ($translations = $citation->getTranslations()) {
-    		$transHtml = <<<HTML
-					<a href="#">show/hide translation(s)</a>
-					<ul style="list-style-type: none;">
+    	$cid = $citation->getId();
+	    $transHtml = <<<HTML
+				<span style="text-muted"><a href="#" class="transToggle" data-citationid="{$cid}"><small>show/hide translation(s)</small></a></span>
+				<div id="transContainer_{$cid}" style="display: none;">
+					<h5>Translations</h5>
+					<ul id="transList_{$cid}" style="list-style-type: none; margin:5px 10px;">
 HTML;
+    	if ($translations = $citation->getTranslations()) {
 				foreach ($translations as $translation) {
 					$tid = $translation->getId();
 					$transHtml .= <<<HTML
 						<li><span id="trans_{$tid}"{$translation->getContent()} <em><span id="transType_{$tid}">({$translation->getType()})</span></em></li>
 HTML;
-
 				}
 	    }
+    	$transHtml .= <<<HTML
+						<li>
+							<a href="#" class="addTranslationLink" data-citationid="{$cid}" title="add translation" style="font-size: 15px;"><i class="fas fa-plus" style="color: #007bff;">
+							</i></a>
+						</li>
+					</ul> <!-- close the transList -->
+				</div>  <!-- close the transContainer -->
+HTML;
+
 			$html .= <<<HTML
 				<li>
 					<span id="citation_{$citation->getId()}">
@@ -598,6 +609,7 @@ HTML;
 					</em>
 					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal">edit</a>
 				</li>
+				<li>{$transHtml}</li>
 HTML;
     }
     $html .= <<<HTML
@@ -726,6 +738,12 @@ HTML;
         <script>  
           $(function () {        
             
+            //hide/show translation container
+            $(document).on('click', '.transToggle', function () {
+              let cid = $(this).attr('data-citationid');
+              $('#transContainer_'+cid).toggle();
+            });
+            
             //populate editCitation modal on button click
             $(document).on('show.bs.modal', '#citationEditModal', function (event) {
               var modal = $(this);
@@ -766,15 +784,79 @@ HTML;
               });
             });
             
+/*            
             //save translation on focus out from translation CKEditor
             CKEDITOR.instances['slipTranslation'].on("blur", function() {
               saveTranslation();  
 						});
-            
+ */           
             //add translation
             $('.addTranslationLink').on('click', function () {
-              let citationId = $('#citationContext').attr('data-citationid');
-              createTranslation(citationId);  
+              let citationId = $(this).attr('data-citationid');
+              $.getJSON('ajax.php?action=createTranslation&citationId='+citationId)
+              .done(function(data) {
+                $('#saveTranslation').attr('data-citationid', citationId);
+                $('#saveTranslation').attr('data-translationid', data.id);
+                CKEDITOR.instances.citationTranslation.setData(''); //clear the translation content for new empty translation
+								$('#translationEditModal').modal('show');
+								return false;
+							});
+            });
+      /*      
+            function createTranslation(citationId) {        
+              $.getJSON('ajax.php?action=createTranslation&citationId='+citationId)
+              .done(function(data) {
+                $('#saveTranslation').attr('data-citationid', citationId);
+                $('#saveTranslation').attr('data-translationid', data.id);
+                CKEDITOR.instances.slipTranslation.setData(''); //clear the translation content for new empty translation
+								$('#translationEditModal').modal('show');
+
+                  //write the translation badge
+                let translationCount = data.translationCount;
+                if (translationCount == 1) {  //new translation link list
+                  $('#translationLinks').html('');  //clear any previous badges
+                }
+                $('#slipTranslation').attr('data-translationid', data.id);
+                addTranslationLink(data.id, translationCount);
+               
+                return false;
+              });    
+            } */
+          
+            function loadTranslation(id) {
+              $.getJSON('ajax.php?action=loadTranslation&id='+id)
+              .done(function (data) {
+                  //update the content html
+                $('#slipTranslation').attr('data-translationid', data.id);
+                CKEDITOR.instances.slipTranslation.setData(data.content);
+                  //update the translationType select
+                $('#translationType').val(data.type);   
+              });
+            }
+            
+            //save translation
+            $('#saveTranslation').on('click', function() {  
+              let citationId = $(this).attr('data-citationid');    
+              let translationId = $(this).attr('data-translationid');
+              let content = CKEDITOR.instances.citationTranslation.getData();
+              alert(content);
+              let type = $('#translationType').val();
+              let params = {
+                url: 'ajax.php',
+                method: 'post',
+                data: {
+                  action: 'saveTranslation',
+                  citationId: citationId,
+	                translationId: translationId,
+	                content: content,
+	                type: type
+                }
+              }
+              $.ajax(params);
+              //update the translation in the slip edit list 
+              
+              
+              $('#translationEditModal').modal('hide');
             });
             
             //load translation
@@ -1146,51 +1228,8 @@ HTML;
                 //update the citationType select
               $('#citationType').val(data.type);             
             }
-            
-            function createTranslation(citationId) {        
-              $.getJSON('ajax.php?action=createTranslation&citationId='+citationId)
-              .done(function(data) {
-                  //write the translation badge
-                let translationCount = data.translationCount;
-                if (translationCount == 1) {  //new translation link list
-                  $('#translationLinks').html('');  //clear any previous badges
-                }
-                $('#slipTranslation').attr('data-translationid', data.id);
-                addTranslationLink(data.id, translationCount);
-                return false;
-              });    
-            }
-            
-            function saveTranslation() {
-              let citationId = $('#citationContext').attr('data-citationid');    
-              let translationId = $('#slipTranslation').attr('data-translationid');
-              let content = CKEDITOR.instances.slipTranslation.getData();
-              let type = $('#translationType').val();
-              let params = {
-                url: 'ajax.php',
-                method: 'post',
-                data: {
-                  action: 'saveTranslation',
-                  citationId: citationId,
-	                translationId: translationId,
-	                content: content,
-	                type: type
-                }
-              }
-              $.ajax(params);
-            }
-            
-            function loadTranslation(id) {
-              $.getJSON('ajax.php?action=loadTranslation&id='+id)
-              .done(function (data) {
-                  //update the content html
-                $('#slipTranslation').attr('data-translationid', data.id);
-                CKEDITOR.instances.slipTranslation.setData(data.content);
-                  //update the translationType select
-                $('#translationType').val(data.type);   
-              });
-            }
-            
+
+ /*           
             //new translation badge 
             function addTranslationLink(translationId = '', index = 0) {
                 //write a new translation badge
@@ -1202,7 +1241,7 @@ HTML;
               CKEDITOR.instances.slipTranslation.setData(''); //clear the translation content for new empty translation
                 //clear the stored translation ID
             }
-            
+ */           
             function writeCitationContext(filename, id) {
 					    var html = '';
 					    let citationId = $('#citationContext').attr('data-citationid');
