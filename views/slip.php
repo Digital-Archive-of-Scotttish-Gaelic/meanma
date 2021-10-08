@@ -32,85 +32,11 @@ class slip
 				<option value="{$i}" {$selected}>{$i}</option>
 HTML;
 	  }
-	  /**
-	   * translations HTML
-	   */
-  	$translations = reset($this->_citations)->getTranslations();  //first citation displays by default
-		if (empty($translations)) {
-			$firstTranslationId = "";
-			$firstTranslationContent = "";
-			$firstTranslationType = "";
-		} else {
-			$firstTranslationId = $translations[0]->getId();
-			$firstTranslationContent = $translations[0]->getContent();
-			$firstTranslationType = $translations[0]->getType();
-		}
-	  $translationTypeHtml = '<select id="translationType" name="translationType" class="form-control col-1">';
-	  foreach (models\translation::$types as $translationType) {
-		  $selected = $translationType == $firstTranslationType ? "selected" : "";
-		  $translationTypeHtml .= <<<HTML
-				<option value="{$translationType}" {$selected}>{$translationType}</option>
-HTML;
-	  }
-	  $translationTypeHtml .= "</select>";
-	  $translationLinksHtml = <<<HTML
-			<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">
-				<a href="#" data-tid="{$firstTranslationId}" class="translationLink">
-					<span class="badge badge-primary badge-pill">1</span>
-				</a>
-			</li>
-HTML;
-	  for ($i = 1; $i < count($translations); $i++) {
-		  $translationId = $translations[$i]->getId();
-		  $translationIndex = $i+1;
-		  $translationLinksHtml .= <<<HTML
-				<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">
-					<a href="#" data-tid="{$translationId}" class="translationLink">
-						<span class="badge badge-primary badge-pill">{$translationIndex}</span>
-					</a>
-				</li>
-HTML;
-	  }
-	  /*
-	   */
     echo <<<HTML
 				<div class="row flex-fill" style="min-height: 0;">
 					<div id="lhs" class="col-6 mh-100" style="overflow-y: scroll; border: 1px solid red;">
 						{$this->_writeCitations()}
 						<!-- {$this->_writeCollocatesView()} -->
-						<small><a href="#translationContainer" id="toggleTranslation" data-toggle="collapse" aria-expanded="false" aria-controls="translationContainer">
-		            show/hide translation
-	          </a></small>
-	          <div id="translationContainer" class="collapse form-group" style="padding: 5px; border: 1px solid gray;">
-	            <label for="slipTranslation">English translation:</label>
-	            <textarea class="form-control" name="slipTranslation" id="slipTranslation" data-translationid="{$translationId}" rows="3">
-									{$firstTranslationContent}
-							</textarea>
-	            <script>
-	              CKEDITOR.replace('slipTranslation', {
-	                contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
-	                customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
-	              });
-	            </script>
-		          <!-- translation links -->
-		          <div>
-		            <label for="translationType">Translation type:</label>
-		            {$translationTypeHtml}
-							</div>
-							<div class="container">
-								<div class="row">
-									<div class="col-1 justify-content-center align-self-center">
-										<a href="#" class="addTranslationLink" title="add translation" style="font-size: 30px;"><i class="fas fa-plus" style="color: #007bff;">
-										</i></a>
-									</div>
-									<div class="col-11 justify-content-center"> 
-										<ul id="translationLinks" class="list-group list-group-horizontal">
-											{$translationLinksHtml}
-										</ul>
-									</div>
-								</div>
-							</div>
-						</div>
         </div>  <!-- end LHS -->
         
 				<div id="rhs" class="col-6 mh-100" style="overflow-y: scroll; border: 1px solid green;"> <!-- RHS panel -->
@@ -577,15 +503,15 @@ HTML;
 	    $transHtml = <<<HTML
 				<span style="text-muted"><a href="#" class="transToggle" data-citationid="{$cid}"><small>show/hide translation(s)</small></a></span>
 				<div id="transContainer_{$cid}" style="display: none;">
-					<h5>Translations</h5>
 					<ul id="transList_{$cid}" style="list-style-type: none; margin:5px 10px;">
 HTML;
     	if ($translations = $citation->getTranslations()) {
 				foreach ($translations as $translation) {
 					$tid = $translation->getId();
+					$content = strip_tags($translation->getContent(), "<mark><b><strong><><i>");
 					$transHtml .= <<<HTML
 						<li xmlns="http://www.w3.org/1999/html">
-							<span id="trans_{$tid}"{$translation->getContent()}</span> <em><span id="transType_{$tid}">({$translation->getType()})</span></em>&nbsp;
+							<span id="trans_{$tid}">{$content}</span> <em><span id="transType_{$tid}">({$translation->getType()})</span></em>&nbsp;
               <a href="#" id="editTrans_{$tid}" class="editTrans" data-translationid="{$tid}">edit</a>
 						</li>
 HTML;
@@ -599,9 +525,8 @@ HTML;
 					</ul> <!-- close the transList -->
 				</div>  <!-- close the transContainer -->
 HTML;
-
 			$html .= <<<HTML
-				<li>
+				<li style="border-top: 1px solid gray;">
 					<span id="citation_{$citation->getId()}">
 						{$citation->getContext()["html"]}
 					</span>
