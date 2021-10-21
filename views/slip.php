@@ -619,7 +619,7 @@ HTML;
               $.ajax('ajax.php?action=saveCitation&id='+cid+'&preScope='+preScope+'&postScope='+postScope+'&type='+type)
               .done(function () {
                 //check if citation is already in list
-                if ($('#citation_'+cid).length) {   //citation existis so update it 
+                if ($('#citation_'+cid).length) {   //citation exists so update it 
                   $('#citation_'+cid).html(html);
                   $('#citationType_'+cid).html('('+type+')');
                 } else {                           //citation does not yet exist so add it
@@ -627,6 +627,11 @@ HTML;
                     citHtml += '<em><span id="citationType_'+cid+'">&nbsp;('+type+')&nbsp;</span></em>';
                     citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal">edit</a>';
                     citHtml += '</li>';
+                    citHtml += '<span style="text-muted"><a href="#" class="transToggle" data-citationid="'+cid+'"><small>show/hide translation(s)</small></a></span>';
+										citHtml += '<div id="transContainer_'+cid+'" style="display: none;">';
+										citHtml += '<ul id="transList_'+cid+'" style="list-style-type: none; margin:5px 10px;">';
+										citHtml += '<li><a href="#" class="addTranslationLink" data-citationid="'+cid+'" title="add translation" style="font-size: 15px;"><i class="fas fa-plus" style="color: #007bff;">';
+										citHtml += '</i></a></li></ul> <!-- close the transList --></div>  <!-- close the transContainer -->';
                     $('#citationList').append(citHtml);
                 }     
                 $('#citationEditModal').modal('hide');
@@ -640,7 +645,7 @@ HTML;
 						});
  */           
             //add translation
-            $('.addTranslationLink').on('click', function () {
+            $(document).on('click', '.addTranslationLink', function () {
               let citationId = $(this).attr('data-citationid');
               $.getJSON('ajax.php?action=createTranslation&citationId='+citationId)
               .done(function(data) {
@@ -703,60 +708,6 @@ HTML;
               loadTranslation(tid);
             });
             
-            //add citation 
-    /*        $('.addCitationLink').on('click', function () {
-              $.getJSON('ajax.php?action=createCitation&slipId={$this->_slip->getAutoId()}')
-              .done(function(data) {
-                let citationId = data.id;
-                $('#citationContext').attr('data-citationid', citationId);
-					      $('#citationContext').attr('data-precontextscope', data.prescope);
-					      $('#citationContext').attr('data-postcontextscope', data.postscope);
-					      $('#preContextScope').val(data.prescope);
-					      $('#postContextScope').val(data.postscope);
-                var citationCount = $('#citationContext').attr('data-citationcount');
-                citationCount++;
-                $('#citationContext').attr('data-citationcount', citationCount);
-                $('#citationContext').attr('data-citationid', citationId);
-                updateCitation(data);          
-                  //write the citation badge
-                html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border: none;background-color: #efefef;">';
-								html += '<a href="#" data-cid="'+citationId+'" class="citationLink">';
-								html += '<span class="badge badge-primary badge-pill">'+citationCount+'</span></a></li>';
-                $('#citationLinks').append(html);
-                createTranslation(citationId);
-                return false;
-              });      
-            });
-     */       
-            //update the citation based on a citationLink click
-      /*      $(document).on('click', '.citationLink', function () {
-              let citationId = $(this).attr('data-cid');
-              $('#citationContext').attr('data-citationid', citationId);
-              $.getJSON('ajax.php?action=loadCitation&id='+citationId)
-              .done(function(data) {
-                updateCitation(data);		
-                if (data.translationCount) {
-                    //add the translation links
-                  let transIds = data.translationIds.split('|'); 
-                  var linkHtml = "";
-                  for (var i=0; i<data.translationCount; i++) {
-                    let index = i+1;
-                    linkHtml += '<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">';
-										linkHtml += '<a href="#" data-tid="'+transIds[i]+'" class="translationLink">';
-										linkHtml += '<span class="badge badge-primary badge-pill">'+index+'</span></a></li>';
-                  }
-                  $('#translationLinks').html(linkHtml);
-                    //add the first translation content to the textarea
-                  CKEDITOR.instances.slipTranslation.setData(data.firstTranslationContent);
-                    //set the first translation type
-                  $('#translationType').val(data.firstTranslationType);
-                } else {
-                  addTranslationLink();
-                }
-              });
-              return false;
-            });
-        */    
             /*
               Increment and Decrement button handlers - update the context  
              */
