@@ -623,7 +623,7 @@ HTML;
                   $('#citation_'+cid).html(html);
                   $('#citationType_'+cid).html('('+type+')');
                 } else {                           //citation does not yet exist so add it
-                    var citHtml = '<li><span id="citation_'+cid+'">'+html+'</span>';
+                    var citHtml = '<li style="border-top: 1px solid gray;"><span id="citation_'+cid+'">'+html+'</span>';
                     citHtml += '<em><span id="citationType_'+cid+'">&nbsp;('+type+')&nbsp;</span></em>';
                     citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal">edit</a>';
                     citHtml += '</li>';

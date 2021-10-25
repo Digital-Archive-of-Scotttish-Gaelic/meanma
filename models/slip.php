@@ -7,7 +7,7 @@ class slip
 	const SCOPE_DEFAULT = 80;
 
   private $_auto_id, $_textId, $_filename, $_id, $_pos, $_db;
-  private $_starred, $_translation, $_notes, $_locked, $_ownedBy, $_entryId, $_headword, $_slipStatus;
+  private $_starred, $_notes, $_locked, $_ownedBy, $_entryId, $_headword, $_slipStatus;
   private $_preContextScope, $_postContextScope, $_wordClass, $_lastUpdatedBy, $_lastUpdated;
   private $_isNew;
   private $_wordClasses = array(
@@ -185,10 +185,6 @@ SQL;
     return $this->_starred;
   }
 
-  public function getTranslation() {
-    return $this->_translation;
-  }
-
   public function getNotes() {
     return $this->_notes;
   }
@@ -289,7 +285,6 @@ SQL;
     $this->_auto_id = $this->getAutoId() ? $this->getAutoId() : $params["auto_id"];
     $this->_isNew = false;
     $this->_starred = $params["starred"] ? 1 : 0;
-    $this->_translation = $params["translation"];
     $this->_notes = $params["notes"];
     $this->_preContextScope = $params["preContextScope"];
     $this->_postContextScope = $params["postContextScope"];
@@ -313,12 +308,12 @@ SQL;
     $this->_saveSlipMorph();
     $sql = <<<SQL
         UPDATE slips 
-            SET text_id = ?, locked = ?, starred = ?, translation = ?, notes = ?, 
+            SET text_id = ?, locked = ?, starred = ?, notes = ?, 
                 entry_id = ?, preContextScope = ?, postContextScope = ?, slipStatus = ?,
              		updatedBy = ?, lastUpdated = now()
             WHERE auto_id = ?
 SQL;
-    $this->_db->exec($sql, array($this->getTextId(), $this->getLocked(), $this->getStarred(), $this->getTranslation(),
+    $this->_db->exec($sql, array($this->getTextId(), $this->getLocked(), $this->getStarred(),
 	    $this->getNotes(), $this->getEntryId(), $this->getPreContextScope(), $this->getPostContextScope(),
 	    $this->getSlipStatus(), $this->getLastUpdatedBy(), $this->getAutoId()));
     return $this;

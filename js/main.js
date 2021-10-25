@@ -281,11 +281,10 @@ function saveSlip() {
   var wordclass = $('#wordClass').val();
   var starred = $('#slipStarred').prop('checked') ? 1 : 0;
   var locked = $('#locked').val();
-  var translation = CKEDITOR.instances['slipTranslation'].getData();
   var notes = CKEDITOR.instances['slipNotes'].getData();
   var status = $('#status').val();
   var data = {action: "saveSlip", filename: $('#slipFilename').text(), id: $('#wordId').text(),
-    auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred, translation: translation,
+    auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred,
     notes: notes, status: status, preContextScope: $('#slipContext').attr('data-precontextscope'),
     postContextScope: $('#slipContext').attr('data-postcontextscope'), wordClass: wordclass,
     locked: locked, text_id: $('#textId').val()};
