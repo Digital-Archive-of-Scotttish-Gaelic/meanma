@@ -2,7 +2,7 @@
 
 namespace models;
 
-class slip
+class corpus_slip
 {
 	const SCOPE_DEFAULT = 80;
 

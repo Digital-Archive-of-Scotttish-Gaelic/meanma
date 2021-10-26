@@ -52,7 +52,7 @@ switch ($_REQUEST["action"]) {
 			echo json_encode(array("count" => count($_SESSION["printSlips"])));
 		break;
   case "loadSlip":
-    $slip = new slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"]);
+    $slip = new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"]);
     $slip->updateResults($_GET["index"]); //ensure that "view slip" (and not "create slip") displays
     $filenameElems = explode('_', $slip->getFilename());
     $textId = $filenameElems[0];
@@ -80,13 +80,15 @@ switch ($_REQUEST["action"]) {
     //
     echo json_encode($results);
     break;
-	/*case "createCitation":
-		$citation = new citation($db);
-		$citation->attachToSlip($_GET["slipId"]);
-		$context = $citation->getContext(true);
-		echo json_encode(array("id" => $citation->getId(), "preScope" => $citation->getPreContextScope(),
-			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context));
-		break;  */
+	case "getCitationsBySlipId":
+		$citationInfo = array();
+		$citationIds = collection::getCitationIdsBySlipId($_GET["slipId"], $db);
+		foreach ($citationIds as $cid) {
+			$citation = new citation($db, $cid);
+			$citationInfo[$cid] = array("context"=>$citation->getContext(false));
+		}
+		echo json_encode($citationInfo);
+    break;
 	case "loadCitation":
 		if ($_GET["id"] == "-1") {  //create a new citation
 			$citation = new citation($db);
@@ -149,7 +151,7 @@ switch ($_REQUEST["action"]) {
 		echo json_encode($slipInfo);
 		break;
 	case "getSenseCategoriesForNewWordclass":
-		$slip = new slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"]);
+		$slip = new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"]);
 		$oldEntryId = $slip->getEntryId();
 		$slip->updateEntry($_GET["headword"], $_GET["wordclass"]);  //update entry with new wordclass
 		$slip->saveSlip($_GET);
@@ -165,7 +167,7 @@ switch ($_REQUEST["action"]) {
 		echo json_encode($unusedSenseInfo);
 		break;
   case "saveSlip":
-    $slip = new slip($_POST["filename"], $_POST["id"], $_POST["auto_id"], $_POST["pos"],
+    $slip = new corpus_slip($_POST["filename"], $_POST["id"], $_POST["auto_id"], $_POST["pos"],
       $_POST["preContextScope"], $_POST["postContextScope"]);
     unset($_POST["action"]);
     $slip->saveSlip($_POST);
@@ -184,7 +186,7 @@ switch ($_REQUEST["action"]) {
 		$results = $search->getDBResults();
 		foreach ($results as $result) {
 			if (!$result["auto_id"]) {
-				new slip($result["filename"], $result["id"], "", $result["pos"]);
+				new corpus_slip($result["filename"], $result["id"], "", $result["pos"]);
 			}
 		}
 		echo json_encode(array("success" => true));

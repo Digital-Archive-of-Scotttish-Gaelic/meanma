@@ -15,12 +15,12 @@ class collection
 		    $view->show();
 		    break;
 	    case "edit":
-		    $slip = new models\slip($_GET["filename"], $_GET["wid"], $id, $_GET["pos"]);
+		    $slip = new models\corpus_slip($_GET["filename"], $_GET["wid"], $id, $_GET["pos"]);
 		    $view = new views\slip($slip);
 		    $view->show("edit");
 	    	break;
 	    case "add":
-	    	$slip = new models\slip($_GET["filename"], $_GET["wid"], null, $_GET["pos"]);
+	    	$slip = new models\corpus_slip($_GET["filename"], $_GET["wid"], null, $_GET["pos"]);
 	    	$view = new views\slip($slip);
 	    	$view->show("edit");
 	    	break;

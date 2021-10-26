@@ -173,7 +173,7 @@ SQL;
 	 * Gets slip info from the DB
 	 * @param $slipId
 	 * @param $db the current models\database object
-	 * @return slip object
+	 * @return corpus_slip object
 	 */
 	public static function getSlipBySlipId($slipId, $db) {
 		$sql = <<<SQL
@@ -184,7 +184,19 @@ SQL;
 SQL;
 		$result = $db->fetch($sql, array(":slipId" => $slipId));
 		$row = $result[0];
-		return new slip($row["filename"], $row["wid"], $slipId, $row["pos"]);
+		return new corpus_slip($row["filename"], $row["wid"], $slipId, $row["pos"]);
+	}
+
+	public static function getCitationIdsBySlipId($slipId, $db) {
+		$citationIds = array();
+		$sql = <<<SQL
+			SELECT citation_id FROM slip_citation WHERE slip_id = :slipId
+SQL;
+		$results = $db->fetch($sql, array(":slipId" => $slipId));
+		foreach ($results as $row) {
+			$citationIds[] = $row["citation_id"];
+		}
+		return $citationIds;
 	}
 
 	public static function getWordformBySlipId($slipId) {

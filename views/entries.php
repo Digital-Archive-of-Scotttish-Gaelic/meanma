@@ -330,6 +330,7 @@ HTML;
         *  Load and show the citations for wordforms or senses
         */
 				$('.citationsLink').on('click', function () {
+				  $('.spinner').show();
 			    var citationsLink = $(this);
 			    var citationsContainerId = '#' + $(this).attr('data-type') + '_citations' + $(this).attr('data-index');
 			    if ($(this).hasClass('hideCitations')) {
@@ -341,41 +342,53 @@ HTML;
 			    var citationIndex = 0;
 			    $(citationsContainerId + "> table > tbody > tr").each(function() {
 			      citationIndex++;
+			      var slipId = $(this).attr('data-slipid');
 			      var date = $(this).attr('data-date');
 			      var html = '<span class="text-muted">' + date + '.</span> ';
-			      var filename = $(this).attr('data-filename');
+		//	      var filename = $(this).attr('data-filename');
 			      var wid = $(this).attr('data-id');
 			      var tid = $(this).attr('data-tid');
-			      var preScope  = $(this).attr('data-precontextscope');
-			      var postScope = $(this).attr('data-postcontextscope');
+		//	      var preScope  = $(this).attr('data-precontextscope');
+		//	      var postScope = $(this).attr('data-postcontextscope');
 			      var translation = $(this).attr('data-translation');
 			      var tr = $(this);
+			      
 			      var title = tr.prop('title');
-			      var url = 'ajax.php?action=getContext&filename='+filename+'&id='+wid+'&preScope='+preScope;
-			      url += '&postScope='+postScope+'&simpleContext=1';
+		//	      var url = 'ajax.php?action=getContext&filename='+filename+'&id='+wid+'&preScope='+preScope;
+		//	      url += '&postScope='+postScope+'&simpleContext=1';
+		
+						var url = 'ajax.php?action=getCitationsBySlipId&slipId='+slipId;
 			      $.getJSON(url, function (data) {
-			        $('.spinner').show();
-			        var preOutput = data.pre["output"];
-			        var postOutput = data.post["output"];
-			        var url = 'index.php?m=corpus&a=browse&id=' + tid + '&wid=' + wid; //title id and word id
-			        tr.find('.entryCitationTextLink').attr('href', url); //add the link to text url
-			        html += preOutput;
-			        if (data.pre["endJoin"] != "right" && data.pre["endJoin"] != "both") {
-			          html += ' ';
-			        }
-			        //html += '<span id="slipWordInContext">' + data.word + '</span>';
-              html += '<mark>' + data.word + '</mark>'; // MM
-			        if (data.post["startJoin"] != "left" && data.post["startJoin"] != "both") {
-			          html += ' ';
-			        }
-			        html += postOutput;
-			        if (translation) {
-			          html += '<div><small><a href="#translation'+citationIndex+'" '; 
-			          html += 'data-toggle="collapse" aria-expanded="false" aria-controls="#translation'+citationIndex+'">';
-			          html += 'show/hide translation</a></small></div>';
-			          html += '<div id="translation' + citationIndex + '" class="collapse"><small class="text-muted">'+translation+'</small></div>';
-			        }
-			        tr.find('.entryCitationContext').html(html);
+			        var corpusLink = 'index.php?m=corpus&a=browse&id=' + tid + '&wid=' + wid; //title id and word id
+				      tr.find('.entryCitationTextLink').attr('href', corpusLink); //add the link to text url
+			        $.each(data, function(cid, info) {    //iterate through each citation
+//				        var preOutput = context.pre["output"];
+//				        var postOutput = context.post["output"];
+				        
+				        
+				        
+/*				        html += preOutput;
+				        if (context.pre["endJoin"] != "right" && context.pre["endJoin"] != "both") {
+				          html += ' ';
+				        }
+				        //html += '<span id="slipWordInContext">' + data.word + '</span>';
+	              html += '<mark>' + context.word + '</mark>'; // MM
+				        if (context.post["startJoin"] != "left" && context.post["startJoin"] != "both") {
+				          html += ' ';
+				        }
+				        html += postOutput;				        
+ */
+                html += info.context.html;
+                html += '<br>--<br>';
+                
+				        if (translation) {
+				          html += '<div><small><a href="#translation'+citationIndex+'" '; 
+				          html += 'data-toggle="collapse" aria-expanded="false" aria-controls="#translation'+citationIndex+'">';
+				          html += 'show/hide translation</a></small></div>';
+				          html += '<div id="translation' + citationIndex + '" class="collapse"><small class="text-muted">'+translation+'</small></div>';
+				        }
+				        tr.find('.entryCitationContext').html(html);
+				      })
 			      })
 			        .then(function () {
 			          $('.spinner').hide();

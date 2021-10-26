@@ -79,7 +79,7 @@ SQL;
 //    $db = new database();
     //only get IDs for this group
     $sql = <<<SQL
-        SELECT DISTINCT e.id as id FROM entry e    
+        SELECT DISTINCT e.id as id, headword FROM entry e    
         	JOIN slips s ON e.id = s.entry_id 
         	WHERE group_id = {$_SESSION["groupId"]}
             ORDER BY headword ASC
