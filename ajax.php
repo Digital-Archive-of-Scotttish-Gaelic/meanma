@@ -82,10 +82,10 @@ switch ($_REQUEST["action"]) {
     break;
 	case "getCitationsBySlipId":
 		$citationInfo = array();
-		$citationIds = collection::getCitationIdsBySlipId($_GET["slipId"], $db);
+		$citationIds = collection::getCitationIdsForCitation($_GET["slipId"], $db);
 		foreach ($citationIds as $cid) {
 			$citation = new citation($db, $cid);
-			$citationInfo[$cid] = array("context"=>$citation->getContext(false));
+			$citationInfo[$citation->getType()] = array("context"=>$citation->getContext(false));
 		}
 		echo json_encode($citationInfo);
     break;

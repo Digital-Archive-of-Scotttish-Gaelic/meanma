@@ -187,14 +187,27 @@ SQL;
 		return new corpus_slip($row["filename"], $row["wid"], $slipId, $row["pos"]);
 	}
 
-	public static function getCitationIdsBySlipId($slipId, $db) {
+	/**
+	 * Runs query to fetch citation IDs for given slip required for citation display
+	 * Returns only the first 'long' type and first 'short' type citation IDs for efficiency
+	 * @param $slipId
+	 * @param $db
+	 * @return array : associative array of citation IDs keyed by citation type
+	 */
+	public static function getCitationIdsForCitation($slipId, $db) {
 		$citationIds = array();
 		$sql = <<<SQL
-			SELECT citation_id FROM slip_citation WHERE slip_id = :slipId
+			SELECT sc.citation_id as cid, c.type as type FROM slip_citation sc
+				JOIN citation c ON c.id = sc.citation_id
+				WHERE slip_id = :slipId
 SQL;
 		$results = $db->fetch($sql, array(":slipId" => $slipId));
 		foreach ($results as $row) {
-			$citationIds[] = $row["citation_id"];
+			if (empty($citationIds["long"]) && $row["type"] == "long") {
+				$citationIds["long"] = $row["cid"];
+			} else if (empty($citationIds["short"]) && $row["type"] == "short") {
+				$citationIds["short"] = $row["cid"];
+			}
 		}
 		return $citationIds;
 	}

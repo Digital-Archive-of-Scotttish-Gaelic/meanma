@@ -331,8 +331,9 @@ HTML;
         */
 				$('.citationsLink').on('click', function () {
 				  $('.spinner').show();
+				  let type = $(this).attr('data-type');   //i.e. "form" or "sense"
 			    var citationsLink = $(this);
-			    var citationsContainerId = '#' + $(this).attr('data-type') + '_citations' + $(this).attr('data-index');
+			    var citationsContainerId = '#' + type + '_citations' + $(this).attr('data-index');
 			    if ($(this).hasClass('hideCitations')) {
 			      $(citationsContainerId).hide();
 			      $(this).text('citations');
@@ -352,34 +353,28 @@ HTML;
 		//	      var postScope = $(this).attr('data-postcontextscope');
 			      var translation = $(this).attr('data-translation');
 			      var tr = $(this);
-			      
 			      var title = tr.prop('title');
-		//	      var url = 'ajax.php?action=getContext&filename='+filename+'&id='+wid+'&preScope='+preScope;
-		//	      url += '&postScope='+postScope+'&simpleContext=1';
-		
 						var url = 'ajax.php?action=getCitationsBySlipId&slipId='+slipId;
 			      $.getJSON(url, function (data) {
 			        var corpusLink = 'index.php?m=corpus&a=browse&id=' + tid + '&wid=' + wid; //title id and word id
 				      tr.find('.entryCitationTextLink').attr('href', corpusLink); //add the link to text url
-			        $.each(data, function(cid, info) {    //iterate through each citation
-//				        var preOutput = context.pre["output"];
-//				        var postOutput = context.post["output"];
-				        
-				        
-				        
-/*				        html += preOutput;
-				        if (context.pre["endJoin"] != "right" && context.pre["endJoin"] != "both") {
-				          html += ' ';
-				        }
-				        //html += '<span id="slipWordInContext">' + data.word + '</span>';
-	              html += '<mark>' + context.word + '</mark>'; // MM
-				        if (context.post["startJoin"] != "left" && context.post["startJoin"] != "both") {
-				          html += ' ';
-				        }
-				        html += postOutput;				        
- */
-                html += info.context.html;
-                html += '<br>--<br>';
+				      let numCitations = Object.keys(data).length;
+			        $.each(data, function(citationType, info) {    //iterate through each citation
+								if (type == "form") {     //default to short citation for forms 
+								  if (citationType == "short") {
+								    html += info.context.html + ' <em>(' + citationType + ')</em>';
+								  } else if (numCitations == 1) {
+								    html += data.long.context.html + ' <em>(' + citationType + ')</em>';  //no long so write short
+								  }
+								} else if (type == "sense") {    //default to long citation for senses
+								    if (citationType == "long") {
+								      html += info.context.html + ' <em>(' + citationType + ')</em>';
+								    } else if (numCitations == 1) {
+								      html += data.short.context.html + ' <em>(' + citationType + ')</em>'; //no short found so write long
+								    }
+								} 
+								
+                
                 
 				        if (translation) {
 				          html += '<div><small><a href="#translation'+citationIndex+'" '; 
@@ -388,7 +383,7 @@ HTML;
 				          html += '<div id="translation' + citationIndex + '" class="collapse"><small class="text-muted">'+translation+'</small></div>';
 				        }
 				        tr.find('.entryCitationContext').html(html);
-				      })
+				      });
 			      })
 			        .then(function () {
 			          $('.spinner').hide();
