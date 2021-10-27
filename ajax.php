@@ -85,7 +85,9 @@ switch ($_REQUEST["action"]) {
 		$citationIds = collection::getCitationIdsForCitation($_GET["slipId"], $db);
 		foreach ($citationIds as $cid) {
 			$citation = new citation($db, $cid);
-			$citationInfo[$citation->getType()] = array("context"=>$citation->getContext(false));
+			$translations = $citation->getTranslations();
+			$translation = isset($translations[0]) ? $translations[0]->getContent() : null;
+			$citationInfo[$citation->getType()] = array("cid"=>$cid, "context"=>$citation->getContext(false), "translation"=>$translation);
 		}
 		echo json_encode($citationInfo);
     break;

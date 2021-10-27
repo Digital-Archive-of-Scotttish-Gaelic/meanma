@@ -340,18 +340,12 @@ HTML;
 			      $(this).removeClass('hideCitations');
 			      return;
 			    }
-			    var citationIndex = 0;
 			    $(citationsContainerId + "> table > tbody > tr").each(function() {
-			      citationIndex++;
 			      var slipId = $(this).attr('data-slipid');
 			      var date = $(this).attr('data-date');
 			      var html = '<span class="text-muted">' + date + '.</span> ';
-		//	      var filename = $(this).attr('data-filename');
 			      var wid = $(this).attr('data-id');
 			      var tid = $(this).attr('data-tid');
-		//	      var preScope  = $(this).attr('data-precontextscope');
-		//	      var postScope = $(this).attr('data-postcontextscope');
-			      var translation = $(this).attr('data-translation');
 			      var tr = $(this);
 			      var title = tr.prop('title');
 						var url = 'ajax.php?action=getCitationsBySlipId&slipId='+slipId;
@@ -362,26 +356,17 @@ HTML;
 			        $.each(data, function(citationType, info) {    //iterate through each citation
 								if (type == "form") {     //default to short citation for forms 
 								  if (citationType == "short") {
-								    html += info.context.html + ' <em>(' + citationType + ')</em>';
+								    html += getCitationHtml(citationType, info);
 								  } else if (numCitations == 1) {
-								    html += data.long.context.html + ' <em>(' + citationType + ')</em>';  //no long so write short
+								    html += getCitationHtml("long", data.long); //no long so write short
 								  }
 								} else if (type == "sense") {    //default to long citation for senses
 								    if (citationType == "long") {
-								      html += info.context.html + ' <em>(' + citationType + ')</em>';
+								      html += getCitationHtml(citationType, info);
 								    } else if (numCitations == 1) {
-								      html += data.short.context.html + ' <em>(' + citationType + ')</em>'; //no short found so write long
+								      html += getCitationHtml("short", data.short); //no short found so write long
 								    }
 								} 
-								
-                
-                
-				        if (translation) {
-				          html += '<div><small><a href="#translation'+citationIndex+'" '; 
-				          html += 'data-toggle="collapse" aria-expanded="false" aria-controls="#translation'+citationIndex+'">';
-				          html += 'show/hide translation</a></small></div>';
-				          html += '<div id="translation' + citationIndex + '" class="collapse"><small class="text-muted">'+translation+'</small></div>';
-				        }
 				        tr.find('.entryCitationContext').html(html);
 				      });
 			      })
@@ -394,6 +379,23 @@ HTML;
 			    citationsLink.text('hide');
 			    citationsLink.addClass('hideCitations');
 			  });
+				
+				function getCitationHtml(citationType, info) {
+				  let translation = info.translation;
+					html = info.context.html + ' <em>(' + citationType + ')</em>';
+					if (translation) {
+					  html += getTranslationHtml(translation, info.cid);
+					}
+					return html;
+				}
+				
+				function getTranslationHtml(content, index) {
+				  html = '<div><small><a href="#translation' + index + '" '; 
+          html += 'data-toggle="collapse" aria-expanded="false" aria-controls="#translation' + index + '">';
+          html += 'show/hide translation</a></small></div>';
+          html += '<div id="translation' + index + '" class="collapse"><small class="text-muted">'+content+'</small></div>';
+          return html;
+				}
 			</script>
 HTML;
   }
