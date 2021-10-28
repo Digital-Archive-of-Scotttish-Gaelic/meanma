@@ -9,7 +9,7 @@ class slip
 	private $_citations;  //an array of citation objects; instance property to prevent unnecessary duplicate DB calls
   public function __construct($slip) {
     $this->_slip = $slip;
-	  $this->_citations = $this->_slip->getCitations();
+    $this->_citations = $this->_slip->getCitations();
   }
 
   public function show($action) {
@@ -85,7 +85,7 @@ HTML;
             <input type="hidden" name="filename" value="{$_REQUEST["filename"]}">
             <input type="hidden" name="id" value="{$_REQUEST["wid"]}">
             <input type="hidden" id="locked" name="locked" value="{$locked}";
-            <input type="hidden" id="auto_id" name="auto_id" value="{$this->_slip->getAutoId()}">
+            <input type="hidden" id="auto_id" name="auto_id" value="{$this->_slip->getId()}">
             <input type="hidden" id="pos" name="pos" value="{$_REQUEST["pos"]}">
             <input type="hidden" id="preContextScope" name="preContextScope" value="{$this->_slip->getPreContextScope()}">
             <input type="hidden" id="postContextScope" name="postContextScope" value="{$this->_slip->getPostContextScope()}">
@@ -240,7 +240,7 @@ HTML;
     $label = $_REQUEST["pos"] ? " ({$pos->getLabel()})" : "";
     $html = <<<HTML
         <div>
-            slip ID:<span id="auto_id">{$this->_slip->getAutoId()}</span><br>
+            slip ID:<span id="auto_id">{$this->_slip->getId()}</span><br>
             POS tag:<span id="slipPOS">{$_REQUEST["pos"]}{$label}</span><br><br>
             filename: <span id="slipFilename">{$this->_slip->getFilename()}</span><br>
             id: <span id="wordId">{$_REQUEST["wid"]}</span><br>
@@ -442,7 +442,7 @@ HTML;
     	$senseDescription = $sense->getDescription();
       $savedCatHtml .= <<<HTML
         <li class="badge badge-success senseBadge" data-title="{$senseDescription}"
-          data-toggle="modal" data-target="#senseModal" data-slip-id="{$this->_slip->getAutoId()}"
+          data-toggle="modal" data-target="#senseModal" data-slip-id="{$this->_slip->getId()}"
           data-sense="{$senseId}" data-sense-name="{$senseName}" data-sense-description="{$senseDescription}">
 					{$senseName}
 				</li>
@@ -555,7 +555,7 @@ HTML;
 		$handler = new models\xmlfilehandler($this->_slip->getFilename());
 		$preScope = $this->_slip->getPreContextScope();
 		$postScope = $this->_slip->getPostContextScope();
-		$context = $handler->getContext($this->_slip->getId(), $preScope, $postScope, true, false);
+		$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, true, false);
 
 		$contextHtml = $context["pre"]["output"];
 		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
@@ -598,7 +598,7 @@ HTML;
               var modal = $(this);
               var editLink = $(event.relatedTarget);
               let cid = editLink.attr('data-citationid');
-              let slipId = {$this->_slip->getAutoId()};
+              let slipId = {$this->_slip->getId()};
               $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId)
               .done(function(data) {
                 $('#citationContext').attr('data-precontextscope', data.preScope);
@@ -767,9 +767,9 @@ HTML;
 		        
 		        //reset the context
 		        $('#resetContext').on('click', function () {
-              let slipId = {$this->_slip->getAutoId()}
+              let slipId = {$this->_slip->getId()}
               let filename = '{$this->_slip->getFilename()}';
-              let id = '{$this->_slip->getId()}';
+              let id = '{$this->_slip->getWid()}';
               let type = $('#citationType').val();
               var preScope = {$this->_slip->getScopeDefault()};
               var postScope = {$this->_slip->getScopeDefault()};        
@@ -838,7 +838,7 @@ HTML;
               $(this).parent().siblings('.collocateLink').addClass('existingCollocate');
               var filename = '{$this->_slip->getFilename()}';
               var headwordId = $('#slipWordInContext').attr('data-headwordid');
-              var slipId = '{$this->_slip->getAutoId()}';
+              var slipId = '{$this->_slip->getId()}';
               var url = 'ajax.php?action=saveLemmaGrammar&id='+wordId+'&filename='+filename;
               url += '&headwordId='+headwordId+'&slipId='+slipId+'&grammar='+$(this).text();
               $.getJSON(url, function(data) {
@@ -863,7 +863,7 @@ HTML;
               html += ' data-title="' + senseDescription +  '" data-sense-name="' + senseName + '">' + sense + '</li>';
               $('#senseCategories').append(html);
               elem.remove();
-              var data = {action: 'saveSlipSense', slipId: '{$this->_slip->getAutoId()}',
+              var data = {action: 'saveSlipSense', slipId: '{$this->_slip->getId()}',
                 senseId: senseId}
               $.post("ajax.php", data, function (response) {
                 console.log(response);        //TODO: add some response code on successful save
@@ -878,13 +878,13 @@ HTML;
               }
               $('#newSenseName').val('');
               $('#newSenseDefinition').val('');
-              var data = {action: 'addSense', slipId: '{$this->_slip->getAutoId()}',
+              var data = {action: 'addSense', slipId: '{$this->_slip->getId()}',
                 name: newSenseName, description: newSenseDefinition, entryId: '{$this->_slip->getEntryId()}'
               }
               $.getJSON("ajax.php", data, function (response) {
                 var html = '<li class="badge badge-success senseBadge" data-sense="' + response.senseId + '"';
                 html += ' data-title="' + response.senseDescription +'"';
-                html += ' data-slip-id="{$this->_slip->getAutoId()}"';
+                html += ' data-slip-id="{$this->_slip->getId()}"';
                 html += ' data-sense-name="' + newSenseName + '" data-sense-description="' + newSenseDefinition + '"';
                 html += ' data-toggle="modal" data-target="#senseModal"';
                 html += '>' + newSenseName + '</li>';
@@ -939,7 +939,7 @@ HTML;
               $('#senseCategorySelect').empty();
               $('#senseCategorySelect').append('<option data-category="">-- select a category --</option>');
               var url = 'ajax.php?action=getSenseCategoriesForNewWordclass';
-              url += '&filename={$this->_slip->getFilename()}&id={$this->_slip->getId()}&auto_id={$this->_slip->getAutoId()}';
+              url += '&filename={$this->_slip->getFilename()}&id={$this->_slip->getWid()}&auto_id={$this->_slip->getId()}';
               url += '&pos={$this->_slip->getPOS()}&headword=' + headword + '&wordclass=' + wordclass;
               $.getJSON(url, function (data) {
                   $.each(data, function (index, sense) {
@@ -950,7 +950,7 @@ HTML;
               })
               .done(function () {   //raise and save an issue with the slip and headword/wordclass information
                     var params = {
-                      description: 'The ' + changedField + ' for §{$this->_slip->getAutoId()} has been changed to <strong>' + changedValue + '</strong>',
+                      description: 'The ' + changedField + ' for §{$this->_slip->getId()} has been changed to <strong>' + changedValue + '</strong>',
                       userEmail: '{$_SESSION["user"]}', status: 'new', updated: ''}; 
                     $.getJSON('ajax.php?action=raiseIssue', params, function(response) {
                       console.log(response.message);
@@ -1035,7 +1035,7 @@ HTML;
 					    let citationId = $('#citationContext').attr('data-citationid');
 					    let preScope  = $('#citationContext').attr('data-precontextscope');
 					    let postScope = $('#citationContext').attr('data-postcontextscope');
-					    let slipId = {$this->_slip->getAutoId()};
+					    let slipId = {$this->_slip->getId()};
 					    let citationType = $('#citationType').val();
 					    var url = "ajax.php?action=getContext";
 					    url += "&citationId="+citationId+"&slipId="+slipId+"&type="+citationType+"&preScope="+preScope+"&postScope="+postScope;

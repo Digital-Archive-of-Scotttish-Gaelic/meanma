@@ -99,7 +99,7 @@ SQL;
 		$handler = new xmlfilehandler($this->_slip->getFilename());
 		$preScope = $this->getPreContextScope();
 		$postScope = $this->getPostContextScope();
-		$context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, $tagContext);
+		$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope,  false, $tagContext);
 		$preIncrementDisable = $postIncrementDisable = "";
 		//check for start/end of document
 		if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default

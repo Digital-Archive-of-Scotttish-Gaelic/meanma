@@ -2,11 +2,11 @@
 
 namespace models;
 
-class corpus_slip
+class corpus_slip extends slip
 {
 	const SCOPE_DEFAULT = 80;
 
-  private $_auto_id, $_textId, $_filename, $_id, $_pos, $_db;
+  private $_textId, $_filename, $_wid, $_pos, $_db;
   private $_starred, $_notes, $_locked, $_ownedBy, $_entryId, $_headword, $_slipStatus;
   private $_preContextScope, $_postContextScope, $_wordClass, $_lastUpdatedBy, $_lastUpdated;
   private $_isNew;
@@ -23,11 +23,12 @@ class corpus_slip
   private $_sensesInfo = array();   //used to store sense info (in place of object data) for AJAX use
 	private $_citations;  //an array of citation objects
 
-  public function __construct($filename, $id, $auto_id = null, $pos, $preScope = self::SCOPE_DEFAULT, $postScope = self::SCOPE_DEFAULT) {
+  public function __construct($filename, $wid, $auto_id = null, $pos, $preScope = self::SCOPE_DEFAULT, $postScope = self::SCOPE_DEFAULT) {
     $this->_filename = $filename;
-    $this->_id = $id;
+    $this->_wid = $wid;
     //test if a slip already exists (if there is a slip with the same groupId, filename, id combination)
-    $this->_auto_id = $auto_id ? $auto_id : collection::slipExists($_SESSION["groupId"], $filename, $id);
+    $slipId = $auto_id ? $auto_id : collection::slipExists($_SESSION["groupId"], $filename, $wid);
+    parent::__construct($slipId);
     $this->_pos = $pos;
     if (!isset($this->_db)) {
       $this->_db = new database();
@@ -38,9 +39,9 @@ class corpus_slip
   private function _loadSlip($preScope, $postScope) {
     $this->_textId = corpus_browse::getTextIdFromFilepath($this->getFilename(), $this->_db);
     $this->_slipMorph = new slipmorphfeature($this->_pos);
-    if (!$this->getAutoId()) {  //create a new slip entry
+    if (!$this->getId()) {  //create a new slip entry
       $this->_isNew = true;
-	    $this->_headword = lemmas::getLemma($this->_id, $this->_filename)[0];
+	    $this->_headword = lemmas::getLemma($this->getWid(), $this->getFilename)[0];
       $this->_extractWordClass($this->_pos);
       //get the entry
 	    $this->_entry = entries::getEntryByHeadwordAndWordclass($this->getHeadword(), $this->getWordClass());
@@ -48,16 +49,16 @@ class corpus_slip
         INSERT INTO slips (filename, text_id, id, entry_id, preContextScope, postContextScope, ownedBy) 
         	VALUES (?, ?, ?, ?, ?, ?, ?);
 SQL;
-      $this->_db->exec($sql, array($this->_filename, $this->getTextId(),  $this->_id, $this->_entry->getId(),
+      $this->_db->exec($sql, array($this->_filename, $this->getTextId(),  $this->getWid(), $this->_entry->getId(),
 	      $preScope, $postScope, $_SESSION["user"]));
-      $this->_auto_id = $this->_db->getLastInsertId();
+      $this->setId($this->_db->getLastInsertId());  //sets the ID on the parent TODO: revisit this urgently!!
       $this->_saveSlipMorph();    //save the defaults to the DB
     }
     $sql = <<<SQL
         SELECT * FROM slips 
         WHERE auto_id = :auto_id
 SQL;
-    $result = $this->_db->fetch($sql, array(":auto_id" => $this->_auto_id));
+    $result = $this->_db->fetch($sql, array(":auto_id" => $this->getId()));
     $slipData = $result[0];
 	  $this->_entry = entries::getEntryById($slipData["entry_id"], $this->_db);
     $this->_populateClass($slipData);
@@ -71,7 +72,7 @@ SQL;
         SELECT sense_id as id FROM slip_sense
         	WHERE slip_id = :auto_id 
 SQL;
-		$results = $this->_db->fetch($sql, array(":auto_id"=>$this->getAutoId()));
+		$results = $this->_db->fetch($sql, array(":auto_id"=>$this->getId()));
 		if ($results) {
 			foreach ($results as $key => $value) {
 				$id = $value["id"];
@@ -88,7 +89,7 @@ SQL;
     $sql = <<<SQL
         SELECT * FROM slipMorph WHERE slip_id = ?
 SQL;
-    $results = $this->_db->fetch($sql, array($this->getAutoId()));
+    $results = $this->_db->fetch($sql, array($this->getId()));
     foreach ($results as $result) {
       $this->_slipMorph->setProp($result["relation"], $result["value"]);
     }
@@ -101,7 +102,7 @@ SQL;
       $sql = <<<SQL
         INSERT INTO slipMorph(slip_id, relation, value) VALUES(?, ?, ?)
 SQL;
-      $this->_db->exec($sql, array($this->getAutoId(), $relation, $value));
+      $this->_db->exec($sql, array($this->getId(), $relation, $value));
     }
   }
 
@@ -109,15 +110,15 @@ SQL;
     $sql = <<<SQL
       DELETE FROM slipMorph WHERE slip_id = ?
 SQL;
-    $this->_db->exec($sql, array($this->_auto_id));
+    $this->_db->exec($sql, array($this->getId()));
   }
 
   /**
-   * Updates the results stored in the SESSION with the new auto_id
+   * Updates the results stored in the SESSION with the new slip ID
    * TODO: this no longer works within the new search engine - need to revisit SB
    */
   public function updateResults($index) {
-    $_SESSION["results"][$index]["auto_id"] = $this->getAutoId();
+    $_SESSION["results"][$index]["auto_id"] = $this->getId();
   }
 
   private function _extractWordClass($pos) {
@@ -140,7 +141,7 @@ SQL;
 		  $sql = <<<SQL
 			SELECT citation_id FROM slip_citation WHERE slip_id = :id ORDER BY citation_id ASC
 SQL;
-		  $results = $this->_db->fetch($sql, array(":id" => $this->getAutoId()));
+		  $results = $this->_db->fetch($sql, array(":id" => $this->getId()));
 		  foreach ($results as $result) {
 		  	$citationId = $result["citation_id"];
 			  $this->_citations[$citationId] = new citation($this->_db, $citationId);
@@ -161,10 +162,6 @@ SQL;
     return $this->_slipMorph;
   }
 
-  public function getAutoId() {
-    return $this->_auto_id;
-  }
-
   public function getFilename() {
     return $this->_filename;
   }
@@ -173,8 +170,8 @@ SQL;
   	return $this->_pos;
   }
 
-  public function getId() {
-    return $this->_id;
+  public function getWid() {
+    return $this->_wid;
   }
 
   public function getIsNew() {
@@ -282,7 +279,8 @@ SQL;
 	}
 
   private function _populateClass($params) {
-    $this->_auto_id = $this->getAutoId() ? $this->getAutoId() : $params["auto_id"];
+    $slipId = $this->getId() ? $this->getId() : $params["auto_id"];
+    $this->setId($slipId);
     $this->_isNew = false;
     $this->_starred = $params["starred"] ? 1 : 0;
     $this->_notes = $params["notes"];
@@ -315,7 +313,7 @@ SQL;
 SQL;
     $this->_db->exec($sql, array($this->getTextId(), $this->getLocked(), $this->getStarred(),
 	    $this->getNotes(), $this->getEntryId(), $this->getPreContextScope(), $this->getPostContextScope(),
-	    $this->getSlipStatus(), $this->getLastUpdatedBy(), $this->getAutoId()));
+	    $this->getSlipStatus(), $this->getLastUpdatedBy(), $this->getId()));
     return $this;
   }
 
@@ -344,7 +342,7 @@ SQL;
   	if ($wordclass != $this->getWordClass()) {
 		  $this->_wordClass = $wordclass;
 		  //remove all the senses
-		  sensecategories::deleteSensesForSlip($this->getAutoId());
+		  sensecategories::deleteSensesForSlip($this->getId());
 		  //hack to workaround POS issues - TODO: discuss with MM
 		  $tempPOS = array("noun" => "n", "verb" => "v", "preposition" => "p", "verbal noun" => "vn", "adjective" => "a",
 			  "adverb" => "A", "other" => "");
@@ -355,7 +353,7 @@ SQL;
   	if ($headword != $this->getHeadword()) {
 		  $this->_headword = $headword;
 		  //remove all the senses
-		  sensecategories::deleteSensesForSlip($this->getAutoId());
+		  sensecategories::deleteSensesForSlip($this->getId());
 	  }
 	  $this->_entry = entries::getEntryByHeadwordAndWordclass($headword, $wordclass);
   }
