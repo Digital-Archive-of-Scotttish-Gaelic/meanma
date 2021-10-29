@@ -260,7 +260,7 @@ $(function () {
   });
 
   $('#savedClose').on('click', function () {
-    saveSlip(); return;
+    saveSlip();
     $('#slipSavedModal').modal();
     setTimeout(function() {
       window.close();
