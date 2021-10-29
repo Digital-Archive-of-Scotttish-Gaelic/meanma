@@ -87,8 +87,6 @@ HTML;
             <input type="hidden" id="locked" name="locked" value="{$locked}";
             <input type="hidden" id="auto_id" name="auto_id" value="{$this->_slip->getId()}">
             <input type="hidden" id="pos" name="pos" value="{$_REQUEST["pos"]}">
-            <input type="hidden" id="preContextScope" name="preContextScope" value="{$this->_slip->getPreContextScope()}">
-            <input type="hidden" id="postContextScope" name="postContextScope" value="{$this->_slip->getPostContextScope()}">
             <input type="hidden" id="textId" name="textId" value="{$this->_slip->getTextId()}">
             <input type="hidden" name="action" value="save">
             {$lockedHtml}
@@ -553,8 +551,9 @@ HTML;
 
 	private function _writeCollocatesView() {
 		$handler = new models\xmlfilehandler($this->_slip->getFilename());
-		$preScope = $this->_slip->getPreContextScope();
-		$postScope = $this->_slip->getPostContextScope();
+
+		//TODO: revisit this with new citation model - following vars just for placeholding
+		$preScope = $postScope = 20;
 		$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, true, false);
 
 		$contextHtml = $context["pre"]["output"];

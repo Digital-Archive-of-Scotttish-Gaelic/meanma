@@ -260,7 +260,7 @@ $(function () {
   });
 
   $('#savedClose').on('click', function () {
-    saveSlip();
+    saveSlip(); return;
     $('#slipSavedModal').modal();
     setTimeout(function() {
       window.close();
@@ -285,8 +285,7 @@ function saveSlip() {
   var status = $('#status').val();
   var data = {action: "saveSlip", filename: $('#slipFilename').text(), id: $('#wordId').text(),
     auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred,
-    notes: notes, status: status, preContextScope: $('#slipContext').attr('data-precontextscope'),
-    postContextScope: $('#slipContext').attr('data-postcontextscope'), wordClass: wordclass,
+    notes: notes, status: status, wordClass: wordclass,
     locked: locked, text_id: $('#textId').val()};
   switch (wordclass) {
     case "noun":
