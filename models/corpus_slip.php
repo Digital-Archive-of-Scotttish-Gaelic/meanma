@@ -13,10 +13,10 @@ class corpus_slip extends slip
     $slipId = $auto_id ? $auto_id : collection::slipExists($_SESSION["groupId"], $filename, $wid);
     parent::__construct($slipId);
     $this->_pos = $pos;
-    $this->_loadSlip();
+    $this->_load();
   }
 
-  private function _loadSlip() {
+  private function _load() {
     $this->_textId = corpus_browse::getTextIdFromFilepath($this->getFilename(), $this->_db);
     $this->_slipMorph = new slipmorphfeature($this->getPOS());
     if (!$this->getId()) {  //create a new slip entry
@@ -27,12 +27,12 @@ class corpus_slip extends slip
 	    $this->_entry = entries::getEntryByHeadwordAndWordclass($this->getHeadword(), $this->getWordClass());
       $sql = <<<SQL
         INSERT INTO slips (filename, text_id, id, entry_id, ownedBy) 
-        	VALUES (?, ?, ?, ?, ?, ?, ?);
+        	VALUES (?, ?, ?, ?, ?);
 SQL;
       $this->_db->exec($sql, array($this->_filename, $this->getTextId(),  $this->getWid(), $this->_entry->getId(),
 	      $_SESSION["user"]));
-      $this->setId($this->_db->getLastInsertId());  //sets the ID on the parent TODO: revisit this urgently!!
-      $this->mapssaveSlipMorph();    //save the defaults to the DB
+      $this->setId($this->_db->getLastInsertId());  //sets the ID on the parent
+      $this->saveSlipMorph();    //save the defaults to the DB
     }
     $sql = <<<SQL
         SELECT * FROM slips 

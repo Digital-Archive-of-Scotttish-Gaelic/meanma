@@ -60,7 +60,12 @@ HTML;
 							{$slipList}
 						</div>
 HTML;
-			  $html .= "<li>{$wordform} ({$morphHtml}) {$citationHtml}</li>";
+			  $html .= <<<HTML
+          <li>{$wordform} 
+            <a href="#" class="createPaperSlip" data-headword="{$entry->getHeadword()}" data-wordform="{$wordform}" data-entryid="{$entry->getId()}"><small>add paper slip</small></a> 
+            ({$morphHtml}) {$citationHtml}
+          </li>
+HTML;
 		  }
 	  }
 	  $html .= "</ul>";
@@ -314,6 +319,18 @@ HTML;
   private function _writeJavascript() {
   	echo <<<HTML
 			<script>
+				//create a paper slip for the selected wordform
+				$('.createPaperSlip').on('click', function () {
+				   let wordform = $(this).attr('data-wordform');
+				   let entryId = $(this).attr('data-entryid');
+				   let headword = $(this).attr('data-headword');
+				   $.getJSON('ajax.php?action=createPaperSlip&entryId='+entryId+'&wordform='+wordform, function (data) {
+				     var url = '?m=collection&a=edit&id=' + data.id + '&filename=&headword='+headword;
+             url += '&pos=' + data.pos + '&wid=';
+             var win = window.open(url, '_blank');
+				   });
+				});
+				
 				$('#showIndividual').on('click', function () {
 				  $('#groupedSenses').hide();
 				  $('#individualSenses').show();

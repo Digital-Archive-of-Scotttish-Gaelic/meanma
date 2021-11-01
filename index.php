@@ -3,7 +3,7 @@ namespace controllers;
 
 require_once "includes/htmlHeader.php";
 
-$module = isset($_GET["m"]) ? $_GET["m"] : ""; // this doesn't do anything surely
+$module = isset($_GET["m"]) ? $_GET["m"] : "";
 $action = isset($_GET["a"]) ? $_GET["a"] : "";
 
 switch ($module) {

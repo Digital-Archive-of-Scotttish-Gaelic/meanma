@@ -152,6 +152,10 @@ switch ($_REQUEST["action"]) {
 		$slipInfo["context"] = $context;
 		echo json_encode($slipInfo);
 		break;
+	case "createPaperSlip":
+		$slip = new paper_slip($_GET["entryId"], $db);
+		echo json_encode(array("id" => $slip->getId(), "wordclass" => $slip->getWordClass(), "pos" => $slip->getPOS()));
+		break;
 	case "getSenseCategoriesForNewWordclass":
 		$slip = new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"]);
 		$oldEntryId = $slip->getEntryId();

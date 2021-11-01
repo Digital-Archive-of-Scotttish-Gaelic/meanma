@@ -8,7 +8,7 @@ class slip
 
 	private $_id; //the slip ID (called 'auto_id' in the DB)
 	protected $_db; //an instance of models\database
-	protected $_pos;
+	protected $_pos, $_wordform;
 	protected $_starred, $_notes, $_locked, $_ownedBy, $_entryId, $_headword, $_slipStatus;
 	protected $_wordClass, $_lastUpdatedBy, $_lastUpdated;
 	protected $_isNew;
@@ -40,6 +40,10 @@ class slip
 
 	public function getPOS() {
 		return $this->_pos;
+	}
+
+	public function getWordform() {
+		return $this->_wordform;
 	}
 
 	public function getScopeDefault() {
@@ -154,6 +158,10 @@ SQL;
 		$this->_pos = $pos;
 	}
 
+	public function setWordform($form) {
+		$this->_wordform = $form;
+	}
+
 	// METHODS
 
 	protected function populateClass($params) {
@@ -165,6 +173,7 @@ SQL;
 		$this->_headword = $this->_entry->getHeadword();
 		$this->_wordClass = $this->_entry->getWordclass();
 		$this->_entryId = $params["entryId"];
+		$this->setWordform($params["wordform"]);
 		$this->_locked = $params["locked"];
 		$this->_slipStatus = $params["slipStatus"];
 		$this->_ownedBy = $params["ownedBy"];
@@ -183,12 +192,12 @@ SQL;
 		$sql = <<<SQL
         UPDATE slips 
             SET text_id = ?, locked = ?, starred = ?, notes = ?, 
-                entry_id = ?, slipStatus = ?,
+                entry_id = ?, wordform = ?, slipStatus = ?, 
              		updatedBy = ?, lastUpdated = now()
             WHERE auto_id = ?
 SQL;
 		$this->_db->exec($sql, array($this->getTextId(), $this->getLocked(), $this->getStarred(),
-			$this->getNotes(), $this->getEntryId(),
+			$this->getNotes(), $this->getEntryId(), $this->getWordform(),
 			$this->getSlipStatus(), $this->getLastUpdatedBy(), $this->getId()));
 		return $this;
 	}

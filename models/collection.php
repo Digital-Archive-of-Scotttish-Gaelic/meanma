@@ -11,12 +11,12 @@ class collection
    */
   public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "date_of_lang", $order = "ASC") {
   	$sort = empty($sort) ? "date_of_lang" : $sort;
-  	$order = empty($order) ? "ASC" : $order;
+  	$order = empty($order) ? "asc" : $order;
   	if (stristr("'", $sort) || stristr('"', $sort)) {
   		echo json_encode(array("error" => "invalid sort param"));
   		return false;   //possible attack
 	  }
-  	if ($order != "ASC" AND $order != "DESC") {
+  	if ($order != "asc" AND $order != "desc") {
 		  echo json_encode(array("error" => "invalid order param"));
   		return false;   //possible attack
 	  }
@@ -31,7 +31,7 @@ class collection
 				$whereClause .= <<<SQL
 					AND (auto_id LIKE @search	
             	OR lemma LIKE @search
-            	OR wordform LIKE @search
+            	OR l.wordform LIKE @search
             	OR lemma LIKE @search
             	OR firstname LIKE @search
             	OR lastname LIKE @search)
@@ -39,7 +39,7 @@ SQL;
 			}
 	    $dbh->setAttribute( \PDO::ATTR_EMULATE_PREPARES, false );
 	    $sql = <<<SQL
-        SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, wordform, firstname, lastname,
+        SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, l.wordform AS wordform, firstname, lastname,
                 date_of_lang, title, page, CONCAT(firstname, ' ', lastname) as fullname, locked,
              		l.pos as pos, s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
             FROM slips s
@@ -215,7 +215,7 @@ SQL;
 	public static function getWordformBySlipId($slipId) {
 		$db = new database();
 		$sql = <<<SQL
-			SELECT wordform FROM lemmas l
+			SELECT l.wordform AS wordform FROM lemmas l
 				JOIN slips s ON s.filename = l.filename AND s.id = l.id
 				WHERE s.auto_id = :slipId
 SQL;
