@@ -7,7 +7,11 @@ class slip
 	const SCOPE_DEFAULT = 80;
 
 	private $_id; //the slip ID (called 'auto_id' in the DB)
+	protected $_type; //used to differiantate between types of slip, e.g. paper or corpus
 	protected $_db; //an instance of models\database
+	protected $_textId = null;
+	protected $_filename = null;
+	protected $_wid = null;
 	protected $_pos, $_wordform;
 	protected $_starred, $_notes, $_locked, $_ownedBy, $_entryId, $_headword, $_slipStatus;
 	protected $_wordClass, $_lastUpdatedBy, $_lastUpdated;
@@ -36,6 +40,10 @@ class slip
 		return $this->_id;
 	}
 
+	public function getType() {
+		return $this->_type;
+	}
+
 	public function getPOS() {
 		return $this->_pos;
 	}
@@ -46,6 +54,18 @@ class slip
 
 	public function getScopeDefault() {
 		return self::SCOPE_DEFAULT;
+	}
+
+	public function getFilename() {
+		return $this->_filename;
+	}
+
+	public function getWid() {
+		return $this->_wid;
+	}
+
+	public function getTextId() {
+		return $this->_textId;
 	}
 
 	public function getSlipIsAttachedTiCitation($citationId) {
@@ -150,6 +170,10 @@ SQL;
 
 	protected function setId($id) {
 		$this->_id = $id;
+	}
+
+	protected function setType($type) {
+		$this->_type = $type;
 	}
 
 	protected function setPOS($pos) {

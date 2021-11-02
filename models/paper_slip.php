@@ -9,9 +9,13 @@ class paper_slip extends slip
 	 * @param int $id  : an optional ID. If given, the paper slip will be loaded from the DB otherwise it will be
 	 *  created
 	 */
-	public function __construct($id = null, $entryId, $db) {
+	public function __construct($id = null, $entryId, $wordform = null, $db) {
 		parent::__construct($id, $db);
+		$this->setType("paper");
 		$this->_entryId = $entryId;
+		if ($wordform) {
+			$this->setWordform($wordform);
+		}
 		$this->_entry = entries::getEntryById($entryId, $this->_db);
 		$this->_wordClass = $this->_entry->getWordclass();
 		$this->setPOS($this->_wordClasses[$this->_wordClass][0]);   //set the first element of the wordClasses array
@@ -25,10 +29,10 @@ class paper_slip extends slip
 			$this->_isNew = true;
 			$this->_headword = $this->_entry->getHeadword();
 			$sql = <<<SQL
-        INSERT INTO slips (filename, text_id, id, entry_id, ownedBy) 
-        	VALUES (?, ?, ?, ?, ?);
+        INSERT INTO slips (filename, text_id, id, entry_id, wordform, ownedBy) 
+        	VALUES (?, ?, ?, ?, ?, ?);
 SQL;
-			$this->_db->exec($sql, array('', '', '', $this->_entry->getId(),
+			$this->_db->exec($sql, array('', '', '', $this->_entry->getId(), $this->getWordform(),
 				$_SESSION["user"]));
 			$this->setId($this->_db->getLastInsertId());  //sets the ID on the parent
 			$this->saveSlipMorph();    //save the defaults to the DB

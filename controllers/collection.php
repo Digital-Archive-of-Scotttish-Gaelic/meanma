@@ -23,7 +23,9 @@ class collection
 		    $view->show();
 		    break;
 	    case "edit":
-		    $slip = new models\corpus_slip($_GET["filename"], $_GET["wid"], $id, $_GET["pos"], $this->_db);
+		    $slip = ($_GET["filename"])
+		      ? new models\corpus_slip($_GET["filename"], $_GET["wid"], $id, $_GET["pos"], $this->_db)
+			    : new models\paper_slip($id, $_GET["entryId"], $_GET["wordform"], $this->_db);
 		    $view = new views\slip($slip);
 		    $view->show("edit");
 	    	break;

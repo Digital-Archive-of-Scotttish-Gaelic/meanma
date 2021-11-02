@@ -157,25 +157,41 @@ HTML;
   }
 
 	private function _writeCitationEditModal() {
+  	//set the input fields depending in slip type
+		if ($this->_slip->getType() == "corpus") {
+			$inputHtml = <<<HTML
+				<h5>Adjust citation context</h5>
+        <div>
+					<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
+					<a class="updateContext btn-link" id="incrementPre"><i class="fas fa-plus"></i></a>
+        </div>
+        <span data-citationid="" data-sliptype="corpus" data-precontextscope="" data-postcontextscope="" id="citationContext" class="citationContext">
+        </span>
+        <div>
+          <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
+					<a class="updateContext btn-link" id="incrementPost"><i class="fas fa-plus"></i></a>
+        </div>
+        <div style="height: 20px;">
+          <a href="#" class="float-right" id="resetContext">reset context</a>
+				</div>
+HTML;
+
+		} else {
+			$inputHtml = <<<HTML
+				<div>
+					<textarea class="form-control" id="preContextString"></textarea>
+					<mark>{$this->_slip->getWordform()}</mark>
+					<textarea class="form-control" id="postContextString"></textarea>
+					<span data-citationid="" data-sliptype="paper" data-wordform="{$this->_slip->getWordform()}" id="citationContext" class="citationContext"/>
+				</div>
+HTML;
+		}
 		$html = <<<HTML
         <div id="citationEditModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="citationEditModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    <h5>Adjust citation context</h5>
-			              <div>
-											<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
-											<a class="updateContext btn-link" id="incrementPre"><i class="fas fa-plus"></i></a>
-			              </div>
-			              <span data-citationid="" data-citationcount="" data-precontextscope="" data-postcontextscope="" id="citationContext" class="citationContext">
-			              </span>
-			              <div>
-			                <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
-											<a class="updateContext btn-link" id="incrementPost"><i class="fas fa-plus"></i></a>
-			              </div>
-			              <div style="height: 20px;">
-			                <a href="#" class="float-right" id="resetContext">reset context</a>
-										</div>
+                    {$inputHtml}
 										<div class="row">		
 											<label class="col-2" for="citationType">Type:</label>
 			                <select id="citationType" name="citationType" class="form-control col-3">
@@ -523,10 +539,13 @@ HTML;
 					</ul> <!-- close the transList -->
 				</div>  <!-- close the transContainer -->
 HTML;
+    	$citationString = ($this->_slip->getType() == "corpus")
+		    ? $citation->getContext()["html"]
+		    : $citation->getPreContextString() . $citation->getPostContextString();
 			$html .= <<<HTML
 				<li style="border-top: 1px solid gray;">
 					<span id="citation_{$citation->getId()}">
-						{$citation->getContext()["html"]}
+						{$citationString}
 					</span>
 					<em>
 						<span id="citationType_{$citation->getId()}">
@@ -602,22 +621,41 @@ HTML;
               let slipId = {$this->_slip->getId()};
               $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId)
               .done(function(data) {
-                $('#citationContext').attr('data-precontextscope', data.preScope);
-                $('#citationContext').attr('data-postcontextscope', data.postScope);
                 $('#citationContext').attr('data-citationid', data.id);
-                $('#citationContext').html(data.context['html']);
+                if (data.context) {   //corpus slip
+                  $('#citationContext').attr('data-precontextscope', data.preScope);
+                  $('#citationContext').attr('data-postcontextscope', data.postScope);
+                  $('#citationContext').html(data.context['html']);
+                } else {              //paper slip
+                  $('#preContextString').val(data.preContextString);
+                  $('#postContextString').val(data.postContextString);
+                }
               });
             });
             
             //save the citation from the modal
             $('#saveCitation').on('click', function() {
+          
               let context = $('#citationContext');
+              let slipType = context.attr('data-sliptype');
+              var html, preContextString, postContextString;
+              var preScope = 0;
+              var postScope = 0;
+              if (slipType == 'corpus') {             //corpus slip
+	              html = context.html();
+	              preScope = context.attr('data-precontextscope');
+	              postScope = context.attr('data-postcontextscope');
+              } else {                                                    //paper slip
+                preContextString = $('#preContextString').val();
+                postContextString = $('#postContextString').val();
+                html = preContextString + ' <mark>' + context.attr('data-wordform') + '</mark> ' + postContextString;
+              }
               let cid = context.attr('data-citationid');
-              let html = context.html();
-              let preScope = context.attr('data-precontextscope');
-              let postScope = context.attr('data-postcontextscope');
-              let type = $('#citationType').val();      
-              $.ajax('ajax.php?action=saveCitation&id='+cid+'&preScope='+preScope+'&postScope='+postScope+'&type='+type)
+              
+              let type = $('#citationType').val();     
+              var url = 'ajax.php?action=saveCitation&id='+cid+'&preScope='+preScope+'&postScope='+postScope+'&type='+type;
+              url += '&preContextString='+preContextString+'&postContextString='+postContextString+'&slipType='+slipType;
+              $.ajax(url)
               .done(function () {
                 //check if citation is already in list
                 if ($('#citation_'+cid).length) {   //citation exists so update it 

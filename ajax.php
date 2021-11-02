@@ -98,7 +98,6 @@ switch ($_REQUEST["action"]) {
 		} else {
 			$citation = new citation($db, $_GET["id"]);
 		}
-		$context = $citation->getContext(true);
 		$translations = $citation->getTranslations();
 		$translationCount = count($translations);
 		$translationIds = $firstTranslationContent = $firstTranslationType = "";
@@ -107,16 +106,26 @@ switch ($_REQUEST["action"]) {
 			$firstTranslationContent = $translations[0]->getContent();
 			$firstTranslationType = $translations[0]->getType();
 		}
-		echo json_encode(array("id" => $citation->getId(), "preScope" => $citation->getPreContextScope(),
-			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(), "context" => $context,
+		$citationData = array("id" => $citation->getId(), "preScope" => $citation->getPreContextScope(),
+			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(),
 			"firstTranslationContent" => $firstTranslationContent, "firstTranslationType" => $firstTranslationType,
-			"translationCount" => $translationCount, "translationIds" => $translationIds));
+			"translationCount" => $translationCount, "translationIds" => $translationIds);
+		//check whether we are dealing with a corpus slip or a paper slip
+		if ($_GET["slipType"] == "corpus") {  //corpus slip
+			$citationData["context"] = $citation->getContext(true);
+		} else {                                                                    //paper slip
+			$citationData["preContextString"] = $citation->getPreContextString();
+			$citationData["postContextString"] = $citation->getPostContextString();
+		}
+		echo json_encode($citationData);
 		break;
 	case "saveCitation":
 		$citation = new citation($db, $_GET["id"]);
 		$citation->setType($_GET["type"]);
 		$citation->setPreContextScope($_GET["preScope"]);
 		$citation->setPostContextScope($_GET["postScope"]);
+		$citation->setPreContextString($_GET["preContextString"]);
+		$citation->setPostContextString($_GET["postContextString"]);
 		$citation->save();
 		break;
 	case "createTranslation":
@@ -153,7 +162,7 @@ switch ($_REQUEST["action"]) {
 		echo json_encode($slipInfo);
 		break;
 	case "createPaperSlip":
-		$slip = new paper_slip(null, $_GET["entryId"], $db);
+		$slip = new paper_slip(null, $_GET["entryId"], $_GET["wordform"], $db);
 		echo json_encode(array("id" => $slip->getId(), "wordclass" => $slip->getWordClass(), "pos" => $slip->getPOS()));
 		break;
 	case "getSenseCategoriesForNewWordclass":

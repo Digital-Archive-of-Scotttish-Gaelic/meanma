@@ -325,7 +325,7 @@ HTML;
 				   let entryId = $(this).attr('data-entryid');
 				   let headword = $(this).attr('data-headword');
 				   $.getJSON('ajax.php?action=createPaperSlip&entryId='+entryId+'&wordform='+wordform, function (data) {
-				     var url = '?m=collection&a=edit&id=' + data.id + '&filename=&headword='+headword;
+				     var url = '?m=collection&a=edit&entryId='+entryId+'&id=' + data.id + '&filename=&headword='+headword;
              url += '&pos=' + data.pos + '&wid=';
              var win = window.open(url, '_blank');
 				   });

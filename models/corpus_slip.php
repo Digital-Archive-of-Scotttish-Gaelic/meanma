@@ -4,14 +4,13 @@ namespace models;
 
 class corpus_slip extends slip
 {
-  private $_textId, $_filename, $_wid;
-
   public function __construct($filename, $wid, $auto_id = null, $pos, $db) {
     $this->_filename = $filename;
     $this->_wid = $wid;
     //test if a slip already exists (if there is a slip with the same groupId, filename, id combination)
     $slipId = $auto_id ? $auto_id : collection::slipExists($_SESSION["groupId"], $filename, $wid, $db);
     parent::__construct($slipId, $db);
+    $this->setType("corpus");
     $this->_pos = $pos;
     $this->_load();
   }
@@ -45,17 +44,5 @@ SQL;
     $this->loadSlipMorph();  //load the slipMorph data from the DB
     $this->loadSenses(); //load the sense objects
     return $this;
-  }
-
-  public function getFilename() {
-    return $this->_filename;
-  }
-
-  public function getWid() {
-    return $this->_wid;
-  }
-
-  public function getTextId() {
-  	return $this->_textId;
   }
 }
