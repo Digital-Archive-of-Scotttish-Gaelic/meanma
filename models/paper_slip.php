@@ -6,13 +6,11 @@ class paper_slip extends slip
 {
 	/**
 	 * @param $entryId  : a paper slip always requires an entryId, regardless of whether is new or exisitng
-	 * @param $db : a models\database object
 	 * @param int $id  : an optional ID. If given, the paper slip will be loaded from the DB otherwise it will be
 	 *  created
 	 */
-	public function __construct($entryId, $db, $id = null) {
-		$this->_db = $db;
-		parent::__construct($id);
+	public function __construct($id = null, $entryId, $db) {
+		parent::__construct($id, $db);
 		$this->_entryId = $entryId;
 		$this->_entry = entries::getEntryById($entryId, $this->_db);
 		$this->_wordClass = $this->_entry->getWordclass();

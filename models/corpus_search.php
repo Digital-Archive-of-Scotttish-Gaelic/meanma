@@ -17,13 +17,17 @@ class corpus_search
 	 * @param $params
 	 * @param bool $fullSearch : a flag for switching to result set required for auto slip creation
 	 */
-	public function __construct($params, $fullSearch=true) {
-		$this->_db = $this->_db ? $this->_db : new database();
+	public function __construct($params, $fullSearch=true, $db) {
+		$this->_db = $db;
 		$this->_params = $params;
 		$this->_init();
 		if (!empty($this->getTerm())) {  //only run the search if there is a search term
 			$this->_dbResults = $this->_getDBSearchResults($fullSearch);
 		}
+	}
+
+	public function getDB() {
+		return $this->_db;
 	}
 
 	/**
@@ -155,7 +159,8 @@ class corpus_search
 		} else {
 			$params["term"] = urldecode($params["term"]); //need to decode if passed via JS encodeURI (auto create slips)
 		}
-		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP
+		$searchPrefix = ''; // "[[:<:]]";  //default to word boundary at start for REGEXP
+		$searchSuffix = ''; // "[[:>:]]";
 		$whereClause = "";
 		switch ($params["order"]) {
 			case "random":
@@ -249,7 +254,7 @@ SQL;
 
 SQL;
 		}
-		$query["search"] = $searchPrefix . $query["search"] . "[[:>:]]";  //word boundary
+		$query["search"] = $searchPrefix . $query["search"] . $searchSuffix;  //word boundary
 		$pdoParams = array(":term" => $query["search"]);    //params required to pass for the PDO DB query
 		if ($params["selectedDates"]) {       //restrict by date
 			$query["sql"] .= $this->_getDateWhereClause();

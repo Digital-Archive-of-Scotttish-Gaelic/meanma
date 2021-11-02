@@ -12,8 +12,8 @@ class corpus_generate
 
 	private $_db;   // an instance of models\database
 
-	public function __construct($id) {
-		$this->_db = isset($this->_db) ? $this->_db : new database();
+	public function __construct($id, $db) {
+		$this->_db = $db;
 		$this->_id = $id;
 		$this->_filepaths = $this->_getFilepaths($id);
     $this->_lexemes = $this->_getLexemes();

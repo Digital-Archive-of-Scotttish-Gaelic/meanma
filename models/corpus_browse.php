@@ -17,8 +17,8 @@ class corpus_browse // models a corpus text or subtext
 
 	private $_db;   // an instance of models\database
 
-	public function __construct($id) {
-		$this->_db = isset($this->_db) ? $this->_db : new database();
+	public function __construct($id, $db) {
+		$this->_db = $db;
 		$this->_id = $id;
 		if ($id != "0") { // not the root corpus node, i.e. a text
 			$this->_load();
@@ -68,7 +68,7 @@ SQL;
 	 * @param $id
 	 */
 	private function _setParentText($id) {
-		$this->_parentText = new corpus_browse($id);
+		$this->_parentText = new corpus_browse($id, $this->_db);
 	}
 
 	private function _setTitle($title) {

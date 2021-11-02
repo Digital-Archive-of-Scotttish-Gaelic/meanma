@@ -6,12 +6,12 @@ class corpus_slip extends slip
 {
   private $_textId, $_filename, $_wid;
 
-  public function __construct($filename, $wid, $auto_id = null, $pos) {
+  public function __construct($filename, $wid, $auto_id = null, $pos, $db) {
     $this->_filename = $filename;
     $this->_wid = $wid;
     //test if a slip already exists (if there is a slip with the same groupId, filename, id combination)
-    $slipId = $auto_id ? $auto_id : collection::slipExists($_SESSION["groupId"], $filename, $wid);
-    parent::__construct($slipId);
+    $slipId = $auto_id ? $auto_id : collection::slipExists($_SESSION["groupId"], $filename, $wid, $db);
+    parent::__construct($slipId, $db);
     $this->_pos = $pos;
     $this->_load();
   }
@@ -21,10 +21,10 @@ class corpus_slip extends slip
     $this->_slipMorph = new slipmorphfeature($this->getPOS());
     if (!$this->getId()) {  //create a new slip entry
       $this->_isNew = true;
-	    $this->_headword = lemmas::getLemma($this->getWid(), $this->getFilename)[0];
+	    $this->_headword = lemmas::getLemma($this->getWid(), $this->getFilename())[0];
       $this->extractWordClass($this->getPOS());
       //get the entry
-	    $this->_entry = entries::getEntryByHeadwordAndWordclass($this->getHeadword(), $this->getWordClass());
+	    $this->_entry = entries::getEntryByHeadwordAndWordclass($this->getHeadword(), $this->getWordClass(), $this->_db);
       $sql = <<<SQL
         INSERT INTO slips (filename, text_id, id, entry_id, ownedBy) 
         	VALUES (?, ?, ?, ?, ?);

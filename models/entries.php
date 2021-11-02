@@ -5,8 +5,7 @@ namespace models;
 class entries
 {
 
-	public static function getEntryByHeadwordAndWordclass($headword, $wordclass) {
-		$db = new database();
+	public static function getEntryByHeadwordAndWordclass($headword, $wordclass, $db) {
 		$sql = <<<SQL
         SELECT * FROM entry WHERE headword = :headword AND wordclass = :wordclass 
 					AND group_id = :groupId

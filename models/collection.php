@@ -119,25 +119,18 @@ HTML;
     }
   }
 
-  public static function slipExists($groupId, $filename, $id) {
-	  $db = new database();
-	  $dbh = $db->getDatabaseHandle();
-	  try {
-		  $sql = <<<SQL
-        SELECT auto_id FROM slips s
-        	JOIN entry e ON s.entry_id = e.id
-        	WHERE e.group_id = :groupId AND s.filename = :filename AND s.id = :id
+  public static function slipExists($groupId, $filename, $id, $db) {
+	  $sql = <<<SQL
+      SELECT auto_id FROM slips s
+        JOIN entry e ON s.entry_id = e.id
+        WHERE e.group_id = :groupId AND s.filename = :filename AND s.id = :id
 SQL;
-		  $sth = $dbh->prepare($sql);
-		  $sth->execute(array(":groupId"=>$groupId, ":filename"=>$filename, ":id"=>$id));
-		  $row = $sth->fetch();
-		  if ($row["auto_id"]) {
-			  return $row["auto_id"];
-		  } else {
-		  	return false;
-		  }
-	  } catch (\PDOException $e) {
-		  echo $e->getMessage();
+	  $results =$db->fetch($sql, array(":groupId"=>$groupId, ":filename"=>$filename, ":id"=>$id));
+	  $row = $results[0];
+	  if ($row["auto_id"]) {
+		  return $row["auto_id"];
+	  } else {
+	    return false;
 	  }
   }
 
@@ -184,7 +177,7 @@ SQL;
 SQL;
 		$result = $db->fetch($sql, array(":slipId" => $slipId));
 		$row = $result[0];
-		return new corpus_slip($row["filename"], $row["wid"], $slipId, $row["pos"]);
+		return new corpus_slip($row["filename"], $row["wid"], $slipId, $row["pos"], $db);
 	}
 
 	/**
@@ -373,11 +366,11 @@ SQL;
 HTML;
   }
 
-  public static function getSlipLinkHtml($data, $index = null) {
+  public static function getSlipLinkHtml($data, $index = null, $db) {
 	  $slipUrl = "#";
 	  $slipClass = "slipLink2";
 	  $modalCode = "";
-	  $slipId = self::slipExists($_SESSION["groupId"], $data["filename"], $data["id"]);  //check if there is a slip for this group
+	  $slipId = self::slipExists($_SESSION["groupId"], $data["filename"], $data["id"], $db);  //check if there is a slip for this group
 	  if ($slipId) {
 		  $slipLinkText = "view";
 		  $createSlipStyle = "";

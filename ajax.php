@@ -52,7 +52,7 @@ switch ($_REQUEST["action"]) {
 			echo json_encode(array("count" => count($_SESSION["printSlips"])));
 		break;
   case "loadSlip":
-    $slip = new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"]);
+    $slip = new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db);
     $slip->updateResults($_GET["index"]); //ensure that "view slip" (and not "create slip") displays
     $filenameElems = explode('_', $slip->getFilename());
     $textId = $filenameElems[0];
@@ -153,11 +153,11 @@ switch ($_REQUEST["action"]) {
 		echo json_encode($slipInfo);
 		break;
 	case "createPaperSlip":
-		$slip = new paper_slip($_GET["entryId"], $db);
+		$slip = new paper_slip(null, $_GET["entryId"], $db);
 		echo json_encode(array("id" => $slip->getId(), "wordclass" => $slip->getWordClass(), "pos" => $slip->getPOS()));
 		break;
 	case "getSenseCategoriesForNewWordclass":
-		$slip = new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"]);
+		$slip = new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db);
 		$oldEntryId = $slip->getEntryId();
 		$slip->updateEntry($_GET["headword"], $_GET["wordclass"]);  //update entry with new wordclass
 		$slip->saveSlip($_GET);
@@ -173,26 +173,25 @@ switch ($_REQUEST["action"]) {
 		echo json_encode($unusedSenseInfo);
 		break;
   case "saveSlip":
-    $slip = new corpus_slip($_POST["filename"], $_POST["id"], $_POST["auto_id"], $_POST["pos"],
-      $_POST["preContextScope"], $_POST["postContextScope"]);
+    $slip = new corpus_slip($_POST["filename"], $_POST["id"], $_POST["auto_id"], $_POST["pos"], $db);
     unset($_POST["action"]);
     $slip->saveSlip($_POST);
     echo "success";
     break;
 	case "getSlipLinkHtml":
-		$slipId = collection::slipExists($_SESSION["groupId"], $_GET["filename"], $_GET["id"]);
+		$slipId = collection::slipExists($_SESSION["groupId"], $_GET["filename"], $_GET["id"], $db);
 		$lemma = urldecode($_GET["lemma"]); // decode required for MSS weird chrs
 		$data = $slipId
 			? collection::getSlipInfoBySlipId($slipId, $db)[0]    //there is a slip so use the data
 			: array("filename"=>$_GET["filename"], "id"=>$_GET["id"], "pos"=>$_GET["pos"], "lemma"=>$lemma);  //new slip
-		echo collection::getSlipLinkHtml($data);
+		echo collection::getSlipLinkHtml($data, null, $db);
 		break;
 	case "autoCreateSlips":
 		$search = new corpus_search($_GET, false);
 		$results = $search->getDBResults();
 		foreach ($results as $result) {
 			if (!$result["auto_id"]) {
-				new corpus_slip($result["filename"], $result["id"], "", $result["pos"]);
+				new corpus_slip($result["filename"], $result["id"], "", $result["pos"], $db);
 			}
 		}
 		echo json_encode(array("success" => true));

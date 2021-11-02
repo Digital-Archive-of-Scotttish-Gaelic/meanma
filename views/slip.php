@@ -550,6 +550,8 @@ HTML;
   }
 
 	private function _writeCollocatesView() {
+
+  	return;     //TODO: reintroduce this at a later date SB
 		$handler = new models\xmlfilehandler($this->_slip->getFilename());
 
 		//TODO: revisit this with new citation model - following vars just for placeholding

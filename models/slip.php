@@ -25,11 +25,9 @@ class slip
 	protected $_sensesInfo = array();   //used to store sense info (in place of object data) for AJAX use
 	protected $_citations;  //an array of citation objects
 
-	public function __construct($id = null) {
+	public function __construct($id = null, $db) {
 		$this->_id = $id;
-		if (!isset($this->_db)) {
-			$this->_db = new database();
-		}
+		$this->_db = $db;
 	}
 
 	//GETTERS
