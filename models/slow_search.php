@@ -61,7 +61,7 @@ class slow_search
 					$index++;
 					$results[$i]["data"] = corpus_search::getDataById($filename, $id);
 					$results[$i]["data"]["context"] = $handler->getContext($id);
-					$results[$i]["data"]["slipLinkHtml"] = collection::getSlipLinkHtml($results[$i]["data"], $index);
+					$results[$i]["data"]["slipLinkHtml"] = collection::getSlipLinkHtml($results[$i]["data"], $index, $this->_db);
 					$pos = new partofspeech($results[$i]["data"]["pos"]);
 					$results[$i]["data"]["posLabel"] = $pos->getLabel();
 					$results[$i]["index"] = $index;

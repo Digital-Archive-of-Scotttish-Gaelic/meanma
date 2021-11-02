@@ -255,7 +255,7 @@ switch ($_REQUEST["action"]) {
 		users::updateGroupLastUsed($_GET["groupId"]);
 		break;
 	case "getSlowSearchResults":
-		$slowSearch = new slow_search($_GET["id"]);
+		$slowSearch = new slow_search($_GET["id"], $db);
 		$xpath = urldecode($_GET["xpath"]);
 		$results = $slowSearch->search($xpath, $_GET["chunkSize"], $_GET["offsetFilename"], $_GET["offsetId"], $_GET["index"]);
 		echo json_encode($results);
