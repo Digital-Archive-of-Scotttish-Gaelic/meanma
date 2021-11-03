@@ -143,7 +143,7 @@ SQL;
 	 */
 	public static function getSlipInfoBySlipId($slipId, $db, $groupId = null) {
 		if ($groupId) {
-			$_SESSION["groupId"] = $groupId; //used in API calls to Meanma for other apps (such as briathradan)
+			$_SESSION["groupId"] = $groupId; //used in API calls to MEANMA for other apps (such as briathradan)
 		}
 		$slipInfo = array();
 		$sql = <<<SQL
@@ -163,10 +163,10 @@ SQL;
 	}
 
 	/**
-	 * Gets slip info from the DB
+	 * Gets slip from DB info
 	 * @param $slipId
 	 * @param $db the current models\database object
-	 * @return corpus_slip object
+	 * @return corpus_slip object or paper_slip object
 	 */
 	public static function getSlipBySlipId($slipId, $db) {
 		$sql = <<<SQL
@@ -176,8 +176,17 @@ SQL;
         WHERE auto_id = :slipId
 SQL;
 		$result = $db->fetch($sql, array(":slipId" => $slipId));
-		$row = $result[0];
-		return new corpus_slip($row["filename"], $row["wid"], $slipId, $row["pos"], $db);
+		if ($result) {
+			$row = $result[0];
+			return new corpus_slip($row["filename"], $row["wid"], $slipId, $row["pos"], $db);
+		} else {
+			$sql = <<<SQL
+				SELECT entry_id, wordform FROM slips WHERE auto_id = :slipId
+SQL;
+			$result = $db->fetch($sql, array(":slipId" => $slipId));
+			$row = $result[0];
+			return new paper_slip($slipId, $row["entry_id"], $row["wordform"], $db);
+		}
 	}
 
 	/**
@@ -248,7 +257,6 @@ SQL;
 	 */
 	public static function getSlipMorphBySlipId($slipId, $db) {
 		$morphInfo = array();
-//		$db = new database();
 		$dbh = $db->getDatabaseHandle();
 		try {
 			$sql = <<<SQL

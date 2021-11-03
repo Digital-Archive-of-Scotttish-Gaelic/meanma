@@ -75,12 +75,13 @@ HTML;
   private function _getSlipListForForms($slipIds) {
   	$slipData = array();
 	  foreach ($slipIds as $id) {
-		  $slipData[] = models\collection::getSlipInfoBySlipId($id, $this->_db);
+		  $info = models\collection::getSlipInfoBySlipId($id, $this->_db);
+		  $slipData[] = ($info) ? $info : array(array("auto_id"=>$id));   //if there is info this is a corpus_slip,
+		                                                                //otherwise it's a paper_slip
 	  }
 		$slipList = '<table class="table"><tbody>';
 		foreach ($slipData as $data) {
 			foreach ($data as $row) {
-				$translation = $row["translation"];
 				$slipLinkData = array(
 					"auto_id" => $row["auto_id"],
 					"lemma" => $row["lemma"],
@@ -98,12 +99,9 @@ HTML;
 						data-filename="{$row["filename"]}"
 						data-id="{$row["id"]}"
 						data-tid="{$row["tid"]}"
-						data-precontextscope="{$row["preContextScope"]}"
-						data-postcontextscope="{$row["postContextScope"]}"
-						data-translation="{$translation}"
 						data-date="{$row["date_of_lang"]}">
 					<!--td data-toggle="tooltip"
-						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]} : {$translation}"
+						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]}"
 						class="entryCitationContext"></td-->
 					<td class="entryCitationContext"></td>
 					<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>

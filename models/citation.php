@@ -39,11 +39,13 @@ SQL;
 
 	public function save() {
 		$sql = <<<SQL
-			UPDATE citation SET `type` = :type, `preContextScope` = :pre, `postContextScope` = :post
+			UPDATE citation SET `type` = :type, `preContextScope` = :pre, `postContextScope` = :post,
+			                    `preContextString` = :preString, `postContextString` = :postString
 				WHERE id = :id
 SQL;
 		$this->_db->exec($sql, array(":type" => $this->getType(), ":pre" => $this->getPreContextScope(),
-			":post" => $this->getPostContextScope(), ":id" => $this->getId()));
+			":post" => $this->getPostContextScope(), ":preString" => $this->getPreContextString(),
+			":postString" => $this->getPostContextString(), ":id" => $this->getId()));
 	}
 
 	private function _load() {
@@ -96,32 +98,38 @@ SQL;
 	 *    : string postIncrementDisable : empty or 'disabled' if the end of the document has been reached
 	 */
 	public function getContext($tagContext = false) {
-		$handler = new xmlfilehandler($this->_slip->getFilename());
-		$preScope = $this->getPreContextScope();
-		$postScope = $this->getPostContextScope();
-		$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope,  false, $tagContext);
-		$preIncrementDisable = $postIncrementDisable = "";
-		//check for start/end of document
-		if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
-			$this->setPreContextScope($context["prelimit"]);
-			$preIncrementDisable = "disabled";
-		}
-		if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
-			$this->setPostContextScope($context["postlimit"]);
-			$postIncrementDisable = "disabled";
-		}
-		$contextHtml = $context["pre"]["output"];
-		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
-			$contextHtml .= ' ';
-		}
-		$contextHtml .= <<<HTML
+		$contextHtml = $preIncrementDisable = $postIncrementDisable = $context["prelimit"] = $context["postlimit"] = "";
+		if ($this->_slip->getType() == "paper") {       //paper slip
+			$contextHtml = $this->getPreContextString() . " <mark>" . $this->_slip->getWordform() . "</mark> "
+				. $this->getPostContextString();
+		} else {                                        //corpus_slip
+			$handler = new xmlfilehandler($this->_slip->getFilename());
+			$preScope = $this->getPreContextScope();
+			$postScope = $this->getPostContextScope();
+			$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, false, $tagContext);
+			$preIncrementDisable = $postIncrementDisable = "";
+			//check for start/end of document
+			if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
+				$this->setPreContextScope($context["prelimit"]);
+				$preIncrementDisable = "disabled";
+			}
+			if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
+				$this->setPostContextScope($context["postlimit"]);
+				$postIncrementDisable = "disabled";
+			}
+			$contextHtml = $context["pre"]["output"];
+			if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
+				$contextHtml .= ' ';
+			}
+			$contextHtml .= <<<HTML
       <mark id="slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
 HTML;
 
-		if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
-			$contextHtml .= ' ';
+			if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
+				$contextHtml .= ' ';
+			}
+			$contextHtml .= $context["post"]["output"];
 		}
-		$contextHtml .= $context["post"]["output"];
 		return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
 			$postIncrementDisable, "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"]);
 	}

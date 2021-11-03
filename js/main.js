@@ -278,6 +278,7 @@ function resetSlip() {
 }
 
 function saveSlip() {
+  var wordform = $('#citationContext').attr('data-wordform');   //TODO: change to value of new input field
   var wordclass = $('#wordClass').val();
   var starred = $('#slipStarred').prop('checked') ? 1 : 0;
   var locked = $('#locked').val();
@@ -285,7 +286,7 @@ function saveSlip() {
   var status = $('#status').val();
   var data = {action: "saveSlip", filename: $('#slipFilename').text(), id: $('#wordId').text(),
     auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred,
-    notes: notes, status: status, wordClass: wordclass,
+    notes: notes, status: status, wordClass: wordclass, wordform: wordform,
     locked: locked, text_id: $('#textId').val()};
   switch (wordclass) {
     case "noun":
