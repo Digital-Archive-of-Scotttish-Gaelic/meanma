@@ -541,7 +541,7 @@ HTML;
 HTML;
     	$citationString = ($this->_slip->getType() == "corpus")
 		    ? $citation->getContext()["html"]
-		    : $citation->getPreContextString() . $citation->getPostContextString();
+		    : $citation->getPreContextString() . " <mark>" . $this->_slip->getWordform() . "</mark> " . $citation->getPostContextString();
 			$html .= <<<HTML
 				<li style="border-top: 1px solid gray;">
 					<span id="citation_{$citation->getId()}">

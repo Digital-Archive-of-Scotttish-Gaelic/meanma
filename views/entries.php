@@ -6,12 +6,14 @@ use models;
 class entries
 {
 	private $_db;
+	private $_entry;
 
 	public function __construct($db) {
 		$this->_db = $db;
 	}
 
 	public function writeEntry($entry) {
+		$this->_entry = $entry;
   	$headword = $entry->getHeadword();
   	$wordclass = $entry->getWordclass();
   	$abbr = models\functions::getWordclassAbbrev($wordclass);
@@ -23,12 +25,15 @@ class entries
           <input type="hidden" id="wordclass" value="{$wordclass}">
         </div>
         <div>
+          <a href="#" class="createPaperSlip" data-headword="{$entry->getHeadword()}" data-wordform="" data-entryid="{$entry->getId()}"><small>add paper slip</small></a> 
+				</div>
+        <div>
           <h5>Forms:</h5>
-          {$this->_getFormsHtml($entry)}
+          {$this->_getFormsHtml()}
 				</div>
 				<div>
 					<h5>Senses:</h5>
-					{$this->_getSensesHtml($entry)}
+					{$this->_getSensesHtml()}
 				</div>
 			</div>
 HTML;
@@ -37,11 +42,11 @@ HTML;
     $this->_writeJavascript();
   }
 
-  private function _getFormsHtml($entry) {
+  private function _getFormsHtml() {
   	$i=0;
 	  $hideText = array("unmarked person", "unmarked number");
 	  $html = "<ul>";
-	  foreach ($entry->getWordforms($this->_db) as $wordform => $morphGroup) {
+	  foreach ($this->_entry->getWordforms($this->_db) as $wordform => $morphGroup) {
 	  	foreach ($morphGroup as $morphString => $slipIds) {
 	  		$i++;
 			  $morphHtml = str_replace('|', ' ', $morphString);
@@ -62,7 +67,6 @@ HTML;
 HTML;
 			  $html .= <<<HTML
           <li>{$wordform} 
-            <a href="#" class="createPaperSlip" data-headword="{$entry->getHeadword()}" data-wordform="{$wordform}" data-entryid="{$entry->getId()}"><small>add paper slip</small></a> 
             ({$morphHtml}) {$citationHtml}
           </li>
 HTML;
@@ -94,6 +98,7 @@ HTML;
 					"page" => $row["page"]
 				);
 				$filenameElems = explode('_', $row["filename"]);
+				$textLink = $row["filename"] ? '<a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small>' : '';
 				$slipList .= <<<HTML
 					<tr id="#slip_{$row["auto_id"]}" data-slipid="{$row["auto_id"]}"
 						data-filename="{$row["filename"]}"
@@ -105,7 +110,7 @@ HTML;
 						class="entryCitationContext"></td-->
 					<td class="entryCitationContext"></td>
 					<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>
-					<td><a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small></td>
+					<td>{$textLink}</td>
 				</tr>
 HTML;
 			}
@@ -114,9 +119,9 @@ HTML;
 		return $slipList;
   }
 
-	private function _getSensesHtml($entry) {
+	private function _getSensesHtml() {
   	//orphaned (uncategorised) senses
-  	$orphanedSensesHtml = $this->_getOrphanSensesHtml($entry);
+  	$orphanedSensesHtml = $this->_getOrphanSensesHtml();
   	if ($orphanedSensesHtml != "") {
 		  $html = "<ul>" . $orphanedSensesHtml . "</ul>";
 	  }
@@ -126,7 +131,7 @@ HTML;
 				<ul>
 HTML;
   	//grouped senses
-		$html .= $this->_getGroupedSensesHtml($entry);
+		$html .= $this->_getGroupedSensesHtml();
 		$html .= '</ul></div>';
 		//individual senses
 		$html .= <<<HTML
@@ -134,15 +139,15 @@ HTML;
 				<h6>Indivdual Senses <a id="showGrouped" href="#" title="show grouped senses"><small>show grouped</small></a></h6> 
 				<ul>
 HTML;
-		$html .= $this->_getIndividualSensesHtml($entry);
+		$html .= $this->_getIndividualSensesHtml();
 		$html .= '</ul></div>';
 		return $html;
 	}
 
-	private function _getOrphanSensesHtml($entry) {
+	private function _getOrphanSensesHtml() {
 		/* Get any citations without senses */
 		$html = "";
-		$nonSenseSlipIds = models\sensecategories::getNonCategorisedSlipIds($entry->getId(), $this->_db);
+		$nonSenseSlipIds = models\sensecategories::getNonCategorisedSlipIds($this->_entry->getId(), $this->_db);
 		if (count($nonSenseSlipIds)) {
 			$slipData = array();
 			$index = 0;
@@ -155,9 +160,9 @@ HTML;
 		return $html;
 	}
 
-	private function _getIndividualSensesHtml($entry) {
+	private function _getIndividualSensesHtml() {
 		/* Get citations for individual senses */
-		$individualSenses = $entry->getIndividualSenses();
+		$individualSenses = $this->_entry->getIndividualSenses();
 		$index = 0;
 		foreach ($individualSenses as $sense => $slipIds) {
 			$slipData = array();
@@ -170,12 +175,12 @@ HTML;
 		return $html;
 	}
 
-	private function _getGroupedSensesHtml($entry) {
+	private function _getGroupedSensesHtml() {
 		/* Get the citations with grouped senses */
 		$index = 0;
-		foreach ($entry->getUniqueSenseIds($this->_db) as $slipId => $senseIds) {
+		foreach ($this->_entry->getUniqueSenseIds($this->_db) as $slipId => $senseIds) {
 			$slipData = array();
-			$senseSlipIds = $entry->getSenseSlipIds($slipId);
+			$senseSlipIds = $this->_entry->getSenseSlipIds($slipId);
 			foreach ($senseSlipIds as $id) {
 				$index++;
 				$slipData[] = models\collection::getSlipInfoBySlipId($id, $this->_db);
@@ -294,12 +299,15 @@ HTML;
   }
 
   private function _getSlipLink($result) {
+		$slipType = $result["filename"] ? "corpus" : "paper";
 		return <<<HTML
 						<small>
                 <a href="#" class="slipLink2"
                     data-toggle="modal" data-target="#slipModal"
                     data-auto_id="{$result["auto_id"]}"
-                    data-headword="{$result["lemma"]}"
+                    data-headword="{$this->_entry->getHeadword()}"
+                    data-entryid="{$this->_entry->getId()}"
+                    data-sliptype= "{$slipType}"
                     data-pos="{$result["pos"]}"
                     data-id="{$result["id"]}"
                     data-xml="{$result["filename"]}"

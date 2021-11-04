@@ -94,6 +94,7 @@ $(function () {
     var locked = "";
     var owner = "";
     var slipId = slipLink.data('auto_id');
+    var entryId = slipLink.data('entryid');
     var headword = slipLink.data('headword');
     var pos = slipLink.data('pos');
     var id = slipLink.data('id');
@@ -113,12 +114,13 @@ $(function () {
     $('#slipId').val(id);
     $('#slipPOS').val(pos);
     $('#auto_id').val(auto_id);
+    $('#entryId').val(entryId);
     $('#slipHeadword').html(headword);
     var canEdit;
     var isOwner;
     //get the slip info from the DB
     $.getJSON('ajax.php?action=loadSlip&filename='+xml+'&id='+id+'&index='+resultindex+'&auto_id='+auto_id
-      +'&pos='+pos, function (data) {
+      +'&pos='+pos+'&entryId='+entryId, function (data) {
       if (data.wordClass) {
         var wc = data.wordClass;
         if (wc=='noun') {
@@ -224,7 +226,8 @@ $(function () {
     var headword = $('#slipHeadword').text();
     var pos = $('#slipPOS').val();
     var auto_id = $('#auto_id').val();
-    var url = '?m=collection&a=edit&id=' + auto_id + '&filename=' + filename + '&&headword=' + headword;
+    var entryId = $('#entryId').val();
+    var url = '?m=collection&a=edit&id=' + auto_id + '&filename=' + filename + '&headword=' + headword + '&entryId=' + entryId;
     url += '&pos=' + pos + '&wid=' + id;
     var win = window.open(url, '_blank');
     if (win) {
