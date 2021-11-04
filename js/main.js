@@ -278,7 +278,9 @@ function resetSlip() {
 }
 
 function saveSlip() {
-  var wordform = $('#citationContext').attr('data-wordform');   //TODO: change to value of new input field
+  var slipType = $('#citationContext').attr('data-sliptype');
+  var entryId = $('#citationContext').attr('data-entryid');
+  var wordform = $('#wordform').val();
   var wordclass = $('#wordClass').val();
   var starred = $('#slipStarred').prop('checked') ? 1 : 0;
   var locked = $('#locked').val();
@@ -287,7 +289,7 @@ function saveSlip() {
   var data = {action: "saveSlip", filename: $('#slipFilename').text(), id: $('#wordId').text(),
     auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred,
     notes: notes, status: status, wordClass: wordclass, wordform: wordform,
-    locked: locked, text_id: $('#textId').val()};
+    locked: locked, text_id: $('#textId').val(), slipType: slipType, entryId: entryId};
   switch (wordclass) {
     case "noun":
       data['numgen'] = $('#posNumberGender').val();

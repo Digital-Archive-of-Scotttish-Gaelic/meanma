@@ -182,7 +182,9 @@ switch ($_REQUEST["action"]) {
 		echo json_encode($unusedSenseInfo);
 		break;
   case "saveSlip":
-    $slip = new corpus_slip($_POST["filename"], $_POST["id"], $_POST["auto_id"], $_POST["pos"], $db);
+    $slip = ($_GET["slipType"] == "corpus")
+	    ? new corpus_slip($_POST["filename"], $_POST["id"], $_POST["auto_id"], $_POST["pos"], $db)
+	    : new paper_slip($_POST["auto_id"], $_POST["entryId"], $_POST["wordform"], $db);
     unset($_POST["action"]);
     $slip->saveSlip($_POST);
     echo "success";

@@ -157,7 +157,7 @@ HTML;
   }
 
 	private function _writeCitationEditModal() {
-  	//set the input fields depending in slip type
+  	//set the input fields depending on slip type
 		if ($this->_slip->getType() == "corpus") {
 			$inputHtml = <<<HTML
 				<h5>Adjust citation context</h5>
@@ -165,7 +165,7 @@ HTML;
 					<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
 					<a class="updateContext btn-link" id="incrementPre"><i class="fas fa-plus"></i></a>
         </div>
-        <span data-citationid="" data-sliptype="corpus" data-precontextscope="" data-postcontextscope="" id="citationContext" class="citationContext">
+        <span data-citationid="" data-sliptype="corpus" data-entryid="{$this->_slip->getEntryId()}" data-precontextscope="" data-postcontextscope="" id="citationContext" class="citationContext">
         </span>
         <div>
           <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
@@ -180,9 +180,9 @@ HTML;
 			$inputHtml = <<<HTML
 				<div>
 					<textarea class="form-control" id="preContextString"></textarea>
-					<mark>{$this->_slip->getWordform()}</mark>
+					<input type="text" name="wordform" id="wordform" value="{$this->_slip->getWordform()}"/>
 					<textarea class="form-control" id="postContextString"></textarea>
-					<span data-citationid="" data-sliptype="paper" data-wordform="{$this->_slip->getWordform()}" id="citationContext" class="citationContext"/>
+					<span data-citationid="" data-entryid="{$this->_slip->getEntryId()}" data-sliptype="paper" id="citationContext" class="citationContext"/>
 				</div>
 HTML;
 		}
@@ -635,7 +635,6 @@ HTML;
             
             //save the citation from the modal
             $('#saveCitation').on('click', function() {
-          
               let context = $('#citationContext');
               let slipType = context.attr('data-sliptype');
               var html, preContextString, postContextString;
@@ -648,7 +647,7 @@ HTML;
               } else {                                                    //paper slip
                 preContextString = $('#preContextString').val();
                 postContextString = $('#postContextString').val();
-                html = preContextString + ' <mark>' + context.attr('data-wordform') + '</mark> ' + postContextString;
+                html = preContextString + ' <mark>' + $('#wordform').val() + '</mark> ' + postContextString;
               }
               let cid = context.attr('data-citationid');
               
