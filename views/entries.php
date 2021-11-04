@@ -207,6 +207,7 @@ HTML;
 					"title" => $row["title"],
 					"page" => $row["page"]
 				);
+				$textLink = $row["filename"] ? '<a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small>' : '';
 				$slipList .= <<<HTML
 					<tr id="#slip_{$row["auto_id"]}" data-slipid="{$row["auto_id"]}"
 							data-filename="{$row["filename"]}"
@@ -221,7 +222,7 @@ HTML;
 							class="entryCitationContext"></td-->
 						<td class="entryCitationContext"></td>
 						<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>
-						<td><a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small></td>
+						<td>{$textLink}</td>
 					</tr>
 HTML;
 			}
