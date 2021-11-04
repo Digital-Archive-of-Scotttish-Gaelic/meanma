@@ -158,7 +158,7 @@ HTML;
 
 	private function _writeCitationEditModal() {
   	//set the input fields depending on slip type
-		if ($this->_slip->getType() == "corpus") {
+		if ($this->_slip->getType() == "corpus") {    //slip type is corpus
 			$inputHtml = <<<HTML
 				<h5>Adjust citation context</h5>
         <div>
@@ -176,7 +176,7 @@ HTML;
 				</div>
 HTML;
 
-		} else {
+		} else {            //slip type is paper
 			$inputHtml = <<<HTML
 				<div>
 					<textarea class="form-control" id="preContextString"></textarea>
