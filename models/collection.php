@@ -9,8 +9,8 @@ class collection
    *
    * @return array of DB results
    */
-  public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "date_of_lang", $order = "ASC") {
-  	$sort = empty($sort) ? "date_of_lang" : $sort;
+  public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "date_of_lang", $order = "ASC", $db) {
+  	$sort = empty($sort) ? "headword" : $sort;
   	$order = empty($order) ? "asc" : $order;
   	if (stristr("'", $sort) || stristr('"', $sort)) {
   		echo json_encode(array("error" => "invalid sort param"));
@@ -21,7 +21,6 @@ class collection
   		return false;   //possible attack
 	  }
   	$params = array(":limit" => (int)$limit, ":offset" => (int)$offset);
-    $db = new database();
     $dbh = $db->getDatabaseHandle();
     try {
 			$whereClause = "WHERE (group_id = {$_SESSION["groupId"]}) ";
@@ -32,7 +31,6 @@ class collection
 					AND (auto_id LIKE @search	
             	OR lemma LIKE @search
             	OR l.wordform LIKE @search
-            	OR lemma LIKE @search
             	OR firstname LIKE @search
             	OR lastname LIKE @search)
 SQL;
@@ -248,6 +246,19 @@ SQL;
 				entries::deleteEntry($entryId);
 			}
 		}
+	}
+
+	/**
+	 * Used via AJAX to add a text ID to a new paper slip
+	 * @param $slipId
+	 * @param $textId
+	 * @param $db
+	 */
+	public static function addTextIdToSlip($slipId, $textId, $db) {
+		$sql = <<<SQL
+			UPDATE slips s SET s.text_id = :textId WHERE s.auto_id = :slipId
+SQL;
+		$db->exec($sql, array(":slipId" => $slipId, ":textId" => $textId));
 	}
 
 	/**

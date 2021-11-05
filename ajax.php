@@ -39,7 +39,7 @@ switch ($_REQUEST["action"]) {
     echo json_encode($context);
     break;
 	case "getSlips":
-		$slipInfo = collection::getAllSlipInfo($_GET["offset"], $_GET["limit"], $_GET["search"], $_GET["sort"], $_GET["order"]);
+		$slipInfo = collection::getAllSlipInfo($_GET["offset"], $_GET["limit"], $_GET["search"], $_GET["sort"], $_GET["order"], $db);
 		echo json_encode($slipInfo);
 		break;
 	case "updatePrintList":
@@ -191,6 +191,10 @@ switch ($_REQUEST["action"]) {
     $slip->saveSlip($_POST);
     echo "success";
     break;
+	case "addTextIdToSlip":
+		collection::addTextIdToSlip($_GET["slipId"], $_GET["textId"], $db);
+		echo json_encode(array("msg" => "success"));
+		break;
 	case "getSlipLinkHtml":
 		$slipId = collection::slipExists($_SESSION["groupId"], $_GET["filename"], $_GET["id"], $db);
 		$lemma = urldecode($_GET["lemma"]); // decode required for MSS weird chrs
@@ -266,6 +270,11 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "setGroup":
 		users::updateGroupLastUsed($_GET["groupId"]);
+		break;
+	case "createEntry":
+		//creates an entry if the combination does not already exist
+		$entry = entries::getEntryByHeadwordAndWordclass($_GET["headword"], $_GET["wordclass"], $db);
+		echo json_encode(array("id" => $entry->getId()));
 		break;
 	case "getSlowSearchResults":
 		$slowSearch = new slow_search($_GET["id"], $db);

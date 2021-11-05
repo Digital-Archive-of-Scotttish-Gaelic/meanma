@@ -192,6 +192,7 @@ SQL;
 		$this->_isNew = false;
 		$this->_starred = $params["starred"] ? 1 : 0;
 		$this->_notes = $params["notes"];
+		$this->_textId = $params["text_id"];
 		$this->_headword = $this->_entry->getHeadword();
 		$this->_wordClass = $this->_entry->getWordclass();
 		$this->_entryId = $params["entryId"];

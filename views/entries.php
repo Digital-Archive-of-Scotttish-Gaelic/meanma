@@ -299,8 +299,54 @@ HTML;
           </thead>
           {$tableBodyHtml}
         </table>
+        <div class="row">
+					<div class="col">
+						<div class="mx-auto" style="width: 60px;">
+              <a href="#" data-toggle="modal" data-target="#addEntryModal" title="add entry" id="addEntry" class="btn btn-success">add</a>
+            </div>
+					</div>
+				</div>
 HTML;
+    $this->_writeAddEntryModal();
+    $this->_writeJavascript();;
   }
+
+	private function _writeAddEntryModal() {
+		echo <<<HTML
+        <div id="addEntryModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addEntryModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Add entry</h5>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+										<div class="row">		
+											<label class="col-4" for="addHeadword">Headword:</label>
+											<input type="text" class="form-control col-7" id="addHeadword" name="addHeadword" autofocus/>             
+										</div>
+										<div class="row">
+											<label class="col-4" for="addWordclass">Part-of-speech:</label>
+											<select id="addWordclass" name="addWordclass" class="form-control col-7">
+			                  <option value="noun">noun</option>
+			                  <option value="short">verb</option>
+			                  <option value="preposition">preposition</option>
+			                  <option value="adjective">adjective</option>
+			                  <option value="adverb">verb</option>
+			                  <option value="other">other</option>
+			                </select> 
+										</div>
+                </div>
+                <div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
+                  <button type="button" id="createEntry" class="btn btn-primary">add</button>
+								</div>
+							</div>
+            </div>
+          </div>
+        </div>
+HTML;
+	}
 
   private function _getSlipLink($result) {
 		$slipType = $result["filename"] ? "corpus" : "paper";
@@ -329,6 +375,22 @@ HTML;
   private function _writeJavascript() {
   	echo <<<HTML
 			<script>
+				//create an entry on modal form create button click
+				$('#createEntry').on('click', function () {
+				  let headword = $('#addHeadword').val();
+				  let wordclass = $('#addWordclass').val();
+				  if (headword == '') {
+				    alert("Headword cannot be empty!");
+				    $('#addHeadword').focus();
+				    return;
+				  }
+				  $.getJSON('ajax.php?action=createEntry&headword='+headword+'&wordclass='+wordclass, function () {
+				  })
+				    .done(function (data) {
+				      window.open('?m=entries&a=view&id='+data.id,'_self');
+				    });	  
+				});
+        
 				//create a paper slip for the selected wordform
 				$('.createPaperSlip').on('click', function () {
 				   let wordform = $(this).attr('data-wordform');

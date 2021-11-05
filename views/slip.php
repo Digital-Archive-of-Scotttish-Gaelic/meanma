@@ -100,6 +100,7 @@ HTML;
 				{$this->_writeCitationEditModal()}
 				{$this->_writeTranslationEditModal()}
         {$this->_writeFooter()}
+        {$this->_writeEnterTextIdModal()}
 			</div>  <!-- end RHS -->
 		</div> <!-- end container -->
 		{$this->_writeSavedModal()}
@@ -249,13 +250,36 @@ HTML;
 		return $html;
 	}
 
+	private function _writeEnterTextIdModal() {
+		$html = <<<HTML
+        <div id="enterTextIdModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="enterTextIdModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Text ID</h5>
+								</div>
+                <div class="modal-body">
+                    <label for="enterTextId">Please enter the text ID:</label>
+                    <input type="text" class="form-control" id="enterTextId"/>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" id="saveTextId" data-slipid="{$this->_slip->getId()}" class="btn btn-primary">save</button>
+								</div>
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
+
   private function _writeFooter() {
     $pos = new models\partofspeech($_REQUEST["pos"]);
     $label = $_REQUEST["pos"] ? " ({$pos->getLabel()})" : "";
     $html = <<<HTML
         <div>
-            slip ID:<span id="auto_id">{$this->_slip->getId()}</span><br>
-            POS tag:<span id="slipPOS">{$_REQUEST["pos"]}{$label}</span><br><br>
+            slip ID: <span id="auto_id">{$this->_slip->getId()}</span><br>
+            text ID: <span id="textId">{$this->_slip->getTextId()}</span><br>
+            POS tag: <span id="slipPOS">{$_REQUEST["pos"]}{$label}</span><br><br>
             filename: <span id="slipFilename">{$this->_slip->getFilename()}</span><br>
             id: <span id="wordId">{$_REQUEST["wid"]}</span><br>
         </div>
@@ -605,7 +629,33 @@ HTML;
   private function _writeJavascript() {
     $html = <<<HTML
         <script>  
-          $(function () {        
+          $(function () {      
+            
+            //demand a Text ID if none is found 
+            if ($('#textId').val() == '') {
+              $('#enterTextIdModal').modal({
+                show: true,
+                backdrop: 'static'
+              });
+            }
+            
+            //save text ID for slip
+            $('#saveTextId').on('click', function () {
+              let textId = $('#enterTextId').val();
+              if (!textId) {
+                alert("You must enter a text ID");
+                $('#enterTextId').focus();
+                return;
+              }
+              let slipId = $(this).attr('data-slipid');
+              $.getJSON('ajax.php?action=addTextIdToSlip&slipId='+slipId+'&textId='+textId, function (data){
+                console.log('success');
+              })
+              .done(function () {
+                $('#textId').val(textId);
+                $('#enterTextIdModal').modal('hide'); 
+              });
+            });
             
             //hide/show translation container
             $(document).on('click', '.transToggle', function () {
