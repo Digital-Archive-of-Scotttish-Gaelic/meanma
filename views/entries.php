@@ -100,7 +100,7 @@ HTML;
 				);
 				$filenameElems = explode('_', $row["filename"]);
 				$textLink = $row["filename"] ? '<a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small>' : '';
-				$emojiHtml = $row["isPaperSlip"] ? "	&#x1F4DD;" : "";
+				$emojiHtml = $row["isPaperSlip"] ? '<span data-toggle="tooltip" data-placement="top" title="paper slip">&#x1F4DD;</span>' : "";
 				$slipList .= <<<HTML
 					<tr id="#slip_{$row["auto_id"]}" data-slipid="{$row["auto_id"]}"
 						data-filename="{$row["filename"]}"
