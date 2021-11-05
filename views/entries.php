@@ -80,11 +80,12 @@ HTML;
   	$slipData = array();
 	  foreach ($slipIds as $id) {
 		  $info = models\collection::getSlipInfoBySlipId($id, $this->_db);
-		  $slipData[] = ($info) ? $info : array(array("auto_id"=>$id));   //if there is info this is a corpus_slip,
-		                                                                //otherwise it's a paper_slip
+		  $isPaperSlip = ($info) ? false : true;      //if there is info this is a corpus_slip,
+		                                              //otherwise it's a paper_slip
+		  $slipData[$id] = $isPaperSlip ? array(array("auto_id"=>$id, "isPaperSlip"=>$isPaperSlip)) : $info;
 	  }
 		$slipList = '<table class="table"><tbody>';
-		foreach ($slipData as $data) {
+		foreach ($slipData as $id => $data) {
 			foreach ($data as $row) {
 				$slipLinkData = array(
 					"auto_id" => $row["auto_id"],
@@ -99,6 +100,7 @@ HTML;
 				);
 				$filenameElems = explode('_', $row["filename"]);
 				$textLink = $row["filename"] ? '<a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small>' : '';
+				$emojiHtml = $row["isPaperSlip"] ? "	&#x1F4DD;" : "";
 				$slipList .= <<<HTML
 					<tr id="#slip_{$row["auto_id"]}" data-slipid="{$row["auto_id"]}"
 						data-filename="{$row["filename"]}"
@@ -109,6 +111,7 @@ HTML;
 						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]}"
 						class="entryCitationContext"></td-->
 					<td class="entryCitationContext"></td>
+					<td>{$emojiHtml}</td>
 					<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>
 					<td>{$textLink}</td>
 				</tr>
