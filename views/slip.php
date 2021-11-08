@@ -6,9 +6,10 @@ use models;
 class slip
 {
   private $_slip;   //an instance of the Slip class
-
+	private $_citations;  //an array of citation objects; instance property to prevent unnecessary duplicate DB calls
   public function __construct($slip) {
     $this->_slip = $slip;
+    $this->_citations = $this->_slip->getCitations();
   }
 
   public function show($action) {
@@ -32,53 +33,38 @@ class slip
 HTML;
 	  }
     echo <<<HTML
-				{$this->_writeContext()}
-				{$this->_writeCollocatesView()}
-				<div style="margin-left: 10px;">
-					<small><a href="#translationContainer" id="toggleTranslation" data-toggle="collapse" aria-expanded="false" aria-controls="translationContainer">
-            show/hide translation
-          </a></small>
-        </div>
-				<div id="translationContainer" class="collapse form-group">
-          <label for="slipTranslation">English translation:</label>
-          <textarea class="form-control" name="slipTranslation" id="slipTranslation" rows="3">{$this->_slip->getTranslation()}</textarea>
-          <script>
-            CKEDITOR.replace('slipTranslation', {
-              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
-              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
-            });
-          </script>
-        </div>
-        <div class="form-group" id="slipChecked">
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" name="starred" id="slipStarred" {$checked}>
-            <label class="form-check-label" for="slipStarred">checked</label>
-          </div>
-        </div>
-        <div class="form-group row">
-					<label for="slipStatus" class="col-form-label col-sm-1">Status:</label>
-					<select id="slipStatus">
-						{$statusOptionHtml}
-					</select>
-				</div>
-        <div>
-          <small><a href="#morphoSyntactic" id="toggleMorphoSyntactic" data-toggle="collapse" aria-expanded="true" aria-controls="morphoSyntactic">
-            show/hide morphosyntax
-          </a></small>
-        </div>
-        <div id="morphoSyntactic" class="collapse editSlipSectionContainer show">
-          <div class="form-group row">
-            <label class="col-form-label col-sm-1" for="slipHeadword">Headword:</label>
-            <input class="col-sm-3 form-control" type="text" id="slipHeadword" name="slipHeadword" value="{$this->_slip->getHeadword()}"> 
-          </div>
-HTML;
-    $this->_writePartOfSpeechSelects();
-    echo <<<HTML
+				<div class="row flex-fill" style="min-height: 0;">
+					<div id="lhs" class="col-6 mh-100" style="overflow-y: scroll; border: 1px solid red;">
+						{$this->_writeCitations()}
+						<!-- {$this->_writeCollocatesView()} -->
+        </div>  <!-- end LHS -->
+        
+				<div id="rhs" class="col-6 mh-100" style="overflow-y: scroll; border: 1px solid green;"> <!-- RHS panel -->
+	        <div class="form-group" id="slipChecked">
+	          <div class="form-check form-check-inline">
+	            <input class="form-check-input" type="checkbox" name="starred" id="slipStarred" {$checked}>
+	            <label class="form-check-label" for="slipStarred">checked</label>
+	          </div>
+	        </div>
+	        <div class="form-group row">
+						<label for="slipStatus" class="col-form-label col-sm-1">Status:</label>
+						<select id="slipStatus">
+							{$statusOptionHtml}
+						</select>
+					</div>
+	        <div>
+	          <small><a href="#morphoSyntactic" id="toggleMorphoSyntactic" data-toggle="collapse" aria-expanded="true" aria-controls="morphoSyntactic">
+	            show/hide morphosyntax
+	          </a></small>
+	        </div>
+	        <div id="morphoSyntactic" class="collapse editSlipSectionContainer show">
+	          <div class="form-group row">
+	            <label class="col-form-label col-sm-1" for="slipHeadword">Headword:</label>
+	            <input class="col-sm-3 form-control" type="text" id="slipHeadword" name="slipHeadword" value="{$this->_slip->getHeadword()}"> 
+	          </div>
+            {$this->_writePartOfSpeechSelects()}
 				</div> <!-- end morphoSyntactic -->
-HTML;
-
-	  $this->_writeSenseCategories();
-    echo <<<HTML
+				{$this->_writeSenseCategories()}
 				<div style="margin: 0 0 10px 10px;">
           <small><a href="#notesSection" id="toggleNotes" data-toggle="collapse" aria-expanded="true" aria-controls="notesSection">
             show/hide notes
@@ -99,10 +85,8 @@ HTML;
             <input type="hidden" name="filename" value="{$_REQUEST["filename"]}">
             <input type="hidden" name="id" value="{$_REQUEST["wid"]}">
             <input type="hidden" id="locked" name="locked" value="{$locked}";
-            <input type="hidden" id="auto_id" name="auto_id" value="{$this->_slip->getAutoId()}">
+            <input type="hidden" id="auto_id" name="auto_id" value="{$this->_slip->getId()}">
             <input type="hidden" id="pos" name="pos" value="{$_REQUEST["pos"]}">
-            <input type="hidden" id="preContextScope" name="preContextScope" value="{$this->_slip->getPreContextScope()}">
-            <input type="hidden" id="postContextScope" name="postContextScope" value="{$this->_slip->getPostContextScope()}">
             <input type="hidden" id="textId" name="textId" value="{$this->_slip->getTextId()}">
             <input type="hidden" name="action" value="save">
             {$lockedHtml}
@@ -112,10 +96,15 @@ HTML;
              </div>
           </div>
         </div>
+				{$this->_writeUpdatedBy()}
+				{$this->_writeCitationEditModal()}
+				{$this->_writeTranslationEditModal()}
+        {$this->_writeFooter()}
+        {$this->_writeEnterTextIdModal()}
+			</div>  <!-- end RHS -->
+		</div> <!-- end container -->
+		{$this->_writeSavedModal()}
 HTML;
-    $this->_writeUpdatedBy();
-    $this->_writeFooter();;
-    $this->_writeSavedModal();
     models\sensecategories::writeSenseModal();
   }
 
@@ -145,15 +134,16 @@ HTML;
     }
     $user = models\users::getUser($email);
     $time = $this->_slip->getLastUpdated();
-    echo <<<HTML
+    $html = <<<HTML
         <div>
             <p>Last updated {$time} by {$user->getFirstName()} {$user->getLastName()}</p>
         </div>
 HTML;
+    return $html;
   }
 
   private function _writeSavedModal() {
-    echo <<<HTML
+    $html = <<<HTML
         <div id="slipSavedModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-sm">
             <div class="modal-content">
@@ -164,24 +154,143 @@ HTML;
           </div>
         </div>
 HTML;
+    return $html;
   }
+
+	private function _writeCitationEditModal() {
+  	//set the input fields depending on slip type
+		if ($this->_slip->getType() == "corpus") {    //slip type is corpus
+			$inputHtml = <<<HTML
+				<h5>Adjust citation context</h5>
+        <div>
+					<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
+					<a class="updateContext btn-link" id="incrementPre"><i class="fas fa-plus"></i></a>
+        </div>
+        <span data-citationid="" data-sliptype="corpus" data-entryid="{$this->_slip->getEntryId()}" data-precontextscope="" data-postcontextscope="" id="citationContext" class="citationContext">
+        </span>
+        <div>
+          <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
+					<a class="updateContext btn-link" id="incrementPost"><i class="fas fa-plus"></i></a>
+        </div>
+        <div style="height: 20px;">
+          <a href="#" class="float-right" id="resetContext">reset context</a>
+				</div>
+HTML;
+
+		} else {            //slip type is paper
+			$inputHtml = <<<HTML
+				<div>
+					<textarea class="form-control" id="preContextString"></textarea>
+					<input type="text" name="wordform" id="wordform" value="{$this->_slip->getWordform()}"/>
+					<textarea class="form-control" id="postContextString"></textarea>
+					<span data-citationid="" data-entryid="{$this->_slip->getEntryId()}" data-sliptype="paper" id="citationContext" class="citationContext"/>
+				</div>
+HTML;
+		}
+		$html = <<<HTML
+        <div id="citationEditModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="citationEditModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    {$inputHtml}
+										<div class="row">		
+											<label class="col-2" for="citationType">Type:</label>
+			                <select id="citationType" name="citationType" class="form-control col-3">
+			                  <option value="long">long</option>
+			                  <option value="short">short</option>
+			                </select>               
+										</div>
+                </div>
+                <div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
+                  <button type="button" id="saveCitation" class="btn btn-primary">save</button>
+								</div>
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
+
+	private function _writeTranslationEditModal() {
+		$translationTypeHtml = '<select id="translationType" name="translationType" class="form-control col-1">';
+		foreach (models\translation::$types as $translationType) {
+			$translationTypeHtml .= <<<HTML
+				<option value="{$translationType}">{$translationType}</option>
+HTML;
+		}
+		$translationTypeHtml .= "</select>";
+		$html = <<<HTML
+        <div id="translationEditModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="translationEditModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5>Translation</h5>
+			              <textarea class="form-control" name="citationTranslation" id="citationTranslation" rows="3">
+										</textarea>
+				            <script>
+				              CKEDITOR.replace('citationTranslation', {
+				                contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+				                customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
+				              });
+				            </script>
+					          <div>
+					            <label for="translationType">Translation type:</label>
+					            {$translationTypeHtml}
+										</div>
+                </div>
+                <div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
+                  <button type="button" id="saveTranslation" data-translationid="" data-citationid="" class="btn btn-primary">save</button>
+								</div>
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
+
+	private function _writeEnterTextIdModal() {
+		$html = <<<HTML
+        <div id="enterTextIdModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="enterTextIdModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Text ID</h5>
+								</div>
+                <div class="modal-body">
+                    <label for="enterTextId">Please enter the text ID:</label>
+                    <input type="text" class="form-control" id="enterTextId"/>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" id="saveTextId" data-slipid="{$this->_slip->getId()}" class="btn btn-primary">save</button>
+								</div>
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
 
   private function _writeFooter() {
     $pos = new models\partofspeech($_REQUEST["pos"]);
     $label = $_REQUEST["pos"] ? " ({$pos->getLabel()})" : "";
-    echo <<<HTML
+    $html = <<<HTML
         <div>
-            slip ID:<span id="auto_id">{$this->_slip->getAutoId()}</span><br>
-            POS tag:<span id="slipPOS">{$_REQUEST["pos"]}{$label}</span><br><br>
+            slip ID: <span id="auto_id">{$this->_slip->getId()}</span><br>
+            text ID: <span id="textId">{$this->_slip->getTextId()}</span><br>
+            POS tag: <span id="slipPOS">{$_REQUEST["pos"]}{$label}</span><br><br>
             filename: <span id="slipFilename">{$this->_slip->getFilename()}</span><br>
             id: <span id="wordId">{$_REQUEST["wid"]}</span><br>
         </div>
+
+				{$this->_writeJavascript()}
 HTML;
-    $this->_writeJavascript();
+    return $html;
   }
 
   private function _writePartOfSpeechSelects() {
-    echo $this->_writeWordClassesSelect();
+    $html = $this->_writeWordClassesSelect();
     $props = $this->_slip->getSlipMorph()->getProps();  //the morph data
     $relations = array("numgen", "case", "mode", "fin_person", "imp_person", "fin_number",
 	    "imp_number", "status", "tense", "mood", "prep_mode", "prep_person", "prep_number", "prep_gender");
@@ -224,7 +333,7 @@ HTML;
     if ($conjPosPrepHide != "hide") {
     	$genderPrepHide = ($props["prep_person"] != "third person") || ($props["prep_number"] != "singular") ? "hide" : "";
     }
-    echo <<<HTML
+    $html .= <<<HTML
         <div>
           <h5>Morphological information</h5>
             <div id="prepSelects" class="{$prepSelectHide}">
@@ -329,7 +438,7 @@ HTML;
             </div>
         </div>
 HTML;
-
+		return $html;
   }
 
   private function _writeWordClassesSelect() {
@@ -347,7 +456,7 @@ HTML;
           <select name="wordClass" id="wordClass" class="form-control col-3">
             {$optionHtml}
           </select>
-      </div>
+        </div>
 HTML;
     return $html;
   }
@@ -371,13 +480,13 @@ HTML;
     	$senseDescription = $sense->getDescription();
       $savedCatHtml .= <<<HTML
         <li class="badge badge-success senseBadge" data-title="{$senseDescription}"
-          data-toggle="modal" data-target="#senseModal" data-slip-id="{$this->_slip->getAutoId()}"
+          data-toggle="modal" data-target="#senseModal" data-slip-id="{$this->_slip->getId()}"
           data-sense="{$senseId}" data-sense-name="{$senseName}" data-sense-description="{$senseDescription}">
 					{$senseName}
 				</li>
 HTML;
     }
-    echo <<<HTML
+    $html = <<<HTML
 				<div style="margin-left: 10px;">
 					<small><a href="#senses" id="toggleSenses" data-toggle="collapse" aria-expanded="true" aria-controls="senses">
             show/hide senses
@@ -419,71 +528,78 @@ HTML;
           </div>
         </div>
 HTML;
+    return $html;
   }
 
-  private function _writeContext() {
-    $handler = new models\xmlfilehandler($this->_slip->getFilename());
-    $preScope = $this->_slip->getPreContextScope();
-    $postScope = $this->_slip->getPostContextScope();
-    $context = $handler->getContext($this->_slip->getId(), $preScope, $postScope,  false, true);
-    $preIncrementDisable = $postIncrementDisable = "";
-    $updateSlip = false;  //flag used to track if the pre or post scopes != defaults
-    //check for start/end of document
-    if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
-      $this->_slip->setPreContextScope($context["prelimit"]);
-      $preIncrementDisable = "disabled";
-      $updateSlip = true;
-    }
-    if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
-    	$this->_slip->setPostContextScope($context["postlimit"]);
-    	$postIncrementDisable = "disabled";
-    	$updateSlip = true;
-    }
-    $contextHtml = $context["pre"]["output"];
-    if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
-      $contextHtml .= ' ';
-    }
-    $contextHtml .= <<<HTML
-      <mark id="slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
+  private function _writeCitations() {
+    $html = <<<HTML
+			<div><h3>Citations</h3><ul id="citationList" style="list-style-type:none;">
 HTML;
-    if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
-      $contextHtml .= ' ';
-    }
-    $contextHtml .= $context["post"]["output"];
-    $preScope = $this->_slip->getPreContextScope();
-    $postScope = $this->_slip->getPostContextScope();
-    if ($updateSlip) {
-    	$this->_slip->updateContexts();
-    }
-    echo <<<HTML
-            <div id="slipContextContainer" class="editSlipSectionContainer">
-              <div class="floatRight">
-                <a href="#" class="btn btn-success" id="showCollocatesView">collocates view</a>
-              </div>
-              <h5>Adjust citation context</h5>
-              <div>
-								<a class="updateContext btn-link" id="decrementPre"><i class="fas fa-minus"></i></a>
-								<a class="updateContext btn-link {$preIncrementDisable}" id="incrementPre"><i class="fas fa-plus"></i></a>
-              </div>
-              <span data-precontextscope="{$preScope}" data-postcontextscope="{$postScope}" id="slipContext" class="slipContext">
-                {$contextHtml}
-              </span>
-              <div>
-                <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
-								<a class="updateContext btn-link {$postIncrementDisable}" id="incrementPost"><i class="fas fa-plus"></i></a>
-              </div>
-              <div style="height: 20px;">
-                <a href="#" class="float-right" id="resetContext">reset context</a>
-							</div>
-            </div>
+    $citations = $this->_citations;
+    foreach ($citations as $citation) {
+    	$cid = $citation->getId();
+	    $transHtml = <<<HTML
+				<span style="text-muted"><a href="#" class="transToggle" data-citationid="{$cid}"><small>show/hide translation(s)</small></a></span>
+				<div id="transContainer_{$cid}" style="display: none;">
+					<ul id="transList_{$cid}" style="list-style-type: none; margin:5px 10px;">
 HTML;
+    	if ($translations = $citation->getTranslations()) {
+				foreach ($translations as $translation) {
+					$tid = $translation->getId();
+					$content = strip_tags($translation->getContent(), "<mark><b><strong><><i>");
+					$transHtml .= <<<HTML
+						<li xmlns="http://www.w3.org/1999/html">
+							<span id="trans_{$tid}">{$content}</span> <em><span id="transType_{$tid}">({$translation->getType()})</span></em>&nbsp;
+              <a href="#" id="editTrans_{$tid}" class="editTrans" data-translationid="{$tid}">edit</a>
+						</li>
+HTML;
+				}
+	    }
+    	$transHtml .= <<<HTML
+						<li>
+							<a href="#" class="addTranslationLink" data-citationid="{$cid}" title="add translation" style="font-size: 15px;"><i class="fas fa-plus" style="color: #007bff;">
+							</i></a>
+						</li>
+					</ul> <!-- close the transList -->
+				</div>  <!-- close the transContainer -->
+HTML;
+    	$citationString = ($this->_slip->getType() == "corpus")
+		    ? $citation->getContext()["html"]
+		    : $citation->getPreContextString() . " <mark>" . $this->_slip->getWordform() . "</mark> " . $citation->getPostContextString();
+			$html .= <<<HTML
+				<li style="border-top: 1px solid gray;">
+					<span id="citation_{$citation->getId()}">
+						{$citationString}
+					</span>
+					<em>
+						<span id="citationType_{$citation->getId()}">
+							({$citation->getType()})
+						</span>
+					</em>
+					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal">edit</a>
+				</li>
+				<li>{$transHtml}</li>
+HTML;
+    }
+    $html .= <<<HTML
+				</ul></div>
+	      <div class="col-1">
+					<a href="#" class="addCitationLink" data-citationid="-1" data-toggle="modal" data-target="#citationEditModal" title="add citation" style="font-size: 30px;">
+						<i class="fas fa-plus" style="color: #007bff;"></i>
+					</a>
+				</div>
+HTML;
+    return $html;
   }
 
 	private function _writeCollocatesView() {
+
+  	return;     //TODO: reintroduce this at a later date SB
 		$handler = new models\xmlfilehandler($this->_slip->getFilename());
-		$preScope = $this->_slip->getPreContextScope();
-		$postScope = $this->_slip->getPostContextScope();
-		$context = $handler->getContext($this->_slip->getId(), $preScope, $postScope, true, false);
+
+		//TODO: revisit this with new citation model - following vars just for placeholding
+		$preScope = $postScope = 20;
+		$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, true, false);
 
 		$contextHtml = $context["pre"]["output"];
 		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
@@ -496,55 +612,256 @@ HTML;
 			$contextHtml .= ' ';  //  <div style="display:inline;">
 		}
 		$contextHtml .= $context["post"]["output"];
-		echo <<<HTML
+		$html = <<<HTML
             <div id="slipCollocatesContainer" class="hide editSlipSectionContainer">
               <div class="floatRight">
                 <a class="btn btn-success" href="#" id="showCitationView">citation view</a>
               </div>
               <h5>Tag citation collocates</h5>
-              <span class="slipContext">
+              <span class="citationContext">
                 {$contextHtml}
               </span>
             </div>
 HTML;
+		return $html;
 	}
 
   private function _writeJavascript() {
-    echo <<<HTML
+    $html = <<<HTML
         <script>  
-          $(function () {            
-		        //update the slip context on click of token
+          $(function () {      
+            
+            //demand a Text ID if none is found 
+            if ($('#textId').val() == '') {
+              $('#enterTextIdModal').modal({
+                show: true,
+                backdrop: 'static'
+              });
+            }
+            
+            //save text ID for slip
+            $('#saveTextId').on('click', function () {
+              let textId = $('#enterTextId').val();
+              if (!textId) {
+                alert("You must enter a text ID");
+                $('#enterTextId').focus();
+                return;
+              }
+              let slipId = $(this).attr('data-slipid');
+              $.getJSON('ajax.php?action=addTextIdToSlip&slipId='+slipId+'&textId='+textId, function (data){
+                console.log('success');
+              })
+              .done(function () {
+                $('#textId').val(textId);
+                $('#enterTextIdModal').modal('hide'); 
+              });
+            });
+            
+            //hide/show translation container
+            $(document).on('click', '.transToggle', function () {
+              let cid = $(this).attr('data-citationid');
+              $('#transContainer_'+cid).toggle();
+            });
+            
+            //populate editCitation modal on button click
+            $(document).on('show.bs.modal', '#citationEditModal', function (event) {
+              var modal = $(this);
+              var editLink = $(event.relatedTarget);
+              let cid = editLink.attr('data-citationid');
+              let slipId = {$this->_slip->getId()};
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId)
+              .done(function(data) {
+                $('#citationContext').attr('data-citationid', data.id);
+                if (data.context) {   //corpus slip
+                  $('#citationContext').attr('data-precontextscope', data.preScope);
+                  $('#citationContext').attr('data-postcontextscope', data.postScope);
+                  $('#citationContext').html(data.context['html']);
+                } else {              //paper slip
+                  $('#preContextString').val(data.preContextString);
+                  $('#postContextString').val(data.postContextString);
+                }
+              });
+            });
+            
+            //save the citation from the modal
+            $('#saveCitation').on('click', function() {
+              let context = $('#citationContext');
+              let slipType = context.attr('data-sliptype');
+              var html, preContextString, postContextString;
+              var preScope = 0;
+              var postScope = 0;
+              if (slipType == 'corpus') {             //corpus slip
+	              html = context.html();
+	              preScope = context.attr('data-precontextscope');
+	              postScope = context.attr('data-postcontextscope');
+              } else {                                                    //paper slip
+                preContextString = $('#preContextString').val();
+                postContextString = $('#postContextString').val();
+                html = preContextString + ' <mark>' + $('#wordform').val() + '</mark> ' + postContextString;
+              }
+              let cid = context.attr('data-citationid');
+              
+              let type = $('#citationType').val();     
+              var url = 'ajax.php?action=saveCitation&id='+cid+'&preScope='+preScope+'&postScope='+postScope+'&type='+type;
+              url += '&preContextString='+preContextString+'&postContextString='+postContextString+'&slipType='+slipType;
+              $.ajax(url)
+              .done(function () {
+                //check if citation is already in list
+                if ($('#citation_'+cid).length) {   //citation exists so update it 
+                  $('#citation_'+cid).html(html);
+                  $('#citationType_'+cid).html('('+type+')');
+                } else {                           //citation does not yet exist so add it
+                    var citHtml = '<li style="border-top: 1px solid gray;"><span id="citation_'+cid+'">'+html+'</span>';
+                    citHtml += '<em><span id="citationType_'+cid+'">&nbsp;('+type+')&nbsp;</span></em>';
+                    citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal">edit</a>';
+                    citHtml += '</li>';
+                    citHtml += '<span style="text-muted"><a href="#" class="transToggle" data-citationid="'+cid+'"><small>show/hide translation(s)</small></a></span>';
+										citHtml += '<div id="transContainer_'+cid+'" style="display: none;">';
+										citHtml += '<ul id="transList_'+cid+'" style="list-style-type: none; margin:5px 10px;">';
+										citHtml += '<li><a href="#" class="addTranslationLink" data-citationid="'+cid+'" title="add translation" style="font-size: 15px;"><i class="fas fa-plus" style="color: #007bff;">';
+										citHtml += '</i></a></li></ul> <!-- close the transList --></div>  <!-- close the transContainer -->';
+                    $('#citationList').append(citHtml);
+                }     
+                $('#citationEditModal').modal('hide');
+              });
+            });
+            
+/*            
+            //save translation on focus out from translation CKEditor
+            CKEDITOR.instances['slipTranslation'].on("blur", function() {
+              saveTranslation();  
+						});
+ */           
+            //add translation
+            $(document).on('click', '.addTranslationLink', function () {
+              let citationId = $(this).attr('data-citationid');
+              $.getJSON('ajax.php?action=createTranslation&citationId='+citationId)
+              .done(function(data) {
+                $('#saveTranslation').attr('data-citationid', citationId);
+                $('#saveTranslation').attr('data-translationid', data.id);
+                //append a placeholder to the citation's translation list 
+                var html = '<li><span id="trans_'+data.id+'"></span> <em><span id="transType_'+data.id+'"></span></em>&nbsp;';
+                html += '<a href="#" id="editTrans_'+data.id+'" class="editTrans" data-translationid="'+data.id+'">edit</a>';
+                $('#transList_'+citationId).append(html);
+                CKEDITOR.instances.citationTranslation.setData(''); //clear the translation content for new empty translation
+								$('#translationEditModal').modal('show');
+								return false;
+							});
+            });
+          
+            $(document).on('click', '.editTrans', function () {
+              let tid = $(this).attr('data-translationid');  
+              $.getJSON('ajax.php?action=loadTranslation&id='+tid)
+              .done(function (data) {
+                  //set the IDs required for save
+                $('#saveTranslation').attr('data-citationid', data.cid);
+                $('#saveTranslation').attr('data-translationid', tid);
+                  //update the content html
+                CKEDITOR.instances.citationTranslation.setData(data.content);
+                  //update the translationType select
+                $('#translationType').val(data.type);
+                $('#translationEditModal').modal('show');
+              });
+            });
+    
+            //save translation
+            $('#saveTranslation').on('click', function() {  
+              let citationId = $(this).attr('data-citationid');    
+              let translationId = $(this).attr('data-translationid');
+              let content = CKEDITOR.instances.citationTranslation.getData();
+              let type = $('#translationType').val();
+              //update the translation info in the slip edit list
+              $('#trans_'+translationId).html(content);
+              $('#transType_'+translationId).html('('+type+')');
+              $('#translationEditModal').modal('hide');
+              //update the database 
+              let params = {
+                url: 'ajax.php',
+                method: 'post',
+                data: {
+                  action: 'saveTranslation',
+                  citationId: citationId,
+	                translationId: translationId,
+	                content: content,
+	                type: type
+                }
+              }
+              $.ajax(params)    
+            });
+            
+            //load translation
+            $(document).on('click', '.translationLink', function () {
+              let tid = $(this).attr('data-tid');
+              $('#slipTranslation').attr('data-translationid', tid);
+              loadTranslation(tid);
+            });
+            
+            /*
+              Increment and Decrement button handlers - update the context  
+             */
+            $('.updateContext').on('click', function () {         
+					    var preScope = $('#citationContext').attr('data-precontextscope');
+					    var postScope = $('#citationContext').attr('data-postcontextscope');
+					    var filename = $('#slipFilename').text();
+					    var id = $('#wordId').text();
+					    switch ($(this).attr('id')) {
+					      case "decrementPre":
+					        preScope--;
+					        if (preScope == 0) {
+					          $('#decrementPre').addClass("disabled");
+					        }
+					        break;
+					      case "incrementPre":
+					        preScope++;
+					        $('#decrementPre').removeClass("disabled");
+					        break;
+					      case "decrementPost":
+					        postScope--;
+					        if (postScope == 0) {
+					          $('#decrementPost').addClass("disabled");
+					        }
+					        break;
+					      case "incrementPost":
+					        postScope++;
+					        $('#decrementPost').removeClass("disabled");
+					        break;
+					    }
+					    $('#citationContext').attr('data-precontextscope', preScope);
+					    $('#citationContext').attr('data-postcontextscope', postScope);
+					    $('#preContextScope').val(preScope);
+					    $('#postContextScope').val(postScope); 
+					    writeCitationContext(filename, id);
+					  });
+					 }); 
+          
+		        //update the citation context on click of token
 		        $(document).on('click', '.contextLink',  function () {
 		          $(this).tooltip('hide')
 		          var filename = $('#slipFilename').text();
               var id = $('#wordId').text();
 		          var preScope = $('#preContextScope').val();
-		          var postScope = $('#postContextScope').val();
-		        
-		          console.log('initial prescope : ' + preScope);
-		          
+		          var postScope = $('#postContextScope').val();		          
 		          if ($(this).hasClass('pre')) {
 		            preScope = $(this).attr('data-position');
 		          } else {
 		            postScope = $(this).attr('data-position');
-		          }
-		          
-		          console.log('\\n\\ncalculated prescope : ' + preScope);
-		          
-		          $('#slipContext').attr('data-precontextscope', preScope);
-					    $('#slipContext').attr('data-postcontextscope', postScope);
+		          }		          
+		          $('#citationContext').attr('data-precontextscope', preScope);
+					    $('#citationContext').attr('data-postcontextscope', postScope);
 					    $('#preContextScope').val(preScope);
 					    $('#postContextScope').val(postScope);
-					    writeSlipContext(filename, id);
+					    writeCitationContext(filename, id);
 		        });
 		        
 		        //reset the context
 		        $('#resetContext').on('click', function () {
-		          let filename = $('#slipFilename').text();
-              let id = $('#wordId').text();
+              let slipId = {$this->_slip->getId()}
+              let filename = '{$this->_slip->getFilename()}';
+              let id = '{$this->_slip->getWid()}';
+              let type = $('#citationType').val();
               var preScope = {$this->_slip->getScopeDefault()};
               var postScope = {$this->_slip->getScopeDefault()};        
-              $.getJSON("ajax.php?action=getContext&filename="+filename+"&id="+id+"&preScope="+preScope+"&postScope="+postScope, function (data) {
+              $.getJSON("ajax.php?action=getContext&slipId="+slipId+"&type="+type+"&preScope="+preScope+"&postScope="+postScope, function (data) {
 					      //handle reaching the start/end of the document
 					      if (data.prelimit) {
 					        preScope = data.prelimit;
@@ -554,11 +871,11 @@ HTML;
 					      } 
 					    })
 					      .done(function () {
-					         $('#slipContext').attr('data-precontextscope', preScope);
-					         $('#slipContext').attr('data-postcontextscope', postScope);
+					         $('#citationContext').attr('data-precontextscope', preScope);
+					         $('#citationContext').attr('data-postcontextscope', postScope);
 					         $('#preContextScope').val(preScope);
 					         $('#postContextScope').val(postScope);
-					         writeSlipContext(filename, id);
+					         writeCitationContext(filename, id);
 					      });
 		        });
 		        
@@ -580,7 +897,6 @@ HTML;
             });
 
             $('#showCollocatesView').on('click', function () {
-              console.log('hit');
               $('#slipContextContainer').hide();
               $('#slipCollocatesContainer').show();
             });
@@ -610,7 +926,7 @@ HTML;
               $(this).parent().siblings('.collocateLink').addClass('existingCollocate');
               var filename = '{$this->_slip->getFilename()}';
               var headwordId = $('#slipWordInContext').attr('data-headwordid');
-              var slipId = '{$this->_slip->getAutoId()}';
+              var slipId = '{$this->_slip->getId()}';
               var url = 'ajax.php?action=saveLemmaGrammar&id='+wordId+'&filename='+filename;
               url += '&headwordId='+headwordId+'&slipId='+slipId+'&grammar='+$(this).text();
               $.getJSON(url, function(data) {
@@ -635,7 +951,7 @@ HTML;
               html += ' data-title="' + senseDescription +  '" data-sense-name="' + senseName + '">' + sense + '</li>';
               $('#senseCategories').append(html);
               elem.remove();
-              var data = {action: 'saveSlipSense', slipId: '{$this->_slip->getAutoId()}',
+              var data = {action: 'saveSlipSense', slipId: '{$this->_slip->getId()}',
                 senseId: senseId}
               $.post("ajax.php", data, function (response) {
                 console.log(response);        //TODO: add some response code on successful save
@@ -650,13 +966,13 @@ HTML;
               }
               $('#newSenseName').val('');
               $('#newSenseDefinition').val('');
-              var data = {action: 'addSense', slipId: '{$this->_slip->getAutoId()}',
+              var data = {action: 'addSense', slipId: '{$this->_slip->getId()}',
                 name: newSenseName, description: newSenseDefinition, entryId: '{$this->_slip->getEntryId()}'
               }
               $.getJSON("ajax.php", data, function (response) {
                 var html = '<li class="badge badge-success senseBadge" data-sense="' + response.senseId + '"';
                 html += ' data-title="' + response.senseDescription +'"';
-                html += ' data-slip-id="{$this->_slip->getAutoId()}"';
+                html += ' data-slip-id="{$this->_slip->getId()}"';
                 html += ' data-sense-name="' + newSenseName + '" data-sense-description="' + newSenseDefinition + '"';
                 html += ' data-toggle="modal" data-target="#senseModal"';
                 html += '>' + newSenseName + '</li>';
@@ -711,7 +1027,7 @@ HTML;
               $('#senseCategorySelect').empty();
               $('#senseCategorySelect').append('<option data-category="">-- select a category --</option>');
               var url = 'ajax.php?action=getSenseCategoriesForNewWordclass';
-              url += '&filename={$this->_slip->getFilename()}&id={$this->_slip->getId()}&auto_id={$this->_slip->getAutoId()}';
+              url += '&filename={$this->_slip->getFilename()}&id={$this->_slip->getWid()}&auto_id={$this->_slip->getId()}';
               url += '&pos={$this->_slip->getPOS()}&headword=' + headword + '&wordclass=' + wordclass;
               $.getJSON(url, function (data) {
                   $.each(data, function (index, sense) {
@@ -722,7 +1038,7 @@ HTML;
               })
               .done(function () {   //raise and save an issue with the slip and headword/wordclass information
                     var params = {
-                      description: 'The ' + changedField + ' for §{$this->_slip->getAutoId()} has been changed to <strong>' + changedValue + '</strong>',
+                      description: 'The ' + changedField + ' for §{$this->_slip->getId()} has been changed to <strong>' + changedValue + '</strong>',
                       userEmail: '{$_SESSION["user"]}', status: 'new', updated: ''}; 
                     $.getJSON('ajax.php?action=raiseIssue', params, function(response) {
                       console.log(response.message);
@@ -774,88 +1090,73 @@ HTML;
                 $('#genderPrepOptions').hide();
               }
             });
-            
-            $('.updateContext').on('click', function () {
-					    var preScope = $('#slipContext').attr('data-precontextscope');
-					    var postScope = $('#slipContext').attr('data-postcontextscope');
-					    var filename = $('#slipFilename').text();
-					    var id = $('#wordId').text();
-					    switch ($(this).attr('id')) {
-					      case "decrementPre":
-					        preScope--;
-					        if (preScope == 0) {
-					          $('#decrementPre').addClass("disabled");
-					        }
-					        break;
-					      case "incrementPre":
-					        preScope++;
-					        $('#decrementPre').removeClass("disabled");
-					        break;
-					      case "decrementPost":
-					        postScope--;
-					        if (postScope == 0) {
-					          $('#decrementPost').addClass("disabled");
-					        }
-					        break;
-					      case "incrementPost":
-					        postScope++;
-					        $('#decrementPost').removeClass("disabled");
-					        break;
-					    }
-					    $('#slipContext').attr('data-precontextscope', preScope);
-					    $('#slipContext').attr('data-postcontextscope', postScope);
-					    $('#preContextScope').val(preScope);
-					    $('#postContextScope').val(postScope);
-					    writeSlipContext(filename, id);
-					  });
-            
-            function writeSlipContext(filename, id) {
+          
+          function updateCitation(data) {
+              let context = data.context;
+                //update the context scope
+              $('#citationContext').attr('data-precontextscope', data.preScope);
+              $('#citationContext').attr('data-postcontextscope', data.preScope);
+              $('#incrementPre').addClass(context.preIncrementDisable);
+              $('#incrementPost').addClass(context.postIncrementDisable);
+                //update the context html
+              $('#citationContext').attr('data-citationid', data.id);              
+              $('#citationContext').html(context.html);
+                //update the citationType select
+              $('#citationType').val(data.type);             
+            }
+
+ /*           
+            //new translation badge 
+            function addTranslationLink(translationId = '', index = 0) {
+                //write a new translation badge
+              var html = '<li class="list-group-item d-flex justify-content-between align-items-center" style="border:none; background-color: white;">';
+              html += '<a href="#" data-tid="'+translationId+'" class="translationLink">';
+							html += '<span class="badge badge-primary badge-pill">'+index+'</span></a></li>';
+							$('#translationLinks').append(html);
+                //clear the translation editor
+              CKEDITOR.instances.slipTranslation.setData(''); //clear the translation content for new empty translation
+                //clear the stored translation ID
+            }
+ */           
+            function writeCitationContext(filename, id) {
 					    var html = '';
-					    var preScope  = $('#slipContext').attr('data-precontextscope');
-					    var postScope = $('#slipContext').attr('data-postcontextscope');
-					    $.getJSON("ajax.php?action=getContext&filename="+filename+"&id="+id+"&preScope="+preScope+"&postScope="+postScope, function (data) {
-					      var preOutput = data.pre["output"];
-					      var postOutput = data.post["output"];
+					    let citationId = $('#citationContext').attr('data-citationid');
+					    let preScope  = $('#citationContext').attr('data-precontextscope');
+					    let postScope = $('#citationContext').attr('data-postcontextscope');
+					    let slipId = {$this->_slip->getId()};
+					    let citationType = $('#citationType').val();
+					    var url = "ajax.php?action=getContext";
+					    url += "&citationId="+citationId+"&slipId="+slipId+"&type="+citationType+"&preScope="+preScope+"&postScope="+postScope;
+					    url += "&filename="+filename+"&id="+id; 
+					    $.getJSON(url, function (data) {					      
 					      //handle zero pre/post context sizes
 					      if (preScope == 0) {
-					        preOutput = "";
 					        $('#decrementPre').addClass("disabled");
 					      } else {
 					        $('#decrementPre').removeClass("disabled");
 					      }
 					      if (postScope == 0) {
-					        postOutput = "";
 					        $('#decrementPost').addClass("disabled");
 					      } else {
 					        $('#decrementPost').removeClass("disabled");
 					      }
 					      //handle reaching the start/end of the document
-					      if (data.prelimit) {
+					      if (data.preIncrementDisable) {
 					        $('#incrementPre').addClass("disabled");
 					      } else {
 					        $('#incrementPre').removeClass("disabled");
 					      }
-					      if (data.postlimit) {
+					      if (data.postIncrementDisable) {
 					        $('#incrementPost').addClass("disabled");
 					      } else {
 					        $('#incrementPost').removeClass("disabled");
-					      }
-					      html = preOutput;
-					      if (data.pre["endJoin"] != "right" && data.pre["endJoin"] != "both") {
-					        html += ' ';
-					      }
-					      //html += '<span id="slipWordInContext">' + data.word + '</span>';
-					      html += '<mark id="slipWordInContext">' + data.word + '</mark>'; // MM
-					      if (data.post["startJoin"] != "left" && data.post["startJoin"] != "both") {
-					        html += ' ';
-					      }
-					      html += postOutput;
-					      $('#slipContext').html(html);
+					      }      
+					      $('#citationContext').html(data.html);
 					      $('#slip').show();
 					    });
 					  }
-					 }); 
         </script>
 HTML;
+    return $html;
   }
 }

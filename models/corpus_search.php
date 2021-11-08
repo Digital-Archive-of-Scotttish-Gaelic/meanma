@@ -17,13 +17,17 @@ class corpus_search
 	 * @param $params
 	 * @param bool $fullSearch : a flag for switching to result set required for auto slip creation
 	 */
-	public function __construct($params, $fullSearch=true) {
-		$this->_db = $this->_db ? $this->_db : new database();
+	public function __construct($params, $fullSearch=true, $db) {
+		$this->_db = $db;
 		$this->_params = $params;
 		$this->_init();
 		if (!empty($this->getTerm())) {  //only run the search if there is a search term
 			$this->_dbResults = $this->_getDBSearchResults($fullSearch);
 		}
+	}
+
+	public function getDB() {
+		return $this->_db;
 	}
 
 	/**
@@ -155,7 +159,8 @@ class corpus_search
 		} else {
 			$params["term"] = urldecode($params["term"]); //need to decode if passed via JS encodeURI (auto create slips)
 		}
-		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP
+		$searchPrefix = ''; // "[[:<:]]";  //default to word boundary at start for REGEXP
+		$searchSuffix = ''; // "[[:>:]]";
 		$whereClause = "";
 		switch ($params["order"]) {
 			case "random":
@@ -249,7 +254,7 @@ SQL;
 
 SQL;
 		}
-		$query["search"] = $searchPrefix . $query["search"] . "[[:>:]]";  //word boundary
+		$query["search"] = $searchPrefix . $query["search"] . $searchSuffix;  //word boundary
 		$pdoParams = array(":term" => $query["search"]);    //params required to pass for the PDO DB query
 		if ($params["selectedDates"]) {       //restrict by date
 			$query["sql"] .= $this->_getDateWhereClause();
@@ -395,8 +400,8 @@ SQL;
 	public static function getDataById($filename, $id) {
 		$db = new database();
 		$sql = <<<SQL
-			SELECT l.id as id, l.filename as filename, wordform, pos, lemma, date_of_lang, l.title, page, medium, s.auto_id as auto_id, 
-			       e.wordclass as wordClass, t.id AS tid, t.level as level, district_id
+			SELECT l.id AS id, l.filename AS filename, l.wordform AS wordform, pos, lemma, date_of_lang, l.title, page, medium, s.auto_id as auto_id, 
+			       e.wordclass AS wordClass, t.id AS tid, t.level AS level, district_id
             FROM lemmas AS l
             LEFT JOIN slips s ON l.filename = s.filename AND l.id = s.id
             LEFT JOIN entry e ON e.id = s.entry_id AND group_id = {$_SESSION["groupId"]}

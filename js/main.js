@@ -84,7 +84,7 @@ $(function () {
   /**
    * Load and display slip data in a modal
    */
-  $('#slipModal').on('show.bs.modal', function (event) { // added by MM
+  $('#slipModal').on('show.bs.modal', function (event) {
     var modal = $(this);
     var slipLink = $(event.relatedTarget);
     //reset lock buttons
@@ -94,6 +94,7 @@ $(function () {
     var locked = "";
     var owner = "";
     var slipId = slipLink.data('auto_id');
+    var entryId = slipLink.data('entryid');
     var headword = slipLink.data('headword');
     var pos = slipLink.data('pos');
     var id = slipLink.data('id');
@@ -113,13 +114,13 @@ $(function () {
     $('#slipId').val(id);
     $('#slipPOS').val(pos);
     $('#auto_id').val(auto_id);
+    $('#entryId').val(entryId);
     $('#slipHeadword').html(headword);
     var canEdit;
     var isOwner;
     //get the slip info from the DB
-    $.getJSON('ajax.php?action=loadSlip&filename='+xml+'&id='+id+'&index='+resultindex
-      +'&preContextScope='+$('#slipContext').attr('data-precontextscope')+'&auto_id='+auto_id
-      +'&postContextScope='+$('#slipContext').attr('data-postcontextscope') + '&pos=' + pos, function (data) {
+    $.getJSON('ajax.php?action=loadSlip&filename='+xml+'&id='+id+'&index='+resultindex+'&auto_id='+auto_id
+      +'&pos='+pos+'&entryId='+entryId, function (data) {
       if (data.wordClass) {
         var wc = data.wordClass;
         if (wc=='noun') {
@@ -131,14 +132,17 @@ $(function () {
       }
       //check if user can edit slip
       canEdit = data.canEdit ? true : false;
-      var context = data.context.pre["output"] + ' <mark>' + data.context.word + '</mark> ' + data.context.post["output"];
-      body += '<p>' + context + '</p>';
-      if (data.translation) {
-        body += '<div><small><a href="#translation" data-toggle="collapse" aria-expanded="false" aria-controls="translation">';
-        body += 'show/hide translation</a></small></div>';
-        body += '<div id="translation" class="collapse"><small class="text-muted">' + data.translation + '</small></div>';
-      }
-      //body += '<p class="small">[#' + textId + ': <em>' + title + '</em> p.' + page + ']</p>';
+      $.each(data.citation, function(cid, citation) {
+        body += '<div>' + citation.context;
+        body += ' <small><em>('+citation.type+')</em></small>';
+        $.each(citation.translation, function (tid, translation) {
+          if (translation.content != '') {
+            body += '<p><small><a href="#" data-tid="trans_'+tid+'" class="toggleTranslation text-muted">show/hide translation</a></small></p>';
+            body += '<div class="slipTranslation d-none" id="trans_'+tid+'">'+translation.content+' (<small><em>'+translation.type+')</em></small></div>';
+          }
+        });
+        body += '</div>';
+      });
       body += '<p class="text-muted"><span data-toggle="tooltip" data-html="true" title="' + '<em>' + title + '</em> p.' + page + '">#' + textId + ': ' + date + '</span></p>';
       body += '<hr/>';
       body += '<ul class="list-inline">';
@@ -190,6 +194,16 @@ $(function () {
       });
   });
 
+  //show/hide translations
+  $(document).on('click', '.toggleTranslation', function () {
+    let tid = '#' + $(this).attr('data-tid');
+    if ($(tid).hasClass('d-none')) {
+      $(tid).removeClass('d-none');
+    } else {
+      $(tid).addClass('d-none');
+    }
+  });
+
   /*
     Open the add new slip form in a new tab
   */
@@ -212,7 +226,8 @@ $(function () {
     var headword = $('#slipHeadword').text();
     var pos = $('#slipPOS').val();
     var auto_id = $('#auto_id').val();
-    var url = '?m=collection&a=edit&id=' + auto_id + '&filename=' + filename + '&&headword=' + headword;
+    var entryId = $('#entryId').val();
+    var url = '?m=collection&a=edit&id=' + auto_id + '&filename=' + filename + '&headword=' + headword + '&entryId=' + entryId;
     url += '&pos=' + pos + '&wid=' + id;
     var win = window.open(url, '_blank');
     if (win) {
@@ -266,17 +281,19 @@ function resetSlip() {
 }
 
 function saveSlip() {
+  var slipType = $('#citationContext').attr('data-sliptype');
+  var entryId = $('#citationContext').attr('data-entryid');
+  var textId = $('#textId').val();
+  var wordform = $('#wordform').val();
   var wordclass = $('#wordClass').val();
   var starred = $('#slipStarred').prop('checked') ? 1 : 0;
   var locked = $('#locked').val();
-  var translation = CKEDITOR.instances['slipTranslation'].getData();
   var notes = CKEDITOR.instances['slipNotes'].getData();
   var status = $('#status').val();
   var data = {action: "saveSlip", filename: $('#slipFilename').text(), id: $('#wordId').text(),
-    auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred, translation: translation,
-    notes: notes, status: status, preContextScope: $('#slipContext').attr('data-precontextscope'),
-    postContextScope: $('#slipContext').attr('data-postcontextscope'), wordClass: wordclass,
-    locked: locked, text_id: $('#textId').val()};
+    auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred,
+    notes: notes, status: status, wordClass: wordclass, wordform: wordform, text_id: textId,
+    locked: locked, text_id: $('#textId').val(), slipType: slipType, entryId: entryId};
   switch (wordclass) {
     case "noun":
       data['numgen'] = $('#posNumberGender').val();

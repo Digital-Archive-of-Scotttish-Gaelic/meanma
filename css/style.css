@@ -240,7 +240,7 @@ a.updateContext:hover {
 }
 
 .editSlipSectionContainer {
-    clear: right;
+    /*clear: right;*/
     margin: 10px;
     padding: 10px;
     background-color: #efefef;

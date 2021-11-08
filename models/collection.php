@@ -9,11 +9,18 @@ class collection
    *
    * @return array of DB results
    */
-  public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort, $order) {
-  	$sort = $sort ? $sort : "auto_id";
-  	$order = $order ? $order : "ASC";
+  public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "headword", $order = "ASC", $db) {
+  	$sort = empty($sort) ? "headword" : $sort;
+  	$order = empty($order) ? "asc" : $order;
+  	if (stristr("'", $sort) || stristr('"', $sort)) {
+  		echo json_encode(array("error" => "invalid sort param"));
+  		return false;   //possible attack
+	  }
+  	if ($order != "asc" AND $order != "desc") {
+		  echo json_encode(array("error" => "invalid order param"));
+  		return false;   //possible attack
+	  }
   	$params = array(":limit" => (int)$limit, ":offset" => (int)$offset);
-    $db = new database();
     $dbh = $db->getDatabaseHandle();
     try {
 			$whereClause = "WHERE (group_id = {$_SESSION["groupId"]}) ";
@@ -22,17 +29,17 @@ class collection
 				$sth->execute(array(":search" => "%{$search}%"));
 				$whereClause .= <<<SQL
 					AND (auto_id LIKE @search	
-            	OR lemma LIKE @search
-            	OR wordform LIKE @search
-            	OR lemma LIKE @search
+            	OR headword LIKE @search
+            	OR l.wordform LIKE @search
             	OR firstname LIKE @search
-            	OR lastname LIKE @search)
+            	OR lastname LIKE @search
+							OR wordclass LIKE @search)
 SQL;
 			}
 	    $dbh->setAttribute( \PDO::ATTR_EMULATE_PREPARES, false );
 	    $sql = <<<SQL
-        SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, wordform, firstname, lastname,
-                date_of_lang, title, page, CONCAT(firstname, ' ', lastname) as fullname, locked,
+        SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, l.wordform AS wordform, firstname, lastname,
+                date_of_lang, title, page, CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
              		l.pos as pos, s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
             FROM slips s
             JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
@@ -99,6 +106,7 @@ HTML;
                     data-title="{$slip["title"]}"
                     data-page="{$slip["page"]}"
                     data-resultindex="-1"
+                    data-entryid="{$slip["entryId"]}"
                     title="view slip {$slip["auto_id"]}">
                     {$slip["auto_id"]}
                 </a>
@@ -111,25 +119,127 @@ HTML;
     }
   }
 
-  public static function slipExists($groupId, $filename, $id) {
-	  $db = new database();
+  public static function getAllPaperSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "headword", $order = "ASC", $db) {
+	  $sort = empty($sort) ? "headword" : $sort;
+	  $order = empty($order) ? "asc" : $order;
+	  if (stristr("'", $sort) || stristr('"', $sort)) {
+		  echo json_encode(array("error" => "invalid sort param"));
+		  return false;   //possible attack
+	  }
+	  if ($order != "asc" AND $order != "desc") {
+		  echo json_encode(array("error" => "invalid order param"));
+		  return false;   //possible attack
+	  }
+	  $params = array(":limit" => (int)$limit, ":offset" => (int)$offset);
 	  $dbh = $db->getDatabaseHandle();
 	  try {
+		  $whereClause = "WHERE wordform IS NOT NULL AND (group_id = {$_SESSION["groupId"]}) ";
+		  if (mb_strlen($search) > 1) {     //there is a search to run
+			  $sth = $dbh->prepare("SET @search = :search");  //set a MySQL variable for the searchterm
+			  $sth->execute(array(":search" => "%{$search}%"));
+			  $whereClause .= <<<SQL
+					AND (auto_id LIKE @search	
+							OR headword LIKE @search
+            	OR wordform LIKE @search
+            	OR firstname LIKE @search
+            	OR lastname LIKE @search
+							OR wordclass LIKE @search)
+SQL;
+		  }
+		  $dbh->setAttribute( \PDO::ATTR_EMULATE_PREPARES, false );
 		  $sql = <<<SQL
-        SELECT auto_id FROM slips s
-        	JOIN entry e ON s.entry_id = e.id
-        	WHERE e.group_id = :groupId AND s.filename = :filename AND s.id = :id
+        SELECT SQL_CALC_FOUND_ROWS auto_id, s.wordform AS wordform, firstname, lastname,
+                CONCAT(firstname, ' ', lastname) as fullname, locked,
+             		s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword, e.id AS entryId
+            FROM slips s
+            JOIN entry e ON e.id = s.entry_id
+            LEFT JOIN user u ON u.email = s.ownedBy
+            {$whereClause}
+            ORDER BY {$sort} {$order}
+            LIMIT :limit OFFSET :offset;
 SQL;
 		  $sth = $dbh->prepare($sql);
-		  $sth->execute(array(":groupId"=>$groupId, ":filename"=>$filename, ":id"=>$id));
-		  $row = $sth->fetch();
-		  if ($row["auto_id"]) {
-			  return $row["auto_id"];
-		  } else {
-		  	return false;
+		  $sth->execute($params);
+		  $rows = $sth->fetchAll(\PDO::FETCH_ASSOC);
+		  $hits = $db->fetch("SELECT FOUND_ROWS() as hits;");
+		  foreach ($rows as $index => $slip) {
+			  $slipId = $slip["auto_id"];
+			  //get the categories
+			  $sql = <<<SQL
+					SELECT name, description, se.id as senseId
+						FROM sense se
+						LEFT JOIN slip_sense ss ON ss.sense_id = se.id
+						WHERE slip_id = :slipId
+SQL;
+			  $senseRows = $db->fetch($sql, array(":slipId" => $slipId));
+			  foreach ($senseRows as $sense) {
+				  $rows[$index]["senses"] .= <<<HTML
+						<span class="badge badge-success senseBadge" data-slip-id="{$slipId}" data-sense="  {$sense["senseId"]}"
+							data-toggle="modal" data-target="#senseModal" data-sense-description="{$sense["description"]}"
+							data-title="{$sense["description"]}" data-sense-name="{$sense["name"]}">
+							{$sense["name"]}</span>
+HTML;
+			  }
+
+			  //get the morph data
+			  $sql = <<<SQL
+					SELECT value
+						FROM slipMorph sm
+						LEFT JOIN slips s ON sm.slip_id = auto_id
+						WHERE slip_id = :slipId
+SQL;
+			  $morphRows = $db->fetch($sql, array(":slipId" => $slipId));
+			  foreach ($morphRows as $morph) {
+				  $rows[$index]["morph"] .= '<span class="badge badge-secondary">' . $morph["value"] . '</span> ';
+			  }
+			  $checked = in_array($slipId, $_SESSION["printSlips"]) ? "checked" : "";
+			  $rows[$index]["printSlip"] = <<<HTML
+					<input type="checkbox" class="chooseSlip" {$checked} id="printSlip_{$slipId}"> 
+HTML;
+			  $rows[$index]["deleteSlip"] = <<<HTML
+					<input type="checkbox" class="markToDelete" id="deleteSlip_{$slipId}"> 
+HTML;
+			  $headword = $slip["headword"] ? $slip["headword"] : $slip["lemma"]; //if there is an entry then use its hw
+			  //otherwise use the default DB lemma
+			  //create the slip link code
+			  $slipUrl = <<<HTML
+                <a href="#" class="slipLink2"
+                    data-toggle="modal" data-target="#slipModal"
+                    data-auto_id="{$slip["auto_id"]}"
+                    data-headword="{$headword}"
+                    data-pos="{$slip["pos"]}"
+                    data-id="{$slip["id"]}"
+                    data-xml="{$slip["filename"]}"
+                    data-uri="{$slip["uri"]}"
+                    data-date="{$slip["date_of_lang"]}"
+                    data-title="{$slip["title"]}"
+                    data-page="{$slip["page"]}"
+                    data-resultindex="-1"
+                    data-entryid="{$slip["entryId"]}"
+                    title="view slip {$slip["auto_id"]}">
+                    {$slip["auto_id"]}
+                </a>
+HTML;
+			  $rows[$index]["auto_id"] = $slipUrl;
 		  }
+		  return array("total"=>(int)$hits[0]["hits"], "totalNotFiltered"=>count($rows), "rows"=>$rows);
 	  } catch (\PDOException $e) {
 		  echo $e->getMessage();
+	  }
+  }
+
+  public static function slipExists($groupId, $filename, $id, $db) {
+	  $sql = <<<SQL
+      SELECT auto_id FROM slips s
+        JOIN entry e ON s.entry_id = e.id
+        WHERE e.group_id = :groupId AND s.filename = :filename AND s.id = :id
+SQL;
+	  $results =$db->fetch($sql, array(":groupId"=>$groupId, ":filename"=>$filename, ":id"=>$id));
+	  $row = $results[0];
+	  if ($row["auto_id"]) {
+		  return $row["auto_id"];
+	  } else {
+	    return false;
 	  }
   }
 
@@ -142,37 +252,81 @@ SQL;
 	 */
 	public static function getSlipInfoBySlipId($slipId, $db, $groupId = null) {
 		if ($groupId) {
-			$_SESSION["groupId"] = $groupId; //used in API calls to Meanma for other apps (such as briathradan)
+			$_SESSION["groupId"] = $groupId; //used in API calls to MEANMA for other apps (such as briathradan)
 		}
 		$slipInfo = array();
-		$dbh = $db->getDatabaseHandle();
-		try {
-			$sql = <<<SQL
-        SELECT s.filename as filename, s.id as id, auto_id, pos, lemma, preContextScope, postContextScope,
-                translation, date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id, 
-               	e.headword AS headword
-            FROM slips s
-            JOIN entry e ON e.id = s.entry_id
-            JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
-            JOIN text t ON s.filename = t.filepath
-            WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId
-            ORDER BY auto_id ASC
+		$sql = <<<SQL
+      SELECT s.filename as filename, s.id as id, auto_id, pos, lemma,
+              date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id, 
+              e.headword AS headword
+          FROM slips s
+          JOIN entry e ON e.id = s.entry_id
+          JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
+          JOIN text t ON s.filename = t.filepath
+          WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId
+          ORDER BY auto_id ASC
 SQL;
-			$sth = $dbh->prepare($sql);
-			$sth->execute(array(":slipId"=>$slipId));
-			while ($row = $sth->fetch()) {
-				$slipInfo[] = $row;
-			}
-			return $slipInfo;
-		} catch (\PDOException $e) {
-			echo $e->getMessage();
+
+		$slipInfo = $db->fetch($sql, array(":slipId" => $slipId));
+		return $slipInfo;
+	}
+
+	/**
+	 * Gets slip from DB info
+	 * @param $slipId
+	 * @param $db the current models\database object
+	 * @return corpus_slip object or paper_slip object
+	 */
+	public static function getSlipBySlipId($slipId, $db) {
+		$sql = <<<SQL
+      SELECT s.filename AS filename, s.id AS wid, pos
+        FROM slips s
+      	JOIN lemmas l ON s.filename = l.filename AND s.id = l.id 
+        WHERE auto_id = :slipId
+SQL;
+		$result = $db->fetch($sql, array(":slipId" => $slipId));
+		if ($result) {
+			$row = $result[0];
+			return new corpus_slip($row["filename"], $row["wid"], $slipId, $row["pos"], $db);
+		} else {
+			$sql = <<<SQL
+				SELECT entry_id, wordform FROM slips WHERE auto_id = :slipId
+SQL;
+			$result = $db->fetch($sql, array(":slipId" => $slipId));
+			$row = $result[0];
+			return new paper_slip($slipId, $row["entry_id"], $row["wordform"], $db);
 		}
+	}
+
+	/**
+	 * Runs query to fetch citation IDs for given slip required for citation display
+	 * Returns only the first 'long' type and first 'short' type citation IDs for efficiency
+	 * @param $slipId
+	 * @param $db
+	 * @return array : associative array of citation IDs keyed by citation type
+	 */
+	public static function getCitationIdsForCitation($slipId, $db) {
+		$citationIds = array();
+		$sql = <<<SQL
+			SELECT sc.citation_id as cid, c.type as type FROM slip_citation sc
+				JOIN citation c ON c.id = sc.citation_id
+				WHERE slip_id = :slipId
+SQL;
+		$results = $db->fetch($sql, array(":slipId" => $slipId));
+		foreach ($results as $row) {
+			if (empty($citationIds["long"]) && $row["type"] == "long") {
+				$citationIds["long"] = $row["cid"];
+			} else if (empty($citationIds["short"]) && $row["type"] == "short") {
+				$citationIds["short"] = $row["cid"];
+			}
+		}
+		return $citationIds;
 	}
 
 	public static function getWordformBySlipId($slipId) {
 		$db = new database();
 		$sql = <<<SQL
-			SELECT wordform FROM lemmas l
+			SELECT l.wordform AS wordform FROM lemmas l
 				JOIN slips s ON s.filename = l.filename AND s.id = l.id
 				WHERE s.auto_id = :slipId
 SQL;
@@ -206,13 +360,25 @@ SQL;
 	}
 
 	/**
+	 * Used via AJAX to add a text ID to a new paper slip
+	 * @param $slipId
+	 * @param $textId
+	 * @param $db
+	 */
+	public static function addTextIdToSlip($slipId, $textId, $db) {
+		$sql = <<<SQL
+			UPDATE slips s SET s.text_id = :textId WHERE s.auto_id = :slipId
+SQL;
+		$db->exec($sql, array(":slipId" => $slipId, ":textId" => $textId));
+	}
+
+	/**
 	 * Gets morph info from the DB to populate an Entry with data required for citations
 	 * @param $slipId
 	 * @return array of DB results
 	 */
 	public static function getSlipMorphBySlipId($slipId, $db) {
 		$morphInfo = array();
-//		$db = new database();
 		$dbh = $db->getDatabaseHandle();
 		try {
 			$sql = <<<SQL
@@ -321,6 +487,7 @@ SQL;
                 <input type="hidden" id="slipFilename">
                 <input type="hidden" id="slipId">
                 <input type="hidden" id="auto_id">
+                <input type="hidden" id="entryId">
                 <input type="hidden" id="slipPOS">
               </div>
             </div>
@@ -330,11 +497,11 @@ SQL;
 HTML;
   }
 
-  public static function getSlipLinkHtml($data, $index = null) {
+  public static function getSlipLinkHtml($data, $index = null, $db) {
 	  $slipUrl = "#";
 	  $slipClass = "slipLink2";
 	  $modalCode = "";
-	  $slipId = self::slipExists($_SESSION["groupId"], $data["filename"], $data["id"]);  //check if there is a slip for this group
+	  $slipId = self::slipExists($_SESSION["groupId"], $data["filename"], $data["id"], $db);  //check if there is a slip for this group
 	  if ($slipId) {
 		  $slipLinkText = "view";
 		  $createSlipStyle = "";

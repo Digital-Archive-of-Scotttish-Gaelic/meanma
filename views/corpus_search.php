@@ -6,9 +6,11 @@ use models;
 class corpus_search extends search
 {
 	private $_model;  //an instance of models\corpus_search
+	private $_db;
 
 	public function __construct($model) {
 		$this->_model = $model;
+		$this->_db = $model->getDB();
 	}
 
 	public function show() {
@@ -358,7 +360,7 @@ HTML;
         {$result["filename"]}<br>{$result["id"]}
 HTML;
 		$textNum = stristr($result["filename"], "_", true);
-		$slipLinkHtml = models\collection::getSlipLinkHtml($result, $index);
+		$slipLinkHtml = models\collection::getSlipLinkHtml($result, $index, $this->_db);
 		echo <<<HTML
 				<td class="extendedField">{$result["date_of_lang"]}</td>
 				<td class="extendedField">#{$textNum} {$shortTitle}</td>

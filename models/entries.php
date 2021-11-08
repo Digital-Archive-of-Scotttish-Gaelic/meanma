@@ -5,8 +5,7 @@ namespace models;
 class entries
 {
 
-	public static function getEntryByHeadwordAndWordclass($headword, $wordclass) {
-		$db = new database();
+	public static function getEntryByHeadwordAndWordclass($headword, $wordclass, $db) {
 		$sql = <<<SQL
         SELECT * FROM entry WHERE headword = :headword AND wordclass = :wordclass 
 					AND group_id = :groupId
@@ -79,7 +78,7 @@ SQL;
 //    $db = new database();
     //only get IDs for this group
     $sql = <<<SQL
-        SELECT DISTINCT e.id as id FROM entry e    
+        SELECT DISTINCT e.id as id, headword FROM entry e    
         	JOIN slips s ON e.id = s.entry_id 
         	WHERE group_id = {$_SESSION["groupId"]}
             ORDER BY headword ASC
@@ -125,7 +124,6 @@ SQL;
   }
 
   public static function addSenseIdsForEntry($entry, $db) {
-//		$db = new database();
 		$sql = <<<SQL
 			SELECT se.id as id, auto_id AS slipId FROM sense se
 					JOIN slip_sense ss ON ss.sense_id = se.id
@@ -146,7 +144,7 @@ SQL;
 
   public static function getWordformsForEntry($entryId, $db) {
   	$wordforms = array();
- // 	$db = new database();
+  	//get the corpus_slip wordforms
   	$sql = <<<SQL
 			SELECT l.wordform AS wordform, auto_id AS slipId
 				FROM lemmas l 
@@ -156,14 +154,19 @@ SQL;
 				ORDER BY date_of_lang
 SQL;
   	$results = $db->fetch($sql, array(":entryId"=>$entryId));
+
+	  //get the paper_slip wordforms
+	  $sql = <<<SQL
+			SELECT wordform, auto_id AS slipId
+				FROM slips 
+				WHERE wordform IS NOT NULL AND entry_id = :entryId
+SQL;
+	  $results = array_merge($results, $db->fetch($sql, array(":entryId"=>$entryId)));
   	foreach ($results as $row) {
   		$wordform = mb_strtolower($row["wordform"], "UTF-8");
   		$slipId = $row["slipId"];
-
 		  $slipMorphResults = collection::getSlipMorphBySlipId($slipId, $db);
-
 		  $morphString = implode('|', $slipMorphResults);
-
   		$wordforms[$wordform][$morphString][] = $slipId;
 	  }
   	return $wordforms;

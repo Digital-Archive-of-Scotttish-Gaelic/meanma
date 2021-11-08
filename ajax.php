@@ -30,13 +30,16 @@ switch ($_REQUEST["action"]) {
 		echo json_encode(array("firstname"=>$user->getFirstName(), "lastname"=>$user->getLastName()));
 		break;
   case "getContext":
-  	$tagContext = $_GET["simpleContext"] ? false : true;
-    $handler = new xmlfilehandler($_GET["filename"]);
-    $context = $handler->getContext($_GET["id"], $_GET["preScope"], $_GET["postScope"], false, $tagContext);
+  	$citation = new citation($db, $_GET["citationId"]);
+	  $citation->attachToSlip($_GET["slipId"]);
+  	$citation->setType($_GET["type"]);
+  	$citation->setPreContextScope($_GET["preScope"]);
+  	$citation->setPostContextScope($_GET["postScope"]);
+	  $context = $citation->getContext(true);
     echo json_encode($context);
     break;
 	case "getSlips":
-		$slipInfo = collection::getAllSlipInfo($_GET["offset"], $_GET["limit"], $_GET["search"], $_GET["sort"], $_GET["order"]);
+		$slipInfo = collection::getAllSlipInfo($_GET["offset"], $_GET["limit"], $_GET["search"], $_GET["sort"], $_GET["order"], $db);
 		echo json_encode($slipInfo);
 		break;
 	case "updatePrintList":
@@ -49,19 +52,29 @@ switch ($_REQUEST["action"]) {
 			echo json_encode(array("count" => count($_SESSION["printSlips"])));
 		break;
   case "loadSlip":
-    $slip = new slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $_GET["preContextScope"], $_GET["postContextScope"]);
+    $slip = ($_GET["slipType"] == "paper")
+	    ? new paper_slip($_GET["auto_id"], $_GET["entryId"], null, $db)
+	    : new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db);
     $slip->updateResults($_GET["index"]); //ensure that "view slip" (and not "create slip") displays
     $filenameElems = explode('_', $slip->getFilename());
     $textId = $filenameElems[0];
-    $results = array("locked"=>$slip->getLocked(), "auto_id"=>$slip->getAutoId(), "owner"=>$slip->getOwnedBy(),
-	    "starred"=>$slip->getStarred(), "translation"=>$slip->getTranslation(), "notes"=>$slip->getNotes(),
-      "preContextScope"=>$slip->getPreContextScope(), "postContextScope"=>$slip->getPostContextScope(),
+    $results = array("locked"=>$slip->getLocked(), "auto_id"=>$slip->getId(), "owner"=>$slip->getOwnedBy(),
+	    "starred"=>$slip->getStarred(), "notes"=>$slip->getNotes(),
       "wordClass"=>$slip->getWordClass(), "senses"=>$slip->getSensesInfo(),
       "lastUpdated"=>$slip->getLastUpdated(), "textId"=>$textId, "slipMorph"=>$slip->getSlipMorph()->getProps());
     //code required for modal slips
-    $handler = new xmlfilehandler($_GET["filename"]);
-    $context = $handler->getContext($_GET["id"], $results["preContextScope"], $results["postContextScope"]);
-    $results["context"] = $context;
+    $citations = $slip->getCitations();
+    foreach ($citations as $citation) {
+    	$citationId = $citation->getId();
+	    $context = $citation->getContext(false);
+	    $results["citation"][$citationId]["type"] = $citation->getType();
+	    $results["citation"][$citationId]["context"] = $context["html"];
+	    foreach ($citation->getTranslations() as $translation) {
+	    	$tid = $translation->getId();
+		    $results["citation"][$citationId]["translation"][$tid]["content"] = $translation->getContent();
+		    $results["citation"][$citationId]["translation"][$tid]["type"] = $translation->getType();
+	    }
+    }
     $results['isOwner'] = $slip->getOwnedBy() == $_SESSION["user"];
     $user = users::getUser($_SESSION["user"]);
     $superuser = $user->getSuperuser();
@@ -69,7 +82,71 @@ switch ($_REQUEST["action"]) {
     //
     echo json_encode($results);
     break;
-    //the following used for the gramar site
+	case "getCitationsBySlipId":
+		$citationInfo = array();
+		$citationIds = collection::getCitationIdsForCitation($_GET["slipId"], $db);
+		foreach ($citationIds as $cid) {
+			$citation = new citation($db, $cid);
+			$translations = $citation->getTranslations();
+			$translation = isset($translations[0]) ? $translations[0]->getContent() : null;
+			$citationInfo[$citation->getType()] = array("cid"=>$cid, "context"=>$citation->getContext(false), "translation"=>$translation);
+		}
+		echo json_encode($citationInfo);
+    break;
+	case "loadCitation":
+		if ($_GET["id"] == "-1") {  //create a new citation
+			$citation = new citation($db);
+			$citation->attachToSlip($_GET["slipId"]);
+		} else {
+			$citation = new citation($db, $_GET["id"]);
+		}
+		$translations = $citation->getTranslations();
+		$translationCount = count($translations);
+		$translationIds = $firstTranslationContent = $firstTranslationType = "";
+		if ($translationCount) {
+			$translationIds = $citation->getTranslationIdsString();
+			$firstTranslationContent = $translations[0]->getContent();
+			$firstTranslationType = $translations[0]->getType();
+		}
+		$citationData = array("id" => $citation->getId(), "preScope" => $citation->getPreContextScope(),
+			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(),
+			"firstTranslationContent" => $firstTranslationContent, "firstTranslationType" => $firstTranslationType,
+			"translationCount" => $translationCount, "translationIds" => $translationIds);
+		//check whether we are dealing with a corpus slip or a paper slip
+		if ($_GET["slipType"] == "corpus") {  //corpus slip
+			$citationData["context"] = $citation->getContext(true);
+		} else {                                                                    //paper slip
+			$citationData["preContextString"] = $citation->getPreContextString();
+			$citationData["postContextString"] = $citation->getPostContextString();
+		}
+		echo json_encode($citationData);
+		break;
+	case "saveCitation":
+		$citation = new citation($db, $_GET["id"]);
+		$citation->setType($_GET["type"]);
+		$citation->setPreContextScope($_GET["preScope"]);
+		$citation->setPostContextScope($_GET["postScope"]);
+		$citation->setPreContextString($_GET["preContextString"]);
+		$citation->setPostContextString($_GET["postContextString"]);
+		$citation->save();
+		break;
+	case "createTranslation":
+		$translation = new translation($db, null, $_GET["citationId"]);
+		$translationCount = count($translation->getCitation()->getTranslations());
+		echo json_encode(array("id" => $translation->getId(), "type" => $translation->getType(),
+			"content" => "", "translationCount" => $translationCount));
+		break;
+	case "loadTranslation":
+		$translation = new translation($db, $_GET["id"]);
+		$citation = $translation->getCitation();
+		echo json_encode(array("type" => $translation->getType(), "content" => $translation->getContent(), "cid" => $citation->getId()));
+		break;
+	case "saveTranslation":
+		$translation = new translation($db, $_POST["translationId"], $_POST["citationId"]);
+		$translation->setType($_POST["type"]);
+		$translation->setContent($_POST["content"]);
+		$translation->save();
+		break;
 	case "deleteSlips":
 				//! only superusers can do this
 		$user = users::getUser($_SESSION["email"]);
@@ -86,8 +163,12 @@ switch ($_REQUEST["action"]) {
 		$slipInfo["context"] = $context;
 		echo json_encode($slipInfo);
 		break;
+	case "createPaperSlip":
+		$slip = new paper_slip(null, $_GET["entryId"], $_GET["wordform"], $db);
+		echo json_encode(array("id" => $slip->getId(), "wordclass" => $slip->getWordClass(), "pos" => $slip->getPOS()));
+		break;
 	case "getSenseCategoriesForNewWordclass":
-		$slip = new slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"]);
+		$slip = new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db);
 		$oldEntryId = $slip->getEntryId();
 		$slip->updateEntry($_GET["headword"], $_GET["wordclass"]);  //update entry with new wordclass
 		$slip->saveSlip($_GET);
@@ -103,26 +184,31 @@ switch ($_REQUEST["action"]) {
 		echo json_encode($unusedSenseInfo);
 		break;
   case "saveSlip":
-    $slip = new slip($_POST["filename"], $_POST["id"], $_POST["auto_id"], $_POST["pos"],
-      $_POST["preContextScope"], $_POST["postContextScope"]);
+    $slip = ($_GET["slipType"] == "corpus")
+	    ? new corpus_slip($_POST["filename"], $_POST["id"], $_POST["auto_id"], $_POST["pos"], $db)
+	    : new paper_slip($_POST["auto_id"], $_POST["entryId"], $_POST["wordform"], $db);
     unset($_POST["action"]);
     $slip->saveSlip($_POST);
     echo "success";
     break;
+	case "addTextIdToSlip":
+		collection::addTextIdToSlip($_GET["slipId"], $_GET["textId"], $db);
+		echo json_encode(array("msg" => "success"));
+		break;
 	case "getSlipLinkHtml":
-		$slipId = collection::slipExists($_SESSION["groupId"], $_GET["filename"], $_GET["id"]);
+		$slipId = collection::slipExists($_SESSION["groupId"], $_GET["filename"], $_GET["id"], $db);
 		$lemma = urldecode($_GET["lemma"]); // decode required for MSS weird chrs
 		$data = $slipId
 			? collection::getSlipInfoBySlipId($slipId, $db)[0]    //there is a slip so use the data
 			: array("filename"=>$_GET["filename"], "id"=>$_GET["id"], "pos"=>$_GET["pos"], "lemma"=>$lemma);  //new slip
-		echo collection::getSlipLinkHtml($data);
+		echo collection::getSlipLinkHtml($data, null, $db);
 		break;
 	case "autoCreateSlips":
 		$search = new corpus_search($_GET, false);
 		$results = $search->getDBResults();
 		foreach ($results as $result) {
 			if (!$result["auto_id"]) {
-				new slip($result["filename"], $result["id"], "", $result["pos"]);
+				new corpus_slip($result["filename"], $result["id"], "", $result["pos"], $db);
 			}
 		}
 		echo json_encode(array("success" => true));
@@ -185,8 +271,13 @@ switch ($_REQUEST["action"]) {
 	case "setGroup":
 		users::updateGroupLastUsed($_GET["groupId"]);
 		break;
+	case "createEntry":
+		//creates an entry if the combination does not already exist
+		$entry = entries::getEntryByHeadwordAndWordclass($_GET["headword"], $_GET["wordclass"], $db);
+		echo json_encode(array("id" => $entry->getId()));
+		break;
 	case "getSlowSearchResults":
-		$slowSearch = new slow_search($_GET["id"]);
+		$slowSearch = new slow_search($_GET["id"], $db);
 		$xpath = urldecode($_GET["xpath"]);
 		$results = $slowSearch->search($xpath, $_GET["chunkSize"], $_GET["offsetFilename"], $_GET["offsetId"], $_GET["index"]);
 		echo json_encode($results);

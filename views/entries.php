@@ -6,12 +6,14 @@ use models;
 class entries
 {
 	private $_db;
+	private $_entry;
 
 	public function __construct($db) {
 		$this->_db = $db;
 	}
 
 	public function writeEntry($entry) {
+		$this->_entry = $entry;
   	$headword = $entry->getHeadword();
   	$wordclass = $entry->getWordclass();
   	$abbr = models\functions::getWordclassAbbrev($wordclass);
@@ -23,12 +25,15 @@ class entries
           <input type="hidden" id="wordclass" value="{$wordclass}">
         </div>
         <div>
+          <a href="#" class="createPaperSlip" data-headword="{$entry->getHeadword()}" data-wordform="" data-entryid="{$entry->getId()}"><small>add paper slip</small></a> 
+				</div>
+        <div>
           <h5>Forms:</h5>
-          {$this->_getFormsHtml($entry)}
+          {$this->_getFormsHtml()}
 				</div>
 				<div>
 					<h5>Senses:</h5>
-					{$this->_getSensesHtml($entry)}
+					{$this->_getSensesHtml()}
 				</div>
 			</div>
 HTML;
@@ -37,11 +42,11 @@ HTML;
     $this->_writeJavascript();
   }
 
-  private function _getFormsHtml($entry) {
+  private function _getFormsHtml() {
   	$i=0;
 	  $hideText = array("unmarked person", "unmarked number");
 	  $html = "<ul>";
-	  foreach ($entry->getWordforms($this->_db) as $wordform => $morphGroup) {
+	  foreach ($this->_entry->getWordforms($this->_db) as $wordform => $morphGroup) {
 	  	foreach ($morphGroup as $morphString => $slipIds) {
 	  		$i++;
 			  $morphHtml = str_replace('|', ' ', $morphString);
@@ -60,7 +65,11 @@ HTML;
 							{$slipList}
 						</div>
 HTML;
-			  $html .= "<li>{$wordform} ({$morphHtml}) {$citationHtml}</li>";
+			  $html .= <<<HTML
+          <li>{$wordform} 
+            ({$morphHtml}) {$citationHtml}
+          </li>
+HTML;
 		  }
 	  }
 	  $html .= "</ul>";
@@ -70,12 +79,14 @@ HTML;
   private function _getSlipListForForms($slipIds) {
   	$slipData = array();
 	  foreach ($slipIds as $id) {
-		  $slipData[] = models\collection::getSlipInfoBySlipId($id, $this->_db);
+		  $info = models\collection::getSlipInfoBySlipId($id, $this->_db);
+		  $isPaperSlip = ($info) ? false : true;      //if there is info this is a corpus_slip,
+		                                              //otherwise it's a paper_slip
+		  $slipData[$id] = $isPaperSlip ? array(array("auto_id"=>$id, "isPaperSlip"=>$isPaperSlip)) : $info;
 	  }
 		$slipList = '<table class="table"><tbody>';
-		foreach ($slipData as $data) {
+		foreach ($slipData as $id => $data) {
 			foreach ($data as $row) {
-				$translation = $row["translation"];
 				$slipLinkData = array(
 					"auto_id" => $row["auto_id"],
 					"lemma" => $row["lemma"],
@@ -88,21 +99,21 @@ HTML;
 					"page" => $row["page"]
 				);
 				$filenameElems = explode('_', $row["filename"]);
+				$textLink = $row["filename"] ? '<a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small>' : '';
+				$emojiHtml = $row["isPaperSlip"] ? '<span data-toggle="tooltip" data-placement="top" title="paper slip">&#x1F4DD;</span>' : "";
 				$slipList .= <<<HTML
 					<tr id="#slip_{$row["auto_id"]}" data-slipid="{$row["auto_id"]}"
 						data-filename="{$row["filename"]}"
 						data-id="{$row["id"]}"
 						data-tid="{$row["tid"]}"
-						data-precontextscope="{$row["preContextScope"]}"
-						data-postcontextscope="{$row["postContextScope"]}"
-						data-translation="{$translation}"
 						data-date="{$row["date_of_lang"]}">
 					<!--td data-toggle="tooltip"
-						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]} : {$translation}"
+						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]}"
 						class="entryCitationContext"></td-->
 					<td class="entryCitationContext"></td>
+					<td>{$emojiHtml}</td>
 					<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>
-					<td><a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small></td>
+					<td>{$textLink}</td>
 				</tr>
 HTML;
 			}
@@ -111,9 +122,9 @@ HTML;
 		return $slipList;
   }
 
-	private function _getSensesHtml($entry) {
+	private function _getSensesHtml() {
   	//orphaned (uncategorised) senses
-  	$orphanedSensesHtml = $this->_getOrphanSensesHtml($entry);
+  	$orphanedSensesHtml = $this->_getOrphanSensesHtml();
   	if ($orphanedSensesHtml != "") {
 		  $html = "<ul>" . $orphanedSensesHtml . "</ul>";
 	  }
@@ -123,7 +134,7 @@ HTML;
 				<ul>
 HTML;
   	//grouped senses
-		$html .= $this->_getGroupedSensesHtml($entry);
+		$html .= $this->_getGroupedSensesHtml();
 		$html .= '</ul></div>';
 		//individual senses
 		$html .= <<<HTML
@@ -131,15 +142,15 @@ HTML;
 				<h6>Indivdual Senses <a id="showGrouped" href="#" title="show grouped senses"><small>show grouped</small></a></h6> 
 				<ul>
 HTML;
-		$html .= $this->_getIndividualSensesHtml($entry);
+		$html .= $this->_getIndividualSensesHtml();
 		$html .= '</ul></div>';
 		return $html;
 	}
 
-	private function _getOrphanSensesHtml($entry) {
+	private function _getOrphanSensesHtml() {
 		/* Get any citations without senses */
 		$html = "";
-		$nonSenseSlipIds = models\sensecategories::getNonCategorisedSlipIds($entry->getId(), $this->_db);
+		$nonSenseSlipIds = models\sensecategories::getNonCategorisedSlipIds($this->_entry->getId(), $this->_db);
 		if (count($nonSenseSlipIds)) {
 			$slipData = array();
 			$index = 0;
@@ -152,9 +163,9 @@ HTML;
 		return $html;
 	}
 
-	private function _getIndividualSensesHtml($entry) {
+	private function _getIndividualSensesHtml() {
 		/* Get citations for individual senses */
-		$individualSenses = $entry->getIndividualSenses();
+		$individualSenses = $this->_entry->getIndividualSenses();
 		$index = 0;
 		foreach ($individualSenses as $sense => $slipIds) {
 			$slipData = array();
@@ -167,12 +178,12 @@ HTML;
 		return $html;
 	}
 
-	private function _getGroupedSensesHtml($entry) {
+	private function _getGroupedSensesHtml() {
 		/* Get the citations with grouped senses */
 		$index = 0;
-		foreach ($entry->getUniqueSenseIds($this->_db) as $slipId => $senseIds) {
+		foreach ($this->_entry->getUniqueSenseIds($this->_db) as $slipId => $senseIds) {
 			$slipData = array();
-			$senseSlipIds = $entry->getSenseSlipIds($slipId);
+			$senseSlipIds = $this->_entry->getSenseSlipIds($slipId);
 			foreach ($senseSlipIds as $id) {
 				$index++;
 				$slipData[] = models\collection::getSlipInfoBySlipId($id, $this->_db);
@@ -199,6 +210,7 @@ HTML;
 					"title" => $row["title"],
 					"page" => $row["page"]
 				);
+				$textLink = $row["filename"] ? '<a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small>' : '';
 				$slipList .= <<<HTML
 					<tr id="#slip_{$row["auto_id"]}" data-slipid="{$row["auto_id"]}"
 							data-filename="{$row["filename"]}"
@@ -213,7 +225,7 @@ HTML;
 							class="entryCitationContext"></td-->
 						<td class="entryCitationContext"></td>
 						<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>
-						<td><a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small></td>
+						<td>{$textLink}</td>
 					</tr>
 HTML;
 			}
@@ -287,16 +299,65 @@ HTML;
           </thead>
           {$tableBodyHtml}
         </table>
+        <div class="row">
+					<div class="col">
+						<div class="mx-auto" style="width: 60px;">
+              <a href="#" data-toggle="modal" data-target="#addEntryModal" title="add entry" id="addEntry" class="btn btn-success">add</a>
+            </div>
+					</div>
+				</div>
 HTML;
+    $this->_writeAddEntryModal();
+    $this->_writeJavascript();;
   }
 
+	private function _writeAddEntryModal() {
+		echo <<<HTML
+        <div id="addEntryModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addEntryModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Add entry</h5>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+										<div class="row">		
+											<label class="col-4" for="addHeadword">Headword:</label>
+											<input type="text" class="form-control col-7" id="addHeadword" name="addHeadword" autofocus/>             
+										</div>
+										<div class="row">
+											<label class="col-4" for="addWordclass">Part-of-speech:</label>
+											<select id="addWordclass" name="addWordclass" class="form-control col-7">
+			                  <option value="noun">noun</option>
+			                  <option value="short">verb</option>
+			                  <option value="preposition">preposition</option>
+			                  <option value="adjective">adjective</option>
+			                  <option value="adverb">verb</option>
+			                  <option value="other">other</option>
+			                </select> 
+										</div>
+                </div>
+                <div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
+                  <button type="button" id="createEntry" class="btn btn-primary">add</button>
+								</div>
+							</div>
+            </div>
+          </div>
+        </div>
+HTML;
+	}
+
   private function _getSlipLink($result) {
+		$slipType = $result["filename"] ? "corpus" : "paper";
 		return <<<HTML
 						<small>
                 <a href="#" class="slipLink2"
                     data-toggle="modal" data-target="#slipModal"
                     data-auto_id="{$result["auto_id"]}"
-                    data-headword="{$result["lemma"]}"
+                    data-headword="{$this->_entry->getHeadword()}"
+                    data-entryid="{$this->_entry->getId()}"
+                    data-sliptype= "{$slipType}"
                     data-pos="{$result["pos"]}"
                     data-id="{$result["id"]}"
                     data-xml="{$result["filename"]}"
@@ -314,6 +375,34 @@ HTML;
   private function _writeJavascript() {
   	echo <<<HTML
 			<script>
+				//create an entry on modal form create button click
+				$('#createEntry').on('click', function () {
+				  let headword = $('#addHeadword').val();
+				  let wordclass = $('#addWordclass').val();
+				  if (headword == '') {
+				    alert("Headword cannot be empty!");
+				    $('#addHeadword').focus();
+				    return;
+				  }
+				  $.getJSON('ajax.php?action=createEntry&headword='+headword+'&wordclass='+wordclass, function () {
+				  })
+				    .done(function (data) {
+				      window.open('?m=entries&a=view&id='+data.id,'_self');
+				    });	  
+				});
+        
+				//create a paper slip for the selected wordform
+				$('.createPaperSlip').on('click', function () {
+				   let wordform = $(this).attr('data-wordform');
+				   let entryId = $(this).attr('data-entryid');
+				   let headword = $(this).attr('data-headword');
+				   $.getJSON('ajax.php?action=createPaperSlip&entryId='+entryId+'&wordform='+wordform, function (data) {
+				     var url = '?m=collection&a=edit&entryId='+entryId+'&id=' + data.id + '&filename=&headword='+headword;
+             url += '&pos=' + data.pos + '&wid=';
+             var win = window.open(url, '_blank');
+				   });
+				});
+				
 				$('#showIndividual').on('click', function () {
 				  $('#groupedSenses').hide();
 				  $('#individualSenses').show();
@@ -330,52 +419,45 @@ HTML;
         *  Load and show the citations for wordforms or senses
         */
 				$('.citationsLink').on('click', function () {
+				  $('.spinner').show();
+				  let type = $(this).attr('data-type');   //i.e. "form" or "sense"
 			    var citationsLink = $(this);
-			    var citationsContainerId = '#' + $(this).attr('data-type') + '_citations' + $(this).attr('data-index');
+			    var citationsContainerId = '#' + type + '_citations' + $(this).attr('data-index');
 			    if ($(this).hasClass('hideCitations')) {
 			      $(citationsContainerId).hide();
 			      $(this).text('citations');
 			      $(this).removeClass('hideCitations');
 			      return;
 			    }
-			    var citationIndex = 0;
 			    $(citationsContainerId + "> table > tbody > tr").each(function() {
-			      citationIndex++;
+			      var slipId = $(this).attr('data-slipid');
 			      var date = $(this).attr('data-date');
 			      var html = '<span class="text-muted">' + date + '.</span> ';
-			      var filename = $(this).attr('data-filename');
 			      var wid = $(this).attr('data-id');
 			      var tid = $(this).attr('data-tid');
-			      var preScope  = $(this).attr('data-precontextscope');
-			      var postScope = $(this).attr('data-postcontextscope');
-			      var translation = $(this).attr('data-translation');
 			      var tr = $(this);
 			      var title = tr.prop('title');
-			      var url = 'ajax.php?action=getContext&filename='+filename+'&id='+wid+'&preScope='+preScope;
-			      url += '&postScope='+postScope+'&simpleContext=1';
+						var url = 'ajax.php?action=getCitationsBySlipId&slipId='+slipId;
 			      $.getJSON(url, function (data) {
-			        $('.spinner').show();
-			        var preOutput = data.pre["output"];
-			        var postOutput = data.post["output"];
-			        var url = 'index.php?m=corpus&a=browse&id=' + tid + '&wid=' + wid; //title id and word id
-			        tr.find('.entryCitationTextLink').attr('href', url); //add the link to text url
-			        html += preOutput;
-			        if (data.pre["endJoin"] != "right" && data.pre["endJoin"] != "both") {
-			          html += ' ';
-			        }
-			        //html += '<span id="slipWordInContext">' + data.word + '</span>';
-              html += '<mark>' + data.word + '</mark>'; // MM
-			        if (data.post["startJoin"] != "left" && data.post["startJoin"] != "both") {
-			          html += ' ';
-			        }
-			        html += postOutput;
-			        if (translation) {
-			          html += '<div><small><a href="#translation'+citationIndex+'" '; 
-			          html += 'data-toggle="collapse" aria-expanded="false" aria-controls="#translation'+citationIndex+'">';
-			          html += 'show/hide translation</a></small></div>';
-			          html += '<div id="translation' + citationIndex + '" class="collapse"><small class="text-muted">'+translation+'</small></div>';
-			        }
-			        tr.find('.entryCitationContext').html(html);
+			        var corpusLink = 'index.php?m=corpus&a=browse&id=' + tid + '&wid=' + wid; //title id and word id
+				      tr.find('.entryCitationTextLink').attr('href', corpusLink); //add the link to text url
+				      let numCitations = Object.keys(data).length;
+			        $.each(data, function(citationType, info) {    //iterate through each citation
+								if (type == "form") {     //default to short citation for forms 
+								  if (citationType == "short") {
+								    html += getCitationHtml(citationType, info);
+								  } else if (numCitations == 1) {
+								    html += getCitationHtml("long", data.long); //no long so write short
+								  }
+								} else if (type == "sense") {    //default to long citation for senses
+								    if (citationType == "long") {
+								      html += getCitationHtml(citationType, info);
+								    } else if (numCitations == 1) {
+								      html += getCitationHtml("short", data.short); //no short found so write long
+								    }
+								} 
+				        tr.find('.entryCitationContext').html(html);
+				      });
 			      })
 			        .then(function () {
 			          $('.spinner').hide();
@@ -386,6 +468,23 @@ HTML;
 			    citationsLink.text('hide');
 			    citationsLink.addClass('hideCitations');
 			  });
+				
+				function getCitationHtml(citationType, info) {
+				  let translation = info.translation;
+					html = info.context.html + ' <em>(' + citationType + ')</em>';
+					if (translation) {
+					  html += getTranslationHtml(translation, info.cid);
+					}
+					return html;
+				}
+				
+				function getTranslationHtml(content, index) {
+				  html = '<div><small><a href="#translation' + index + '" '; 
+          html += 'data-toggle="collapse" aria-expanded="false" aria-controls="#translation' + index + '">';
+          html += 'show/hide translation</a></small></div>';
+          html += '<div id="translation' + index + '" class="collapse"><small class="text-muted">'+content+'</small></div>';
+          return html;
+				}
 			</script>
 HTML;
   }

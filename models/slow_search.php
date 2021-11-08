@@ -11,13 +11,13 @@ class slow_search
 	private $_id;   //the text ID
 	private $_db;   //database
 
-	public function __construct($id) {
+	public function __construct($id, $db) {
 		if (substr(getcwd(), 0, 6) == "/Users") {   //for local testing
 			$this->_filepathOffset = 16;
 			$this->_path = "../gadelica/xml";
 		}
 		$this->_id = $id ? $id : 0;
-		$this->_db = isset($this->_db) ? $this->_db : new database();
+		$this->_db = $db;
 	}
 
 	public function search($xpath, $chunkSize=null, $offsetFilename=null, $offsetId=null, $index=-1) {
@@ -61,7 +61,7 @@ class slow_search
 					$index++;
 					$results[$i]["data"] = corpus_search::getDataById($filename, $id);
 					$results[$i]["data"]["context"] = $handler->getContext($id);
-					$results[$i]["data"]["slipLinkHtml"] = collection::getSlipLinkHtml($results[$i]["data"], $index);
+					$results[$i]["data"]["slipLinkHtml"] = collection::getSlipLinkHtml($results[$i]["data"], $index, $this->_db);
 					$pos = new partofspeech($results[$i]["data"]["pos"]);
 					$results[$i]["data"]["posLabel"] = $pos->getLabel();
 					$results[$i]["index"] = $index;

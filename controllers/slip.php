@@ -8,7 +8,7 @@ class slip
   private $_db, $_slip;
 
   public function __construct($slipId) {
-	  $this->_slip = new models\slip($_GET["filename"], $_GET["id"], $slipId, $_GET["pos"]);
+	  $this->_slip = new models\corpus_slip($_GET["filename"], $_GET["id"], $slipId, $_GET["pos"]);
   }
 
   public function run($action) {
