@@ -161,6 +161,8 @@ class corpus_search
 		}
 		$searchPrefix = ''; // "[[:<:]]";  //default to word boundary at start for REGEXP
 		$searchSuffix = ''; // "[[:>:]]";
+		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP
+		$searchSuffix = "[[:>:]]";
 		$whereClause = "";
 		switch ($params["order"]) {
 			case "random":
