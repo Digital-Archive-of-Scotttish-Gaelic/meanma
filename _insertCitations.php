@@ -7,6 +7,12 @@ require_once 'includes/htmlHeader.php';
 
 $db = new database();
 
+/*
+ *
+ *      !! If using the following code, empty all the citation related tables first! - citation_translation, slip_citation,
+ * translation, and citation
+ *
+ *
 //Get all the slips' data
 $sql = <<<SQL
 	SELECT * FROM slips
@@ -48,6 +54,7 @@ SQL;
 		$db->exec($sql);
 	}
 }
+*/
 
 
 require_once 'includes/htmlFooter.php';
