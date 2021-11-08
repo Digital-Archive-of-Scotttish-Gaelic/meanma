@@ -4,7 +4,7 @@ namespace models;
 
 require_once 'includes/htmlHeader.php';
 
-/*
+
 $db = new database();
 
 //Get all the slips' data
@@ -48,6 +48,6 @@ SQL;
 		$db->exec($sql);
 	}
 }
-*/
+
 
 require_once 'includes/htmlFooter.php';
