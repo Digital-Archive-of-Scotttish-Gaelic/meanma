@@ -9,7 +9,7 @@ class collection
    *
    * @return array of DB results
    */
-  public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "date_of_lang", $order = "ASC", $db) {
+  public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "headword", $order = "ASC", $db) {
   	$sort = empty($sort) ? "headword" : $sort;
   	$order = empty($order) ? "asc" : $order;
   	if (stristr("'", $sort) || stristr('"', $sort)) {
@@ -29,16 +29,17 @@ class collection
 				$sth->execute(array(":search" => "%{$search}%"));
 				$whereClause .= <<<SQL
 					AND (auto_id LIKE @search	
-            	OR lemma LIKE @search
+            	OR headword LIKE @search
             	OR l.wordform LIKE @search
             	OR firstname LIKE @search
-            	OR lastname LIKE @search)
+            	OR lastname LIKE @search
+							OR wordclass LIKE @search)
 SQL;
 			}
 	    $dbh->setAttribute( \PDO::ATTR_EMULATE_PREPARES, false );
 	    $sql = <<<SQL
         SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, l.wordform AS wordform, firstname, lastname,
-                date_of_lang, title, page, CONCAT(firstname, ' ', lastname) as fullname, locked,
+                date_of_lang, title, page, CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
              		l.pos as pos, s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
             FROM slips s
             JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
@@ -105,6 +106,7 @@ HTML;
                     data-title="{$slip["title"]}"
                     data-page="{$slip["page"]}"
                     data-resultindex="-1"
+                    data-entryid="{$slip["entryId"]}"
                     title="view slip {$slip["auto_id"]}">
                     {$slip["auto_id"]}
                 </a>
@@ -115,6 +117,115 @@ HTML;
     } catch (\PDOException $e) {
       echo $e->getMessage();
     }
+  }
+
+  public static function getAllPaperSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "headword", $order = "ASC", $db) {
+	  $sort = empty($sort) ? "headword" : $sort;
+	  $order = empty($order) ? "asc" : $order;
+	  if (stristr("'", $sort) || stristr('"', $sort)) {
+		  echo json_encode(array("error" => "invalid sort param"));
+		  return false;   //possible attack
+	  }
+	  if ($order != "asc" AND $order != "desc") {
+		  echo json_encode(array("error" => "invalid order param"));
+		  return false;   //possible attack
+	  }
+	  $params = array(":limit" => (int)$limit, ":offset" => (int)$offset);
+	  $dbh = $db->getDatabaseHandle();
+	  try {
+		  $whereClause = "WHERE wordform IS NOT NULL AND (group_id = {$_SESSION["groupId"]}) ";
+		  if (mb_strlen($search) > 1) {     //there is a search to run
+			  $sth = $dbh->prepare("SET @search = :search");  //set a MySQL variable for the searchterm
+			  $sth->execute(array(":search" => "%{$search}%"));
+			  $whereClause .= <<<SQL
+					AND (auto_id LIKE @search	
+							OR headword LIKE @search
+            	OR wordform LIKE @search
+            	OR firstname LIKE @search
+            	OR lastname LIKE @search
+							OR wordclass LIKE @search)
+SQL;
+		  }
+		  $dbh->setAttribute( \PDO::ATTR_EMULATE_PREPARES, false );
+		  $sql = <<<SQL
+        SELECT SQL_CALC_FOUND_ROWS auto_id, s.wordform AS wordform, firstname, lastname,
+                CONCAT(firstname, ' ', lastname) as fullname, locked,
+             		s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword, e.id AS entryId
+            FROM slips s
+            JOIN entry e ON e.id = s.entry_id
+            LEFT JOIN user u ON u.email = s.ownedBy
+            {$whereClause}
+            ORDER BY {$sort} {$order}
+            LIMIT :limit OFFSET :offset;
+SQL;
+		  $sth = $dbh->prepare($sql);
+		  $sth->execute($params);
+		  $rows = $sth->fetchAll(\PDO::FETCH_ASSOC);
+		  $hits = $db->fetch("SELECT FOUND_ROWS() as hits;");
+		  foreach ($rows as $index => $slip) {
+			  $slipId = $slip["auto_id"];
+			  //get the categories
+			  $sql = <<<SQL
+					SELECT name, description, se.id as senseId
+						FROM sense se
+						LEFT JOIN slip_sense ss ON ss.sense_id = se.id
+						WHERE slip_id = :slipId
+SQL;
+			  $senseRows = $db->fetch($sql, array(":slipId" => $slipId));
+			  foreach ($senseRows as $sense) {
+				  $rows[$index]["senses"] .= <<<HTML
+						<span class="badge badge-success senseBadge" data-slip-id="{$slipId}" data-sense="  {$sense["senseId"]}"
+							data-toggle="modal" data-target="#senseModal" data-sense-description="{$sense["description"]}"
+							data-title="{$sense["description"]}" data-sense-name="{$sense["name"]}">
+							{$sense["name"]}</span>
+HTML;
+			  }
+
+			  //get the morph data
+			  $sql = <<<SQL
+					SELECT value
+						FROM slipMorph sm
+						LEFT JOIN slips s ON sm.slip_id = auto_id
+						WHERE slip_id = :slipId
+SQL;
+			  $morphRows = $db->fetch($sql, array(":slipId" => $slipId));
+			  foreach ($morphRows as $morph) {
+				  $rows[$index]["morph"] .= '<span class="badge badge-secondary">' . $morph["value"] . '</span> ';
+			  }
+			  $checked = in_array($slipId, $_SESSION["printSlips"]) ? "checked" : "";
+			  $rows[$index]["printSlip"] = <<<HTML
+					<input type="checkbox" class="chooseSlip" {$checked} id="printSlip_{$slipId}"> 
+HTML;
+			  $rows[$index]["deleteSlip"] = <<<HTML
+					<input type="checkbox" class="markToDelete" id="deleteSlip_{$slipId}"> 
+HTML;
+			  $headword = $slip["headword"] ? $slip["headword"] : $slip["lemma"]; //if there is an entry then use its hw
+			  //otherwise use the default DB lemma
+			  //create the slip link code
+			  $slipUrl = <<<HTML
+                <a href="#" class="slipLink2"
+                    data-toggle="modal" data-target="#slipModal"
+                    data-auto_id="{$slip["auto_id"]}"
+                    data-headword="{$headword}"
+                    data-pos="{$slip["pos"]}"
+                    data-id="{$slip["id"]}"
+                    data-xml="{$slip["filename"]}"
+                    data-uri="{$slip["uri"]}"
+                    data-date="{$slip["date_of_lang"]}"
+                    data-title="{$slip["title"]}"
+                    data-page="{$slip["page"]}"
+                    data-resultindex="-1"
+                    data-entryid="{$slip["entryId"]}"
+                    title="view slip {$slip["auto_id"]}">
+                    {$slip["auto_id"]}
+                </a>
+HTML;
+			  $rows[$index]["auto_id"] = $slipUrl;
+		  }
+		  return array("total"=>(int)$hits[0]["hits"], "totalNotFiltered"=>count($rows), "rows"=>$rows);
+	  } catch (\PDOException $e) {
+		  echo $e->getMessage();
+	  }
   }
 
   public static function slipExists($groupId, $filename, $id, $db) {
