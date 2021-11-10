@@ -7,6 +7,7 @@ class slip
 {
   private $_slip;   //an instance of the Slip class
 	private $_citations;  //an array of citation objects; instance property to prevent unnecessary duplicate DB calls
+
   public function __construct($slip) {
     $this->_slip = $slip;
     $this->_citations = $this->_slip->getCitations();
