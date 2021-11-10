@@ -9,7 +9,8 @@ class collection
    *
    * @return array of DB results
    */
-  public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "headword", $order = "ASC", $db) {
+  public static function getAllSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "headword", $order = "ASC",
+                                        $type = "corpus", $db) {
   	$sort = empty($sort) ? "headword" : $sort;
   	$order = empty($order) ? "asc" : $order;
   	if (stristr("'", $sort) || stristr('"', $sort)) {
@@ -23,26 +24,40 @@ class collection
   	$params = array(":limit" => (int)$limit, ":offset" => (int)$offset);
     $dbh = $db->getDatabaseHandle();
     try {
-			$whereClause = "WHERE (group_id = {$_SESSION["groupId"]}) ";
+    	$whereCondition = $type == "paper" ? "wordform IS NOT NULL AND" : ""; //all paper slips have a wordform
+			$whereClause = "WHERE {$whereCondition} group_id = {$_SESSION["groupId"]} ";
 			if (mb_strlen($search) > 1) {     //there is a search to run
+				$wordformField = $type == "corpus" ? "l.wordform" : "s.wordform";     //switch fields based on slip type
 				$sth = $dbh->prepare("SET @search = :search");  //set a MySQL variable for the searchterm
 				$sth->execute(array(":search" => "%{$search}%"));
 				$whereClause .= <<<SQL
 					AND (auto_id LIKE @search	
             	OR headword LIKE @search
-            	OR l.wordform LIKE @search
+            	OR {$wordformField} LIKE @search
             	OR firstname LIKE @search
             	OR lastname LIKE @search
 							OR wordclass LIKE @search)
 SQL;
 			}
 	    $dbh->setAttribute( \PDO::ATTR_EMULATE_PREPARES, false );
-	    $sql = <<<SQL
-        SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, l.wordform AS wordform, firstname, lastname,
+			$sql = "";
+			if ($type == "corpus") {      //this is a corpus slip query
+				$sql = <<<SQL
+					SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, l.wordform AS wordform, firstname, lastname,
                 date_of_lang, title, page, CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
              		l.pos as pos, s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
             FROM slips s
             JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
+SQL;
+			} else {        //this is a paper slip query
+				$sql = <<<SQL
+					SELECT SQL_CALC_FOUND_ROWS auto_id, s.wordform AS wordform, firstname, lastname,
+                CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
+             		s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
+            FROM slips s
+SQL;
+			}
+	    $sql .= <<<SQL
             JOIN entry e ON e.id = s.entry_id
             LEFT JOIN user u ON u.email = s.ownedBy
             {$whereClause}

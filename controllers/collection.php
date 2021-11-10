@@ -20,7 +20,7 @@ class collection
     switch ($action) {
 	    case "browse":
 		    $view = new views\collection();
-		    $view->show();
+		    $view->show($action, $_GET["type"]);
 		    break;
 	    case "edit":
 		    $slip = ($_GET["filename"])

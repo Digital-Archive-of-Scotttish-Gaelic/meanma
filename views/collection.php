@@ -5,12 +5,37 @@ use models;
 
 class collection
 {
-	public function show($action = "browse", $id = null) {
-		switch ($action) {
-			case "browse":
-				$this->_writeBrowseTable();
-				break;
+	private $_type = "corpus";  //the collection type : corpus or paper
+
+	public function show($action = "browse", $type = "corpus", $id = null) {
+		$this->_type = $type;
+		$this->_writeSubNav($type);
+		$this->_writeBrowseTable();
+	}
+
+	private function _getType() {
+		return $this->_type;
+	}
+
+	private function _writeSubNav($type) {
+		$listItemHtml = "";
+		if ($type == "paper") {
+			$listItemHtml = <<<HTML
+				<li class="nav-item"><a class="nav-link" title="corpus slips" href="?m=collection&a=browse&type=corpus">corpus slips</a></li>
+		    <li class="nav-item"><div class="nav-link active">paper slips</div></li>	
+HTML;
+		} else {
+			$listItemHtml = <<<HTML
+				<li class="nav-item"><div class="nav-link active">corpus slips</div></li>
+		    <li class="nav-item"><a class="nav-link" title="paper slips" href="?m=collection&a=browse&type=paper">paper slips</a></li>	
+HTML;
 		}
+		echo <<<HTML
+			<ul class="nav nav-pills nav-justified" style="padding-bottom: 20px;">			  
+				{$listItemHtml}		    		
+		  </ul>	
+HTML;
+
 	}
 
   private function _writeBrowseTable() {
@@ -126,7 +151,7 @@ HTML;
 				* @param params
 				*/
 			  function ajaxRequest(params) {
-			    $.getJSON( 'ajax.php?action=getSlips&' + $.param(params.data), {format: 'json'}).then(function (res) {
+			    $.getJSON( 'ajax.php?action=getSlips&type={$this->_getType()}&' + $.param(params.data), {format: 'json'}).then(function (res) {
 			      params.success(res)
 					});
 			  }

@@ -43,7 +43,7 @@ class slipprint
 		foreach ($slipIds as $slipId) {
 			$i++;
 			$slipInfo = collection::getSlipInfoBySlipId($slipId, $db)[0];
-			$headword = $slipInfo["lemma"];
+			$headword = $slipInfo["headword"];
 			$filename = $slipInfo["filename"];
 			$filenameElems = explode('_', $filename);
 			$textNum = $filenameElems[0];

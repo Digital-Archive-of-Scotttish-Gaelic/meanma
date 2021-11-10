@@ -39,7 +39,7 @@ switch ($_REQUEST["action"]) {
     echo json_encode($context);
     break;
 	case "getSlips":
-		$slipInfo = collection::getAllSlipInfo($_GET["offset"], $_GET["limit"], $_GET["search"], $_GET["sort"], $_GET["order"], $db);
+		$slipInfo = collection::getAllSlipInfo($_GET["offset"], $_GET["limit"], $_GET["search"], $_GET["sort"], $_GET["order"], $_GET["type"], $db);
 		echo json_encode($slipInfo);
 		break;
 	case "updatePrintList":

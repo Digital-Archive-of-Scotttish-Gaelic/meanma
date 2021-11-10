@@ -301,8 +301,8 @@ HTML;
         </table>
         <div class="row">
 					<div class="col">
-						<div class="mx-auto" style="width: 60px;">
-              <a href="#" data-toggle="modal" data-target="#addEntryModal" title="add entry" id="addEntry" class="btn btn-success">add</a>
+						<div class="mx-auto" style="width: 100px;">
+              <a href="#" data-toggle="modal" data-target="#addEntryModal" title="add entry" id="addEntry" class="btn btn-success">add entry</a>
             </div>
 					</div>
 				</div>
