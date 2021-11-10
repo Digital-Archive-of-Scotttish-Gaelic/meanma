@@ -147,7 +147,7 @@ HTML;
 				});
 				
 				/**
-				* Runs an AJAX request to populate the Bootstrap table
+				* Runs an AJAX request to populate the Bootstrap table 
 				* @param params
 				*/
 			  function ajaxRequest(params) {

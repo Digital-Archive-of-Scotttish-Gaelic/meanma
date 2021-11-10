@@ -61,7 +61,6 @@ class slipprint
 			$translation = $slipInfo["translation"];
 			$date = $slipInfo["date_of_lang"];
 			$reference = $date . ' <em>' . $slipInfo["title"] . '</em> ' . $slipInfo["page"];
-
 			$html = <<<EOD
 			<table>
 				<tr>
