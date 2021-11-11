@@ -432,7 +432,10 @@ HTML;
 			    $(citationsContainerId + "> table > tbody > tr").each(function() {
 			      var slipId = $(this).attr('data-slipid');
 			      var date = $(this).attr('data-date');
-			      var html = '<span class="text-muted">' + date + '.</span> ';
+			      var html = '';
+			      if (date) {
+			        html += '<span class="text-muted">' + date + '.</span> ';
+			      } 
 			      var wid = $(this).attr('data-id');
 			      var tid = $(this).attr('data-tid');
 			      var tr = $(this);
@@ -472,6 +475,9 @@ HTML;
 				function getCitationHtml(citationType, info) {
 				  let translation = info.translation;
 					html = info.context.html + ' <em>(' + citationType + ')</em>';
+					if (info.reference) {
+					  html += '<br>' + info.reference;
+					}
 					if (translation) {
 					  html += getTranslationHtml(translation, info.cid);
 					}

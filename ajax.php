@@ -89,7 +89,9 @@ switch ($_REQUEST["action"]) {
 			$citation = new citation($db, $cid);
 			$translations = $citation->getTranslations();
 			$translation = isset($translations[0]) ? $translations[0]->getContent() : null;
-			$citationInfo[$citation->getType()] = array("cid"=>$cid, "context"=>$citation->getContext(false), "translation"=>$translation);
+			$slip = $citation->getSlip();
+			$reference = $slip->getReference();
+			$citationInfo[$citation->getType()] = array("cid"=>$cid, "context"=>$citation->getContext(false), "translation"=>$translation, "reference"=>$reference);
 		}
 		echo json_encode($citationInfo);
     break;

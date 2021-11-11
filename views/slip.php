@@ -86,11 +86,10 @@ HTML;
           <textarea class="form-control" name="reference" id="reference" rows="2">{$this->_slip->getReference()}</textarea>
           <script>
             CKEDITOR.replace('reference', {
-              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfigSlipRef.js',
+              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js',
               stylesSet : 'my_styles'
             });
-            
-            //add the small caps option
+            //add the small caps option for author names
             CKEDITOR.stylesSet.add( 'my_styles', [
               { name: 'small caps', element: 'span', styles: { 'font-variant': 'small-caps' } } 
 						]);
