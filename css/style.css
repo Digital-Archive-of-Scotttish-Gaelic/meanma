@@ -2,6 +2,10 @@ html,body {
     height: 100%;
 }
 
+.small-caps {
+    font-variant: small-caps;
+}
+
 .word {
     cursor: pointer;
 }

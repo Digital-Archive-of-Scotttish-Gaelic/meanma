@@ -284,6 +284,7 @@ function saveSlip() {
   var slipType = $('#citationContext').attr('data-sliptype');
   var entryId = $('#citationContext').attr('data-entryid');
   var textId = $('#textId').val();
+  var reference = CKEDITOR.instances['reference'].getData();
   var wordform = $('#wordform').val();
   var wordclass = $('#wordClass').val();
   var starred = $('#slipStarred').prop('checked') ? 1 : 0;
@@ -291,7 +292,7 @@ function saveSlip() {
   var notes = CKEDITOR.instances['slipNotes'].getData();
   var status = $('#status').val();
   var data = {action: "saveSlip", filename: $('#slipFilename').text(), id: $('#wordId').text(),
-    auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred,
+    auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred, reference: reference,
     notes: notes, status: status, wordClass: wordclass, wordform: wordform, text_id: textId,
     locked: locked, text_id: $('#textId').val(), slipType: slipType, entryId: entryId};
   switch (wordclass) {

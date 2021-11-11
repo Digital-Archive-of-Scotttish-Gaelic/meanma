@@ -10,6 +10,7 @@ class slip
 	protected $_type; //used to differiantate between types of slip, e.g. paper or corpus
 	protected $_db; //an instance of models\database
 	protected $_textId = null;
+	protected $_reference = null; //used for lexicographers to manually store a reference as HTML
 	protected $_filename = null;
 	protected $_wid = null;
 	protected $_pos, $_wordform;
@@ -38,6 +39,10 @@ class slip
 
 	public function getId() {
 		return $this->_id;
+	}
+
+	public function getReference() {
+		return $this->_reference;
 	}
 
 	public function getType() {
@@ -193,6 +198,7 @@ SQL;
 		$this->_starred = $params["starred"] ? 1 : 0;
 		$this->_notes = $params["notes"];
 		$this->_textId = $params["text_id"];
+		$this->_reference = $params["reference"];
 		$this->_headword = $this->_entry->getHeadword();
 		$this->_wordClass = $this->_entry->getWordclass();
 		$this->_entryId = $params["entryId"];
@@ -214,12 +220,12 @@ SQL;
 		$this->saveSlipMorph();
 		$sql = <<<SQL
         UPDATE slips 
-            SET text_id = ?, locked = ?, starred = ?, notes = ?, 
+            SET text_id = ?, reference = ?, locked = ?, starred = ?, notes = ?, 
                 entry_id = ?, wordform = ?, slipStatus = ?, 
              		updatedBy = ?, lastUpdated = now()
             WHERE auto_id = ?
 SQL;
-		$this->_db->exec($sql, array($this->getTextId(), $this->getLocked(), $this->getStarred(),
+		$this->_db->exec($sql, array($this->getTextId(), $this->getReference(), $this->getLocked(), $this->getStarred(),
 			$this->getNotes(), $this->getEntryId(), $this->getWordform(),
 			$this->getSlipStatus(), $this->getLastUpdatedBy(), $this->getId()));
 		return $this;

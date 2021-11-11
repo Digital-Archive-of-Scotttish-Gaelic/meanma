@@ -81,6 +81,21 @@ HTML;
             });
           </script>
         </div>
+        <div id="referenceSection" class="form-group collapse show">
+          <label for="reference">Reference:</label>
+          <textarea class="form-control" name="reference" id="reference" rows="2">{$this->_slip->getReference()}</textarea>
+          <script>
+            CKEDITOR.replace('reference', {
+              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfigSlipRef.js',
+              stylesSet : 'my_styles'
+            });
+            
+            //add the small caps option
+            CKEDITOR.stylesSet.add( 'my_styles', [
+              { name: 'small caps', element: 'span', styles: { 'font-variant': 'small-caps' } } 
+						]);
+          </script>
+        </div>
         <div class="form-group">
           <div class="input-group">
             <input type="hidden" name="filename" value="{$_REQUEST["filename"]}">
