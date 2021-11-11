@@ -100,7 +100,7 @@ SQL;
 	public function getContext($tagContext = false) {
 		$contextHtml = $preIncrementDisable = $postIncrementDisable = $context["prelimit"] = $context["postlimit"] = "";
 		if ($this->_slip->getType() == "paper") {       //paper slip
-			$contextHtml = $this->getPreContextString() . " <mark>" . $this->_slip->getWordform() . "</mark> "
+			$contextHtml = $this->getPreContextString() . ' <mark class="hi">' . $this->_slip->getWordform() . '</mark> '
 				. $this->getPostContextString();
 		} else {                                        //corpus_slip
 			$handler = new xmlfilehandler($this->_slip->getFilename());
@@ -122,7 +122,7 @@ SQL;
 				$contextHtml .= ' ';
 			}
 			$contextHtml .= <<<HTML
-      <mark id="slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
+      <mark class="hi slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
 HTML;
 
 			if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {

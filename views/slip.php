@@ -566,7 +566,7 @@ HTML;
 HTML;
     	$citationString = ($this->_slip->getType() == "corpus")
 		    ? $citation->getContext()["html"]
-		    : $citation->getPreContextString() . " <mark>" . $this->_slip->getWordform() . "</mark> " . $citation->getPostContextString();
+		    : $citation->getPreContextString() . ' <mark class="hi">' . $this->_slip->getWordform() . '</mark> ' . $citation->getPostContextString();
 			$html .= <<<HTML
 				<li style="border-top: 1px solid gray;">
 					<span id="citation_{$citation->getId()}">
@@ -698,7 +698,7 @@ HTML;
               } else {                                                    //paper slip
                 preContextString = $('#preContextString').val();
                 postContextString = $('#postContextString').val();
-                html = preContextString + ' <mark>' + $('#wordform').val() + '</mark> ' + postContextString;
+                html = preContextString + ' <mark class="hi">' + $('#wordform').val() + '</mark> ' + postContextString;
               }
               let cid = context.attr('data-citationid');
               
@@ -926,7 +926,7 @@ HTML;
               var wordId = $(this).parents('div.collocate').attr('data-wordid');
               $(this).parent().siblings('.collocateLink').addClass('existingCollocate');
               var filename = '{$this->_slip->getFilename()}';
-              var headwordId = $('#slipWordInContext').attr('data-headwordid');
+              var headwordId = $('.slipWordInContext').attr('data-headwordid');
               var slipId = '{$this->_slip->getId()}';
               var url = 'ajax.php?action=saveLemmaGrammar&id='+wordId+'&filename='+filename;
               url += '&headwordId='+headwordId+'&slipId='+slipId+'&grammar='+$(this).text();

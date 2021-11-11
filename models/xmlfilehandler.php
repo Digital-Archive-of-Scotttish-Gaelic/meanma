@@ -94,7 +94,7 @@ XPATH;
 		$word = $this->_xml->xpath($xpath);
 		$wordString = functions::cleanForm($word[0]);   //strips tags
 		$context["word"] = ($tagCollocates || $tagContext)
-			? '<div style="display:inline; margin-left:4px;"><mark>' . $wordString . '</mark></div>'
+			? '<div style="display:inline; margin-left:4px;"><mark class="hi">' . $wordString . '</mark></div>'
 			: $wordString;
 
 		$xpath = <<<XPATH
