@@ -134,6 +134,10 @@ HTML;
 			$postIncrementDisable, "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"]);
 	}
 
+	public static function getDefaultContext() {
+
+	}
+
 	//GETTERS
 	public function getId() {
 		return $this->_id;

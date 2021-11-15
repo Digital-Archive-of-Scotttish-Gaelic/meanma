@@ -102,6 +102,8 @@ switch ($_REQUEST["action"]) {
 		} else {
 			$citation = new citation($db, $_GET["id"]);
 		}
+		$slip = $citation->getSlip();
+		$slipType = $slip->getType();
 		$translations = $citation->getTranslations();
 		$translationCount = count($translations);
 		$translationIds = $firstTranslationContent = $firstTranslationType = "";
@@ -115,12 +117,14 @@ switch ($_REQUEST["action"]) {
 			"firstTranslationContent" => $firstTranslationContent, "firstTranslationType" => $firstTranslationType,
 			"translationCount" => $translationCount, "translationIds" => $translationIds);
 		//check whether we are dealing with a corpus slip or a paper slip
-		if ($_GET["slipType"] == "corpus") {  //corpus slip
+		if ($slipType == "corpus") {  //corpus slip
 			$citationData["context"] = $citation->getContext(true);
 		} else {                                                                    //paper slip
 			$citationData["preContextString"] = $citation->getPreContextString();
 			$citationData["postContextString"] = $citation->getPostContextString();
 		}
+
+		$citationData["type"] = $slipType;
 		echo json_encode($citationData);
 		break;
 	case "saveCitation":
