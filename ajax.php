@@ -174,7 +174,9 @@ switch ($_REQUEST["action"]) {
 		echo json_encode(array("id" => $slip->getId(), "wordclass" => $slip->getWordClass(), "pos" => $slip->getPOS()));
 		break;
 	case "getSenseCategoriesForNewWordclass":
-		$slip = new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db);
+		$slip = ($_GET["slipType"] == "corpus")
+			? new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db)
+			: new paper_slip($_GET["auto_id"], $_GET["entryId"], null, $db);
 		$oldEntryId = $slip->getEntryId();
 		$slip->updateEntry($_GET["headword"], $_GET["wordclass"]);  //update entry with new wordclass
 		$slip->saveSlip($_GET);

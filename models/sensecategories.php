@@ -31,7 +31,7 @@ SQL;
     $db->exec("DELETE FROM slip_sense WHERE sense_id = :id", array(":id" => $id));
   }
 
-  public static function  deleteSensesForSlip($slipId) {
+  public static function deleteSensesForSlip($slipId) {
   	$db = new database();
   	$db->exec("DELETE FROM slip_sense WHERE slip_id = :slipId", array("slipId" => $slipId));
   }

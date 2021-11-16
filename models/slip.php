@@ -14,7 +14,8 @@ class slip
 	protected $_filename = null;
 	protected $_wid = null;
 	protected $_pos, $_wordform;
-	protected $_starred, $_notes, $_locked, $_ownedBy, $_entryId, $_headword, $_slipStatus;
+	protected $_locked = 0;
+	protected $_starred, $_notes, $_ownedBy, $_entryId, $_headword, $_slipStatus;
 	protected $_wordClass, $_lastUpdatedBy, $_lastUpdated;
 	protected $_isNew;
 	protected $_wordClasses = array(
@@ -218,6 +219,8 @@ SQL;
 		$this->_slipMorph->setType($this->getWordClass());
 		$this->_slipMorph->populateClass($params);
 		$this->saveSlipMorph();
+		//ensure locked has some value
+		$locked = $this->getLocked() ? $this->getLocked() : 0;
 		$sql = <<<SQL
         UPDATE slips 
             SET text_id = ?, reference = ?, locked = ?, starred = ?, notes = ?, 
@@ -225,7 +228,7 @@ SQL;
              		updatedBy = ?, lastUpdated = now()
             WHERE auto_id = ?
 SQL;
-		$this->_db->exec($sql, array($this->getTextId(), $this->getReference(), $this->getLocked(), $this->getStarred(),
+		$this->_db->exec($sql, array($this->getTextId(), $this->getReference(), $locked, $this->getStarred(),
 			$this->getNotes(), $this->getEntryId(), $this->getWordform(),
 			$this->getSlipStatus(), $this->getLastUpdatedBy(), $this->getId()));
 		return $this;
@@ -253,7 +256,7 @@ SQL;
 			//remove all the senses
 			sensecategories::deleteSensesForSlip($this->getId());
 		}
-		$this->_entry = entries::getEntryByHeadwordAndWordclass($headword, $wordclass);
+		$this->_entry = entries::getEntryByHeadwordAndWordclass($headword, $wordclass, $this->_db);
 	}
 
 	protected function loadSenses() {

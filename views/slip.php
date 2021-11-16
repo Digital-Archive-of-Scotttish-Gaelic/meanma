@@ -12,7 +12,6 @@ class slip
     $this->_slip = $slip;
     $this->_citations = $this->_slip->getCitations();
   }
-
   public function show($action) {
 		switch ($action) {
 			case "edit":
@@ -23,7 +22,7 @@ class slip
 
   private function _writeEditForm() {
   	$user = models\users::getUser($_SESSION["user"]);
-	  $locked = $this->_slip->getLocked();
+	  $locked = $this->_slip->getLocked() ? $this->_slip->getLocked() : 0;
 		$lockedHtml = $user->getSuperuser() ? $this->_getLockedDiv($locked) : '';
   	$checked = $this->_slip->getStarred() ? "checked" : "";
   	$statusOptionHtml = "";
@@ -1042,12 +1041,13 @@ HTML;
               $('#senseCategorySelect').empty();
               $('#senseCategorySelect').append('<option data-category="">-- select a category --</option>');
               var url = 'ajax.php?action=getSenseCategoriesForNewWordclass';
+              url += '&slipType={$this->_slip->getType()}&entryId={$this->_slip->getEntryId()}';
               url += '&filename={$this->_slip->getFilename()}&id={$this->_slip->getWid()}&auto_id={$this->_slip->getId()}';
               url += '&pos={$this->_slip->getPOS()}&headword=' + headword + '&wordclass=' + wordclass;
               $.getJSON(url, function (data) {
                   $.each(data, function (index, sense) {
                     var html = '<option data-sense="' + index + '" data-sense-description="' + sense.description + '"';
-                    html += ' data-sense-name="' + sense.name + '" value="' + index + '">' + sense.name + '</option>';
+                    html += ' data-sense-name="' + sense.name + '" value="' + index + '">' + sense.name + '</optin>';
                     $('#senseCategorySelect').append(html);
                   });
               })
