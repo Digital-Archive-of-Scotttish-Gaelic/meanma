@@ -179,6 +179,7 @@ switch ($_REQUEST["action"]) {
 			: new paper_slip($_GET["auto_id"], $_GET["entryId"], null, $db);
 		$oldEntryId = $slip->getEntryId();
 		$slip->updateEntry($_GET["headword"], $_GET["wordclass"]);  //update entry with new wordclass
+		$_GET["entryId"] = $slip->getEntryId();
 		$slip->saveSlip($_GET);
 		// check the old entry for this slip and delete if now empty
 		if (entries::isEntryEmpty($oldEntryId)) {
@@ -189,7 +190,7 @@ switch ($_REQUEST["action"]) {
 		foreach ($senses as $sense) {
 			$unusedSenseInfo[$sense->getId()] = array("name" => $sense->getName(), "description" => $sense->getDescription());
 		}
-		echo json_encode($unusedSenseInfo);
+		echo json_encode(array("entryId" => $slip->getEntryId(), "senseInfo" => $unusedSenseInfo));
 		break;
   case "saveSlip":
     $slip = ($_GET["slipType"] == "corpus")

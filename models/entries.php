@@ -12,7 +12,7 @@ class entries
 SQL;
 		$result = $db->fetch($sql, array(":headword" => $headword, ":wordclass" => $wordclass, ":groupId" => $_SESSION["groupId"]));
 		$entry = null;
-		if ($result) {
+		if (!empty($result)) {
 			$result = $result[0];
 			$entry = new entry($result["id"]);
 			$entry->setGroupId($result["group_id"]);

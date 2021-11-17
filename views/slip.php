@@ -1045,8 +1045,11 @@ HTML;
               url += '&slipType={$this->_slip->getType()}&entryId={$this->_slip->getEntryId()}';
               url += '&filename={$this->_slip->getFilename()}&id={$this->_slip->getWid()}&auto_id={$this->_slip->getId()}';
               url += '&pos={$this->_slip->getPOS()}&headword=' + headword + '&wordclass=' + wordclass;
-              $.getJSON(url, function (data) {
-                  $.each(data, function (index, sense) {
+							var entryId;              
+              $.getJSON(url, function (data) { 
+                  entryId = data.entryId;
+                  $('#citationContext').attr('data-entryid', entryId);
+                  $.each(data.senseInfo, function (index, sense) {
                     var html = '<option data-sense="' + index + '" data-sense-description="' + sense.description + '"';
                     html += ' data-sense-name="' + sense.name + '" value="' + index + '">' + sense.name + '</optin>';
                     $('#senseCategorySelect').append(html);
