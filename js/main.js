@@ -87,6 +87,8 @@ $(function () {
   $('#slipModal').on('show.bs.modal', function (event) {
     var modal = $(this);
     var slipLink = $(event.relatedTarget);
+
+    console.log(slipLink);
     //reset lock buttons
     $('.lockBtn').addClass('d-none');
     $('#lockedBtn').attr('title', 'Slip is locked - click to request unlock');
@@ -98,9 +100,9 @@ $(function () {
     var headword = slipLink.data('headword');
     var pos = slipLink.data('pos');
     var id = slipLink.data('id');
-    var xml = slipLink.data('xml');
+    var filename = slipLink.data('filename');
     //var filenameElems = xml.split('_');
-    var textId = xml.split('_')[0];
+    var textId = filename.split('_')[0];
     var uri = slipLink.data('uri');
     var date = slipLink.data('date');
     var title = slipLink.data('title');
@@ -110,7 +112,7 @@ $(function () {
     var body = '';
     var header = headword;
     //write the hidden info needed for slip edit
-    $('#slipFilename').val(xml);
+    $('#slipFilename').val(filename);
     $('#slipId').val(id);
     $('#slipPOS').val(pos);
     $('#auto_id').val(auto_id);
@@ -119,7 +121,7 @@ $(function () {
     var canEdit;
     var isOwner;
     //get the slip info from the DB
-    $.getJSON('ajax.php?action=loadSlip&filename='+xml+'&id='+id+'&index='+resultindex+'&auto_id='+auto_id
+    $.getJSON('ajax.php?action=loadSlip&filename='+filename+'&id='+id+'&index='+resultindex+'&auto_id='+auto_id
       +'&pos='+pos+'&entryId='+entryId, function (data) {
       if (data.wordClass) {
         var wc = data.wordClass;

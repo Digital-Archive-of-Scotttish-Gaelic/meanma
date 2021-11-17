@@ -22,6 +22,7 @@ class slip
 
   private function _writeEditForm() {
   	$user = models\users::getUser($_SESSION["user"]);
+  	$filename = $this->_slip->getFilename() ? $this->_slip->getFilename() : $_REQUEST["filename"];
 	  $locked = $this->_slip->getLocked() ? $this->_slip->getLocked() : 0;
 		$lockedHtml = $user->getSuperuser() ? $this->_getLockedDiv($locked) : '';
   	$checked = $this->_slip->getStarred() ? "checked" : "";
@@ -96,7 +97,7 @@ HTML;
         </div>
         <div class="form-group">
           <div class="input-group">
-            <input type="hidden" name="filename" value="{$_REQUEST["filename"]}">
+            <input type="hidden" name="filename" value="{$filename}">
             <input type="hidden" name="id" value="{$_REQUEST["wid"]}">
             <input type="hidden" id="locked" name="locked" value="{$locked}";
             <input type="hidden" id="auto_id" name="auto_id" value="{$this->_slip->getId()}">
@@ -644,7 +645,7 @@ HTML;
     $html = <<<HTML
         <script>  
           $(function () {      
-            
+    /*        
             //demand a Text ID if none is found 
             if ($('#textId').val() == '') {
               $('#enterTextIdModal').modal({
@@ -652,7 +653,7 @@ HTML;
                 backdrop: 'static'
               });
             }
-            
+    */        
             //save text ID for slip
             $('#saveTextId').on('click', function () {
               let textId = $('#enterTextId').val();

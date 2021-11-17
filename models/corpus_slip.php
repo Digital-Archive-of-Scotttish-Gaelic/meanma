@@ -39,6 +39,7 @@ SQL;
 SQL;
     $result = $this->_db->fetch($sql, array(":auto_id" => $this->getId()));
     $slipData = $result[0];
+		$slipData["text_id"] = $this->getTextId();
 	  $this->_entry = entries::getEntryById($slipData["entry_id"], $this->_db);
     $this->populateClass($slipData);
     $this->loadSlipMorph();  //load the slipMorph data from the DB
