@@ -200,6 +200,7 @@ HTML;
 	          <textarea class="form-control" name="preContextString" id="preContextString" rows="2"></textarea>
 	          <script>
 	            CKEDITOR.replace('preContextString', {
+	              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
 	              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js',
 	              autoParagraph: false
 	            });
@@ -213,6 +214,7 @@ HTML;
 	          <textarea class="form-control" name="postContextString" id="postContextString" rows="2"></textarea>
 	          <script>
 	            CKEDITOR.replace('postContextString', {
+	              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
 	              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js',
 	              autoParagraph: false
 	            });

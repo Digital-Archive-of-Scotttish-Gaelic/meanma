@@ -170,13 +170,11 @@ $(function () {
     })
       .done(function () {
         modal.find('.modal-title').html(header);
-        console.log(starred);
+        var slipNumHtml = '§'+slipId;
         if (starred === 1) {
-          modal.find('#slipChecked').html('Ch &#x2713;');
-        } else {
-          modal.find('#slipChecked').html('');
+          slipNumHtml += ' ✅';
         }
-        modal.find('#slipNo').text('§'+slipId);
+        modal.find('#slipNo').text(slipNumHtml);
         $('#auto_id').val(slipId);
         modal.find('.modal-body').html(body);
         if (canEdit) {
