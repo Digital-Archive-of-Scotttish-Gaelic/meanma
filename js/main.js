@@ -67,6 +67,11 @@ $(function () {
     var name = $('#modalSenseName').val();
     var description = $('#modalSenseDescription').val();
     var id = $('#senseId').val();
+    var senseBadge = $('[data-sense='+id+']');
+    senseBadge.attr('data-title', description);
+    senseBadge.attr('data-description', description);
+    senseBadge.attr('data-sense-name', name);
+    senseBadge.text(name);
     var url = 'ajax.php?action=editSense&id=' + id;
     url += '&name=' + encodeURIComponent(name) + '&description=' + encodeURIComponent(description);
     //check if a slip association is to be removed
@@ -75,10 +80,7 @@ $(function () {
     }
     $('#senseModal').modal('hide');
     $.ajax({url: url}, function () {
-    })
-      .done(function(response) {
-        location.reload();  //refresh the page
-      });
+    });
   });
 
   /**
