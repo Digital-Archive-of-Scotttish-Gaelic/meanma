@@ -132,8 +132,8 @@ switch ($_REQUEST["action"]) {
 		$citation->setType($_GET["type"]);
 		$citation->setPreContextScope($_GET["preScope"]);
 		$citation->setPostContextScope($_GET["postScope"]);
-		$citation->setPreContextString($_GET["preContextString"]);
-		$citation->setPostContextString($_GET["postContextString"]);
+		$citation->setPreContextString($_POST["preContextString"]);
+		$citation->setPostContextString($_POST["postContextString"]);
 		$citation->save();
 		break;
 	case "createTranslation":

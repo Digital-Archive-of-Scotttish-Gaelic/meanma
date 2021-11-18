@@ -194,10 +194,27 @@ HTML;
 
 		} else {            //slip type is paper
 			$inputHtml = <<<HTML
-				<div>
-					<textarea class="form-control" id="preContextString"></textarea>
-					<input type="text" name="wordform" id="wordform" value="{$this->_slip->getWordform()}"/>
-					<textarea class="form-control" id="postContextString"></textarea>
+				<div>					
+					<div class="form-group">
+	          <textarea class="form-control" name="preContextString" id="preContextString" rows="2"></textarea>
+	          <script>
+	            CKEDITOR.replace('preContextString', {
+	              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js',
+	              autoParagraph: false
+	            });
+	          </script>
+	        </div>
+	        
+					<input type="text" class="form-control" name="wordform" id="wordform" value="{$this->_slip->getWordform()}"/>
+					<div class="form-group">
+	          <textarea class="form-control" name="postContextString" id="postContextString" rows="2"></textarea>
+	          <script>
+	            CKEDITOR.replace('postContextString', {
+	              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js',
+	              autoParagraph: false
+	            });
+	          </script>
+	        </div>
 					<span data-citationid="" data-entryid="{$this->_slip->getEntryId()}" data-sliptype="paper" id="citationContext" class="citationContext"/>
 				</div>
 HTML;
@@ -645,7 +662,7 @@ HTML;
     $html = <<<HTML
         <script>  
           $(function () {      
-    /*        
+            
             //demand a Text ID if none is found 
             if ($('#textId').val() == '') {
               $('#enterTextIdModal').modal({
@@ -653,7 +670,7 @@ HTML;
                 backdrop: 'static'
               });
             }
-    */        
+            
             //save text ID for slip
             $('#saveTextId').on('click', function () {
               let textId = $('#enterTextId').val();
@@ -692,8 +709,8 @@ HTML;
                   $('#citationContext').attr('data-postcontextscope', data.postScope);
                   $('#citationContext').html(data.context['html']);
                 } else {              //paper slip
-                  $('#preContextString').val(data.preContextString);
-                  $('#postContextString').val(data.postContextString);
+                  CKEDITOR.instances["preContextString"].setData(data.preContextString); 
+                  CKEDITOR.instances["postContextString"].setData(data.postContextString); 
                 }
               });
             });
@@ -710,16 +727,22 @@ HTML;
 	              preScope = context.attr('data-precontextscope');
 	              postScope = context.attr('data-postcontextscope');
               } else {                                                    //paper slip
-                preContextString = $('#preContextString').val();
-                postContextString = $('#postContextString').val();
+                preContextString = CKEDITOR.instances['preContextString'].getData();
+                postContextString = CKEDITOR.instances['postContextString'].getData();
                 html = preContextString + ' <mark class="hi">' + $('#wordform').val() + '</mark> ' + postContextString;
               }
-              let cid = context.attr('data-citationid');
-              
+              let cid = context.attr('data-citationid');           
               let type = $('#citationType').val();     
               var url = 'ajax.php?action=saveCitation&id='+cid+'&preScope='+preScope+'&postScope='+postScope+'&type='+type;
-              url += '&preContextString='+preContextString+'&postContextString='+postContextString+'&slipType='+slipType;
-              $.ajax(url)
+              url += '&slipType='+slipType;
+              $.ajax({
+                method: "post",
+                url: url,
+                data: {
+                  preContextString: preContextString,
+                  postContextString: postContextString
+                }
+              })
               .done(function () {
                 //check if citation is already in list
                 if ($('#citation_'+cid).length) {   //citation exists so update it 
