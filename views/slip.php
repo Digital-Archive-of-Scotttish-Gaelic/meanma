@@ -35,12 +35,12 @@ HTML;
 	  }
     echo <<<HTML
 				<div class="row flex-fill" style="min-height: 0;">
-					<div id="lhs" class="col-6 mh-100" style="overflow-y: scroll; border: 1px solid red;">
+					<div id="lhs" class="col-6 mh-100" style="overflow-y: scroll;">
 						{$this->_writeCitations()}
 						<!-- {$this->_writeCollocatesView()} -->
         </div>  <!-- end LHS -->
         
-				<div id="rhs" class="col-6 mh-100" style="overflow-y: scroll; border: 1px solid green;"> <!-- RHS panel -->
+				<div id="rhs" class="col-6 mh-100" style="overflow-y: scroll;"> <!-- RHS panel -->
 	        <div class="form-group" id="slipChecked">
 	          <div class="form-check form-check-inline">
 	            <input class="form-check-input" type="checkbox" name="starred" id="slipStarred" {$checked}>

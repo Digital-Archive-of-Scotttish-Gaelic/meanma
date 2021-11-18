@@ -87,8 +87,6 @@ $(function () {
   $('#slipModal').on('show.bs.modal', function (event) {
     var modal = $(this);
     var slipLink = $(event.relatedTarget);
-
-    console.log(slipLink);
     //reset lock buttons
     $('.lockBtn').addClass('d-none');
     $('#lockedBtn').attr('title', 'Slip is locked - click to request unlock');
@@ -101,7 +99,6 @@ $(function () {
     var pos = slipLink.data('pos');
     var id = slipLink.data('id');
     var filename = slipLink.data('filename');
-    //var filenameElems = xml.split('_');
     var textId = filename.split('_')[0];
     var uri = slipLink.data('uri');
     var date = slipLink.data('date');
@@ -120,11 +117,13 @@ $(function () {
     $('#slipHeadword').html(headword);
     var canEdit;
     var isOwner;
+    var starred;
     //get the slip info from the DB
     $.getJSON('ajax.php?action=loadSlip&filename='+filename+'&id='+id+'&index='+resultindex+'&auto_id='+auto_id
       +'&pos='+pos+'&entryId='+entryId, function (data) {
       if (data.wordClass) {
         var wc = data.wordClass;
+        starred = data.starred;
         if (wc=='noun') {
           header += ' <em>n.</em>';
         }
@@ -169,6 +168,12 @@ $(function () {
     })
       .done(function () {
         modal.find('.modal-title').html(header);
+        console.log(starred);
+        if (starred === 1) {
+          modal.find('#slipChecked').html('Ch &#x2713;');
+        } else {
+          modal.find('#slipChecked').html('');
+        }
         modal.find('#slipNo').text('§'+slipId);
         $('#auto_id').val(slipId);
         modal.find('.modal-body').html(body);

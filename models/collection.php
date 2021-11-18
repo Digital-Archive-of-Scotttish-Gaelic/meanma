@@ -487,7 +487,8 @@ SQL;
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                <span class="text-muted" style="float:right;" id="slipNo">§</span>
+                <span style="float:right;" id="slipChecked"></span>
+                <span class="text-muted" style="float:right;" id="slipNo">§</span>          
               </div>
               <div class="modal-body">
               </div>
