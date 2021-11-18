@@ -161,6 +161,7 @@ switch ($_REQUEST["action"]) {
 		}
 		collection::deleteSlips($_GET["slipIds"]);
 		break;
+		/*
 	case "loadSlipData":
 		$result = collection::getSlipInfoBySlipId($_GET["id"], $db, $_GET["groupId"]);
 		$slipInfo = $result[0];
@@ -169,6 +170,7 @@ switch ($_REQUEST["action"]) {
 		$slipInfo["context"] = $context;
 		echo json_encode($slipInfo);
 		break;
+		*/
 	case "createPaperSlip":
 		$slip = new paper_slip(null, $_GET["entryId"], $_GET["wordform"], $db);
 		echo json_encode(array("id" => $slip->getId(), "wordclass" => $slip->getWordClass(), "pos" => $slip->getPOS()));

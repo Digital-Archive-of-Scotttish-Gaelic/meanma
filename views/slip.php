@@ -41,15 +41,15 @@ HTML;
         </div>  <!-- end LHS -->
         
 				<div id="rhs" class="col-6 mh-100" style="overflow-y: scroll;"> <!-- RHS panel -->
-	        <div class="form-group" id="slipChecked">
-	          <div class="form-check form-check-inline">
+	        <div class="form-group row float-right" id="slipChecked">
+	          <div class="col-3 form-check form-check-inline">
 	            <input class="form-check-input" type="checkbox" name="starred" id="slipStarred" {$checked}>
 	            <label class="form-check-label" for="slipStarred">checked</label>
 	          </div>
 	        </div>
-	        <div class="form-group row">
-						<label for="slipStatus" class="col-form-label col-sm-1">Status:</label>
-						<select id="slipStatus">
+	        <div class="form-group row" style="clear:both;">
+						<label for="slipStatus" class="col-form-label col-sm-2">Status:</label>
+						<select class="form-control col-1" id="slipStatus">
 							{$statusOptionHtml}
 						</select>
 					</div>
@@ -60,8 +60,8 @@ HTML;
 	        </div>
 	        <div id="morphoSyntactic" class="collapse editSlipSectionContainer show">
 	          <div class="form-group row">
-	            <label class="col-form-label col-sm-1" for="slipHeadword">Headword:</label>
-	            <input class="col-sm-3 form-control" type="text" id="slipHeadword" name="slipHeadword" value="{$this->_slip->getHeadword()}"> 
+	            <label class="col-sm-2 col-form-label" for="slipHeadword">Headword:</label>
+	            <input class="col-4 form-control" type="text" id="slipHeadword" name="slipHeadword" value="{$this->_slip->getHeadword()}"> 
 	          </div>
             {$this->_writePartOfSpeechSelects()}
 				</div> <!-- end morphoSyntactic -->
@@ -72,7 +72,7 @@ HTML;
           </a></small>
         </div>
         <div id="notesSection" class="form-group collapse show">
-          <label for="slipNotes">Notes:</label>
+          <label class="form-label" for="slipNotes">Notes:</label>
           <textarea class="form-control" name="slipNotes" id="slipNotes" rows="3">{$this->_slip->getNotes()}</textarea>
           <script>
             CKEDITOR.replace('slipNotes', {
@@ -82,10 +82,11 @@ HTML;
           </script>
         </div>
         <div id="referenceSection" class="form-group collapse show">
-          <label for="reference">Reference:</label>
+          <label class="form-label" for="reference">Reference:</label>
           <textarea class="form-control" name="reference" id="reference" rows="2">{$this->_slip->getReference()}</textarea>
           <script>
             CKEDITOR.replace('reference', {
+              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
               customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js',
               stylesSet : 'my_styles'
             });
@@ -205,7 +206,9 @@ HTML;
 	          </script>
 	        </div>
 	        
-					<input type="text" class="form-control" name="wordform" id="wordform" value="{$this->_slip->getWordform()}"/>
+	        <div class="form-group">
+						<input type="text" class="form-control" name="wordform" id="wordform" value="{$this->_slip->getWordform()}"/>
+					</div>
 					<div class="form-group">
 	          <textarea class="form-control" name="postContextString" id="postContextString" rows="2"></textarea>
 	          <script>
@@ -226,8 +229,8 @@ HTML;
                 <div class="modal-body">
                     {$inputHtml}
 										<div class="row">		
-											<label class="col-2" for="citationType">Type:</label>
-			                <select id="citationType" name="citationType" class="form-control col-3">
+											<label class="col-4 " for="citationType">Citation type:</label>
+			                <select id="citationType" name="citationType" class="form-control col-4">
 			                  <option value="long">long</option>
 			                  <option value="short">short</option>
 			                </select>               
@@ -367,30 +370,30 @@ HTML;
     }
     $html .= <<<HTML
         <div>
-          <h5>Morphological information</h5>
+          <!--h5>Morphological information</h5-->
             <div id="prepSelects" class="{$prepSelectHide}">
-              <div class="row form-group form-inline">
-                <label for="posPrepMode" class="col-form-label col-sm-1">Mode:</label>
+              <div class="row form-group">
+                <label for="posPrepMode" class="col-form-label col-2">Mode:</label>
                 <select name="prep_mode" id="posPrepMode" class="form-control col-2">
                   {$optionsHtml["prep_mode"]}
                 </select>
               </div>
               <span id="conjPosPrepOptions" class="{$conjPosPrepHide}">
-                <div class="row form-group form-inline">
-                  <label for="posPrepPerson" class="col-form-label col-sm-1">Person:</label>
+                <div class="row form-group">
+                  <label for="posPrepPerson" class="col-form-label col-sm-2">Person:</label>
                   <select name="prep_person" id="posPrepPerson" class="form-control col-2">
                     {$optionsHtml["prep_person"]}
                   </select>
                 </div>
-                <div class="row form-group form-inline">
-                  <label for="posPrepNumber" class="col-form-label col-sm-1">Number:</label>
+                <div class="row form-group">
+                  <label for="posPrepNumber" class="col-form-label col-sm-2">Number:</label>
                   <select name="prep_number" id="posPrepNumber" class="form-control col-2">
                     {$optionsHtml["prep_number"]}
                   </select>
                 </div>
                   <span id="genderPrepOptions" class="{$genderPrepHide}">
-                    <div class="row form-group form-inline">
-                      <label for="posPrepGender" class="col-form-label col-sm-1">Gender:</label>
+                    <div class="row form-group">
+                      <label for="posPrepGender" class="col-form-label col-sm-2">Gender:</label>
                       <select name="prep_gender" id="posPrepGender" class="form-control col-2">
                         {$optionsHtml["prep_gender"]}
 											</select>
@@ -399,68 +402,68 @@ HTML;
 								</span>
             </div>
             <div id="nounSelects" class="{$nounSelectHide}">
-                <div class="row form-group form-inline">
-	                <label for="posNumberGender" class="col-form-label col-sm-1">Number:</label>
-	                <select name="numgen" id="posNumberGender" class="form-control col-2">
+                <div class="row form-group">
+	                <label for="posNumberGender" class="col-form-label col-sm-2">Number:</label>
+	                <select name="numgen" id="posNumberGender" class="form-control col-4">
 	                  {$optionsHtml["numgen"]}
 	                </select>
 	              </div>
-	              <div class="row form-group form-inline">
-	                <label for="posCase" class="col-form-label col-sm-1">Case:</label>
+	              <div class="row form-group">
+	                <label for="posCase" class="col-form-label col-sm-2">Case:</label>
 	                <select name="case" id="posCase" class="form-control col-2">
 	                  {$optionsHtml["case"]}
 	                </select>
 	              </div>
             </div>
             <div id="verbSelects" class="{$verbSelectHide}">
-                <div class="row form-group form-inline">
-	                <label for="posMode" class="col-form-label col-sm-1">Mode:</label>
+                <div class="row form-group">
+	                <label for="posMode" class="col-form-label col-sm-2">Mode:</label>
 	                <select name="mode" id="posMode" class="form-control col-2">
 	                  {$optionsHtml["mode"]}
 	                </select>
 	              </div>
                 <span id="nonVerbalNounOptions" class="{$verbalNounHide}">
                   <span id="imperativeVerbOptions" class="{$impVerbSelectHide}">
-                    <div class="row form-group form-inline">
-	                    <label for="posImpPerson" class="col-form-label col-sm-1">Person:</label>
-		                  <select name="imp_person" id="posImpPerson" class="form-control col-2">
+                    <div class="row form-group">
+	                    <label for="posImpPerson" class="col-form-label col-sm-2">Person:</label>
+		                  <select name="imp_person" id="posImpPerson" class="form-control col-4">
 		                    {$optionsHtml["imp_person"]}
 		                  </select>
 		                </div>
-		                <div class="row form-group form-inline">
-		                  <label for="posImpNumber" class="col-form-label col-sm-1">Number:</label>
-		                  <select name="imp_number" id="posImpNumber" class="form-control col-2">
+		                <div class="row form-group">
+		                  <label for="posImpNumber" class="col-form-label col-sm-2">Number:</label>
+		                  <select name="imp_number" id="posImpNumber" class="form-control col-4">
 		                    {$optionsHtml["imp_number"]}
 		                  </select>
 		                </div>
 	                </span>
 	                <span id="finiteVerbOptions" class="{$finVerbSelectHide}">
-	                  <div class="row form-group form-inline">
-	                    <label for="posFinPerson" class="col-form-label col-sm-1">Person:</label>
+	                  <div class="row form-group">
+	                    <label for="posFinPerson" class="col-form-label col-sm-2">Person:</label>
 		                  <select name="fin_person" id="posFinPerson" class="form-control col-2">
 		                    {$optionsHtml["fin_person"]}
 		                  </select>
 		                </div>
-		                <div class="row form-group form-inline">
-		                  <label for="posFinNumber" class="col-form-label col-sm-1">Number:</label>
+		                <div class="row form-group">
+		                  <label for="posFinNumber" class="col-form-label col-sm-2">Number:</label>
 		                  <select name="fin_number" id="posFinNumber" class="form-control col-2">
 		                    {$optionsHtml["fin_number"]}
 		                  </select>
 		                </div>
-		                <div class="row form-group form-inline">
-		                  <label for="posStatus" class="col-form-label col-sm-1">Status:</label>
+		                <div class="row form-group">
+		                  <label for="posStatus" class="col-form-label col-sm-2">Status:</label>
 		                  <select name="status" id="posStatus" class="form-control col-2">
 		                    {$optionsHtml["status"]}
 		                  </select>
 		                </div>
-		                <div class="row form-group form-inline">
-	                    <label for="posTense" class="col-form-label col-sm-1">Tense:</label>
+		                <div class="row form-group">
+	                    <label for="posTense" class="col-form-label col-sm-2">Tense:</label>
 	                    <select name="tense" id="posTense" class="form-control col-2">
 	                      {$optionsHtml["tense"]}
 	                    </select>
 	                  </div>
-	                  <div class="row form-group form-inline">
-	                    <label for="posMood" class="col-form-label col-sm-1">Mood:</label>
+	                  <div class="row form-group">
+	                    <label for="posMood" class="col-form-label col-sm-2">Mood:</label>
 	                    <select name="mood" id="posMood" class="form-control col-2">
 	                      {$optionsHtml["mood"]}
 	                    </select>
@@ -483,9 +486,9 @@ HTML;
 HTML;
     }
     $html = <<<HTML
-        <div id="wordClassSelect" class="form-group form-inline">
-          <label for="wordClass" class="col-form-label"><h5>Part-of-speech:</h5></label>
-          <select name="wordClass" id="wordClass" class="form-control col-3">
+        <div id="wordClassSelect" class="row form-group">
+          <label for="wordClass" class="col-sm-2 col-form-label">Part-of-speech:</label>
+          <select name="wordClass" id="wordClass" class="form-control col-sm-3">
             {$optionHtml}
           </select>
         </div>
@@ -525,31 +528,31 @@ HTML;
           </a></small>
         </div>
         <div id="senses" class="editSlipSectionContainer collapse show">
-          <h5>Sense Categories</h5>
+          <!--h5>Sense Categories</h5-->
           <div class="form-group row">
-            <div class="col-md-3">
-                  <label for="senseCategorySelect">Choose existing sense category:</label>
+            <div class="col-sm-2">
+                  <label for="senseCategorySelect" class="col-form-label">Choose existing sense category:</label>
             </div>
             <div>
-                <select id="senseCategorySelect">{$dropdownHtml}</select>
+                <select class="form-control" id="senseCategorySelect">{$dropdownHtml}</select>
             </div>
-            <div class="col-md-1">
+            <div class="col-sm-2">
                   <button type="button" class="form-control btn btn-primary" id="chooseSenseCategory">Add</button>
               </div>
           </div>
           <div class="form-group row">
-              <div class="col-md-3">
-                  <label for="senseCategory">Assign to new sense category:</label>
+              <div class="col-sm-2">
+                  <label for="senseCategory" class="col-form-label">Assign to new sense category:</label>
               </div>
-              <div class="col-md-2">
-									<label for="newSenseName">Name</label>
+              <div class="col-sm-2">
+									<label class="col-form-label" for="newSenseName">Name</label>
                   <input type="text" class="form-control" id="newSenseName">
               </div>
-              <div class="col-md-3">
-                  <label for="newSenseDefinition">Definition</label>
+              <div class="col-sm-3">
+                  <label class="col-form-label" for="newSenseDefinition">Definition</label>
                   <input type="text" class="form-control" id="newSenseDefinition">
 							</div>
-              <div class="col-md-1">
+              <div class="col-sm-2">
                   <button type="button" class="form-control btn btn-primary" id="addSense">Add</button>
               </div>
           </div>

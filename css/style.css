@@ -140,21 +140,13 @@ html,body {
     z-index: 10;
 }
 
-#slipChecked {
-    float: right;
-}
-
 #toggleMorphoSyntactic {
     margin-left: 10px;
 }
 
-#wordClassSelect {
-    margin-top: 10px;
-}
-
 #slipHeadword {
     font-weight: bold;
-    font-size: 14pt;
+    font-size: 12pt;
 }
 
 .slipContext {
@@ -237,13 +229,11 @@ a.updateContext:hover {
     color: red;
 }
 
+/*
 .editSlipSectionContainer {
-    /*clear: right;*/
-    margin: 10px;
-    padding: 10px;
     background-color: #efefef;
 }
-
+*/
 .deleteCat {
     color: white !important;
     cursor: pointer;
