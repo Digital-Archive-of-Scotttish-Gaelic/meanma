@@ -112,18 +112,18 @@ switch ($_REQUEST["action"]) {
 			$firstTranslationContent = $translations[0]->getContent();
 			$firstTranslationType = $translations[0]->getType();
 		}
+		$context = $citation->getContext(true); //check context 1st to ensure correct pre and post scope values
 		$citationData = array("id" => $citation->getId(), "preScope" => $citation->getPreContextScope(),
 			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(),
 			"firstTranslationContent" => $firstTranslationContent, "firstTranslationType" => $firstTranslationType,
 			"translationCount" => $translationCount, "translationIds" => $translationIds);
 		//check whether we are dealing with a corpus slip or a paper slip
 		if ($slipType == "corpus") {  //corpus slip
-			$citationData["context"] = $citation->getContext(true);
+			$citationData["context"] = $context;
 		} else {                                                                    //paper slip
 			$citationData["preContextString"] = $citation->getPreContextString();
 			$citationData["postContextString"] = $citation->getPostContextString();
 		}
-
 		$citationData["type"] = $slipType;
 		echo json_encode($citationData);
 		break;

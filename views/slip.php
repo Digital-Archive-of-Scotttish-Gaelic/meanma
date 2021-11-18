@@ -565,7 +565,7 @@ HTML;
 
   private function _writeCitations() {
     $html = <<<HTML
-			<div><h3>Citations</h3><ul id="citationList" style="list-style-type:none;">
+			<div><ul id="citationList" style="list-style-type:none;">
 HTML;
     $citations = $this->_citations;
     foreach ($citations as $citation) {
@@ -708,6 +708,13 @@ HTML;
                   $('#citationContext').attr('data-precontextscope', data.preScope);
                   $('#citationContext').attr('data-postcontextscope', data.postScope);
                   $('#citationContext').html(data.context['html']);
+                  //check for context limits
+                  if (data.context.preIncrementDisable) {
+                    $('#incrementPre').addClass("disabled");
+                  }
+                  if (data.context.postIncrementDisable) {
+                    $('#incrementPost').addClass("disabled");
+                  }
                 } else {              //paper slip
                   CKEDITOR.instances["preContextString"].setData(data.preContextString); 
                   CKEDITOR.instances["postContextString"].setData(data.postContextString); 
@@ -763,13 +770,7 @@ HTML;
                 $('#citationEditModal').modal('hide');
               });
             });
-            
-/*            
-            //save translation on focus out from translation CKEditor
-            CKEDITOR.instances['slipTranslation'].on("blur", function() {
-              saveTranslation();  
-						});
- */           
+                    
             //add translation
             $(document).on('click', '.addTranslationLink', function () {
               let citationId = $(this).attr('data-citationid');
@@ -1161,7 +1162,6 @@ HTML;
             }
  */           
             function writeCitationContext(filename, id) {
-					    var html = '';
 					    let citationId = $('#citationContext').attr('data-citationid');
 					    let preScope  = $('#citationContext').attr('data-precontextscope');
 					    let postScope = $('#citationContext').attr('data-postcontextscope');
