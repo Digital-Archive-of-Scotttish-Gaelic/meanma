@@ -25,6 +25,7 @@ class slip
   	$filename = $this->_slip->getFilename() ? $this->_slip->getFilename() : $_REQUEST["filename"];
 	  $locked = $this->_slip->getLocked() ? $this->_slip->getLocked() : 0;
 		$lockedHtml = $user->getSuperuser() ? $this->_getLockedDiv($locked) : '';
+		$lockedHtml = "";   //hide this for now
   	$checked = $this->_slip->getStarred() ? "checked" : "";
   	$statusOptionHtml = "";
   	for ($i=1; $i<11; $i++) {
@@ -42,18 +43,19 @@ HTML;
         
 				<div id="rhs" class="col-6 mh-100" style="overflow-y: scroll;"> <!-- RHS panel -->
 	        <div class="form-group row float-right" id="slipChecked">
-	          <div class="col-3 form-check form-check-inline">
+	          <div class="form-check form-check-inline">
 	            <input class="form-check-input" type="checkbox" name="starred" id="slipStarred" {$checked}>
 	            <label class="form-check-label" for="slipStarred">checked</label>
 	          </div>
 	        </div>
-	        <div class="form-group row" style="clear:both;">
+	        <!--div class="form-group row" style="clear:right;">
 						<label for="slipStatus" class="col-form-label col-sm-2">Status:</label>
 						<select class="form-control col-1" id="slipStatus">
 							{$statusOptionHtml}
 						</select>
-					</div>
-	        <div>
+					</div-->
+					</div-->
+	        <div class="row" style="clear:right;">
 	          <small><a href="#morphoSyntactic" id="toggleMorphoSyntactic" data-toggle="collapse" aria-expanded="true" aria-controls="morphoSyntactic">
 	            show/hide morphosyntax
 	          </a></small>
@@ -107,7 +109,7 @@ HTML;
             <input type="hidden" name="action" value="save">
             {$lockedHtml}
             <div class="mx-2">
-              <button name="close" class="windowClose btn btn-secondary">close</button>
+              <button name="close" class="windowClose btn btn-secondary">cancel</button>
               <button name="submit" id="savedClose" class="btn btn-primary">save</button>
              </div>
           </div>
@@ -188,8 +190,8 @@ HTML;
           <a class="updateContext btn-link" id="decrementPost"><i class="fas fa-minus"></i></a>
 					<a class="updateContext btn-link" id="incrementPost"><i class="fas fa-plus"></i></a>
         </div>
-        <div style="height: 20px;">
-          <a href="#" class="float-right" id="resetContext">reset context</a>
+        <div class="float-right" style="height: 20px;">
+          <a href="#" id="resetContext">reset context</a>
 				</div>
 HTML;
 
@@ -200,6 +202,8 @@ HTML;
 	          <textarea class="form-control" name="preContextString" id="preContextString" rows="2"></textarea>
 	          <script>
 	            CKEDITOR.replace('preContextString', {
+	              extraPlugins: 'editorplaceholder',
+                editorplaceholder: 'pre context here...',
 	              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
 	              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js',
 	              autoParagraph: false
@@ -208,12 +212,14 @@ HTML;
 	        </div>
 	        
 	        <div class="form-group">
-						<input type="text" class="form-control" name="wordform" id="wordform" value="{$this->_slip->getWordform()}"/>
+						<input type="text" class="form-control" name="wordform" id="wordform" placeholder="wordform" value="{$this->_slip->getWordform()}"/>
 					</div>
 					<div class="form-group">
 	          <textarea class="form-control" name="postContextString" id="postContextString" rows="2"></textarea>
 	          <script>
 	            CKEDITOR.replace('postContextString', {
+	              extraPlugins: 'editorplaceholder',
+                editorplaceholder: 'post context here...',
 	              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
 	              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js',
 	              autoParagraph: false
@@ -230,8 +236,8 @@ HTML;
             <div class="modal-content">
                 <div class="modal-body">
                     {$inputHtml}
-										<div class="row">		
-											<label class="col-4 " for="citationType">Citation type:</label>
+										<div class="row form-group" style="clear:right;">		
+											<label class="col-4" for="citationType">Citation type:</label>
 			                <select id="citationType" name="citationType" class="form-control col-4">
 			                  <option value="long">long</option>
 			                  <option value="short">short</option>
@@ -239,7 +245,7 @@ HTML;
 										</div>
                 </div>
                 <div class="modal-footer">
-									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
                   <button type="button" id="saveCitation" class="btn btn-primary">save</button>
 								</div>
             </div>
@@ -250,7 +256,7 @@ HTML;
 	}
 
 	private function _writeTranslationEditModal() {
-		$translationTypeHtml = '<select id="translationType" name="translationType" class="form-control col-1">';
+		$translationTypeHtml = '<select id="translationType" name="translationType" class="form-control col-4">';
 		foreach (models\translation::$types as $translationType) {
 			$translationTypeHtml .= <<<HTML
 				<option value="{$translationType}">{$translationType}</option>
@@ -262,8 +268,8 @@ HTML;
           <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    <h5>Translation</h5>
-			              <textarea class="form-control" name="citationTranslation" id="citationTranslation" rows="3">
+                  <div class="row form-group">
+			              <textarea name="citationTranslation" id="citationTranslation" rows="2">
 										</textarea>
 				            <script>
 				              CKEDITOR.replace('citationTranslation', {
@@ -271,13 +277,14 @@ HTML;
 				                customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
 				              });
 				            </script>
-					          <div>
-					            <label for="translationType">Translation type:</label>
-					            {$translationTypeHtml}
-										</div>
+			            </div>
+			            <div class="row">		
+										<label class="col-4" for="translationType">Translation type:</label>
+										{$translationTypeHtml}           
+									</div>
                 </div>
                 <div class="modal-footer">
-									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
                   <button type="button" id="saveTranslation" data-translationid="" data-citationid="" class="btn btn-primary">save</button>
 								</div>
             </div>
@@ -316,9 +323,6 @@ HTML;
         <div>
             slip ID: <span id="auto_id">{$this->_slip->getId()}</span><br>
             text ID: <span id="textId">{$this->_slip->getTextId()}</span><br>
-            POS tag: <span id="slipPOS">{$_REQUEST["pos"]}{$label}</span><br><br>
-            filename: <span id="slipFilename">{$this->_slip->getFilename()}</span><br>
-            id: <span id="wordId">{$_REQUEST["wid"]}</span><br>
         </div>
 
 				{$this->_writeJavascript()}
