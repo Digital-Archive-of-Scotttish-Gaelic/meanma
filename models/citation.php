@@ -134,8 +134,25 @@ HTML;
 			$postIncrementDisable, "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"]);
 	}
 
-	public static function getDefaultContext() {
-
+	/**
+	 * Deletes citation from DB
+	 * Deletes all attached translations for the citation
+	 */
+	public static function delete($id, $db) {
+		//translations
+		$sql = <<<SQL
+			DELETE t, ct FROM translation t
+				JOIN citation_translation ct ON t.id = ct.translation_id
+				WHERE ct.citation_id = :id
+SQL;
+		$db->exec($sql, array(":id" => $id));
+		//citation
+		$sql = <<<SQL
+			DELETE c, sc FROM citation c 
+				JOIN slip_citation sc ON c.id = sc.citation_id
+				WHERE c.id = :id
+SQL;
+		$db->exec($sql, array(":id" => $id));
 	}
 
 	//GETTERS
@@ -214,6 +231,7 @@ SQL;
 	public function setPostContextString($string) {
 		$this->_postContextString = $string;
 	}
+
 
 
 }

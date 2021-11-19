@@ -573,12 +573,17 @@ HTML;
   }
 
   private function _writeCitations() {
+	  $user = models\users::getUser($_SESSION["email"]);
+	  $isSuperUser = $user->getSuperuser();
     $html = <<<HTML
 			<div><ul id="citationList" style="list-style-type:none;">
 HTML;
     $citations = $this->_citations;
     foreach ($citations as $citation) {
     	$cid = $citation->getId();
+    	$deleteCitHtml = $isSuperUser
+		    ? '<a href="#" class="deleteCitation danger float-right" data-cid="' . $cid . '"><small>delete citation</small></a>'
+		    : "";
 	    $transHtml = <<<HTML
 				<span style="text-muted"><a href="#" class="transToggle" data-citationid="{$cid}"><small>show/hide translation(s)</small></a></span>
 				<div id="transContainer_{$cid}" style="display: none;">
@@ -587,11 +592,15 @@ HTML;
     	if ($translations = $citation->getTranslations()) {
 				foreach ($translations as $translation) {
 					$tid = $translation->getId();
+					$deleteTransHtml = $isSuperUser
+						? '<a href="#" class="deleteTranslation danger float-right" data-tid="' . $tid . '"><small>delete translation</small></a>'
+						: "";
 					$content = strip_tags($translation->getContent(), "<mark><b><strong><><i>");
 					$transHtml .= <<<HTML
-						<li xmlns="http://www.w3.org/1999/html">
+						<li class="translationContainer_{$tid}">
 							<span id="trans_{$tid}">{$content}</span> <em><span id="transType_{$tid}">({$translation->getType()})</span></em>&nbsp;
               <a href="#" id="editTrans_{$tid}" class="editTrans" data-translationid="{$tid}">edit</a>
+              {$deleteTransHtml}
 						</li>
 HTML;
 				}
@@ -608,7 +617,7 @@ HTML;
 		    ? $citation->getContext()["html"]
 		    : $citation->getPreContextString() . ' <mark class="hi">' . $this->_slip->getWordform() . '</mark> ' . $citation->getPostContextString();
 			$html .= <<<HTML
-				<li style="border-top: 1px solid gray;">
+				<li class="citationContainer_{$cid}" style="border-top: 1px solid gray;">
 					<span id="citation_{$citation->getId()}">
 						{$citationString}
 					</span>
@@ -618,8 +627,9 @@ HTML;
 						</span>
 					</em>
 					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal">edit</a>
+					{$deleteCitHtml}
 				</li>
-				<li>{$transHtml}</li>
+				<li class="citationContainer_{$cid}">{$transHtml}</li>
 HTML;
     }
     $html .= <<<HTML
@@ -679,6 +689,26 @@ HTML;
                 backdrop: 'static'
               });
             }
+            
+            //delete citation
+            $(document).on('click', '.deleteCitation', function () {
+              if (!confirm('Are you sure you want to delete this citation?')) {
+                return;
+              }  
+              let cid = $(this).attr('data-cid');
+              $('.citationContainer_'+cid).remove();
+              $.ajax('ajax.php?action=deleteCitation&id='+cid);
+            });
+            
+            //delete translation
+            $(document).on('click', '.deleteTranslation', function () {
+              if (!confirm('Are you sure you want to delete this translation?')) {
+                return;
+              }  
+              let tid = $(this).attr('data-tid');
+              $('.translationContainer_'+tid).remove();
+              $.ajax('ajax.php?action=deleteTranslation&id='+tid);
+            });
             
             //save text ID for slip
             $('#saveTextId').on('click', function () {

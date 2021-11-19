@@ -10,6 +10,10 @@ html,body {
     cursor: pointer;
 }
 
+.danger {
+    color: #dc3545;
+}
+
 .chunk {
     cursor: pointer;
 }

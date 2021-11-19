@@ -55,6 +55,19 @@ SQL;
 		$this->_db->exec($sql, array(":type" => $this->getType(), ":content" => $this->getContent(), ":id" => $this->getId()));
 	}
 
+	/**
+	 * Deletes translation from DB
+	 */
+	public static function delete($id, $db) {
+		//translations
+		$sql = <<<SQL
+			DELETE t, ct FROM translation t
+				JOIN citation_translation ct ON t.id = ct.translation_id
+				WHERE ct.translation_id = :id
+SQL;
+		$db->exec($sql, array(":id" => $id));
+	}
+
 	//GETTERS
 	public function getId() {
 		return $this->_id;
