@@ -273,8 +273,11 @@ HTML;
 										</textarea>
 				            <script>
 				              CKEDITOR.replace('citationTranslation', {
-				                contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
-				                customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
+				                extraPlugins: 'editorplaceholder',
+                        editorplaceholder: 'translation text here...',
+	                      contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+	                      customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js',
+	                      autoParagraph: false
 				              });
 				            </script>
 			            </div>
@@ -493,7 +496,7 @@ HTML;
     }
     $html = <<<HTML
         <div id="wordClassSelect" class="row form-group">
-          <label for="wordClass" class="col-sm-2 col-form-label">Part-of-speech:</label>
+          <label for="wordClass" class="col-sm-2 col-form-label">POS:</label>
           <select name="wordClass" id="wordClass" class="form-control col-sm-3">
             {$optionHtml}
           </select>
@@ -606,11 +609,10 @@ HTML;
 				}
 	    }
     	$transHtml .= <<<HTML
-						<li>
-							<a href="#" class="addTranslationLink" data-citationid="{$cid}" title="add translation" style="font-size: 15px;"><i class="fas fa-plus" style="color: #007bff;">
-							</i></a>
-						</li>
 					</ul> <!-- close the transList -->
+					<div>
+						<a href="#" class="addTranslationLink" data-citationid="{$cid}" title="add translation" style="font-size: 15px;"><i class="fas fa-plus" style="color: #007bff;"></i></a>
+					</div>
 				</div>  <!-- close the transContainer -->
 HTML;
     	$citationString = ($this->_slip->getType() == "corpus")
@@ -789,21 +791,23 @@ HTML;
                   postContextString: postContextString
                 }
               })
-              .done(function () {
+              .done(function (data) {
                 //check if citation is already in list
                 if ($('#citation_'+cid).length) {   //citation exists so update it 
                   $('#citation_'+cid).html(html);
                   $('#citationType_'+cid).html('('+type+')');
-                } else {                           //citation does not yet exist so add it
-                    var citHtml = '<li style="border-top: 1px solid gray;"><span id="citation_'+cid+'">'+html+'</span>';
+                } else {                           //citation does not yet exist so add it                 
+                    var citHtml = '<li class="citationContainer_'+cid+'" style="border-top: 1px solid gray;"><span id="citation_'+cid+'">'+html+'</span>';
                     citHtml += '<em><span id="citationType_'+cid+'">&nbsp;('+type+')&nbsp;</span></em>';
                     citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal">edit</a>';
-                    citHtml += '</li>';
+                    citHtml += '<a href="#" class="deleteCitation danger float-right" data-cid="'+cid+'"><small>delete citation</small></a>';
+                    // delete code here
+                    citHtml += '</li><li class="citationContainer_'+cid+'">';
                     citHtml += '<span style="text-muted"><a href="#" class="transToggle" data-citationid="'+cid+'"><small>show/hide translation(s)</small></a></span>';
 										citHtml += '<div id="transContainer_'+cid+'" style="display: none;">';
 										citHtml += '<ul id="transList_'+cid+'" style="list-style-type: none; margin:5px 10px;">';
 										citHtml += '<li><a href="#" class="addTranslationLink" data-citationid="'+cid+'" title="add translation" style="font-size: 15px;"><i class="fas fa-plus" style="color: #007bff;">';
-										citHtml += '</i></a></li></ul> <!-- close the transList --></div>  <!-- close the transContainer -->';
+										citHtml += '</i></a></li></ul></li> <!-- close the transList --></div>  <!-- close the transContainer -->';
                     $('#citationList').append(citHtml);
                 }     
                 $('#citationEditModal').modal('hide');
@@ -818,8 +822,9 @@ HTML;
                 $('#saveTranslation').attr('data-citationid', citationId);
                 $('#saveTranslation').attr('data-translationid', data.id);
                 //append a placeholder to the citation's translation list 
-                var html = '<li><span id="trans_'+data.id+'"></span> <em><span id="transType_'+data.id+'"></span></em>&nbsp;';
+                var html = '<li class="translationContainer_'+data.id+'"><span id="trans_'+data.id+'"></span> <em><span id="transType_'+data.id+'"></span></em>&nbsp;';
                 html += '<a href="#" id="editTrans_'+data.id+'" class="editTrans" data-translationid="'+data.id+'">edit</a>';
+                html += '<a href="#" class="deleteTranslation danger float-right" data-tid="'+data.id+'"><small>delete translation</small></a>'
                 $('#transList_'+citationId).append(html);
                 CKEDITOR.instances.citationTranslation.setData(''); //clear the translation content for new empty translation
 								$('#translationEditModal').modal('show');

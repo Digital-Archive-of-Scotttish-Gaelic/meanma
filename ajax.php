@@ -52,14 +52,14 @@ switch ($_REQUEST["action"]) {
 			echo json_encode(array("count" => count($_SESSION["printSlips"])));
 		break;
   case "loadSlip":
-    $slip = ($_GET["slipType"] == "paper")
+    $slip = ($_GET["slipType"])
 	    ? new paper_slip($_GET["auto_id"], $_GET["entryId"], null, $db)
 	    : new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db);
     $slip->updateResults($_GET["index"]); //ensure that "view slip" (and not "create slip") displays
     $filenameElems = explode('_', $slip->getFilename());
     $textId = $filenameElems[0];
     $results = array("locked"=>$slip->getLocked(), "auto_id"=>$slip->getId(), "owner"=>$slip->getOwnedBy(),
-	    "starred"=>$slip->getStarred(), "notes"=>$slip->getNotes(),
+	    "starred"=>$slip->getStarred(), "notes"=>$slip->getNotes(), "type"=>$slip->getType(),
       "wordClass"=>$slip->getWordClass(), "senses"=>$slip->getSensesInfo(),
       "lastUpdated"=>$slip->getLastUpdated(), "textId"=>$textId, "slipMorph"=>$slip->getSlipMorph()->getProps());
     //code required for modal slips

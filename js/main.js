@@ -101,6 +101,7 @@ $(function () {
     var pos = slipLink.data('pos');
     var id = slipLink.data('id');
     var filename = slipLink.data('filename');
+    var slipType = filename ? "corpus" : "paper";
     var textId = filename.split('_')[0];
     var uri = slipLink.data('uri');
     var date = slipLink.data('date');
@@ -126,6 +127,7 @@ $(function () {
       if (data.wordClass) {
         var wc = data.wordClass;
         starred = data.starred;
+        type = data.type;
         if (wc=='noun') {
           header += ' <em>n.</em>';
         }
@@ -170,9 +172,13 @@ $(function () {
     })
       .done(function () {
         modal.find('.modal-title').html(header);
-        var slipNumHtml = '§'+slipId;
+        var slipNumHtml = '';
+        if (slipType == 'paper') {  //paper slip
+          slipNumHtml = '📝 ';
+        }
+        slipNumHtml += '§'+slipId;
         if (starred === 1) {
-          slipNumHtml += ' ✅';
+          slipNumHtml += ' ✅';  //checked slip
         }
         modal.find('#slipNo').text(slipNumHtml);
         $('#auto_id').val(slipId);
