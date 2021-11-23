@@ -1044,13 +1044,14 @@ HTML;
             $(document).on('click', '#addSense', function () {
               var newSenseName = $('#newSenseName').val();
               var newSenseDefinition = $('#newSenseDefinition').val();
+              var entryId = $('#citationContext').attr('data-entryid');      
               if (newSenseName == "") {
                 return false;
               }
               $('#newSenseName').val('');
               $('#newSenseDefinition').val('');
               var data = {action: 'addSense', slipId: '{$this->_slip->getId()}',
-                name: newSenseName, description: newSenseDefinition, entryId: '{$this->_slip->getEntryId()}'
+                name: newSenseName, description: newSenseDefinition, entryId: entryId
               }
               $.getJSON("ajax.php", data, function (response) {
                 var html = '<li class="badge badge-success senseBadge" data-sense="' + response.senseId + '"';
