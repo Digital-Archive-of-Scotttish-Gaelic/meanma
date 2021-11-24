@@ -239,8 +239,9 @@ HTML;
 										<div class="row form-group" style="clear:right;">		
 											<label class="col-4" for="citationType">Citation type:</label>
 			                <select id="citationType" name="citationType" class="form-control col-4">
-			                  <option value="long">long</option>
-			                  <option value="short">short</option>
+			                  <option value="draft">draft</option>
+			                  <option value="sense">sense</option>
+			                  <option value="form">form</option>
 			                </select>               
 										</div>
                 </div>
@@ -760,6 +761,7 @@ HTML;
                   CKEDITOR.instances["preContextString"].setData(data.preContextString); 
                   CKEDITOR.instances["postContextString"].setData(data.postContextString); 
                 }
+                $('#citationType').val(data.type);
               });
             });
             

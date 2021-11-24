@@ -446,16 +446,16 @@ HTML;
 				      let numCitations = Object.keys(data).length;
 			        $.each(data, function(citationType, info) {    //iterate through each citation
 								if (type == "form") {     //default to short citation for forms 
-								  if (citationType == "short") {
+								  if (citationType == "form") {
 								    html += getCitationHtml(citationType, info);
 								  } else if (numCitations == 1) {
-								    html += getCitationHtml("long", data.long); //no long so write short
+								    html += getCitationHtml("sense", data.sense); //no sense so write form
 								  }
 								} else if (type == "sense") {    //default to long citation for senses
-								    if (citationType == "long") {
+								    if (citationType == "sense") {
 								      html += getCitationHtml(citationType, info);
 								    } else if (numCitations == 1) {
-								      html += getCitationHtml("short", data.short); //no short found so write long
+								      html += getCitationHtml("form", data.form); //no form found so write sense
 								    }
 								} 
 				        tr.find('.entryCitationContext').html(html);

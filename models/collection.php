@@ -337,10 +337,10 @@ SQL;
 SQL;
 		$results = $db->fetch($sql, array(":slipId" => $slipId));
 		foreach ($results as $row) {
-			if (empty($citationIds["long"]) && $row["type"] == "long") {
-				$citationIds["long"] = $row["cid"];
-			} else if (empty($citationIds["short"]) && $row["type"] == "short") {
-				$citationIds["short"] = $row["cid"];
+			if (empty($citationIds["sense"]) && $row["type"] == "sense") {
+				$citationIds["sense"] = $row["cid"];
+			} else if (empty($citationIds["form"]) && $row["type"] == "form") {
+				$citationIds["form"] = $row["cid"];
 			}
 		}
 		return $citationIds;

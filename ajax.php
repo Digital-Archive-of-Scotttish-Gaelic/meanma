@@ -124,7 +124,6 @@ switch ($_REQUEST["action"]) {
 			$citationData["preContextString"] = $citation->getPreContextString();
 			$citationData["postContextString"] = $citation->getPostContextString();
 		}
-		$citationData["type"] = $slipType;
 		echo json_encode($citationData);
 		break;
 	case "saveCitation":
