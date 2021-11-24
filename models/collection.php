@@ -285,6 +285,15 @@ SQL;
 		return $slipInfo;
 	}
 
+	public static function getEntryIdBySlipId($slipId, $db) {
+		$sql = <<<SQL
+			SELECT entry_id FROM slips s 
+				WHERE auto_id = :id
+SQL;
+		$result = $db->fetch($sql, array(":id" => $slipId));
+		return $result[0]["entry_id"];
+	}
+
 	/**
 	 * Gets slip from DB info
 	 * @param $slipId
@@ -352,8 +361,7 @@ SQL;
 	public static function deleteSlips($slipIds) {
 		$db = new database();
 		foreach ($slipIds as $slipId) {
-			$slipInfo = self::getSlipInfoBySlipId($slipId, $db);
-			$entryId = $slipInfo[0]["entry_id"];
+			$entryId = self::getEntryIdBySlipId($slipId, $db);
 			// delete morpho info for this slip
 			$sql = <<<SQL
     		DELETE FROM slipMorph WHERE slip_id = :slipId
