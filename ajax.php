@@ -84,7 +84,7 @@ switch ($_REQUEST["action"]) {
     break;
 	case "getCitationsBySlipId":
 		$citationInfo = array();
-		$citationIds = collection::getCitationIdsForCitation($_GET["slipId"], $db);
+		$citationIds = collection::getCitationIdsForSlip($_GET["slipId"], $db);
 		foreach ($citationIds as $cid) {
 			$citation = new citation($db, $cid);
 			$translations = $citation->getTranslations();

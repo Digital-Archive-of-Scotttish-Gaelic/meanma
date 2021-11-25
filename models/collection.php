@@ -328,7 +328,7 @@ SQL;
 	 * @param $db
 	 * @return array : associative array of citation IDs keyed by citation type
 	 */
-	public static function getCitationIdsForCitation($slipId, $db) {
+	public static function getCitationIdsForSlip($slipId, $db) {
 		$citationIds = array();
 		$sql = <<<SQL
 			SELECT sc.citation_id as cid, c.type as type FROM slip_citation sc
@@ -362,19 +362,24 @@ SQL;
 		$db = new database();
 		foreach ($slipIds as $slipId) {
 			$entryId = self::getEntryIdBySlipId($slipId, $db);
-			// delete morpho info for this slip
+							// delete morpho info for this slip
 			$sql = <<<SQL
     		DELETE FROM slipMorph WHERE slip_id = :slipId
 SQL;
 			$db->exec($sql, array(":slipId" => $slipId));
-			// delete sense categories for this slip
+							// delete sense categories for this slip
 			sensecategories::deleteSensesForSlip($slipId);
-			// delete the slip itself
+							// delete citations for this slip
+			$citationIds = self::getCitationIdsForSlip($slipId, $db);
+			foreach ($citationIds as $cid) {
+				citation::delete($cid, $db);
+			}
+							// delete the slip itself
 			$sql = <<<SQL
     		DELETE FROM slips WHERE auto_id = :slipId
 SQL;
 			$db->exec($sql, array(":slipId" => $slipId));
-			// check the entry for this slip and delete if now empty
+							// check the entry for this slip and delete if now empty
 			if (entries::isEntryEmpty($entryId)) {
 				entries::deleteEntry($entryId);
 			}
