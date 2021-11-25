@@ -358,8 +358,7 @@ SQL;
 	}
 
 
-	public static function deleteSlips($slipIds) {
-		$db = new database();
+	public static function deleteSlips($slipIds, $db) {
 		foreach ($slipIds as $slipId) {
 			$entryId = self::getEntryIdBySlipId($slipId, $db);
 							// delete morpho info for this slip

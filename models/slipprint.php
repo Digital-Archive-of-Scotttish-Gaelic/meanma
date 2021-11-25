@@ -42,36 +42,53 @@ class slipprint
 		$i= 0;
 		foreach ($slipIds as $slipId) {
 			$i++;
-			$slipInfo = collection::getSlipInfoBySlipId($slipId, $db)[0];
-			$headword = $slipInfo["headword"];
-			$filename = $slipInfo["filename"];
-			$filenameElems = explode('_', $filename);
-			$textNum = $filenameElems[0];
+			$slip = collection::getSlipBySlipId($slipId, $db);
+
+			$headword = $slip->getHeadword();
+			$reference = $slip->getReference();
+			$textNum = $slip->getTextId();
+			$date = mb_substr(strip_tags($reference), 0, 4, "UTF-8");
+
+			if (empty($reference) && $slip->getType() == "corpus") {
+				$slipInfo = collection::getSlipInfoBySlipId($slipId, $db)[0];
+				$date = $slipInfo["date_of_lang"];
+				$reference =  $date . ' <em>' . $slipInfo["title"] . '</em> ' . $slipInfo["page"];
+			}
+
+			//get the first citation - TODO: ask lexicos and revisit SB
+/*			$citations = $slip->getCitations();
+			$citation = $citations[0];
+			$citationHtml = $citation->getContext()["html"]
+			$translations = $citation ? $citation->getTranslations() : array();
+			$translation = $translations[0];
+*/
+			$citationHtml = "test citation context";
+			$translation = "some blah blah translation";
+
+
 			$checkmark = "";
 			if ($slipInfo["starred"]) {
 				$checkmark = $pdf->unhtmlentities("&#x2713;");
 			}
 			$checked = 'Ch <span style="font-family:dejavusans;">' . $checkmark . '</span>';
-			$id = $slipInfo["auto_id"];
-			$fileHandler = new xmlfilehandler($filename);
-			$context = $fileHandler->getContext($slipInfo["id"], $slipInfo["preContextScope"], $slipInfo["postContextScope"]);
-			$citation = $context["pre"]["output"]
-				. ' <span style="background-color: #CCCCCC">' . $context["word"] . '</span> '
-				. $context["post"]["output"];
-			$translation = $slipInfo["translation"];
-			$date = $slipInfo["date_of_lang"];
-			$reference = $date . ' <em>' . $slipInfo["title"] . '</em> ' . $slipInfo["page"];
+	//		$id = $slipInfo["auto_id"];
+	//		$fileHandler = new xmlfilehandler($filename);
+	//		$context = $fileHandler->getContext($slipInfo["id"], $slipInfo["preContextScope"], $slipInfo["postContextScope"]);
+	//		$citation = $context["pre"]["output"]
+	//			. ' <span style="background-color: #CCCCCC">' . $context["word"] . '</span> '
+	//			. $context["post"]["output"];
+
 			$html = <<<EOD
 			<table>
 				<tr>
 					<td>{$headword}</td>			<td style="text-align: center;">Text {$textNum}</td>				<td style="text-align: right;">{$checked}</td>
 				</tr>
 				<tr>
-					<td></td>                 <td></td>                       <td style="text-align: right;">{$id}</td>
+					<td></td>                 <td></td>                       <td style="text-align: right;">{$slipId}</td>
 				</tr>
 				<tr><td colspan="3"><br></td></tr>
 				<tr>
-					<td colspan="3">{$citation}</td>
+					<td colspan="3">{$citationHtml}</td>
 				</tr>
 				<tr>
 					<td colspan="3" style="color:green;font-style:italic;">{$translation}</td>

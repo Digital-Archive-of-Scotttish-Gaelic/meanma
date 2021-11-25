@@ -174,7 +174,15 @@ switch ($_REQUEST["action"]) {
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
 		}
-		collection::deleteSlips($_GET["slipIds"]);
+		collection::deleteSlips($_GET["slipIds"], $db);
+		break;
+	case "deleteEntries":
+		//! only superusers can do this
+		$user = users::getUser($_SESSION["email"]);
+		if (!$user->getSuperuser()) {
+			return json_encode(array("message" => "not authorised"));
+		}
+		entries::deleteEntries($_GET["entryIds"], $db);
 		break;
 		/*
 	case "loadSlipData":
@@ -199,8 +207,8 @@ switch ($_REQUEST["action"]) {
 		$_GET["entryId"] = $slip->getEntryId();
 		$slip->saveSlip($_GET);
 		// check the old entry for this slip and delete if now empty
-		if (entries::isEntryEmpty($oldEntryId)) {
-			entries::deleteEntry($oldEntryId);
+		if (entries::isEntryEmpty($oldEntryId, $db)) {
+			entries::deleteEntry($oldEntryId, $db);
 		}
 		$senses = $slip->getUnusedSenses();
 		$unusedSenseInfo = array();
