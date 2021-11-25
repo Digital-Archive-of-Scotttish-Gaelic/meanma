@@ -230,7 +230,7 @@ switch ($_REQUEST["action"]) {
 		echo collection::getSlipLinkHtml($data, null, $db);
 		break;
 	case "autoCreateSlips":
-		$search = new corpus_search($_GET, false);
+		$search = new corpus_search($_GET, false, $db);
 		$results = $search->getDBResults();
 		foreach ($results as $result) {
 			if (!$result["auto_id"]) {

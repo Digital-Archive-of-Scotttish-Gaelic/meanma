@@ -190,7 +190,7 @@ SQL;
 SQL;
 		$results = $this->_db->fetch($sql, array(":writerId" => $this->getId()));
 		foreach ($results as $result) {
-			$texts[$result["text_id"]] = new corpus_browse($result["text_id"]);
+			$texts[$result["text_id"]] = new corpus_browse($result["text_id"], $this->_db);
 		}
 		return $texts;
 	}
