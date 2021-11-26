@@ -273,10 +273,25 @@ HTML;
 	}
 
   public function writeBrowseTable($entryIds) {
+	  $user = models\users::getUser($_SESSION["email"]);
+	  $deleteHeading = $deleteHtml = $deleteCell = "";
+	  if ($user->getSuperuser()) {
+		  $deleteHeading = '<th class="bg-danger" data-field="deleteEntry"><span class="text-white">Delete</span></th>';
+		  $deleteHtml = <<<HTML
+				<div class="col">
+          <a href="#" id="deleteEntries" class="btn btn-danger disabled">delete</a>
+				</div>
+HTML;
+	  }
     $tableBodyHtml = "<tbody>";
     foreach ($entryIds as $id) {
     	$entry = models\entries::getEntryById($id, $this->_db);
       $entryUrl = "?m=entries&a=view&id={$id}";
+      if ($user->getSuperuser()) {
+	      $deleteCell = <<<HTML
+					<td><input type="checkbox" class="markToDelete" id="deleteEntry_{$id}"></td> 
+HTML;
+      }
       $tableBodyHtml .= <<<HTML
         <tr>
           <td>{$entry->getHeadword()}</td>
@@ -284,17 +299,19 @@ HTML;
           <td><a href="{$entryUrl}" title="view entry for {$entry->getHeadword()}">
             view entry
           </td>
+          {$deleteCell}
         </tr>
 HTML;
     }
     $tableBodyHtml .= "</tbody>";
     echo <<<HTML
-        <table id="browseSlipsTable" data-toggle="table" data-pagination="true" data-search="true">
+        <table id="browseEntriesTable" data-toggle="table" data-pagination="true" data-search="true">
           <thead>
             <tr>
               <th data-sortable="true">Headword</th>
               <th data-sortable="true">Part-of-speech</th>
               <th>Link</th>
+              {$deleteHeading}
             </tr>
           </thead>
           {$tableBodyHtml}
@@ -305,10 +322,11 @@ HTML;
               <a href="#" data-toggle="modal" data-target="#addEntryModal" title="add entry" id="addEntry" class="btn btn-success">add entry</a>
             </div>
 					</div>
+					{$deleteHtml}
 				</div>
 HTML;
     $this->_writeAddEntryModal();
-    $this->_writeJavascript();;
+    $this->_writeBrowseJavascript();;
   }
 
 	private function _writeAddEntryModal() {
@@ -371,25 +389,63 @@ HTML;
 HTML;
   }
 
+  private function _writeBrowseJavascript() {
+		echo <<<HTML
+			<script>
+				$(function () {
+					//create an entry on modal form create button click
+					$('#createEntry').on('click', function () {
+					  let headword = $('#addHeadword').val();
+					  let wordclass = $('#addWordclass').val();
+					  if (headword == '') {
+					    alert("Headword cannot be empty!");
+					    $('#addHeadword').focus();
+					    return;
+					  }
+					  $.getJSON('ajax.php?action=createEntry&headword='+headword+'&wordclass='+wordclass, function () {
+					  })
+					    .done(function (data) {
+					      window.open('?m=entries&a=view&id='+data.id,'_self');
+					    });	  
+					});
+					
+					//mark entry for deletion - should only work for superuser
+					$(document).on('click', '.markToDelete', function () {
+					  if ($(this).hasClass('deleteEntry')) {
+					    $(this).removeClass('deleteEntry');
+					  } else {	    
+					    $('#deleteEntries').removeClass('disabled');    // !! revisit
+					    $(this).addClass('deleteEntry');
+					  }
+					});
+				
+					//delete selected entries
+					$('#deleteEntries').on('click', function () {
+					  if (!confirm('Are you sure you want to delete selected entries?')) {
+					    return;
+					  }
+					  var entryIds = [];
+					  $('.deleteEntry').each(function() {
+					    let linkId = $(this).attr('id');
+					    let entryId = linkId.split('_')[1];
+					    entryIds.push(entryId);
+					  });
+					  let url = 'ajax.php';
+					  let data = {action: 'deleteEntries', entryIds: entryIds}; 
+					  $.ajax({url: url, data: data})
+					    .done(function () {
+					      location.reload();
+					    });
+					});
+				
+				});
+			</script>
+HTML;
+  }
+
   private function _writeJavascript() {
   	echo <<<HTML
 			<script>
-				//create an entry on modal form create button click
-				$('#createEntry').on('click', function () {
-				  let headword = $('#addHeadword').val();
-				  let wordclass = $('#addWordclass').val();
-				  if (headword == '') {
-				    alert("Headword cannot be empty!");
-				    $('#addHeadword').focus();
-				    return;
-				  }
-				  $.getJSON('ajax.php?action=createEntry&headword='+headword+'&wordclass='+wordclass, function () {
-				  })
-				    .done(function (data) {
-				      window.open('?m=entries&a=view&id='+data.id,'_self');
-				    });	  
-				});
-        
 				//create a paper slip for the selected wordform
 				$('.createPaperSlip').on('click', function () {
 				   let wordform = $(this).attr('data-wordform');
@@ -446,16 +502,16 @@ HTML;
 				      let numCitations = Object.keys(data).length;
 			        $.each(data, function(citationType, info) {    //iterate through each citation
 								if (type == "form") {     //default to short citation for forms 
-								  if (citationType == "short") {
+								  if (citationType == "form") {
 								    html += getCitationHtml(citationType, info);
 								  } else if (numCitations == 1) {
-								    html += getCitationHtml("long", data.long); //no long so write short
+								    html += getCitationHtml("sense", data.sense); //no sense so write form
 								  }
 								} else if (type == "sense") {    //default to long citation for senses
-								    if (citationType == "long") {
+								    if (citationType == "sense") {
 								      html += getCitationHtml(citationType, info);
 								    } else if (numCitations == 1) {
-								      html += getCitationHtml("short", data.short); //no short found so write long
+								      html += getCitationHtml("form", data.form); //no form found so write sense
 								    }
 								} 
 				        tr.find('.entryCitationContext').html(html);

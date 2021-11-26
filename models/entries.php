@@ -22,7 +22,7 @@ SQL;
 			$entry->setUpdated($result["updated"]);
 		} else {
 			$entry = self::createEntry(array("groupId" => $_SESSION["groupId"], "headword" => $headword,
-				"wordclass" => $wordclass, "notes" => ""));
+				"wordclass" => $wordclass, "notes" => ""), $db);
 		}
 		return $entry;
 	}
@@ -47,8 +47,7 @@ SQL;
 		}
 	}
 
-	public static function createEntry($params) {
-		$db = new database();
+	public static function createEntry($params, $db) {
 		$sql = <<<SQL
         INSERT INTO entry (group_id, headword, wordclass, notes) 
         	VALUES (:groupId, :headword, :wordclass, :notes) 
@@ -60,6 +59,7 @@ SQL;
 		return $entry;
 	}
 
+	/*
 	public static function updateEntry($params) {
 		$db = new database();
 		$sql = <<<SQL
@@ -72,10 +72,10 @@ SQL;
 		$entry = new entry($params["id"]);
 		return $entry;
 	}
+*/
 
   public static function getActiveEntryIds($db) {
     $entryIds = array();
-//    $db = new database();
     //only get IDs for this group
     $sql = <<<SQL
         SELECT DISTINCT e.id as id, headword FROM entry e    
@@ -94,8 +94,7 @@ SQL;
 	 * Deletes an entry from the DB - !! should only be used on empty entries (with no slips) – see ::getIsEntryEmpty()
 	 * @param $id : the entry ID
 	 */
-  public static function deleteEntry($id) {
-		$db = new database();
+  public static function deleteEntry($id, $db) {
 		// delete senses for this entry
 	  $sql = <<<SQL
 			DELETE FROM sense WHERE entry_id = :id
@@ -108,13 +107,44 @@ SQL;
 		$db->exec($sql, array(":id" => $id));
   }
 
+  /**
+   * Deletes an entry and all associated slips from the DB
+   * @param array $ids : the entry IDs to be deleted
+   * @param database $db : database object
+   */
+  public static function deleteEntries($ids, $db) {
+		foreach ($ids as $id) {
+			$slipIds = self::getSlipIdsForEntry($id, $db);
+			collection::deleteSlips($slipIds, $db);
+			self::deleteEntry($id);
+		}
+
+		return $slipIds;
+  }
+
 	/**
+	 * @param $id : entry ID
+	 * @param database $db : database object
+	 * @return array : slip IDs
+	 */
+  public static function getSlipIdsForEntry($id, $db) {
+  	$slipIds = array();
+		$sql = <<<SQL
+			SELECT auto_id FROM slips WHERE entry_id = :eid
+SQL;
+		$result = $db->fetch($sql, array(":eid" => $id));
+		foreach ($result as $row) {
+			$slipIds[] = $row["auto_id"];
+		}
+  	return $slipIds;
+  }
+
+  /**
 	 * Runs a DB check to see if an entry has no slips
 	 * @param $id : the entry ID
 	 * @return bool : true if the entry is empty
 	 */
-  public static function isEntryEmpty($id) {
-  	$db = new database();
+  public static function isEntryEmpty($id, $db) {
 		$sql = <<<SQL
 			SELECT count(*) as c FROM slips s WHERE entry_id = :id
 SQL;

@@ -84,7 +84,7 @@ switch ($_REQUEST["action"]) {
     break;
 	case "getCitationsBySlipId":
 		$citationInfo = array();
-		$citationIds = collection::getCitationIdsForCitation($_GET["slipId"], $db);
+		$citationIds = collection::getCitationIdsForSlip($_GET["slipId"], $db);
 		foreach ($citationIds as $cid) {
 			$citation = new citation($db, $cid);
 			$translations = $citation->getTranslations();
@@ -124,7 +124,6 @@ switch ($_REQUEST["action"]) {
 			$citationData["preContextString"] = $citation->getPreContextString();
 			$citationData["postContextString"] = $citation->getPostContextString();
 		}
-		$citationData["type"] = $slipType;
 		echo json_encode($citationData);
 		break;
 	case "saveCitation":
@@ -138,10 +137,10 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "deleteCitation":
 		//! only superusers can do this
-		$user = users::getUser($_SESSION["email"]);
+		/*$user = users::getUser($_SESSION["email"]);
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
-		}
+		}*/
 		citation::delete($_GET["id"], $db);
 		break;
 	case "createTranslation":
@@ -163,10 +162,11 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "deleteTranslation":
 		//! only superusers can do this
+		/*
 		$user = users::getUser($_SESSION["email"]);
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
-		}
+		} */
 		translation::delete($_GET["id"], $db);
 		break;
 	case "deleteSlips":
@@ -175,7 +175,15 @@ switch ($_REQUEST["action"]) {
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
 		}
-		collection::deleteSlips($_GET["slipIds"]);
+		collection::deleteSlips($_GET["slipIds"], $db);
+		break;
+	case "deleteEntries":
+		//! only superusers can do this
+		$user = users::getUser($_SESSION["email"]);
+		if (!$user->getSuperuser()) {
+			return json_encode(array("message" => "not authorised"));
+		}
+		entries::deleteEntries($_GET["entryIds"], $db);
 		break;
 		/*
 	case "loadSlipData":
@@ -200,8 +208,8 @@ switch ($_REQUEST["action"]) {
 		$_GET["entryId"] = $slip->getEntryId();
 		$slip->saveSlip($_GET);
 		// check the old entry for this slip and delete if now empty
-		if (entries::isEntryEmpty($oldEntryId)) {
-			entries::deleteEntry($oldEntryId);
+		if (entries::isEntryEmpty($oldEntryId, $db)) {
+			entries::deleteEntry($oldEntryId, $db);
 		}
 		$senses = $slip->getUnusedSenses();
 		$unusedSenseInfo = array();
@@ -231,7 +239,7 @@ switch ($_REQUEST["action"]) {
 		echo collection::getSlipLinkHtml($data, null, $db);
 		break;
 	case "autoCreateSlips":
-		$search = new corpus_search($_GET, false);
+		$search = new corpus_search($_GET, false, $db);
 		$results = $search->getDBResults();
 		foreach ($results as $result) {
 			if (!$result["auto_id"]) {

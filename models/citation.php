@@ -12,7 +12,7 @@ class citation
 
 	const SCOPE_DEFAULT = 80;
 
-	public static $types = array("long", "short");  //the possible values for citation type
+	public static $types = array("draft", "sense", "form");  //the possible values for citation type
 
 	public function __construct($db, $id = null) {
 		$this->_db = $db;
@@ -27,7 +27,7 @@ class citation
 	private function _init() {
 		$this->_preContextScope = self::SCOPE_DEFAULT;
 		$this->_postContextScope = self::SCOPE_DEFAULT;
-		$this->_type = "short";   //default for new citation
+		$this->_type = "draft";   //default for new citation
 		$sql = <<<SQL
 			INSERT INTO citation (`preContextScope`, `postContextScope`, `type`) VALUES(:pre, :post, :type);
 SQL;

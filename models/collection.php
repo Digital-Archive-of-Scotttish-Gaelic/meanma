@@ -285,6 +285,15 @@ SQL;
 		return $slipInfo;
 	}
 
+	public static function getEntryIdBySlipId($slipId, $db) {
+		$sql = <<<SQL
+			SELECT entry_id FROM slips s 
+				WHERE auto_id = :id
+SQL;
+		$result = $db->fetch($sql, array(":id" => $slipId));
+		return $result[0]["entry_id"];
+	}
+
 	/**
 	 * Gets slip from DB info
 	 * @param $slipId
@@ -319,7 +328,7 @@ SQL;
 	 * @param $db
 	 * @return array : associative array of citation IDs keyed by citation type
 	 */
-	public static function getCitationIdsForCitation($slipId, $db) {
+	public static function getCitationIdsForSlip($slipId, $db) {
 		$citationIds = array();
 		$sql = <<<SQL
 			SELECT sc.citation_id as cid, c.type as type FROM slip_citation sc
@@ -328,10 +337,10 @@ SQL;
 SQL;
 		$results = $db->fetch($sql, array(":slipId" => $slipId));
 		foreach ($results as $row) {
-			if (empty($citationIds["long"]) && $row["type"] == "long") {
-				$citationIds["long"] = $row["cid"];
-			} else if (empty($citationIds["short"]) && $row["type"] == "short") {
-				$citationIds["short"] = $row["cid"];
+			if (empty($citationIds["sense"]) && $row["type"] == "sense") {
+				$citationIds["sense"] = $row["cid"];
+			} else if (empty($citationIds["form"]) && $row["type"] == "form") {
+				$citationIds["form"] = $row["cid"];
 			}
 		}
 		return $citationIds;
@@ -349,24 +358,27 @@ SQL;
 	}
 
 
-	public static function deleteSlips($slipIds) {
-		$db = new database();
+	public static function deleteSlips($slipIds, $db) {
 		foreach ($slipIds as $slipId) {
-			$slipInfo = self::getSlipInfoBySlipId($slipId, $db);
-			$entryId = $slipInfo[0]["entry_id"];
-			// delete morpho info for this slip
+			$entryId = self::getEntryIdBySlipId($slipId, $db);
+							// delete morpho info for this slip
 			$sql = <<<SQL
     		DELETE FROM slipMorph WHERE slip_id = :slipId
 SQL;
 			$db->exec($sql, array(":slipId" => $slipId));
-			// delete sense categories for this slip
+							// delete sense categories for this slip
 			sensecategories::deleteSensesForSlip($slipId);
-			// delete the slip itself
+							// delete citations for this slip
+			$citationIds = self::getCitationIdsForSlip($slipId, $db);
+			foreach ($citationIds as $cid) {
+				citation::delete($cid, $db);
+			}
+							// delete the slip itself
 			$sql = <<<SQL
     		DELETE FROM slips WHERE auto_id = :slipId
 SQL;
 			$db->exec($sql, array(":slipId" => $slipId));
-			// check the entry for this slip and delete if now empty
+							// check the entry for this slip and delete if now empty
 			if (entries::isEntryEmpty($entryId)) {
 				entries::deleteEntry($entryId);
 			}
