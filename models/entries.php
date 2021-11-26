@@ -118,7 +118,6 @@ SQL;
 			collection::deleteSlips($slipIds, $db);
 			self::deleteEntry($id);
 		}
-
 		return $slipIds;
   }
 

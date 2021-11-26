@@ -183,7 +183,8 @@ switch ($_REQUEST["action"]) {
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
 		}
-		entries::deleteEntries($_GET["entryIds"], $db);
+		$response = entries::deleteEntries($_GET["entryIds"], $db);
+		echo json_encode(array("response" => $response));
 		break;
 		/*
 	case "loadSlipData":
