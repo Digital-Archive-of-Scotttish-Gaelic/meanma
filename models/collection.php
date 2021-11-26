@@ -379,8 +379,8 @@ SQL;
 SQL;
 			$db->exec($sql, array(":slipId" => $slipId));
 							// check the entry for this slip and delete if now empty
-			if (entries::isEntryEmpty($entryId)) {
-				entries::deleteEntry($entryId);
+			if (entries::isEntryEmpty($entryId, $db)) {
+				entries::deleteEntry($entryId, $db);
 			}
 		}
 	}

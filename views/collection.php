@@ -143,7 +143,9 @@ HTML;
 				  let url = 'ajax.php';
 				  let data = {action: 'deleteSlips', slipIds: slipIds};
 				  $.ajax({url: url, data: data})
-				    .done(function () {location.reload();});
+				    .done(function () {
+				      location.reload();
+				    });
 				});
 				
 				/**
