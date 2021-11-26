@@ -43,40 +43,29 @@ class slipprint
 		foreach ($slipIds as $slipId) {
 			$i++;
 			$slip = collection::getSlipBySlipId($slipId, $db);
-
 			$headword = $slip->getHeadword();
 			$reference = $slip->getReference();
 			$textNum = $slip->getTextId();
 			$date = mb_substr(strip_tags($reference), 0, 4, "UTF-8");
-
+				//assemble the reference if it's a corpus slip
 			if (empty($reference) && $slip->getType() == "corpus") {
 				$slipInfo = collection::getSlipInfoBySlipId($slipId, $db)[0];
 				$date = $slipInfo["date_of_lang"];
 				$reference =  $date . ' <em>' . $slipInfo["title"] . '</em> ' . $slipInfo["page"];
 			}
-
-			//get the first citation - TODO: ask lexicos and revisit SB
-/*			$citations = $slip->getCitations();
-			$citation = $citations[0];
-			$citationHtml = $citation->getContext()["html"]
+				//citation and translation
+			$citations = $slip->getCitations();
+			$citation = reset($citations);    //get the first citation - TODO: ask lexicos and revisit SB
+			$citationHtml = $citation->getContext()["html"];
 			$translations = $citation ? $citation->getTranslations() : array();
 			$translation = $translations[0];
-*/
-			$citationHtml = "test citation context";
-			$translation = "some blah blah translation";
-
-
+			$translationHtml = ($translation) ? $translation->getContent() : "";
+				//checked
 			$checkmark = "";
 			if ($slipInfo["starred"]) {
 				$checkmark = $pdf->unhtmlentities("&#x2713;");
 			}
 			$checked = 'Ch <span style="font-family:dejavusans;">' . $checkmark . '</span>';
-	//		$id = $slipInfo["auto_id"];
-	//		$fileHandler = new xmlfilehandler($filename);
-	//		$context = $fileHandler->getContext($slipInfo["id"], $slipInfo["preContextScope"], $slipInfo["postContextScope"]);
-	//		$citation = $context["pre"]["output"]
-	//			. ' <span style="background-color: #CCCCCC">' . $context["word"] . '</span> '
-	//			. $context["post"]["output"];
 
 			$html = <<<EOD
 			<table>
@@ -91,7 +80,7 @@ class slipprint
 					<td colspan="3">{$citationHtml}</td>
 				</tr>
 				<tr>
-					<td colspan="3" style="color:green;font-style:italic;">{$translation}</td>
+					<td colspan="3" style="color:green;font-style:italic;">{$translationHtml}</td>
 				</tr>
 				<tr><td colspan="3"><br></td></tr>
 				<tr>
