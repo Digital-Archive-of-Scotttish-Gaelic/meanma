@@ -577,17 +577,13 @@ HTML;
   }
 
   private function _writeCitations() {
-	  $user = models\users::getUser($_SESSION["email"]);
-	  $isSuperUser = $user->getSuperuser();
     $html = <<<HTML
 			<div><ul id="citationList" style="list-style-type:none;">
 HTML;
     $citations = $this->_citations;
     foreach ($citations as $citation) {
     	$cid = $citation->getId();
-    	$deleteCitHtml = $isSuperUser
-		    ? '<a href="#" class="deleteCitation danger float-right" data-cid="' . $cid . '"><small>delete citation</small></a>'
-		    : "";
+    	$deleteCitHtml = '<a href="#" class="deleteCitation danger float-right" data-cid="' . $cid . '"><small>delete citation</small></a>';
 	    $transHtml = <<<HTML
 				<span style="text-muted"><a href="#" class="transToggle" data-citationid="{$cid}"><small>show/hide translation(s)</small></a></span>
 				<div id="transContainer_{$cid}" style="display: none;">
@@ -596,9 +592,7 @@ HTML;
     	if ($translations = $citation->getTranslations()) {
 				foreach ($translations as $translation) {
 					$tid = $translation->getId();
-					$deleteTransHtml = $isSuperUser
-						? '<a href="#" class="deleteTranslation danger float-right" data-tid="' . $tid . '"><small>delete translation</small></a>'
-						: "";
+					$deleteTransHtml = '<a href="#" class="deleteTranslation danger float-right" data-tid="' . $tid . '"><small>delete translation</small></a>';
 					$content = strip_tags($translation->getContent(), "<mark><b><strong><><i>");
 					$transHtml .= <<<HTML
 						<li class="translationContainer_{$tid}">
@@ -695,7 +689,7 @@ HTML;
             
             //delete citation
             $(document).on('click', '.deleteCitation', function () {
-              if (!confirm('Are you sure you want to delete this citation?')) {
+              if (!confirm('Are you sure you want to delete this citation?    ** This will delete all translations for this citation. **')) {
                 return;
               }  
               let cid = $(this).attr('data-cid');

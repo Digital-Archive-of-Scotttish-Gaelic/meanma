@@ -137,10 +137,10 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "deleteCitation":
 		//! only superusers can do this
-		$user = users::getUser($_SESSION["email"]);
+		/*$user = users::getUser($_SESSION["email"]);
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
-		}
+		}*/
 		citation::delete($_GET["id"], $db);
 		break;
 	case "createTranslation":
@@ -162,10 +162,11 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "deleteTranslation":
 		//! only superusers can do this
+		/*
 		$user = users::getUser($_SESSION["email"]);
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
-		}
+		} */
 		translation::delete($_GET["id"], $db);
 		break;
 	case "deleteSlips":
