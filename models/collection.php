@@ -323,7 +323,7 @@ SQL;
 
 	/**
 	 * Runs query to fetch citation IDs for given slip required for citation display
-	 * Returns only the first 'long' type and first 'short' type citation IDs for efficiency
+	 * Returns only the first 'form', 'sense', and 'draft' type citation IDs for efficiency
 	 * @param $slipId
 	 * @param $db
 	 * @return array : associative array of citation IDs keyed by citation type
@@ -341,6 +341,8 @@ SQL;
 				$citationIds["sense"] = $row["cid"];
 			} else if (empty($citationIds["form"]) && $row["type"] == "form") {
 				$citationIds["form"] = $row["cid"];
+			} else {
+				$citationIds["draft"] = $row["cid"];
 			}
 		}
 		return $citationIds;

@@ -32,6 +32,10 @@ SQL;
 	      $_SESSION["user"]));
       $this->setId($this->_db->getLastInsertId());  //sets the ID on the parent
       $this->saveSlipMorph();    //save the defaults to the DB
+	      //add a draft citation by default
+	      $citation = new citation($this->_db);
+	      $citation->attachToSlip($this->getId());
+	      $this->addCitation($citation);
     }
     $sql = <<<SQL
         SELECT * FROM slips 

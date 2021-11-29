@@ -500,18 +500,27 @@ HTML;
 			        var corpusLink = 'index.php?m=corpus&a=browse&id=' + tid + '&wid=' + wid; //title id and word id
 				      tr.find('.entryCitationTextLink').attr('href', corpusLink); //add the link to text url
 				      let numCitations = Object.keys(data).length;
+				      var formFound = senseFound = false;
 			        $.each(data, function(citationType, info) {    //iterate through each citation
 								if (type == "form") {     //default to short citation for forms 
-								  if (citationType == "form") {
+								  
+								  if (!data.form) {
+								    if (!data.sense) {
+								      html += getCitationHtml("draft", data.draft); //no form or sense so write draft
+								    } else {
+								      html += getCitationHtml("sense", data.sense); //no form so write sense
+								    }
+								  } else {
 								    html += getCitationHtml(citationType, info);
-								  } else if (numCitations == 1) {
-								    html += getCitationHtml("sense", data.sense); //no sense so write form
 								  }
+
 								} else if (type == "sense") {    //default to long citation for senses
 								    if (citationType == "sense") {
 								      html += getCitationHtml(citationType, info);
-								    } else if (numCitations == 1) {
-								      html += getCitationHtml("form", data.form); //no form found so write sense
+								    } else if (data.sense) {
+								      html += getCitationHtml("form", data.form); //no sense found so write form
+								    } else {
+								      html += getCitationHtml("draft", data.draft); //no form or sense so write draft
 								    }
 								} 
 				        tr.find('.entryCitationContext').html(html);
