@@ -29,6 +29,14 @@ class entries
 				</div>
         <div>
           <h5>Forms:</h5>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="formsOptions" id="formsOnly" value="formsOnly" checked>
+            <label class="form-check-label" for="formsOnly"><small>form citations only</small></label>
+					</div>
+					<div class="form-check form-check-inline"> 
+            <input class="form-check-input" type="radio" name="formsOptions" id="allCitations" value="allCitations">
+            <label class="form-check-label" for="allCitations"><small>all citations</small></label>
+					</div>
           {$this->_getFormsHtml()}
 				</div>
 				<div>
@@ -469,8 +477,18 @@ HTML;
 				  $('#groupedSenses').show();
 				  return false;
 				});
-							
-				/**
+					
+				$('#formsOnly').on('click', function () {
+					$('.forms_sense').hide();
+					$('.forms_draft').hide();
+				});
+				
+				$('#allCitations').on('click', function () {
+					$('.forms_sense').show();
+					$('.forms_draft').show();
+				});
+						
+				/**, 
         *  Load and show the citations for wordforms or senses
         */
 				$('.citationsLink').on('click', function () {
@@ -485,6 +503,9 @@ HTML;
 			      return;
 			    }
 			    $(citationsContainerId + "> table > tbody > tr").each(function() {
+			      var tr = $(this);
+			      var formsOnly = $("input[name='formsOptions']:checked").val() == "formsOnly" ? true : false;  
+			      console.log($("input[name='formsOptions']:checked").val());
 			      var slipId = $(this).attr('data-slipid');
 			      var date = $(this).attr('data-date');
 			      var html = '';
@@ -503,11 +524,24 @@ HTML;
 							  if (!data.form) {
 							    if (!data.sense) {
 							      html += getCitationHtml("draft", data.draft); //no form or sense so write draft
+							      tr.addClass("forms_draft");
+							      if (formsOnly) {
+							        tr.addClass('hide');
+							      } else {
+							        tr.removeClass('hide');
+							      }
 							    } else {
 							      html += getCitationHtml("sense", data.sense); //no form so write sense
+							      tr.addClass("forms_sense");
+							      if (formsOnly) {
+							        tr.addClass('hide');
+							      } else {
+							        tr.removeClass('hide');
+							      }
 							    }
 							  } else {
 							    html += getCitationHtml("form", data.form); //there is a form so write it
+							    tr.addClass("forms_form");
 							  }
 				      } else if (type == "sense") {
 				        if (!data.sense) {

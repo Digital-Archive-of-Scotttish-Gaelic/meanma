@@ -341,7 +341,7 @@ HTML;
 	    "imp_number", "status", "tense", "mood", "prep_mode", "prep_person", "prep_number", "prep_gender");
     $options["numgen"] = array("masculine singular", "feminine singular", "plural", "singular (gender unclear)",
       "feminine dual", "unclear");
-    $options["case"] = array("nominative", "genitive", "dative", "unclear");
+    $options["case"] = array("nominative", "genitive", "dative", "vocative", "accusative†", "unclear");
     $options["mode"] = array("unclear mode", "imperative", "finite", "verbal noun");
 	  $options["imp_person"] = array("second person", "first person", "third person", "unclear person");
     $options["fin_person"] = array("unmarked person", "first person", "second person", "third person");
