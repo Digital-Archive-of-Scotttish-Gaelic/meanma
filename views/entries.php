@@ -87,10 +87,7 @@ HTML;
   private function _getSlipListForForms($slipIds) {
   	$slipData = array();
 	  foreach ($slipIds as $id) {
-		  $info = models\collection::getSlipInfoBySlipId($id, $this->_db);
-		  $isPaperSlip = ($info) ? false : true;      //if there is info this is a corpus_slip,
-		                                              //otherwise it's a paper_slip
-		  $slipData[$id] = $isPaperSlip ? array(array("auto_id"=>$id, "isPaperSlip"=>$isPaperSlip)) : $info;
+		  $slipData[$id] = models\collection::getSlipInfoBySlipId($id, $this->_db);
 	  }
 		$slipList = '<table class="table"><tbody>';
 		foreach ($slipData as $id => $data) {
@@ -505,7 +502,6 @@ HTML;
 			    $(citationsContainerId + "> table > tbody > tr").each(function() {
 			      var tr = $(this);
 			      var formsOnly = $("input[name='formsOptions']:checked").val() == "formsOnly" ? true : false;  
-			      console.log($("input[name='formsOptions']:checked").val());
 			      var slipId = $(this).attr('data-slipid');
 			      var date = $(this).attr('data-date');
 			      var html = '';

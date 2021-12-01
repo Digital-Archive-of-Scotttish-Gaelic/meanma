@@ -250,20 +250,20 @@ switch ($_REQUEST["action"]) {
 		echo json_encode(array("success" => true));
 		break;
   case "saveSlipSense":
-    sensecategories::saveSlipSense($_POST["slipId"], $_POST["senseId"]);
+    sensecategories::saveSlipSense($_POST["slipId"], $_POST["senseId"], $db);
     collection::touchSlip($_POST["slipId"]);
     echo "success";
     break;
 	case "addSense":
-		$senseId = sensecategories::addSense($_GET["name"], $_GET["description"], $_GET["entryId"]);
-		sensecategories::saveSlipSense($_GET["slipId"], $senseId);
+		$senseId = sensecategories::addSense($_GET["name"], $_GET["description"], $_GET["entryId"], $db);
+		sensecategories::saveSlipSense($_GET["slipId"], $senseId, $db);
 		echo json_encode(array("senseId" => $senseId, "senseDescription" => $_GET["description"]));
 		break;
 	case "editSense":
-		sensecategories::updateSense($_GET["id"], $_GET["name"], $_GET["description"]);
+		sensecategories::updateSense($_GET["id"], $_GET["name"], $_GET["description"], $db);
 		//remove association with slip
 		if ($_GET["slipId"]) {
-			sensecategories::deleteSlipSense($_GET["slipId"], $_GET["id"]);
+			sensecategories::deleteSlipSense($_GET["slipId"], $_GET["id"], $db);
 			collection::touchSlip($_GET["slipId"]);
 		}
 		break;
@@ -286,7 +286,7 @@ switch ($_REQUEST["action"]) {
       $context = $fileHandler->getContext($elems[1], 8, 8);
       $context["date"] = $elems[2];   //return the date of language
       $context["auto_id"] = $elems[3]; //return the auto_id (slip id)
-      $context["title"] = str_replace("\\", " ", $elems[4]);   //return the title
+      $context["title"] = str_replace("\\", " ", $elems[4]);   //return the title.
       $context["page"] = $elems[5]; //return the page no
 	    $context["tid"] = $elems[6];  //return the text ID
       $results["results"][] = $context;

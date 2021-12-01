@@ -282,7 +282,11 @@ SQL;
 SQL;
 
 		$slipInfo = $db->fetch($sql, array(":slipId" => $slipId));
-		return $slipInfo;
+		//check if slip info is populated. if it is this is a corpus slip, of not then it's a paper slip
+		if ($slipInfo) {
+			return $slipInfo;         //corpus slip
+		}
+		return array(array("auto_id"=>$slipId, "isPaperSlip"=>true)); //paper slip
 	}
 
 	public static function getEntryIdBySlipId($slipId, $db) {

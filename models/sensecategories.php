@@ -11,8 +11,7 @@ class sensecategories
 	 * @param $entryId
 	 * @return string : the ID of the newly created sense
 	 */
-  public static function addSense($name, $description, $entryId) {
-    $db = new database();
+  public static function addSense($name, $description, $entryId, $db) {
     $sql = <<<SQL
 			INSERT INTO sense(name, description, entry_id)
 				VALUES (:name, :description, :entryId)
@@ -25,8 +24,7 @@ SQL;
 	 * Deletes a sense from the database and removes all its associated slip references also
 	 * @param $id : the sense ID
 	 */
-  public static function deleteSense($id) {
-    $db = new database();
+  public static function deleteSense($id, $db) {
     $db->exec("DELETE FROM sense WHERE id = :id", array(":id" => $id));
     $db->exec("DELETE FROM slip_sense WHERE sense_id = :id", array(":id" => $id));
   }
@@ -41,8 +39,7 @@ SQL;
 	 * @param $slipId
 	 * @param $senseId
 	 */
-  public static function saveSlipSense($slipId, $senseId) {
-	  $db = new database();
+  public static function saveSlipSense($slipId, $senseId, $db) {
 	  $sql = "INSERT INTO slip_sense VALUES(:slipId, :senseId)";
 	  $db->exec($sql, array(":slipId" => $slipId, ":senseId" => $senseId));
   }
@@ -52,10 +49,18 @@ SQL;
 	 * @param $slipId
 	 * @param $senseId
 	 */
-	public static function deleteSlipSense($slipId, $senseId) {
-		$db = new database();
+	public static function deleteSlipSense($slipId, $senseId, $db) {
 		$sql = "DELETE FROM slip_sense WHERE slip_id = :slipId AND sense_id = :senseId";
 		$db->exec($sql, array(":slipId" => $slipId, ":senseId" => $senseId));
+		if (self::getSenseIsOrphaned($senseId, $db)) {
+			self::deleteSense($senseId, $db);       //delete the sense if it's an orphan
+		}
+	}
+
+	public static function getSenseIsOrphaned($id, $db) {
+		$sql = "SELECT * FROM slip_sense WHERE sense_id = :senseId";
+		$result = $db->fetch($sql, array(":senseId" => $id));
+		return empty($result);
 	}
 
 	/**
@@ -63,9 +68,9 @@ SQL;
 	 * @param $id
 	 * @param $name
 	 * @param $description
+	 * @param $db
 	 */
-	public static function updateSense($id, $name, $description) {
-		$db = new database();
+	public static function updateSense($id, $name, $description, $db) {
 		$sql = <<<SQL
 				UPDATE sense SET name = :name, description = :description WHERE id = :id
 SQL;
@@ -79,7 +84,7 @@ SQL;
 	 */
 	public static function getNonCategorisedSlipIds($entryId, $db) {
 		$slipIds = array();
-//		$db = new database();
+			//get the corpus slip data
 		$sql = <<<SQL
         SELECT auto_id FROM slips s 
         	JOIN lemmas l ON l.id = s.id AND l.filename = s.filename
@@ -90,6 +95,18 @@ SQL;
 SQL;
 		$results = $db->fetch($sql, array(":entryId"=>$entryId));
 		foreach ($results as $row) {
+			$slipIds[] = $row["auto_id"];
+		}
+			//...and get the paper slip data
+		$sql2 = <<<SQL
+			SELECT auto_id FROM slips s 
+				JOIN entry e ON e.id = s.entry_id
+				WHERE auto_id NOT IN (SELECT slip_id FROM slip_sense) AND s.entry_id = :entryId 
+				  AND filename = ''
+        	AND group_id = {$_SESSION["groupId"]}
+SQL;
+		$results2 = $db->fetch($sql2, array(":entryId"=>$entryId));
+		foreach ($results2 as $row) {
 			$slipIds[] = $row["auto_id"];
 		}
 		return $slipIds;

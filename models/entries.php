@@ -168,6 +168,20 @@ SQL;
 		  $slipId = $row["slipId"];
 		  $entry->addSense($sense, $slipId);
 	  }
+	  //query for paper slips -
+	  $sql2 = <<<SQL
+			SELECT se.id as id, auto_id AS slipId FROM sense se
+					JOIN slip_sense ss ON ss.sense_id = se.id
+					JOIN slips s ON s.auto_id = ss.slip_id
+					JOIN entry e ON e.id = s.entry_id
+        	WHERE filename = '' AND group_id = {$_SESSION["groupId"]} AND e.id = :entryId
+SQL;
+	  $results2 = $db->fetch($sql2, array("entryId"=>$entry->getId()));
+	  foreach ($results2 as $row) {
+		  $sense = new sense($row["id"], $db);
+		  $slipId = $row["slipId"];
+		  $entry->addSense($sense, $slipId);
+	  }
 		return $entry;
   }
 
