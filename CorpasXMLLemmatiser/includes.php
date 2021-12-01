@@ -1,7 +1,7 @@
 <?php
 
 //constants
-define("INPUT_FILEPATH", "../../xml");   //for local testing only
+define("INPUT_FILEPATH", "../../gadelica/xml");   //for local testing only
 //define("INPUT_FILEPATH", "inputFiles");
 
 //DB
