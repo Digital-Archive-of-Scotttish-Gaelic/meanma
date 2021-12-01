@@ -36,6 +36,10 @@
     </p>
   </xsl:template>
 
+  <xsl:template match="dasg:hr">
+    <hr/>
+  </xsl:template>
+
   <xsl:template match="dasg:p">
     <p>
       <xsl:apply-templates/>
@@ -147,7 +151,7 @@
   <xsl:template match="dasg:pc">
     <xsl:apply-templates/>
   </xsl:template>
-  
+
   <xsl:template match="dasg:pause">
     <p> </p>
   </xsl:template>
