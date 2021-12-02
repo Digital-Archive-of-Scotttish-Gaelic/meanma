@@ -337,10 +337,10 @@ HTML;
   private function _writePartOfSpeechSelects() {
     $html = $this->_writeWordClassesSelect();
     $props = $this->_slip->getSlipMorph()->getProps();  //the morph data
-    $relations = array("numgen", "case", "mode", "fin_person", "imp_person", "fin_number",
+    $relations = array("number", "gender", "case", "mode", "fin_person", "imp_person", "fin_number",
 	    "imp_number", "status", "tense", "mood", "prep_mode", "prep_person", "prep_number", "prep_gender");
-    $options["numgen"] = array("masculine singular", "feminine singular", "plural", "singular (gender unclear)",
-      "feminine dual", "unclear");
+    $options["number"] = array("singular", "plural", "dual†", "unclear");
+    $options["gender"] = array("masculine", "feminine", "neuter†", "unclear");
     $options["case"] = array("nominative", "genitive", "dative", "vocative", "accusative†", "unclear");
     $options["mode"] = array("unclear mode", "imperative", "finite", "verbal noun");
 	  $options["imp_person"] = array("second person", "first person", "third person", "unclear person");
@@ -358,7 +358,7 @@ HTML;
 		//create the HTML options for each relation
 	  $optionsHtml = array();
     foreach ($relations as $relation) {
-    	$optionsHtml[$relation] = "";
+    	$optionsHtml[$relation] = '<option value="">----</option>';
     	foreach ($options[$relation] as $option) {
     		$selected = $option == $props[$relation] ? "selected" : "";
     		$optionsHtml[$relation] .= <<<HTML
@@ -367,6 +367,7 @@ HTML;
 	    }
     }
     $nounSelectHide = $this->_slip->getWordClass() == "noun" ? "" : "hide";
+	  $nounPhraseSelectHide = $this->_slip->getWordClass() == "noun phrase" ? "" : "hide";
     $verbSelectHide = $this->_slip->getWordClass() == "verb" ? "" : "hide";
     $prepSelectHide = $this->_slip->getWordClass() == "preposition" ? "" : "hide";
 	  $impVerbSelectHide = $props["mode"] == "imperative" ? "" : "hide";
@@ -413,14 +414,40 @@ HTML;
             </div>
             <div id="nounSelects" class="{$nounSelectHide}">
                 <div class="row form-group">
-	                <label for="posNumberGender" class="col-form-label col-sm-2">Number:</label>
-	                <select name="numgen" id="posNumberGender" class="form-control col-4">
-	                  {$optionsHtml["numgen"]}
+	                <label for="posNumber" class="col-form-label col-sm-2">Number:</label>
+	                <select name="number" id="posNumber" class="form-control col-4">
+	                  {$optionsHtml["number"]}
+	                </select>
+	              </div>
+	              <div class="row form-group">
+	                <label for="posGender" class="col-form-label col-sm-2">Gender:</label>
+	                <select name="gender" id="posGender" class="form-control col-4">
+	                  {$optionsHtml["gender"]}
 	                </select>
 	              </div>
 	              <div class="row form-group">
 	                <label for="posCase" class="col-form-label col-sm-2">Case:</label>
 	                <select name="case" id="posCase" class="form-control col-2">
+	                  {$optionsHtml["case"]}
+	                </select>
+	              </div>
+            </div>
+            <div id="nounPhraseSelects" class="{$nounPhraseSelectHide}">
+                <div class="row form-group">
+	                <label for="posNPNumber" class="col-form-label col-sm-2">Number:</label>
+	                <select name="number" id="posNPNumber" class="form-control col-4">
+	                  {$optionsHtml["number"]}
+	                </select>
+	              </div>
+	              <div class="row form-group">
+	                <label for="posNPGender" class="col-form-label col-sm-2">Gender:</label>
+	                <select name="gender" id="posNPGender" class="form-control col-4">
+	                  {$optionsHtml["gender"]}
+	                </select>
+	              </div>
+	              <div class="row form-group">
+	                <label for="posNPCase" class="col-form-label col-sm-2">Case:</label>
+	                <select name="case" id="posNPCase" class="form-control col-2">
 	                  {$optionsHtml["case"]}
 	                </select>
 	              </div>
@@ -1085,20 +1112,30 @@ HTML;
                   $('#verbSelects').show();
                   $('#nonVerbalNounOptions').show();
                   $('#nounSelects').hide();
+                  $('#nounPhraseSelects').hide();
                   $('#prepSelects').hide();
                   break;
                 case "noun":
                   $('#nounSelects').show();
+                  $('#nounPhraseSelects').hide();
+                  $('#verbSelects').hide();
+                  $('#prepSelects').hide();
+                  break;
+                case "noun phrase":              
+                  $('#nounPhraseSelects').show();
+                  $('#nounSelects').hide();
                   $('#verbSelects').hide();
                   $('#prepSelects').hide();
                   break;
                 case "preposition":
                   $('#prepSelects').show();
                   $('#nounSelects').hide();
+                  $('#nounPhraseSelects').hide();
                   $('#verbSelects').hide();
                   break;
                 default:
                   $('#nounSelects').hide();
+                  $('#nounPhraseSelects').hide();
                   $('#verbSelects').hide();
                   $('#prepSelects').hide();
               }

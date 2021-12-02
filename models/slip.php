@@ -19,7 +19,8 @@ class slip
 	protected $_wordClass, $_lastUpdatedBy, $_lastUpdated;
 	protected $_isNew;
 	protected $_wordClasses = array(
-		'noun' => array("n", "nx", "ns", "N", "Nx"),
+		"noun" => array("n", "nx", "ns", "N", "Nx"),
+		"noun phrase" => array("nphr"),
 		"verb" => array("v", "V", "vn"),
 		"adjective" => array("a", "ar"),
 		"preposition" => array("p", "P"),
@@ -245,8 +246,8 @@ SQL;
 			//remove all the senses
 			sensecategories::deleteSensesForSlip($this->getId());
 			//hack to workaround POS issues - TODO: discuss with MM
-			$tempPOS = array("noun" => "n", "verb" => "v", "preposition" => "p", "verbal noun" => "vn", "adjective" => "a",
-				"adverb" => "A", "other" => "");
+			$tempPOS = array("noun" => "n", "noun phrase" => "nphr", "verb" => "v", "preposition" => "p", "verbal noun" => "vn",
+				"adjective" => "a", "adverb" => "A", "other" => "");
 			$this->setPOS($tempPOS[$wordclass]);
 			$this->_slipMorph = new slipmorphfeature($this->getPOS());  //attach the morph data for the new POS
 			$this->_clearSlipMorphEntries();

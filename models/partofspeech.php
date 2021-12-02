@@ -10,6 +10,7 @@ class partofspeech
     "nx" => "case-marked noun",
     "N" => "proper noun (unmarked)",
     "Nx" => "case-marked proper noun",
+    "nphr" => "noun phrase",
     "v" => "dependent verb form",
     "vn" => "verbal noun",
     "V" => "independent verb form",

@@ -315,8 +315,14 @@ function saveSlip() {
     locked: locked, text_id: $('#textId').val(), slipType: slipType, entryId: entryId};
   switch (wordclass) {
     case "noun":
-      data['numgen'] = $('#posNumberGender').val();
+      data['number'] = $('#posNumber').val();
+      data['gender'] = $('#posGender').val();
       data['case'] = $('#posCase').val();
+      break;
+    case "noun phrase":
+      data['number'] = $('#posNPNumber').val();
+      data['gender'] = $('#posNPGender').val();
+      data['case'] = $('#posNPCase').val();
       break;
     case "verb":
       var mode = $('#posMode').val();

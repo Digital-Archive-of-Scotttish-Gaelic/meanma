@@ -7,7 +7,8 @@ class slipmorphfeature
   private $_abbr, $_type;
   private $_props = array();
   private $_propTitles = array(
-  	  "noun"=>array("numgen", "case"),
+  	  "noun"=>array("number", "gender", "case"),
+	    "noun phrase"=>array("number", "gender", "case"),
 	    "verb"=>array("mode", "status", "imp_number", "fin_number",
 		    "imp_person", "fin_person", "tense", "mood"),
 		  "preposition"=>array("prep_mode", "prep_person", "prep_number", "prep_gender"),
@@ -22,19 +23,23 @@ class slipmorphfeature
     switch ($this->_abbr) {
       case "n":
         $this->_type = "noun";
-        $this->_props["numgen"] = "singular (gender unclear)";
-        $this->_props["case"] = "nominative";
+        /* following commented out to test new noun slips having blank defaults */
+    //    $this->_props["number"] = "singular";
+    //    $this->_props["case"] = "nominative";
         break;
       case "ns":
         $this->_type = "noun";
-        $this->_props["numgen"] = "plural";
+        $this->_props["number"] = "plural";
         $this->_props["case"] = "nominative";
         break;
       case "nx":
         $this->_type = "noun";
-        $this->_props["numgen"] = "singular (gender unclear)";
+        $this->_props["number"] = "singular";
         $this->_props["case"] = "genitive";
         break;
+	    case "nphr":
+	    	$this->_type = "noun phrase";
+	    	break;
       case "v":
         $this->_type = "verb";
 	      $this->_props["mode"] = "finite";
@@ -46,7 +51,7 @@ class slipmorphfeature
         break;
       case "vn":
         $this->_type = "verb";
-	        $this->_props['mode'] = "verbal noun";
+        $this->_props['mode'] = "verbal noun";
         break;
       case "V":
         $this->_type = "verb";
