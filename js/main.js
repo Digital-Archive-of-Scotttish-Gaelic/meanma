@@ -49,6 +49,9 @@ $(function () {
    * Sense category editing
    */
   $(document).on('click', '.senseBadge', function() {
+    var thisBadge = $(this);
+    //add a flag in case of deletion
+    thisBadge.addClass('delete');
     var senseId = $(this).attr('data-sense');
     var senseDescription = $(this).attr('data-sense-description');
     var senseName = $(this).attr('data-sense-name');
@@ -76,8 +79,10 @@ $(function () {
     url += '&name=' + encodeURIComponent(name) + '&description=' + encodeURIComponent(description);
     //check if a slip association is to be removed
     if ($('#modalSenseSlipRemove').prop('checked')) {
+      $('.delete').remove();    //get rid of the badge
       url += '&slipId=' + $('#modalSlipId').val();
     }
+    $('.delete').removeClass('delete');
     $('#senseModal').modal('hide');
     $.ajax({url: url}, function () {
     });
