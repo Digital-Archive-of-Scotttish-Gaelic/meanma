@@ -847,7 +847,7 @@ HTML;
                 //append a placeholder to the citation's translation list 
                 var html = '<li class="translationContainer_'+data.id+'"><span id="trans_'+data.id+'"></span> <em><span id="transType_'+data.id+'"></span></em>&nbsp;';
                 html += '<a href="#" id="editTrans_'+data.id+'" class="editTrans" data-translationid="'+data.id+'">edit</a>';
-                html += '<a href="#" class="deleteTranslation danger float-right" data-tid="'+data.id+'"><small>delete translation</small></a>'
+                html += '<a href="#" class="deleteTranslation danger float-right" data-tid="'+data.id+'"><small>delete translation</small></a>';
                 $('#transList_'+citationId).append(html);
                 CKEDITOR.instances.citationTranslation.setData(''); //clear the translation content for new empty translation
 								$('#translationEditModal').modal('show');
@@ -891,8 +891,8 @@ HTML;
 	                content: content,
 	                type: type
                 }
-              }
-              $.ajax(params)    
+              };
+              $.ajax(params);
             });
             
             //load translation
@@ -1092,8 +1092,8 @@ HTML;
              */
             $('#wordClass,#slipHeadword').on('change', function() {
               let check = confirm('Changing the headword and/or wordclass will remove any senses. Are you sure you want to proceed?');
-              let previousHeadword = '{$this->_slip->getHeadword()}';
-              let previousWordclass = '{$this->_slip->getWordClass()}';        
+              let previousHeadword = "{$this->_slip->getHeadword()}";
+              let previousWordclass = "{$this->_slip->getWordClass()}";        
               if (!check) {
                 $('#slipHeadword').val(previousHeadword)
                 $('#wordClass').val(previousWordclass);
