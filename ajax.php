@@ -189,9 +189,6 @@ switch ($_REQUEST["action"]) {
 	case "loadSlipData":                             //this is only used externally as an API (by e.g. briathradan
 		//$result = collection::getSlipInfoBySlipId($_GET["id"], $db, $_GET["groupId"]);
 		$slip = collection::getSlipBySlipId($_GET["id"]);
-
-
-		echo (json_encode(print_r($slip))); die();
 		$citations = $slip->getCitations();
 		$citation = reset($citations);
 
@@ -199,6 +196,8 @@ switch ($_REQUEST["action"]) {
 		//$handler = new xmlfilehandler($slipInfo["filename"]);
 		//$context = $handler->getContext($slipInfo["id"], $slipInfo["preContextScope"], $slipInfo["postContextScope"]);
 		$slipInfo["context"] = $citation->getContext();
+
+		$slipInfo["context"] = "this is the context for slip " . $slip->getId();
 		echo json_encode($slipInfo);
 		break;
 	case "createPaperSlip":
