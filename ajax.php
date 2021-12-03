@@ -187,15 +187,15 @@ switch ($_REQUEST["action"]) {
 		echo json_encode(array("response" => $response));
 		break;
 	case "loadSlipData":                             //this is only used externally as an API (by e.g. briathradan
-		//$result = collection::getSlipInfoBySlipId($_GET["id"], $db, $_GET["groupId"]);
+		$result = collection::getSlipInfoBySlipId($_GET["id"], $db, $_GET["groupId"]);
 		$slip = collection::getSlipBySlipId($_GET["id"], $db);
 		$citations = $slip->getCitations();
 		$citation = reset($citations);
-
-		//$slipInfo = $result[0];
-		//$handler = new xmlfilehandler($slipInfo["filename"]);
-		//$context = $handler->getContext($slipInfo["id"], $slipInfo["preContextScope"], $slipInfo["postContextScope"]);
+		$translations = $citation->getTranslations();
+		$translation = reset($translations);
+		$slipInfo = $result[0];
 		$slipInfo["context"] = $citation->getContext();
+		$slipInfo["translation"] = $translation->getContent();
 		echo json_encode($slipInfo);
 		break;
 	case "createPaperSlip":
