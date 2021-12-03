@@ -299,6 +299,7 @@ function resetSlip() {
 }
 
 function saveSlip() {
+  alert('this is a really, particularly annoying alert to test caching');
   var slipType = $('#citationContext').attr('data-sliptype');
   var entryId = $('#citationContext').attr('data-entryid');
   var textId = $('#textId').val();
@@ -350,7 +351,9 @@ function saveSlip() {
       break;
   }
   $.post("ajax.php", data, function (response) {
-    //refresh the parent page to show updated slip info
-    window.opener.document.location.reload(true);
-  });
+  })
+    .done(function () {
+      //refresh the parent page to show updated slip info once save is complete
+      window.opener.document.location.reload(true);
+    });
 }
