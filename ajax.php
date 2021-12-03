@@ -189,6 +189,9 @@ switch ($_REQUEST["action"]) {
 	case "loadSlipData":                             //this is only used externally as an API (by e.g. briathradan
 		//$result = collection::getSlipInfoBySlipId($_GET["id"], $db, $_GET["groupId"]);
 		$slip = collection::getSlipBySlipId($_GET["id"]);
+
+
+		echo (json_encode(print_r($slip))); die();
 		$citations = $slip->getCitations();
 		$citation = reset($citations);
 
