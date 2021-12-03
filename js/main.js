@@ -282,10 +282,6 @@ $(function () {
 
   $('#savedClose').on('click', function () {
     saveSlip();
-    $('#slipSavedModal').modal();
-    setTimeout(function() {
-      window.close();
-    }, 2000);
   });
 });
 
@@ -299,7 +295,6 @@ function resetSlip() {
 }
 
 function saveSlip() {
-  alert('this is a really, particularly annoying alert to test caching');
   var slipType = $('#citationContext').attr('data-sliptype');
   var entryId = $('#citationContext').attr('data-entryid');
   var textId = $('#textId').val();
@@ -355,5 +350,9 @@ function saveSlip() {
     .done(function () {
       //refresh the parent page to show updated slip info once save is complete
       window.opener.document.location.reload(true);
+      $('#slipSavedModal').modal();   //show the saved messsage
+      setTimeout(function() {
+        window.close();     //close the edit window
+      }, 2000);
     });
 }
