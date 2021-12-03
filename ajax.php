@@ -186,12 +186,16 @@ switch ($_REQUEST["action"]) {
 		$response = entries::deleteEntries($_GET["entryIds"], $db);
 		echo json_encode(array("response" => $response));
 		break;
-	case "loadSlipData":      //this is only used externally as an API (by e.g. briathradan
-		$result = collection::getSlipInfoBySlipId($_GET["id"], $db, $_GET["groupId"]);
-		$slipInfo = $result[0];
-		$handler = new xmlfilehandler($slipInfo["filename"]);
-		$context = $handler->getContext($slipInfo["id"], $slipInfo["preContextScope"], $slipInfo["postContextScope"]);
-		$slipInfo["context"] = $context;
+	case "loadSlipData":                             //this is only used externally as an API (by e.g. briathradan
+		//$result = collection::getSlipInfoBySlipId($_GET["id"], $db, $_GET["groupId"]);
+		$slip = collection::getSlipBySlipId($_GET["id"]);
+		$citations = $slip->getCitations();
+		$citation = reset($citations);
+
+		//$slipInfo = $result[0];
+		//$handler = new xmlfilehandler($slipInfo["filename"]);
+		//$context = $handler->getContext($slipInfo["id"], $slipInfo["preContextScope"], $slipInfo["postContextScope"]);
+		$slipInfo["context"] = $citation->getContext();
 		echo json_encode($slipInfo);
 		break;
 	case "createPaperSlip":
