@@ -196,8 +196,6 @@ switch ($_REQUEST["action"]) {
 		//$handler = new xmlfilehandler($slipInfo["filename"]);
 		//$context = $handler->getContext($slipInfo["id"], $slipInfo["preContextScope"], $slipInfo["postContextScope"]);
 		$slipInfo["context"] = $citation->getContext();
-
-		$slipInfo["context"] = "this is the context for slip " . $slip->getId();
 		echo json_encode($slipInfo);
 		break;
 	case "createPaperSlip":
