@@ -210,11 +210,11 @@ XPATH;
 	 */
 	private function _getSlipLinkHtml($element, $headword, $pos) {
 		$wordId = $element->attributes()->id;
-		$slipId = collection::slipExists($_SESSION["groupId"], $this->getFilename(), $wordId);
+		$slipId = collection::slipExists($_SESSION["groupId"], $this->getFilename(), $wordId, $this->_db);
 		$data = $slipId
 			? collection::getSlipInfoBySlipId($slipId, $this->_db)[0]    //there is a slip so use the data
 			: array("filename"=>$this->getFilename(), "id"=>$wordId, "pos"=>$pos, "lemma"=>$headword);  //new slip
-		return collection::getSlipLinkHtml($data);
+		return collection::getSlipLinkHtml($data, null, $this->_db);
 	}
 
 	private function _getHandShiftInfo($element) {

@@ -207,10 +207,21 @@ SQL;
 	  $results = array_merge($results, $db->fetch($sql, array(":entryId"=>$entryId)));
   	foreach ($results as $row) {
   		$wordform = mb_strtolower($row["wordform"], "UTF-8");
+
+  		$entryForm = new entry_form($wordform);
+
   		$slipId = $row["slipId"];
 		  $slipMorphResults = collection::getSlipMorphBySlipId($slipId, $db);
+
+		  $entryForm->addMorphFeature();
+
 		  $morphString = implode('|', $slipMorphResults);
   		$wordforms[$wordform][$morphString][] = $slipId;
+	  }
+  	foreach ($wordforms as $wordform => $morphString) {
+
+  		print_r($wordforms[$wordform]);
+  		ksort($wordforms[$wordform], SORT_STRING);
 	  }
   	return $wordforms;
   }
