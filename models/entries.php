@@ -220,7 +220,7 @@ SQL;
 	  }
   	foreach ($wordforms as $wordform => $morphString) {
 
-  		print_r($wordforms[$wordform]);
+  	//	print_r($wordforms[$wordform]);
   		ksort($wordforms[$wordform], SORT_STRING);
 	  }
   	return $wordforms;
