@@ -763,9 +763,6 @@ HTML;
 			      } 
 				    html += '<li>scribe: ' + handHtml + '</li>'; 
 				  }
-				  if (chunk.pos) {
-				    html += '<li>' + chunk.pos[0].replace('_', ' ') + '</li>';
-				  }
 				  if (chunk.abbrevs.glyphs != undefined && chunk.abbrevs.glyphs.length) { //ligatures and abbreviations
 				    html += '<li>scribal abbreviations and ligatures –</li><ul>'
 			//	    var glyphRefs = []; //used to track used glyphs to hancle duplicates
@@ -879,6 +876,9 @@ HTML;
 				  if (chunk.obscureSection) {
 				    let section = chunk.obscureSection;
 				    html += '<li>part of an obscured section ('+ section.resp[0] + ', ' + section.cert[0] + ' certainty)</li>';
+				  }
+				  if (chunk.pos) {
+				    html += '<li>' + chunk.pos[0].replace('_', ' ') + '</li>';
 				  }
 				  if (chunk.edil) {
 				    html += '<li>eDil: <a target="_blank" href="' + chunk.edil[0] + '">' + chunk.lemma[0] + '</a></li>';
