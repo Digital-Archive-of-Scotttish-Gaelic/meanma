@@ -54,8 +54,15 @@ HTML;
   	$i=0;
 	  $hideText = array("unmarked person", "unmarked number");
 	  $html = "<ul>";
+
+	  $groupedArray = array();
+
 	  foreach ($this->_entry->getWordforms($this->_db) as $wordform => $morphGroup) {
 	  	foreach ($morphGroup as $morphString => $slipIds) {
+
+				$groupedArray[$morphString][$wordform] = $slipIds;
+
+/*
 	  		$i++;
 			  $morphHtml = str_replace('|', ' ', $morphString);
 			  $morphHtml = str_replace($hideText, '', $morphHtml);
@@ -78,8 +85,47 @@ HTML;
             ({$morphHtml}) {$citationHtml}
           </li>
 HTML;
+*/
 		  }
 	  }
+
+	  foreach ($groupedArray as $morphString => $wordforms) {
+
+		  $morphHtml = str_replace('|', ' ', $morphString);
+		  $morphHtml = str_replace($hideText, '', $morphHtml);
+
+		  $html .= <<<HTML
+				<li>{$morphHtml} – <ul>
+				
+HTML;
+
+
+	  	foreach ($wordforms as $wordform => $slipIds) {
+			  $i++;
+
+			  $slipList = $this->_getSlipListForForms($slipIds);
+			  $citationHtml = <<<HTML
+						<small><a href="#" class="citationsLink" data-type="form" data-index="{$i}">
+								citations
+						</a></small>
+						<div id="form_citations{$i}" class="citation">
+							<div class="spinner">
+				        <div class="spinner-border" role="status">
+				          <span class="sr-only">Loading...</span>
+				        </div>
+							</div>
+							{$slipList}
+						</div>
+HTML;
+			  $html .= <<<HTML
+          <li>{$wordform} 
+            {$citationHtml}
+          </li>
+HTML;
+		  }
+	  	$html .= "</ul></li>";
+	  }
+
 	  $html .= "</ul>";
 	  return $html;
   }

@@ -213,7 +213,7 @@ SQL;
   		$slipId = $row["slipId"];
 		  $slipMorphResults = collection::getSlipMorphBySlipId($slipId, $db);
 
-		  $entryForm->addMorphFeature();
+	//	  $entryForm->addMorphFeature();
 
 		  $morphString = implode('|', $slipMorphResults);
   		$wordforms[$wordform][$morphString][] = $slipId;
