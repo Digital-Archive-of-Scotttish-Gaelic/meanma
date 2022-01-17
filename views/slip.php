@@ -536,7 +536,7 @@ HTML;
   private function _writeSenseCategories() {
   	$unusedSenses = $this->_slip->getUnusedSenses();
 		$savedSenses = $this->_slip->getSenses();
-    $dropdownHtml = '<option data-category="">-- select a category --</option>';
+    $dropdownHtml = '<option data-category="">-- select a pile --</option>';
     foreach ($unusedSenses as $sense) {
     	$senseId = $sense->getId();
     	$senseName = $sense->getName();
@@ -568,7 +568,7 @@ HTML;
           <!--h5>Sense Categories</h5-->
           <div class="form-group row">
             <div class="col-sm-2">
-                  <label for="senseCategorySelect" class="col-form-label">Choose existing sense category:</label>
+                  <label for="senseCategorySelect" class="col-form-label">Choose existing pile:</label>
             </div>
             <div>
                 <select class="form-control" id="senseCategorySelect">{$dropdownHtml}</select>
@@ -579,7 +579,7 @@ HTML;
           </div>
           <div class="form-group row">
               <div class="col-sm-2">
-                  <label for="senseCategory" class="col-form-label">Assign to new sense category:</label>
+                  <label for="senseCategory" class="col-form-label">Assign to new pile:</label>
               </div>
               <div class="col-sm-2">
 									<label class="col-form-label" for="newSenseName">Name</label>

@@ -60,7 +60,7 @@ HTML;
                   <th data-field="headword" data-sortable="true">Headword</th>
                   <th data-field="wordform" data-sortable="true">Wordform</th>
                   <th data-field="wordclass" data-sortable="true">Part-of-speech</th>
-                  <th data-field="senses">Senses</th>
+                  <th data-field="senses">Piles</th>
                   <th data-field="morph">Morphological</th>
                   <th data-field="fullname" data-sortable="true">Owned By</th>
                   <th data-field="lastUpdated" data-sortable="true">Date</th>

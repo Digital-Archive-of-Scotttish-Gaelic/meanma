@@ -448,8 +448,7 @@ HTML;
 	private function _getChildTextsHtml() {
 		if (!count($this->_model->getChildTextsInfo())) {
 			return "";
-		}
-		else {
+		} else {
 			$levelColours = array(1 => "gold", 2 => "silver", 3 => "bronze");
 			$html = '<tr><td>contents</td><td>';
 			$html .= '<div class="list-group list-group-flush">';

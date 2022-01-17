@@ -40,7 +40,7 @@ class entries
           {$this->_getFormsHtml()}
 				</div>
 				<div>
-					<h5>Senses:</h5>
+					<h5>Piles:</h5>
 					{$this->_getSensesHtml()}
 				</div>
 			</div>
@@ -55,54 +55,23 @@ HTML;
 	  $hideText = array("unmarked person", "unmarked number");
 	  $html = "<ul>";
 
+	  //group the wordforms by morphology
 	  $groupedArray = array();
-
 	  foreach ($this->_entry->getWordforms($this->_db) as $wordform => $morphGroup) {
 	  	foreach ($morphGroup as $morphString => $slipIds) {
-
 				$groupedArray[$morphString][$wordform] = $slipIds;
-
-/*
-	  		$i++;
-			  $morphHtml = str_replace('|', ' ', $morphString);
-			  $morphHtml = str_replace($hideText, '', $morphHtml);
-			  $slipList = $this->_getSlipListForForms($slipIds);
-			  $citationHtml = <<<HTML
-						<small><a href="#" class="citationsLink" data-type="form" data-index="{$i}">
-								citations
-						</a></small>
-						<div id="form_citations{$i}" class="citation">
-							<div class="spinner">
-				        <div class="spinner-border" role="status">
-				          <span class="sr-only">Loading...</span>
-				        </div>
-							</div>
-							{$slipList}
-						</div>
-HTML;
-			  $html .= <<<HTML
-          <li>{$wordform} 
-            ({$morphHtml}) {$citationHtml}
-          </li>
-HTML;
-*/
 		  }
 	  }
 
 	  foreach ($groupedArray as $morphString => $wordforms) {
-
 		  $morphHtml = str_replace('|', ' ', $morphString);
 		  $morphHtml = str_replace($hideText, '', $morphHtml);
-
 		  $html .= <<<HTML
-				<li>{$morphHtml} – <ul>
-				
+				<li>{$morphHtml} – <ul>		
 HTML;
-
 
 	  	foreach ($wordforms as $wordform => $slipIds) {
 			  $i++;
-
 			  $slipList = $this->_getSlipListForForms($slipIds);
 			  $citationHtml = <<<HTML
 						<small><a href="#" class="citationsLink" data-type="form" data-index="{$i}">
@@ -181,7 +150,7 @@ HTML;
 	  }
   	$html .= <<<HTML
 			<div id="groupedSenses">
-				<h6>Grouped Senses <a id="showIndividual" href="#" title="show individual senses"><small>show individual</small></a></h6> 
+				<h6>Grouped Piles <a id="showIndividual" href="#" title="show individual senses"><small>show individual</small></a></h6> 
 				<ul>
 HTML;
   	//grouped senses
@@ -190,7 +159,7 @@ HTML;
 		//individual senses
 		$html .= <<<HTML
 			<div id="individualSenses" class="hide">
-				<h6>Indivdual Senses <a id="showGrouped" href="#" title="show grouped senses"><small>show grouped</small></a></h6> 
+				<h6>Individual Piles <a id="showGrouped" href="#" title="show grouped senses"><small>show grouped</small></a></h6> 
 				<ul>
 HTML;
 		$html .= $this->_getIndividualSensesHtml();
