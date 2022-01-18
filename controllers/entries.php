@@ -9,7 +9,6 @@ class entries
 
   public function __construct() {
   	$this->_db = new models\database();
-	  $this->_view = new views\entries($this->_db);
   }
 
   public function run($action) {
@@ -19,10 +18,12 @@ class entries
 	  switch ($action) {
 		  case "browse":
 			  $entryIds = models\entries::getActiveEntryIds($this->_db);
+			  $this->_view = new views\entries($this->_db);
 			  $this->_view->writeBrowseTable($entryIds);
 			  break;
 		  case "view":
 			  $entry = models\entries::getEntryById($_GET["id"], $this->_db);
+			  $this->_view = new views\entry($this->_db);
 			  $this->_view->writeEntry($entry);
 			  break;
 	  }

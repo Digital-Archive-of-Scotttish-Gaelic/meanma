@@ -184,7 +184,7 @@ SQL;
 	  }
 		return $entry;
   }
-
+/*
   public static function getWordformsForEntry($entryId, $db) {
   	$wordforms = array();
   	//get the corpus_slip wordforms
@@ -223,4 +223,5 @@ SQL;
 	  }
   	return $wordforms;
   }
+*/
 }

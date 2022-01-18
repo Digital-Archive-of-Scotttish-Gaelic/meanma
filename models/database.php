@@ -4,13 +4,14 @@ namespace models;
 
 class database {
 
-  private $_dbh, $_sth;
+  private $_dbh, $_sth, $_queryCount;
 
   /**
    * Creates and initialises a new Database object
    */
   public function __construct($dbName = DB) {
-    try {
+  	$this->_queryCount = 0;
+  	try {
       $this->_dbh = new \PDO(
         "mysql:host=" . DB_HOST . ";dbname=" . $dbName . ";charset=utf8;", DB_USER, DB_PASSWORD, array(
         \PDO::MYSQL_ATTR_LOCAL_INFILE => true,
@@ -39,6 +40,7 @@ class database {
    */
   public function fetch($sql, array $values = array()) {
     try {
+	    $this->_queryCount++;
       $this->_sth = $this->_dbh->prepare($sql);
       $this->_sth->execute($values);
       $results = $this->_sth->fetchAll();
@@ -56,6 +58,7 @@ class database {
    */
   public function exec($sql, array $values = array()) {
     try {
+    	$this->_queryCount++;
       $this->_sth = $this->_dbh->prepare($sql);
       $this->_sth->execute($values);
     } catch (PDOException $e) {
@@ -65,5 +68,9 @@ class database {
 
   public function getLastInsertId() {
     return $this->_dbh->lastInsertId();
+  }
+
+  public function getQueryCount() {
+  	return $this->_queryCount;
   }
 }
