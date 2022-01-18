@@ -77,7 +77,7 @@ HTML;
 						<small><a href="#" class="citationsLink" data-type="form" data-index="{$i}">
 								citations
 						</a></small>
-						<div id="form_citations{$i}" class="citation">
+						<div id="form_citations{$i}" data-loaded class="citation">
 							<div class="spinner">
 				        <div class="spinner-border" role="status">
 				          <span class="sr-only">Loading...</span>
@@ -504,7 +504,7 @@ HTML;
         *  Load and show the citations for wordforms or senses
         */
 				$('.citationsLink').on('click', function () {
-				  $('.spinner').show();
+				  //$('.spinner').show();
 				  let type = $(this).attr('data-type');   //i.e. "form" or "sense"
 			    var citationsLink = $(this);
 			    var citationsContainerId = '#' + type + '_citations' + $(this).attr('data-index');
@@ -514,6 +514,16 @@ HTML;
 			      $(this).removeClass('hideCitations');
 			      return;
 			    }
+			    //check if data has alreay loaded
+		      if ($(citationsContainerId).attr('data-loaded')) {
+		        
+		        $(citationsContainerId).show();
+			    citationsLink.text('hide');
+			    citationsLink.addClass('hideCitations');
+			      console.log('populated');
+			      return;
+			    }
+			    
 			    $(citationsContainerId + "> table > tbody > tr").each(function() {
 			      var tr = $(this);
 			      var formsOnly = $("input[name='formsOptions']:checked").val() == "formsOnly" ? true : false;  
@@ -568,7 +578,8 @@ HTML;
 				      tr.find('.entryCitationContext').html(html);
 			      })
 			        .then(function () {
-			          $('.spinner').hide();
+			          $(citationsContainerId).attr('data-loaded', true);
+			          //$('.spinner').hide();
 			        });
 
 			    });

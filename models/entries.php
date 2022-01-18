@@ -208,7 +208,7 @@ SQL;
   	foreach ($results as $row) {
   		$wordform = mb_strtolower($row["wordform"], "UTF-8");
 
-  		$entryForm = new entry_form($wordform);
+ // 		$entryForm = new entry_form($wordform);
 
   		$slipId = $row["slipId"];
 		  $slipMorphResults = collection::getSlipMorphBySlipId($slipId, $db);
@@ -219,8 +219,6 @@ SQL;
   		$wordforms[$wordform][$morphString][] = $slipId;
 	  }
   	foreach ($wordforms as $wordform => $morphString) {
-
-  	//	print_r($wordforms[$wordform]);
   		ksort($wordforms[$wordform], SORT_STRING);
 	  }
   	return $wordforms;
