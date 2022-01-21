@@ -12,12 +12,13 @@ class entry
 		$this->_db = $db;
 	}
 
-	public function writeEntry($entry) {
+	public function writeEntry($entry, $type) {
 		$starttime = microtime(true);
 		$this->_entry = $entry;
 		$headword = $entry->getHeadword();
 		$wordclass = $entry->getWordclass();
 		$abbr = models\functions::getWordclassAbbrev($wordclass);
+		$this->_writeSubNav($type);
 		echo <<<HTML
       <div id="#entryContainer">
         <div>
@@ -28,18 +29,13 @@ class entry
         <div>
           <a href="#" class="createPaperSlip" data-headword="{$entry->getHeadword()}" data-wordform="" data-entryid="{$entry->getId()}"><small>add paper slip</small></a> 
 				</div>
-        <div>
-          <h5>Forms:</h5>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="formsOptions" id="formsOnly" value="formsOnly" checked>
-            <label class="form-check-label" for="formsOnly"><small>form citations only</small></label>
-					</div>
-					<div class="form-check form-check-inline"> 
-            <input class="form-check-input" type="radio" name="formsOptions" id="allCitations" value="allCitations">
-            <label class="form-check-label" for="allCitations"><small>all citations</small></label>
-					</div>
-          {$this->_getFormsHtml()}
-				</div>
+HTML;
+		if ($type == "forms") {
+			$this->_writeFormsView();
+		} else if ($type == "slips") {
+			$this->_writeSlipsView();
+		}
+		echo <<<HTML
 				<div>
 					<h5>Piles:</h5>
 					{$this->_getSensesHtml()}
@@ -70,6 +66,62 @@ HTML;
 		models\collection::writeSlipDiv();
 		models\sensecategories::writeSenseModal();
 		$this->_writeJavascript();
+	}
+
+	private function _writeSubNav($type) {
+		$listItemHtml = "";
+		if ($type == "slips") {
+			$listItemHtml = <<<HTML
+				<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
+		    <li class="nav-item"><div class="nav-link active">slips</div></li>	
+HTML;
+		} else {
+			$listItemHtml = <<<HTML
+				<li class="nav-item"><div class="nav-link active">forms</div></li>
+		    <li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>	
+HTML;
+		}
+		echo <<<HTML
+			<ul class="nav nav-pills nav-justified" style="padding-bottom: 20px;">			  
+				{$listItemHtml}		    		
+		  </ul>	
+HTML;
+	}
+
+	private function _writeFormsView() {
+		echo <<<HTML
+			<div>
+        <h5>Forms:</h5>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="formsOptions" id="formsOnly" value="formsOnly" checked>
+          <label class="form-check-label" for="formsOnly"><small>form citations only</small></label>
+				</div>
+				<div class="form-check form-check-inline"> 
+          <input class="form-check-input" type="radio" name="formsOptions" id="allCitations" value="allCitations">
+          <label class="form-check-label" for="allCitations"><small>all citations</small></label>
+				</div>
+        {$this->_getFormsHtml()}
+			</div>
+HTML;
+		return;
+	}
+
+	private function _writeSlipsView() {
+		$slipIds = $this->_entry->getSlipIds($this->_db);
+		echo "<ul>";
+		foreach ($slipIds as $slipId) {
+			$slip = models\collection::getSlipBySlipId($slipId, $this->_db);
+			$citations = $slip->getCitations();
+
+			$testCitation = array_pop($citations);
+			if (!empty($testCitation)) {
+				$context = $testCitation->getContext();
+				echo <<<HTML
+				<li><strong>{$slipId}</strong> : {$context["html"]}</li>
+HTML;
+			}
+		}
+		echo "</ul>";
 	}
 
 	private function _getFormsHtml() {

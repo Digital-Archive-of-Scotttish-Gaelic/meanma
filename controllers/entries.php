@@ -22,9 +22,10 @@ class entries
 			  $this->_view->writeBrowseTable($entryIds);
 			  break;
 		  case "view":
+			  $type = isset($_GET["type"]) ? $_GET["type"] : "forms";
 			  $entry = models\entries::getEntryById($_GET["id"], $this->_db);
 			  $this->_view = new views\entry($this->_db);
-			  $this->_view->writeEntry($entry);
+			  $this->_view->writeEntry($entry, $type);
 			  break;
 	  }
   }

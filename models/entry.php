@@ -77,6 +77,18 @@ SQL;
 		return $results[0]["c"];
 	}
 
+	public function getSlipIds($db) {
+		$sql = <<<SQL
+			SELECT auto_id FROM slips WHERE entry_id = :id
+SQL;
+		$results = $db->fetch($sql, array(":id" => $this->getId()));
+		$slipIds = array();
+		foreach ($results as $row) {
+			$slipIds[] = $row["auto_id"];
+		}
+		return $slipIds;
+	}
+
 	public function getWordforms($db) {
 		$wordforms = array();
 		//get the corpus_slip wordforms
