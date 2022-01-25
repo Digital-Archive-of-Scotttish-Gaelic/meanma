@@ -366,7 +366,8 @@ HTML;
 HTML;
 	    }
     }
-    $nounSelectHide = $this->_slip->getWordClass() == "noun" ? "" : "hide";
+    $nounTypes = array("masculine noun", "feminine noun", "variable-gender noun", "unclear-gender noun");
+    $nounSelectHide = in_array($this->_slip->getWordClass(), $nounTypes) ? "" : "hide";
 	  $nounPhraseSelectHide = $this->_slip->getWordClass() == "noun phrase" ? "" : "hide";
     $verbSelectHide = $this->_slip->getWordClass() == "verb" ? "" : "hide";
     $prepSelectHide = $this->_slip->getWordClass() == "preposition" ? "" : "hide";
@@ -417,12 +418,6 @@ HTML;
 	                <label for="posNumber" class="col-form-label col-sm-2">Number:</label>
 	                <select name="number" id="posNumber" class="form-control col-4">
 	                  {$optionsHtml["number"]}
-	                </select>
-	              </div>
-	              <div class="row form-group">
-	                <label for="posGender" class="col-form-label col-sm-2">Gender:</label>
-	                <select name="gender" id="posGender" class="form-control col-4">
-	                  {$optionsHtml["gender"]}
 	                </select>
 	              </div>
 	              <div class="row form-group">
@@ -1115,7 +1110,10 @@ HTML;
                   $('#nounPhraseSelects').hide();
                   $('#prepSelects').hide();
                   break;
-                case "noun":
+                case "masculine noun":
+                case "feminine noun":
+                case "gender-variable noun":
+                case "gender-unclear noun":
                   $('#nounSelects').show();
                   $('#nounPhraseSelects').hide();
                   $('#verbSelects').hide();
