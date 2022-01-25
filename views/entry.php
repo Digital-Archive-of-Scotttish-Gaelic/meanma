@@ -30,16 +30,17 @@ class entry
           <a href="#" class="createPaperSlip" data-headword="{$entry->getHeadword()}" data-wordform="" data-entryid="{$entry->getId()}"><small>add paper slip</small></a> 
 				</div>
 HTML;
-		if ($type == "forms") {
-			$this->_writeFormsView();
-		} else if ($type == "slips") {
-			$this->_writeSlipsView();
+		switch ($type) {
+			case "piles":
+				$this->_writeSensesView();
+				break;
+			case "slips":
+				$this->_writeSlipsView();
+				break;
+			default:
+				$this->_writeFormsView();
 		}
 		echo <<<HTML
-				<div>
-					<h5>Piles:</h5>
-					{$this->_getSensesHtml()}
-				</div>
 			</div>
 HTML;
 		/**
@@ -70,15 +71,26 @@ HTML;
 
 	private function _writeSubNav($type) {
 		$listItemHtml = "";
-		if ($type == "slips") {
-			$listItemHtml = <<<HTML
-				<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
-		    <li class="nav-item"><div class="nav-link active">slips</div></li>	
+		switch ($type) {
+			case "piles":
+				$listItemHtml = <<<HTML
+					<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
+					<li class="nav-item"><div class="nav-link active">piles</div></li>
+					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>    	
 HTML;
-		} else {
-			$listItemHtml = <<<HTML
-				<li class="nav-item"><div class="nav-link active">forms</div></li>
-		    <li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>	
+				break;
+			case "slips":
+				$listItemHtml = <<<HTML
+					<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
+					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
+			    <li class="nav-item"><div class="nav-link active">slips</div></li>	
+HTML;
+				break;
+			default:
+				$listItemHtml = <<<HTML
+					<li class="nav-item"><div class="nav-link active">forms</div></li>
+					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
+					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>    	
 HTML;
 		}
 		echo <<<HTML
@@ -106,9 +118,18 @@ HTML;
 		return;
 	}
 
+	private function _writeSensesView() {
+		echo <<<HTML
+				<div>
+					<h5>Piles:</h5>
+					{$this->_getSensesHtml()}
+				</div>
+HTML;
+	}
+
 	private function _writeSlipsView() {
+		$tableBodyHtml = "<tbody>";
 		$slipIds = $this->_entry->getSlipIds($this->_db);
-		echo "<ul>";
 		foreach ($slipIds as $slipId) {
 			$slip = models\collection::getSlipBySlipId($slipId, $this->_db);
 			$citations = $slip->getCitations();
@@ -116,12 +137,27 @@ HTML;
 			$testCitation = array_pop($citations);
 			if (!empty($testCitation)) {
 				$context = $testCitation->getContext();
-				echo <<<HTML
-				<li><strong>{$slipId}</strong> : {$context["html"]}</li>
+				$tableBodyHtml .= <<<HTML
+					<tr>
+						<td>{$context["html"]}</td>
+						<td>{$slipId}</td>
+					</tr>
 HTML;
 			}
 		}
-		echo "</ul>";
+		$tableBodyHtml .= "</tbody>";
+
+		echo <<<HTML
+        <table id="browseSlipsTable" data-toggle="table" data-pagination="true" data-search="true">
+          <thead>
+            <tr>
+              <th data-sortable="true">Context</th>
+              <th data-sortable="true">ID</th>
+            </tr>
+          </thead>  
+            {$tableBodyHtml}
+        </table>
+HTML;
 	}
 
 	private function _getFormsHtml() {
