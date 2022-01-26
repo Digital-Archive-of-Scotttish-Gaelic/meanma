@@ -127,7 +127,6 @@ SQL;
 	}
 
 	// GETTERS
-
 	public function getId() {
 		return $this->_id;
 	}

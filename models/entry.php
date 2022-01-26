@@ -91,7 +91,7 @@ SQL;
 
 	public function getWordforms($db) {
 		$wordforms = array();
-		//get the corpus_slip wordforms
+		//get the corpus_slip wordforms.
 		$sql = <<<SQL
 			SELECT l.wordform AS wordform, auto_id AS slipId
 				FROM lemmas l 

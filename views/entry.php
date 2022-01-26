@@ -165,7 +165,7 @@ HTML;
 		$hideText = array("unmarked person", "unmarked number");
 		$html = "<ul>";
 
-		//group the wordforms by morphology
+		//group the wordforms by morphology –
 		$groupedArray = array();
 		foreach ($this->_entry->getWordforms($this->_db) as $wordform => $morphGroup) {
 			foreach ($morphGroup as $morphString => $slipIds) {
