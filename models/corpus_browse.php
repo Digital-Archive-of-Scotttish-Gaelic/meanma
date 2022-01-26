@@ -8,7 +8,8 @@ class corpus_browse // models a corpus text or subtext
   private $_id; // the id number for the text in the corpus (obligatory)
 	private $_parentText; // the parent text of this text (optional) – an instance of models\corpus_browse
   private $_title; // the title of the text (optional)
-  private $_date, $_level, $_notes;
+  private $_date, $_displayDate, $_publicationDate;
+	private $_level, $_notes;
   private $_type; //used to flag manuscripts ("ms")
   private $_filepath; // the path to the text XML (simple texts only)
   private $_transformedText; // simple texts only
@@ -30,7 +31,7 @@ class corpus_browse // models a corpus text or subtext
 	 */
 	private function _load() {
 		$sql = <<<SQL
-			SELECT title, partOf, filepath, date, level, notes, type
+			SELECT title, partOf, filepath, date, date_display, date_publication, level, notes, type
 				FROM text
 				WHERE id = :id
 SQL;
@@ -48,6 +49,12 @@ SQL;
 		}
 		if ($date = $textData["date"]) {
 			$this->_setDate($date);
+		}
+		if ($displayDate = $textData["date_display"]) {
+			$this->_setDisplayDate($displayDate);
+		}
+		if ($publicationDate = $textData["date_publication"]) {
+			$this->_setPublicationDate($publicationDate);
 		}
 		if ($level = $textData["level"]) {
 			$this->_setLevel($level);
@@ -81,6 +88,14 @@ SQL;
 
 	private function _setDate($date) {
 		$this->_date = $date;
+	}
+
+	private function _setDisplayDate($date) {
+		$this->_displayDate = $date;
+	}
+
+	private function _setPublicationDate($date) {
+		$this->_publicationDate = $date;
 	}
 
 	private function _setLevel($level) {
@@ -125,6 +140,14 @@ SQL;
 		return $this->_date;
 	}
 
+	public function getDisplayDate() {
+		return $this->_displayDate;
+	}
+
+	public function getPublicationDate() {
+		return $this->_publicationDate;
+	}
+
 	public function getLevel() {
 		return $this->_level;
 	}
@@ -138,7 +161,7 @@ SQL;
 	}
 
 	/**
-	 * @return models\text object
+	 * @return models\corpus_browse object
 	 */
 	public function getParentText() {
 		return $this->_parentText;
@@ -248,10 +271,12 @@ SQL;
 		//save the metadata
 	  if (!empty($data["textTitle"])) { //ensure there are form data to be saved
 			$sql = <<<SQL
-				UPDATE text SET title = :title, date = :date, filepath = :filepath, level = :level, notes = :notes 
+				UPDATE text SET title = :title, date = :date, date_display = :date_display, date_publication = :date_publication, 
+				                filepath = :filepath, level = :level, notes = :notes 
 					WHERE id = :id
 SQL;
 			$this->_db->exec($sql, array(":id"=>$this->getId(), ":title"=>$data["textTitle"], ":date"=>$data["textDate"],
+				":date_display"=>$data["textDisplayDate"], ":date_publication"=>$data["textPublicationDate"],
 				":filepath"=>$data["filepath"], ":level"=>$data["textLevel"], ":notes"=>$data["textNotes"]));
 			//save new writer ID
 		  if ($data["writerId"]) {

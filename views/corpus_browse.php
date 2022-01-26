@@ -156,9 +156,17 @@ HTML;
 							{$writersHtml}
 					</div>
 					<div class="form-group row">
-						<label class="col-sm-2 col-form-label" for="textDate">Date</label>
+						<label class="col-sm-2 col-form-label" for="textDate">Internal Date</label>
 						<input class="form-control col-sm-4" type="text" name="textDate" id="textDate" value="{$this->_model->getDate()}">
+					</div>				
+					<div class="form-group row">
+						<label class="col-sm-2 col-form-label" for="textDisplayDate">Display Date</label>
+						<input class="form-control col-sm-4" type="text" name="textDisplayDate" id="textDisplayDate" value="{$this->_model->getDisplayDate()}">
 					</div>
+					<div class="form-group row">
+						<label class="col-sm-2 col-form-label" for="textDate">Date of Publication</label>
+						<input class="form-control col-sm-4" type="text" name="textPublicationDate" id="textPublicationDate" value="{$this->_model->getPublicationDate()}">
+					</div>		
 					<div class="form-group row">
 						<label class="col-sm-2 col-form-label" for="textLevel">Text Level</label>
 						{$levelHtml}
@@ -194,7 +202,7 @@ HTML;
 					<input class="form-control col-sm-4" type="text" name="subTextTitle" id="subTextTitle">
 				</div>
 				<div class="form-group row">
-					<label class="col-sm-2 col-form-label" for="subTextDate">SubText Date</label>
+					<label class="col-sm-2 col-form-label" for="subTextDate">SubText Internal Date</label>
 					<input class="form-control col-sm-4" type="text" name="subTextDate" id="subTextDate">
 				</div>
 				<div class="form-group row">
