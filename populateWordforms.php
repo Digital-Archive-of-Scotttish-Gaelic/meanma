@@ -19,10 +19,10 @@ SQL;
 $results = $db->fetch($sql);
 
 $sql = <<<SQL
-		UPDATE slips SET wordform = :wordform WHERE auto_id :slipId
+		UPDATE slips SET wordform = :wordform WHERE auto_id = :slipId
 SQL;
 foreach ($results as $result) {
 	$slipId = $result["auto_id"];
 	$wordform = $result["wordform"];
-//	$db->exec($sql, array(":wordform"=>$wordform, ":slipId"=>$slipId));
+	$db->exec($sql, array(":wordform"=>$wordform, ":slipId"=>$slipId));
 }
