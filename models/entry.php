@@ -92,7 +92,7 @@ SQL;
 	public function getWordforms($db) {
 		$wordforms = array();
 		//get the corpus_slip wordforms
-		$sql = <<<SQL
+/*		$sql = <<<SQL
 			SELECT l.wordform AS wordform, auto_id AS slipId
 				FROM lemmas l 
 				JOIN slips s ON s.id = l.id AND s.filename = l.filename
@@ -109,6 +109,16 @@ SQL;
 				WHERE wordform IS NOT NULL AND entry_id = :entryId
 SQL;
 		$results = array_merge($results, $db->fetch($sql, array(":entryId"=>$this->getId())));
+*/
+
+		$sql = <<<SQL
+			SELECT wordform, auto_id AS slipId
+				FROM slips
+				JOIN text t ON text_id = t.id
+				WHERE entry_id = :entryId
+				ORDER by date ASC
+SQL;
+		$results = $db->fetch($sql, array(":entryId"=>$this->getId()));
 		foreach ($results as $row) {
 			$wordform = mb_strtolower($row["wordform"], "UTF-8");
 

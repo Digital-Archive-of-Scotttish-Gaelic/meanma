@@ -272,7 +272,7 @@ SQL;
 		$sql = <<<SQL
       SELECT s.filename as filename, s.id as id, auto_id, pos, lemma,
               date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id, 
-              e.headword AS headword
+              e.headword AS headword, t.date AS date_internal
           FROM slips s
           JOIN entry e ON e.id = s.entry_id
           JOIN lemmas l ON s.filename = l.filename AND s.id = l.id

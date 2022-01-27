@@ -236,7 +236,7 @@ HTML;
 						data-filename="{$row["filename"]}"
 						data-id="{$row["id"]}"
 						data-tid="{$row["tid"]}"
-						data-date="{$row["date_of_lang"]}">
+						data-date="{$row["date_internal"]}">
 					<!--td data-toggle="tooltip"
 						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]}"
 						class="entryCitationContext"></td-->
