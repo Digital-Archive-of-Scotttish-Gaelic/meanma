@@ -20,16 +20,18 @@ class corpus_slip extends slip
     $this->_slipMorph = new slipmorphfeature($this->getPOS());
     if (!$this->getId()) {  //create a new slip entry
       $this->_isNew = true;
-	    $this->_headword = lemmas::getLemma($this->getWid(), $this->getFilename())[0];
+      $lemmaData = lemmas::getData($this->getWid(), $this->getFilename());
+	    $this->_headword = $lemmaData["lemma"];
+	    $this->_wordform = $lemmaData["wordform"];
       $this->extractWordClass($this->getPOS());
       //get the entry
 	    $this->_entry = entries::getEntryByHeadwordAndWordclass($this->getHeadword(), $this->getWordClass(), $this->_db);
       $sql = <<<SQL
-        INSERT INTO slips (filename, text_id, id, entry_id, ownedBy) 
-        	VALUES (?, ?, ?, ?, ?);
+        INSERT INTO slips (filename, text_id, id, wordform, entry_id, ownedBy) 
+        	VALUES (?, ?, ?, ?, ?, ?);
 SQL;
-      $this->_db->exec($sql, array($this->_filename, $this->getTextId(),  $this->getWid(), $this->_entry->getId(),
-	      $_SESSION["user"]));
+      $this->_db->exec($sql, array($this->_filename, $this->getTextId(),  $this->getWid(), $this->getWordform(),
+	      $this->_entry->getId(), $_SESSION["user"]));
       $this->setId($this->_db->getLastInsertId());  //sets the ID on the parent
       $this->saveSlipMorph();    //save the defaults to the DB
 	      //add a draft citation by default

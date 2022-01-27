@@ -24,7 +24,7 @@ class collection
   	$params = array(":limit" => (int)$limit, ":offset" => (int)$offset);
     $dbh = $db->getDatabaseHandle();
     try {
-    	$whereCondition = $type == "paper" ? "wordform IS NOT NULL AND" : ""; //all paper slips have a wordform
+    	$whereCondition = $type == "paper" ? "filename = '' AND" : ""; //paper slips have no filename
 			$whereClause = "WHERE {$whereCondition} group_id = {$_SESSION["groupId"]} ";
 			if (mb_strlen($search) > 1) {     //there is a search to run
 				$wordformField = $type == "corpus" ? "l.wordform" : "s.wordform";     //switch fields based on slip type
@@ -147,7 +147,7 @@ HTML;
 	  $params = array(":limit" => (int)$limit, ":offset" => (int)$offset);
 	  $dbh = $db->getDatabaseHandle();
 	  try {
-		  $whereClause = "WHERE wordform IS NOT NULL AND (group_id = {$_SESSION["groupId"]}) ";
+		  $whereClause = "WHERE filename = '' AND (group_id = {$_SESSION["groupId"]}) ";    //paper slips do not have a filename
 		  if (mb_strlen($search) > 1) {     //there is a search to run
 			  $sth = $dbh->prepare("SET @search = :search");  //set a MySQL variable for the searchterm
 			  $sth->execute(array(":search" => "%{$search}%"));
@@ -282,7 +282,7 @@ SQL;
 SQL;
 
 		$slipInfo = $db->fetch($sql, array(":slipId" => $slipId));
-		//check if slip info is populated. if it is this is a corpus slip, of not then it's a paper slip
+		//check if slip info is populated. if it is this is a corpus slip, if not then it's a paper slip
 		if ($slipInfo) {
 			return $slipInfo;         //corpus slip
 		}

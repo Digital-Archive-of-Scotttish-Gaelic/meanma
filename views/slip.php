@@ -193,6 +193,7 @@ HTML;
         <div class="float-right" style="height: 20px;">
           <a href="#" id="resetContext">reset context</a>
 				</div>
+				<input type="hidden" class="form-control" name="wordform" id="wordform" placeholder="wordform" value="{$this->_slip->getWordform()}"/>
 HTML;
 
 		} else {            //slip type is paper

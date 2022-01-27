@@ -4,12 +4,12 @@ namespace models;
 
 class lemmas
 {
-	public static function getLemma($id, $filename) {
+	public static function getData($id, $filename) {
 		$db = new database();
 		$dbh = $db->getDatabaseHandle();
 		try {
 			$sql = <<<SQL
-        SELECT lemma FROM lemmas 
+        SELECT lemma, wordform FROM lemmas 
             WHERE filename = :filename AND id =:id
 SQL;
 			$sth = $dbh->prepare($sql);
