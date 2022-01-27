@@ -417,10 +417,11 @@ HTML;
 
 
 	private function _getDateHtml() {
-		if (!$this->_model->getDate()) {
-			return "";
-		}
-		return "<tr><td>date</td><td>{$this->_model->getDate()}</td></tr>";
+		return <<<HTML
+			<tr><td>internal date</td><td>{$this->_model->getDate()}</td></tr>
+			<tr><td>display date</td><td>{$this->_model->getDisplayDate()}</td></tr>
+			<tr><td>publication date</td><td>{$this->_model->getDisplayDate()}</td></tr>
+HTML;
 	}
 
 	private function _getParentTextHtml() {
