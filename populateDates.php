@@ -14,16 +14,11 @@ $sql = <<<SQL
 SQL;
 $results = $db->fetch($sql);
 foreach ($results as $result) {
-
 	$textId = $result["id"];
-
-	echo "<br>{$textId}";
-
 	$text = new models\corpus_browse($textId, $db);
-
-	echo $text->getDate() . "<br><br>";
-
 	if ($text->getDate() == NULL) {
+
+		echo "<br>{$textId}";
 		$date = $text->getParentText()->getDate();
 		if ($date) {
 			echo "<br>{$date}";
