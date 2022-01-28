@@ -16,9 +16,7 @@ $results = $db->fetch($sql);
 foreach ($results as $result) {
 	$textId = $result["id"];
 	$text = new models\corpus_browse($textId, $db);
-	if ($text->getDate() == NULL) {
-
-		echo "<br>{$textId}";
+	if ($text->getDate() == 0.0) {
 		$date = $text->getParentText()->getDate();
 		if ($date) {
 			echo "<br>{$date}";
