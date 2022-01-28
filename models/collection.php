@@ -272,13 +272,13 @@ SQL;
 		$sql = <<<SQL
       SELECT s.filename as filename, s.id as id, auto_id, pos, lemma,
               date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id, 
-              e.headword AS headword, t.date AS date_internal
+              e.headword AS headword, t.date AS date_internal, t.date_display AS date_display, t.date_publication AS 
+      				date_publication
           FROM slips s
           JOIN entry e ON e.id = s.entry_id
           JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
           JOIN text t ON s.filename = t.filepath
           WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId
-          ORDER BY auto_id ASC
 SQL;
 
 		$slipInfo = $db->fetch($sql, array(":slipId" => $slipId));
@@ -286,7 +286,16 @@ SQL;
 		if ($slipInfo) {
 			return $slipInfo;         //corpus slip
 		}
-		return array(array("auto_id"=>$slipId, "isPaperSlip"=>true)); //paper slip
+		$sql = <<<SQL
+			SELECT auto_id, starred, t.id AS tid, entry_id, e.headword AS headword, t.date AS date_internal, t.date_display AS 
+					date_display, t.date_publication AS date_publication
+				FROM slips s JOIN entry e ON e.id = s.entry_id JOIN text t ON s.text_id = t.id
+				WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId
+				ORDER BY date_internal ASC
+SQL;
+		$slipInfo = $db->fetch($sql, array(":slipId" => $slipId));  //paper slip
+		$slipInfo["isPaperSlip"] = true;
+		return $slipInfo;
 	}
 
 	public static function getEntryIdBySlipId($slipId, $db) {

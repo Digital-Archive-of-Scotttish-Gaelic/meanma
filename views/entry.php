@@ -236,7 +236,8 @@ HTML;
 						data-filename="{$row["filename"]}"
 						data-id="{$row["id"]}"
 						data-tid="{$row["tid"]}"
-						data-date="{$row["date_internal"]}">
+						data-date="{$row["date_internal"]}"
+						data-date_display="{$row["date_display"]}">
 					<!--td data-toggle="tooltip"
 						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]}"
 						class="entryCitationContext"></td-->
@@ -484,7 +485,7 @@ HTML;
 			      var tr = $(this);
 			      var formsOnly = $("input[name='formsOptions']:checked").val() == "formsOnly" ? true : false;  
 			      var slipId = $(this).attr('data-slipid');
-			      var date = $(this).attr('data-date');
+			      var date = $(this).attr('data-date_display');
 			      var html = '';
 			      if (date) {
 			        html += '<span class="text-muted">' + date + '.</span> ';
