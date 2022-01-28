@@ -4,8 +4,6 @@ use models;
 
 require_once "includes/include.php";
 
-error_reporting(E_ALL);
-
 if (!models\users::checkSuperuserAuth()) {
 	die ("not authorised");
 }
@@ -18,6 +16,9 @@ $results = $db->fetch($sql);
 foreach ($results as $result) {
 
 	$textId = $result["id"];
+
+	echo "<br>{$textId}";
+
 	$text = new models\corpus_browse($textId, $db);
 
 	if ($text->getDate() == NULL) {
