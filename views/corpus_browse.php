@@ -192,7 +192,12 @@ HTML;
 HTML;
 		}
 		$levelHtml .= "</select>";
+		$subTextInternalDate = $this->_model->getDate();
+		$subTextDisplayDate = $this->_model->getDisplayDate();
+		$subTextPublicationDate = $this->_model->getPublicationDate();
+		$subTextLevel = $this->_model->getLevel();
 		$html = <<<HTML
+				<div class="row"><hr></div>
 				<div class="form-group row">
 					<label class="col-sm-2 col-form-label" for="subTextId">SubText ID</label>
 					{$prefix}<input class="form-control col-sm-4" type="text" name="subTextId" id="subTextId">
@@ -201,18 +206,19 @@ HTML;
 					<label class="col-sm-2 col-form-label" for="subTextTitle">SubText Title</label>
 					<input class="form-control col-sm-4" type="text" name="subTextTitle" id="subTextTitle">
 				</div>
-				<div class="form-group row">
-					<label class="col-sm-2 col-form-label" for="subTextDate">SubText Internal Date</label>
-					<input class="form-control col-sm-4" type="text" name="subTextDate" id="subTextDate">
-				</div>
-				<div class="form-group row">
+				<!--div class="form-group row">
 					<label class="col-sm-2 col-form-label" for="subTextLevel">SubText Level</label>
 					{$levelHtml}
-				</div>
-				<div class="form-group row">
+				</div-->
+				<!--div class="form-group row">
 					<label class="col-sm-2 col-form-label" for="textNotes">SubText Notes</label>
 					<textarea class="form-control col-sm-4" id="subTextNotes" name="subTextNotes" rows="10"></textarea>
-				</div>
+				</div-->
+				<input type="hidden" name="subTextDate" value="{$subTextInternalDate}">
+				<input type="hidden" name="subTextDisplayDate" value="{$subTextDisplayDate}">
+				<input type="hidden" name="subTextPublicationDate" value="{$subTextPublicationDate}">
+				<input type="hidden" name="subTextLevel" value="{$subTextLevel}">
+
 HTML;
 		return $html;
 	}

@@ -301,12 +301,13 @@ SQL;
 			$partOf = $this->getId();
 		}
 		$sql = <<<SQL
-			INSERT INTO text (id, title, partOf, filepath, date, level, notes)
-				VALUES(:id, :title, :partOf, :filepath, :date, :level, :notes)
+			INSERT INTO text (id, title, partOf, filepath, date, date_display, date_publication, level)
+				VALUES(:id, :title, :partOf, :filepath, :date, :dateDisplay, :datePublication, :level)
 SQL;
 		$this->_db->exec($sql, array(
 			":id"=>$id, ":title"=>$data["subTextTitle"], ":partOf"=>$partOf, ":filepath"=>$data["filepath"],
-				":date"=>$data["subTextDate"], ":level"=>$data["subTextLevel"], ":notes"=>$data["subTextNotes"]));
+				":date"=>$data["subTextDate"], ":dateDisplay"=>$data["subTextDisplayDate"],
+				":datePublication"=>$data["subTextPublicationDate"], ":level"=>$data["subTextLevel"]));
 	}
 
 	public static function getTextIdFromFilepath($filepath, $db) {
