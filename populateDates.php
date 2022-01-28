@@ -4,6 +4,7 @@ use models;
 
 require_once "includes/include.php";
 
+error_reporting(E_ALL);
 if (!models\users::checkSuperuserAuth()) {
 	die ("not authorised");
 }
