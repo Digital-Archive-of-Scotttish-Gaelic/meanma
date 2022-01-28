@@ -210,12 +210,12 @@ SQL;
 	public function getChildTextsInfo() {
 		$childTextsInfo = array();
 		$sql = <<<SQL
-			SELECT id, title, date, level FROM text WHERE partOf = :id ORDER BY CAST(id AS UNSIGNED) ASC
+			SELECT id, title, date, date_display, level FROM text WHERE partOf = :id ORDER BY CAST(id AS UNSIGNED) ASC
 SQL;
 		$results = $this->_db->fetch($sql, array(":id" => $this->getId()));
 		foreach ($results as $result) {
 			$childTextsInfo[$result["id"]] = array("title" => $result["title"], "date" => $result["date"],
-				"level" => $result["level"]);
+				"dateDisplay" => $result["date_display"], "level" => $result["level"]);
 			//check for writers of child texts
 			$writerSql = <<<SQL
 				SELECT w.id AS id, surname_en 

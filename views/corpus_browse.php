@@ -262,7 +262,7 @@ HTML;
           <a href="?m=corpus&a=browse&id={$text["id"]}">{$text["title"]}</a>
         </td>
         <td>{$writerHtml}</td>
-        <td>{$text["date"]}</td>
+        <td>{$text["date_display"]}</td>
       </tr>
 HTML;
 	}
@@ -478,7 +478,7 @@ HTML;
 					}
 				}
 				if ($childInfo["date"]) {
-					$html .= " (" . $childInfo["date"] . ")";
+					$html .= " (" . $childInfo["dateDisplay"] . ")";
 				}
 				$html .= "</div>";
 			}
