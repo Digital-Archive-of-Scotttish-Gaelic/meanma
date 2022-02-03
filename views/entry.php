@@ -228,10 +228,10 @@ HTML;
 				$filenameElems = explode('_', $row["filename"]);
 				$textLink = $row["filename"] ? '<a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small>' : '';
 				$emojiHtml = $row["isPaperSlip"] ? '<span data-toggle="tooltip" data-placement="top" title="paper slip">&#x1F4DD;</span>' : "";
-				if (!$row["auto_id"]) {
+	/*			if (!$row["auto_id"]) {
 					continue;             //bug fix
 				}
-				$slipList .= <<<HTML
+	*/			$slipList .= <<<HTML
 					<tr id="#slip_{$row["auto_id"]}" data-slipid="{$row["auto_id"]}"
 						data-filename="{$row["filename"]}"
 						data-id="{$row["id"]}"
