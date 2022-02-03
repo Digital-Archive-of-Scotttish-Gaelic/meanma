@@ -321,6 +321,10 @@ HTML;
 		$slipList = '<table class="table"><tbody>';
 		foreach($slipData as $data) {
 			foreach ($data as $row) {
+				if (!$row["auto_id"]) {
+					continue;             // temp bug fix
+				}
+
 				$filenameElems = explode('_', $row["filename"]);
 				$translation = $row["translation"];
 				$slipLinkData = array(
@@ -494,11 +498,6 @@ HTML;
 			      var tid = $(this).attr('data-tid');
 			      var tr = $(this);
 			      var title = tr.prop('title');
-			 /*     if (slipId == '') {
-			        alert('no slip id!');
-			      }
-			 */
-			 
 						var url = 'ajax.php?action=getCitationsBySlipId&slipId='+slipId;
 			      $.getJSON(url, function (data) {
 			        var corpusLink = 'index.php?m=corpus&a=browse&id=' + tid + '&wid=' + wid; //title id and word id
