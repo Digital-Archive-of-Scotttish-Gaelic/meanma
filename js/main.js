@@ -310,9 +310,11 @@ function saveSlip() {
     notes: notes, status: status, wordClass: wordclass, wordform: wordform, text_id: textId,
     locked: locked, text_id: $('#textId').val(), slipType: slipType, entryId: entryId};
   switch (wordclass) {
-    case "noun":
+    case "masculine noun":
+    case "feminine noun":
+    case "variable-gender noun":
+    case "unclear-gender noun":
       data['number'] = $('#posNumber').val();
-      data['gender'] = $('#posGender').val();
       data['case'] = $('#posCase').val();
       break;
     case "noun phrase":
