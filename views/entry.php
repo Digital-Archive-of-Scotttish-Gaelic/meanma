@@ -494,9 +494,11 @@ HTML;
 			      var tid = $(this).attr('data-tid');
 			      var tr = $(this);
 			      var title = tr.prop('title');
-			      if (slipId == '') {
+			 /*     if (slipId == '') {
 			        alert('no slip id!');
 			      }
+			      */
+			  */
 						var url = 'ajax.php?action=getCitationsBySlipId&slipId='+slipId;
 			      $.getJSON(url, function (data) {
 			        var corpusLink = 'index.php?m=corpus&a=browse&id=' + tid + '&wid=' + wid; //title id and word id
