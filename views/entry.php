@@ -210,13 +210,10 @@ HTML;
 	}
 
 	private function _getSlipListForForms($slipIds) {
-		$slipData = array();
-		foreach ($slipIds as $id) {
-			$slipData[$id] = models\collection::getSlipInfoBySlipId($id, $this->_db);
-		}
 		$slipList = '<table class="table"><tbody>';
-		foreach ($slipData as $id => $data) {
-			foreach ($data as $row) {
+		foreach ($slipIds as $id) {
+			$slipData = models\collection::getSlipInfoBySlipId($id, $this->_db);
+			$row = $slipData[0];
 				$slipLinkData = array(
 					"auto_id" => $row["auto_id"],
 					"lemma" => $row["lemma"],
@@ -231,6 +228,9 @@ HTML;
 				$filenameElems = explode('_', $row["filename"]);
 				$textLink = $row["filename"] ? '<a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small>' : '';
 				$emojiHtml = $row["isPaperSlip"] ? '<span data-toggle="tooltip" data-placement="top" title="paper slip">&#x1F4DD;</span>' : "";
+				if (!$row["auto_id"]) {
+					continue;             //bug fix
+				}
 				$slipList .= <<<HTML
 					<tr id="#slip_{$row["auto_id"]}" data-slipid="{$row["auto_id"]}"
 						data-filename="{$row["filename"]}"
@@ -241,14 +241,14 @@ HTML;
 					<!--td data-toggle="tooltip"
 						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]}"
 						class="entryCitationContext"></td-->
-					<td class="entryCitationContext"></td>
+					<td class="entryCitationContext"></td> 
 					<td>{$emojiHtml}</td>
 					<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>
 					<td>{$textLink}</td>
 				</tr>
 HTML;
 			}
-		}
+
 		$slipList .= "</tbody></table>";
 		return $slipList;
 	}
@@ -494,6 +494,9 @@ HTML;
 			      var tid = $(this).attr('data-tid');
 			      var tr = $(this);
 			      var title = tr.prop('title');
+			      if (slipId == '') {
+			        alert('no slip id!');
+			      }
 						var url = 'ajax.php?action=getCitationsBySlipId&slipId='+slipId;
 			      $.getJSON(url, function (data) {
 			        var corpusLink = 'index.php?m=corpus&a=browse&id=' + tid + '&wid=' + wid; //title id and word id
