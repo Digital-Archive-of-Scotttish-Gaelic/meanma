@@ -30,7 +30,7 @@ HTML;
 			  <li class="nav-item"><div class="nav-link active">viewing corpus</div></li>
 		    <li class="nav-item"><a class="nav-link" href="?m=corpus&a=search&id=0">search corpus</a></li>
 HTML;
-			if ($user->getSuperuser()) {
+			if ($user->getSuperuser() || $user->getEditor()) {
 				echo <<<HTML
 			    <li class="nav-item"><a class="nav-link" href="?m=corpus&a=edit&id=0">add text</a></li>
 HTML;
@@ -44,7 +44,7 @@ HTML;
 			<li class="nav-item"><div class="nav-link active">viewing text #{$this->_model->getId()}</div></li>
 		  <li class="nav-item"><a class="nav-link" href="?m=corpus&a=search&id={$this->_model->getId()}">search text #{$this->_model->getId()}</a></li>
 HTML;
-			if ($user->getSuperuser()) {
+			if ($user->getSuperuser() || $user->getEditor()) {
 				echo <<<HTML
 			    <li class="nav-item"><a class="nav-link" href="?m=corpus&a=edit&id={$this->_model->getId()}">edit text #{$this->_model->getId()}</a></li>
 HTML;
@@ -71,7 +71,7 @@ HTML;
 
 	private function _writeEditForm() {
 		$user = models\users::getUser($_SESSION["user"]);
-		if (!$user->getSuperuser()) {
+		if (!($user->getSuperuser() || $user->getEditor())) {
 			$this->show();
 			return;
 		}

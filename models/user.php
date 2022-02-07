@@ -4,8 +4,11 @@ namespace models;
 
 class user
 {
+	const SUPERUSER = 1;
+	const EDITOR = 2;
+
   private $email, $password, $salt, $firstName, $lastName,
-    $isSlipAdmin, $passwordAuth, $superuser, $lastLoggedIn, $updated;
+    $isSlipAdmin, $passwordAuth, $userFlag, $lastLoggedIn, $updated;
   private $_lastUsedGroup;  //an instance of UserGroup
   private $_groups = array(); //an array of UserGroup objects
 
@@ -76,12 +79,20 @@ class user
     return $this->passwordAuth;
   }
 
-  public function getSuperuser() {
-  	return $this->superuser;
+  public function getUserFlag() {
+  	return $this->userFlag;
   }
 
-  public function setSuperuser($flag) {
-  	$this->superuser = $flag;
+	public function setUserFlag($flag) {
+		$this->userFlag = $flag;
+	}
+
+  public function getSuperuser() {
+  	return $this->userFlag == self::SUPERUSER;
+  }
+
+  public function getEditor() {
+  	return $this->userFlag == self::EDITOR;
   }
 
   public function setPasswordAuth($auth) {

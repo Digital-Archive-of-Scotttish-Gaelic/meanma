@@ -20,7 +20,7 @@ class users
       $user->setLastName($row['lastname']);
       $user->setIsSlipAdmin($row['slip_admin']);
       $user->setPasswordAuth($row['passwordAuth']);
-      $user->setSuperuser($row["superuser"]);
+      $user->setUserFlag($row["superuser"]);
       $user->setUpdated($row["updated"]);
       self::_setGroups($user);  //set the user's groups
       return $user;
@@ -88,7 +88,7 @@ SQL;
       $sth->execute(array(":email"=>$user->getEmail(),
         ":password"=>$user->getPassword(), ":salt"=>$user->getSalt(), ":firstname"=>$user->getFirstName(),
         ":lastname"=>$user->getLastName(), ":slip_admin"=>$user->getIsSlipAdmin(),
-        ":superuser"=>$user->getSuperuser(), ":passwordAuth"=>$user->getPasswordAuth()));
+        ":superuser"=>$user->getUserFlag(), ":passwordAuth"=>$user->getPasswordAuth()));
     } catch (PDOException $e) {
       echo $e->getMessage();
     }
