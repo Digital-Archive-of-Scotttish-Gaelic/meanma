@@ -7,10 +7,10 @@ class slipmorphfeature
   private $_abbr, $_type;
   private $_props = array();
   private $_propTitles = array(
-	    "masculine noun"=>array("number", "case"),
-  	  "feminine noun"=>array("number", "case"),
-	    "variable-gender noun"=>array("number", "case"),
-	    "unclear-gender noun"=>array("number", "case"),
+	    "masculine noun"=>array("gender", "number", "case"),
+  	  "feminine noun"=>array("gender", "number", "case"),
+	    "variable-gender noun"=>array("gender", "number", "case"),
+	    "unclear-gender noun"=>array("gender", "number", "case"),
 	    "noun phrase"=>array("number", "gender", "case"),
 	    "verb"=>array("mode", "status", "imp_number", "fin_number",
 		    "imp_person", "fin_person", "tense", "mood"),

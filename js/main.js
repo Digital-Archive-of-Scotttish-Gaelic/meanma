@@ -314,6 +314,7 @@ function saveSlip() {
     case "feminine noun":
     case "variable-gender noun":
     case "unclear-gender noun":
+      data['gender'] = $('#posGender').val();
       data['number'] = $('#posNumber').val();
       data['case'] = $('#posCase').val();
       break;

@@ -416,6 +416,12 @@ HTML;
             </div>
             <div id="nounSelects" class="{$nounSelectHide}">
                 <div class="row form-group">
+	                <label for="posGender" class="col-form-label col-sm-2">Gender:</label>
+	                <select name="gender" id="posGender" class="form-control col-4">
+	                  {$optionsHtml["gender"]}
+	                </select>
+	              </div>
+                <div class="row form-group">
 	                <label for="posNumber" class="col-form-label col-sm-2">Number:</label>
 	                <select name="number" id="posNumber" class="form-control col-4">
 	                  {$optionsHtml["number"]}
