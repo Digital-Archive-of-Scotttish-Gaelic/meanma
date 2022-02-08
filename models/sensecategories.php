@@ -84,7 +84,7 @@ SQL;
 	 */
 	public static function getNonCategorisedSlipIds($entryId, $db) {
 		$slipIds = array();
-			//get the corpus slip data
+/*			//get the corpus slip data
 		$sql = <<<SQL
         SELECT auto_id FROM slips s 
         	JOIN lemmas l ON l.id = s.id AND l.filename = s.filename
@@ -97,13 +97,14 @@ SQL;
 		foreach ($results as $row) {
 			$slipIds[] = $row["auto_id"];
 		}
-			//...and get the paper slip data
+*/
 		$sql2 = <<<SQL
 			SELECT auto_id FROM slips s 
 				JOIN entry e ON e.id = s.entry_id
-				WHERE auto_id NOT IN (SELECT slip_id FROM slip_sense) AND s.entry_id = :entryId 
-				  AND filename = ''
+				JOIN text t ON t.id = s.text_id 
+				WHERE auto_id NOT IN (SELECT slip_id FROM slip_sense) AND s.entry_id = :entryId 		  
         	AND group_id = {$_SESSION["groupId"]}
+        	ORDER BY date ASC
 SQL;
 		$results2 = $db->fetch($sql2, array(":entryId"=>$entryId));
 		foreach ($results2 as $row) {
