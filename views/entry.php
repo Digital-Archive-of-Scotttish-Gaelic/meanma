@@ -243,6 +243,7 @@ HTML;
 						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]}"
 						class="entryCitationContext"></td-->
 					<td class="entryCitationContext"></td> 
+					<td id="citationSlip_{$row["auto_id"]}" class="citationType"></td>
 					<td>{$emojiHtml}</td>
 					<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>
 					<td>{$textLink}</td>
@@ -323,9 +324,8 @@ HTML;
 		foreach($slipData as $data) {
 			foreach ($data as $row) {
 				if (!$row["auto_id"]) {
-					continue;             // temp bug fix
+					continue;             // no slip data so move on
 				}
-
 				$filenameElems = explode('_', $row["filename"]);
 				$translation = $row["translation"];
 				$slipLinkData = array(
@@ -348,12 +348,14 @@ HTML;
 							data-precontextscope="{$row["preContextScope"]}"
 							data-postcontextscope="{$row["postContextScope"]}"
 							data-translation="{$translation}"
-							data-date="{$row["date_of_lang"]}">
+							data-date="{$row["date_internal"]}"
+							data-date_display="{$row["date_display"]}">
 						<!--td data-toggle="tooltip"
 							title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]} : {$translation}"
 							class="entryCitationContext"></td-->
 						<td class="entryCitationContext"></td>
-						<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>
+						<td id="citationSlip_{$row["auto_id"]}" class="citationType"></td>
+						<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>					
 						<td>{$textLink}</td>
 					</tr>
 HTML;
@@ -477,15 +479,13 @@ HTML;
 			      return;
 			    }
 			    //check if data has alreay loaded
-		      if ($(citationsContainerId).attr('data-loaded')) {
-		        
+		      if ($(citationsContainerId).attr('data-loaded')) {		        
 		        $(citationsContainerId).show();
-			    citationsLink.text('hide');
-			    citationsLink.addClass('hideCitations');
-			      console.log('populated');
+			      citationsLink.text('hide');
+			      citationsLink.addClass('hideCitations');
 			      return;
 			    }
-			    
+			    //data hasn't been loaded yet, so fetch it
 			    $(citationsContainerId + "> table > tbody > tr").each(function() {
 			      var tr = $(this);
 			      var formsOnly = $("input[name='formsOptions']:checked").val() == "formsOnly" ? true : false;  
@@ -506,7 +506,7 @@ HTML;
 				      if (type == "form") {     //default to short citation for forms 	  
 							  if (!data.form) {
 							    if (!data.sense) {
-							      html += getCitationHtml("draft", data.draft); //no form or sense so write draft
+							      html += getCitationHtml("draft", data.draft, slipId); //no form or sense so write draft
 							      tr.addClass("forms_draft");
 							      if (formsOnly) {
 							        tr.addClass('hide');
@@ -514,7 +514,7 @@ HTML;
 							        tr.removeClass('hide');
 							      }
 							    } else {
-							      html += getCitationHtml("sense", data.sense); //no form so write sense
+							      html += getCitationHtml("sense", data.sense, slipId); //no form so write sense
 							      tr.addClass("forms_sense");
 							      if (formsOnly) {
 							        tr.addClass('hide');
@@ -523,18 +523,18 @@ HTML;
 							      }
 							    }
 							  } else {
-							    html += getCitationHtml("form", data.form); //there is a form so write it
+							    html += getCitationHtml("form", data.form, slipId); //there is a form so write it							    
 							    tr.addClass("forms_form");
 							  }
 				      } else if (type == "sense") {
 				        if (!data.sense) {
 							    if (!data.form) {
-							      html += getCitationHtml("draft", data.draft); //no form or sense so write draft
+							      html += getCitationHtml("draft", data.draft, slipId); //no form or sense so write draft
 							    } else {
-							      html += getCitationHtml("form", data.form); //no sense so write form
+							      html += getCitationHtml("form", data.form, slipId); //no sense so write form
 							    }
 							  } else {
-							    html += getCitationHtml("sense", data.sense); //there is a sense so write it 
+							    html += getCitationHtml("sense", data.sense, slipId); //there is a sense so write it 
 							  }
 				      }			      
 				      tr.find('.entryCitationContext').html(html);
@@ -550,15 +550,17 @@ HTML;
 			    citationsLink.addClass('hideCitations');
 			  });
 				
-				function getCitationHtml(citationType, info) {
+				function getCitationHtml(citationType, info, slipId = null) {
 				  let translation = info.translation;
-					html = info.context.html + ' <em>(' + citationType + ')</em>';
+					html = info.context.html;
 					if (info.reference) {
 					  html += '<br>' + info.reference;
 					}
 					if (translation) {
 					  html += getTranslationHtml(translation, info.cid);
 					}
+					//write the icon
+					$('#citationSlip_'+slipId).html('<strong>'+citationType+'</strong>');
 					return html;
 				}
 				
