@@ -347,6 +347,8 @@ HTML;
 		$context = $result["context"];
 		$pos = new models\partofspeech($result["pos"]);
 
+		print_r($result);
+
 		$shortTitle = mb_strlen($result["title"], "UTF-8") < 30
 			? $result["title"]
 			: mb_substr($result["title"], 0, 29, "UTF-8") . "...";
@@ -354,7 +356,7 @@ HTML;
 		$title = <<<HTML
         Headword: {$result["lemma"]}<br>
         POS: {$result["pos"]} ({$pos->getLabel()})<br>
-        Date: {$result["date_of_lang"]}<br>
+        Date: {$result["date_display"]}<br>
         Title: {$result["title"]}<br>
         Page No: {$result["page"]}<br><br>
         {$result["filename"]}<br>{$result["id"]}
@@ -362,7 +364,7 @@ HTML;
 		$textNum = stristr($result["filename"], "_", true);
 		$slipLinkHtml = models\collection::getSlipLinkHtml($result, $index, $this->_db);
 		echo <<<HTML
-				<td class="extendedField">{$result["date_of_lang"]}</td>
+				<td class="extendedField">{$result["date_display"]}</td>
 				<td class="extendedField">#{$textNum} {$shortTitle}</td>
         <td style="text-align: right;">{$context["pre"]["output"]}</td>
         <td style="text-align: center;">

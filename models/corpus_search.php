@@ -130,7 +130,7 @@ class corpus_search
 			$fileResults[$i]["tid"] = $result["tid"];
 			$fileResults[$i]["lemma"] = $result["lemma"];
 			$fileResults[$i]["pos"] = $result["pos"];
-			$fileResults[$i]["date_of_lang"] = $result["date_of_lang"];
+			$fileResults[$i]["date_display"] = $result["date_display"];
 			$fileResults[$i]["filename"] = $result["filename"];
 			$fileResults[$i]["auto_id"] = $result["auto_id"];
 			$fileResults[$i]["title"] = $result["title"];
@@ -169,10 +169,10 @@ class corpus_search
 				$orderBy = "RAND()";
 				break;
 			case "dateAsc":
-				$orderBy = "date_of_lang ASC, page ASC";
+				$orderBy = "date ASC, page ASC";
 				break;
 			case "dateDesc":
-				$orderBy = "date_of_lang DESC, page ASC";
+				$orderBy = "date DESC, page ASC";
 				break;
 			/*case "precedingWord":
 				$orderBy = "preceding_word ASC";
@@ -246,7 +246,7 @@ SQL;
 SQL;
 		} else {  // the MAIN search query
 			$query["sql"] = <<<SQL
-				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, date_of_lang, l.title,
+				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, date_display, t.title,
                 page, medium, t.id AS tid
             FROM lemmas AS l
 						JOIN text t ON t.filepath = l.filename 
@@ -307,7 +307,7 @@ SQL;
 
 	private function _getDateWhereClause() {
 		$dates = explode('-', $this->_params["selectedDates"]);
-		$whereClause = " AND date_of_lang >= {$dates[0]} AND date_of_lang <= {$dates[1]} ";
+		$whereClause = " AND date >= {$dates[0]} AND date <= {$dates[1]} ";
 		return $whereClause;
 	}
 
@@ -402,7 +402,7 @@ SQL;
 	public static function getDataById($filename, $id) {
 		$db = new database();
 		$sql = <<<SQL
-			SELECT l.id AS id, l.filename AS filename, l.wordform AS wordform, pos, lemma, date_of_lang, l.title, page, medium, s.auto_id as auto_id, 
+			SELECT l.id AS id, l.filename AS filename, l.wordform AS wordform, pos, lemma, date_display, l.title, page, medium, s.auto_id as auto_id, 
 			       e.wordclass AS wordClass, t.id AS tid, t.level AS level, district_id
             FROM lemmas AS l
             LEFT JOIN slips s ON l.filename = s.filename AND l.id = s.id
