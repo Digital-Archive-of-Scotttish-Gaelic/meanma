@@ -7,10 +7,7 @@ class slipmorphfeature
   private $_abbr, $_type;
   private $_props = array();
   private $_propTitles = array(
-	    "masculine noun"=>array("gender", "number", "case"),
-  	  "feminine noun"=>array("gender", "number", "case"),
-	    "variable-gender noun"=>array("gender", "number", "case"),
-	    "unclear-gender noun"=>array("gender", "number", "case"),
+	    "noun"=>array("gender", "number", "case"),
 	    "noun phrase"=>array("number", "gender", "case"),
 	    "verb"=>array("mode", "status", "imp_number", "fin_number",
 		    "imp_person", "fin_person", "tense", "mood"),
@@ -25,18 +22,18 @@ class slipmorphfeature
     //set defaults based on abbreviation
     switch ($this->_abbr) {
       case "n":
-        $this->_type = "gender-unclear noun";
+        $this->_type = "noun";
         /* following commented out to test new noun slips having blank defaults */
     //    $this->_props["number"] = "singular";
     //    $this->_props["case"] = "nominative";
         break;
       case "ns":
-        $this->_type = "gender-unclear noun";
+        $this->_type = "noun";
         $this->_props["number"] = "plural";
         $this->_props["case"] = "nominative";
         break;
       case "nx":
-        $this->_type = "gender-unclear noun";
+        $this->_type = "noun";
         $this->_props["number"] = "singular";
         $this->_props["case"] = "genitive";
         break;

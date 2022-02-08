@@ -19,10 +19,7 @@ class slip
 	protected $_wordClass, $_lastUpdatedBy, $_lastUpdated;
 	protected $_isNew;
 	protected $_wordClasses = array(
-		"masculine noun" => array("nm"),
-		"feminine noun" => array("nf"),
-		"variable-gender noun" => array("nvar"),
-		"unclear-gender noun" => array("n", "nx", "ns", "N", "Nx"),
+		"noun" => array("n", "nx", "ns", "N", "Nx"),
 		"noun phrase" => array("nphr"),
 		"verb" => array("v", "V", "vn"),
 		"adjective" => array("a", "ar"),
