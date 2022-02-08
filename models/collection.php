@@ -294,7 +294,6 @@ SQL;
 				ORDER BY date_internal ASC
 SQL;
 		$slipInfo = $db->fetch($sql, array(":slipId" => $slipId));  //paper slip
-		$slipInfo["isPaperSlip"] = true;
 		return $slipInfo;
 	}
 

@@ -226,8 +226,9 @@ HTML;
 					"page" => $row["page"]
 				);
 				$filenameElems = explode('_', $row["filename"]);
+				//corpus slips have a filename, paper slips do not
 				$textLink = $row["filename"] ? '<a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small>' : '';
-				$emojiHtml = $row["isPaperSlip"] ? '<span data-toggle="tooltip" data-placement="top" title="paper slip">&#x1F4DD;</span>' : "";
+				$emojiHtml = $row["filename"] ? "" : '<span data-toggle="tooltip" data-placement="top" title="paper slip">&#x1F4DD;</span>';
 	/*			if (!$row["auto_id"]) {
 					continue;             //bug fix
 				}
