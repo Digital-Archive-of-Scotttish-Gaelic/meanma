@@ -364,8 +364,8 @@ SQL;
 	public static function getMinMaxDates() {
 		$db = new database();
 		$sql = <<<SQL
-        SELECT MIN(date_of_lang) AS min, MAX(date_of_lang) AS max FROM lemmas
-            WHERE date_of_lang != ''
+        SELECT MIN(FLOOR(date)) AS min, MAX(FLOOR(date)) AS max FROM text
+            WHERE date != ''
 SQL;
 		$result = $db->fetch($sql, array());
 		return $result[0];
