@@ -44,14 +44,14 @@ SQL;
 			if ($type == "corpus") {      //this is a corpus slip query
 				$sql = <<<SQL
 					SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, l.wordform AS wordform, firstname, lastname,
-                date_of_lang, title, page, CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
+                date_display AS date, t.title, page, CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
              		l.pos as pos, s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
             FROM slips s
             JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
 SQL;
 			} else {        //this is a paper slip query
 				$sql = <<<SQL
-					SELECT SQL_CALC_FOUND_ROWS auto_id, s.wordform AS wordform, firstname, lastname,
+					SELECT SQL_CALC_FOUND_ROWS auto_id, s.wordform AS wordform, firstname, lastname, t.title, date_display AS date,
                 CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
              		s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
             FROM slips s
@@ -59,6 +59,7 @@ SQL;
 			}
 	    $sql .= <<<SQL
             JOIN entry e ON e.id = s.entry_id
+						JOIN text t ON t.id = s.text_id
             LEFT JOIN user u ON u.email = s.ownedBy
             {$whereClause}
             ORDER BY {$sort} {$order}
@@ -116,7 +117,7 @@ HTML;
                     data-pos="{$slip["pos"]}"
                     data-id="{$slip["id"]}"
                     data-filename="{$slip["filename"]}"
-                    data-date="{$slip["date_of_lang"]}"
+                    data-date="{$slip["date"]}"
                     data-title="{$slip["title"]}"
                     data-page="{$slip["page"]}"
                     data-resultindex="-1"
@@ -271,8 +272,8 @@ SQL;
 		$slipInfo = array();
 		$sql = <<<SQL
       SELECT s.filename as filename, s.id as id, auto_id, pos, lemma,
-              date_of_lang, l.title AS title, page, starred, t.id AS tid, entry_id, 
-              e.headword AS headword, t.date AS date_internal, t.date_display AS date_display, t.date_publication AS 
+              date, l.title AS title, page, starred, t.id AS tid, entry_id, 
+              e.headword AS headword, t.date_display AS date, t.date_publication AS 
       				date_publication
           FROM slips s
           JOIN entry e ON e.id = s.entry_id
@@ -287,11 +288,10 @@ SQL;
 			return $slipInfo;         //corpus slip
 		}
 		$sql = <<<SQL
-			SELECT auto_id, starred, t.id AS tid, entry_id, e.headword AS headword, t.date AS date_internal, t.date_display AS 
-					date_display, t.date_publication AS date_publication
+			SELECT auto_id, starred, t.id AS tid, entry_id, e.headword AS headword, 
+					date_display as date, t.date_publication AS date_publication
 				FROM slips s JOIN entry e ON e.id = s.entry_id JOIN text t ON s.text_id = t.id
 				WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId
-				ORDER BY date_internal ASC
 SQL;
 		$slipInfo = $db->fetch($sql, array(":slipId" => $slipId));  //paper slip
 		return $slipInfo;
@@ -564,7 +564,7 @@ HTML;
             data-id="{$data["id"]}"
             data-filename="{$data["filename"]}"
             data-uri="{$data["context"]["uri"]}"
-            data-date="{$data["date_of_lang"]}"
+            data-date="{$data["date_display"]}"
             data-page="{$data["page"]}"
             data-resultindex="{$index}">
             {$slipLinkText}

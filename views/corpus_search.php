@@ -346,9 +346,6 @@ HTML;
 	private function _writeSearchResult($result, $index) {
 		$context = $result["context"];
 		$pos = new models\partofspeech($result["pos"]);
-
-		print_r($result);
-
 		$shortTitle = mb_strlen($result["title"], "UTF-8") < 30
 			? $result["title"]
 			: mb_substr($result["title"], 0, 29, "UTF-8") . "...";
