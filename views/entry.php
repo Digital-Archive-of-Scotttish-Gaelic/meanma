@@ -253,7 +253,7 @@ HTML;
 					"id" => $row["id"],
 					"filename" => $row["filename"],
 					"uri" => "",
-					"date_of_lang" => $row["date_of_lang"],
+					"date" => $row["date"],
 					"title" => $row["title"],
 					"page" => $row["page"]
 				);
@@ -269,10 +269,9 @@ HTML;
 						data-filename="{$row["filename"]}"
 						data-id="{$row["id"]}"
 						data-tid="{$row["tid"]}"
-						data-date="{$row["date_internal"]}"
-						data-date_display="{$row["date_display"]}">
+						data-date="{$row["date"]}">
 					<!--td data-toggle="tooltip"
-						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]}"
+						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_display"]}"
 						class="entryCitationContext"></td-->
 					<td class="entryCitationContext"></td> 
 					<td id="citationSlip_{$row["auto_id"]}" class="citationType"></td>
@@ -300,7 +299,7 @@ HTML;
                     data-pos="{$result["pos"]}"
                     data-id="{$result["id"]}"
                     data-filename ="{$result["filename"]}"
-                    data-date="{$result["date_of_lang"]}"
+                    data-date="{$result["date"]}"
                     data-title="{$result["title"]}"
                     data-page="{$result["page"]}"
                     data-resultindex="">
@@ -367,7 +366,7 @@ HTML;
 					"id" => $row["id"],
 					"filename" => $row["filename"],
 					"uri" => "",
-					"date_of_lang" => $row["date_of_lang"],
+					"date" => $row["date"],
 					"title" => $row["title"],
 					"page" => $row["page"]
 				);
@@ -380,8 +379,7 @@ HTML;
 							data-precontextscope="{$row["preContextScope"]}"
 							data-postcontextscope="{$row["postContextScope"]}"
 							data-translation="{$translation}"
-							data-date="{$row["date_internal"]}"
-							data-date_display="{$row["date_display"]}">
+							data-date="{$row["date"]}">
 						<!--td data-toggle="tooltip"
 							title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]} : {$translation}"
 							class="entryCitationContext"></td-->
@@ -522,7 +520,7 @@ HTML;
 			      var tr = $(this);
 			      var formsOnly = $("input[name='formsOptions']:checked").val() == "formsOnly" ? true : false;  
 			      var slipId = $(this).attr('data-slipid');
-			      var date = $(this).attr('data-date_display');
+			      var date = $(this).attr('data-date');
 			      var html = '';
 			      if (date) {
 			        html += '<span class="text-muted">' + date + '.</span> ';
