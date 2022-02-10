@@ -12,6 +12,10 @@ class entry
 	private $_slipSenses = array();
 	private $_individualSenses = array();
 
+	//Do we want this here? SB
+	private $_subclasses = array(
+		"noun" => array("masculine", "feminine", "variable-gender", "unclear-gender"));
+
 	public function __construct($id) {
 		$this->_id = $id;
 	}

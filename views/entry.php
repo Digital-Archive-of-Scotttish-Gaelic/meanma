@@ -31,6 +31,9 @@ class entry
 				</div>
 HTML;
 		switch ($type) {
+			case "edit":
+				$this->_writeEditView();
+				break;
 			case "piles":
 				$this->_writeSensesView();
 				break;
@@ -72,11 +75,21 @@ HTML;
 	private function _writeSubNav($type) {
 		$listItemHtml = "";
 		switch ($type) {
+			case "edit":
+				$listItemHtml = <<<HTML
+					<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
+					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
+					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>    	
+					<li class="nav-item"><div class="nav-link active">edit</div></li>
+HTML;
+				break;
 			case "piles":
 				$listItemHtml = <<<HTML
 					<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
 					<li class="nav-item"><div class="nav-link active">piles</div></li>
-					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>    	
+					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>  
+					<li class="nav-item"><a class="nav-link" title="edit" href="?m=entries&a=view&type=edit&id={$this->_entry->getId()}">edit</a></li>
+					  	
 HTML;
 				break;
 			case "slips":
@@ -84,13 +97,15 @@ HTML;
 					<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
 					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
 			    <li class="nav-item"><div class="nav-link active">slips</div></li>	
+					<li class="nav-item"><a class="nav-link" title="edit" href="?m=entries&a=view&type=edit&id={$this->_entry->getId()}">edit</a></li>
 HTML;
 				break;
 			default:
 				$listItemHtml = <<<HTML
 					<li class="nav-item"><div class="nav-link active">forms</div></li>
 					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
-					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>    	
+					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>   										
+					<li class="nav-item"><a class="nav-link" title="edit" href="?m=entries&a=view&type=edit&id={$this->_entry->getId()}">edit</a></li>
 HTML;
 		}
 		echo <<<HTML
@@ -98,6 +113,23 @@ HTML;
 				{$listItemHtml}		    		
 		  </ul>	
 HTML;
+	}
+
+	private function _writeEditView() {
+		echo <<<HTML
+			<div>
+        <h5>Edit:</h5>
+        <div class="form-group">
+          <div class="row">
+            <label class="form-label col-2" for="sublcass">Subclass</label>
+            <select class="form-control col-2">
+              <option value="">---</option>
+						</select>
+					</div>
+				</div>
+			</div>
+HTML;
+		return;
 	}
 
 	private function _writeFormsView() {
