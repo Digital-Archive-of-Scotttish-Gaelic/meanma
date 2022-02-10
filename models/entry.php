@@ -183,4 +183,8 @@ SQL;
 		}
 		return array_unique($uniqueIds);
 	}
+
+	public function getSubclasses() {
+		return $this->_subclasses[$this->getWordclass()]; //only subclasses for this wordclass
+	}
 }

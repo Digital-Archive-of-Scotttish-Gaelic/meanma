@@ -120,16 +120,36 @@ HTML;
 			<div>
         <h5>Edit:</h5>
         <div class="form-group">
-          <div class="row">
-            <label class="form-label col-2" for="sublcass">Subclass</label>
-            <select class="form-control col-2">
-              <option value="">---</option>
-						</select>
-					</div>
+					{$this->_getSubclassHtml()}
 				</div>
+				<button type="submit" class="btn btn-primary">save</button>
+				<a href="?m=entries&a=view&type=edit&id={$this->_entry->getId()}">
+					<button type="button" class="btn btn-secondary">cancel</button>
+				</a>
 			</div>
 HTML;
-		return;
+	}
+
+	private function _getSubclassHtml() {
+		$subclasses = $this->_entry->getSubclasses();
+		if (!$subclasses) {
+			return "";
+		}
+		$optionHtml = '<option value="">---</option>';
+		foreach ($subclasses as $subclass) {
+			$optionHtml .= <<<HTML
+				<option value="{$subclass}">{$subclass}</option>
+HTML;
+		}
+		$subclassHtml = <<<HTML
+      <div class="row">
+        <label class="form-label col-2" for="sublcass">Subclass</label>
+        <select class="form-control col-2">
+          {$optionHtml}
+				</select>
+			</div>
+HTML;
+		return $subclassHtml;
 	}
 
 	private function _writeFormsView() {
