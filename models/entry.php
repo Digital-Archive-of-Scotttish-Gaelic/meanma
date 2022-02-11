@@ -11,8 +11,8 @@ class entry
 	private $_senseSlipIds = array();
 	private $_slipSenses = array();
 	private $_individualSenses = array();
-
-	//Do we want this here? SB
+	private $_etymology;
+	private $_subclass;
 	private $_subclasses = array(
 		"noun" => array("masculine", "feminine", "variable-gender", "unclear-gender"));
 
@@ -42,6 +42,14 @@ class entry
 		$this->_updated = $timestamp;
 	}
 
+	public function setSubclass($option) {
+		$this->_subclass = $option;
+	}
+
+	public function setEtymology($text) {
+		$this->_etymology = $text;
+	}
+
 	public function addSense($sense, $slipId) {
 		$this->_senses[$slipId][] = $sense;
 		$this->_individualSenses[$sense->getId()][] = $slipId;
@@ -67,6 +75,10 @@ class entry
 
 	public function getNotes() {
 		return $this->_notes;
+	}
+
+	public function getEtymology() {
+		return $this->_etymology;
 	}
 
 	public function getUpdated() {
@@ -184,7 +196,31 @@ SQL;
 		return array_unique($uniqueIds);
 	}
 
+	/**
+	 * Returns all possible subclass options for this entry (based on wordclass)
+	 * @return array: of strings
+	 */
 	public function getSubclasses() {
 		return $this->_subclasses[$this->getWordclass()]; //only subclasses for this wordclass
+	}
+
+	/**
+	 * Returns the selected subclass for this entry from the array of subclasses
+	 * @return string
+	 */
+	public function getSubclass() {
+		return $this->_subclass;
+	}
+
+	// OTHER METHODS
+
+	public function saveEntry($db) {
+		$sql = <<<SQL
+			UPDATE entry SET headword = :headword, wordclass = :wordclass, subclass = :subclass, notes = :notes,
+			  etymology = :etymology
+				WHERE id = :id
+SQL;
+		$db->exec($sql, array(":id"=>$this->getId(), ":headword"=>$this->getHeadword(), ":wordclass"=>$this->getWordclass(),
+			":subclass"=>$this->getSubclass(), ":notes"=>$this->getNotes(), ":etymology"=>$this->getEtymology()));
 	}
 }

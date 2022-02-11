@@ -314,6 +314,13 @@ switch ($_REQUEST["action"]) {
 		$entry = entries::getEntryByHeadwordAndWordclass($_GET["headword"], $_GET["wordclass"], $db);
 		echo json_encode(array("id" => $entry->getId()));
 		break;
+		case "saveEntry":
+		$entry = entries::getEntryById($_POST["id"], $db);
+		$entry->setSubclass($_POST["subclass"]);
+		$entry->setNotes($_POST["notes"]);
+		$entry->setEtymology($_POST["etymology"]);
+		$entry->saveEntry($db);
+
 	case "getSlowSearchResults":
 		$slowSearch = new slow_search($_GET["id"], $db);
 		$xpath = urldecode($_GET["xpath"]);

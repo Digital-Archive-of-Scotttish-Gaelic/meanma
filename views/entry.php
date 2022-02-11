@@ -121,8 +121,16 @@ HTML;
         <h5>Edit:</h5>
         <div class="form-group">
 					{$this->_getSubclassHtml()}
+					<div class="row">
+						<label class="form-label col-2" for="etymology">Etymology</label>
+						<textarea id="etymology">{$this->_entry->getEtymology()}</textarea>
+					</div>
+					<div class="row">
+						<label class="form-label col-2" for="notes">Notes</label>
+						<textarea id="notes">{$this->_entry->getNotes()}</textarea>
+					</div>
 				</div>
-				<button type="submit" class="btn btn-primary">save</button>
+				<button type="button" id="saveEntry" class="btn btn-primary">save</button>
 				<a href="?m=entries&a=view&type=edit&id={$this->_entry->getId()}">
 					<button type="button" class="btn btn-secondary">cancel</button>
 				</a>
@@ -137,14 +145,15 @@ HTML;
 		}
 		$optionHtml = '<option value="">---</option>';
 		foreach ($subclasses as $subclass) {
+			$selected = $subclass == $this->_entry->getSubclass() ? "selected" : "";
 			$optionHtml .= <<<HTML
-				<option value="{$subclass}">{$subclass}</option>
+				<option value="{$subclass}" {$selected}>{$subclass}</option>
 HTML;
 		}
 		$subclassHtml = <<<HTML
       <div class="row">
         <label class="form-label col-2" for="sublcass">Subclass</label>
-        <select class="form-control col-2">
+        <select id="subclass" class="form-control col-2">
           {$optionHtml}
 				</select>
 			</div>
@@ -480,6 +489,20 @@ HTML;
 	private function _writeJavascript() {
 		echo <<<HTML
 			<script>
+				//save the entry
+				$('#saveEntry').on('click', function () {
+				  var params = {
+				    action: "saveEntry",
+				    id: '{$this->_entry->getId()}',
+				    subclass: $('#subclass').val(),
+				    notes: $('#notes').val(),
+				    etymology: $('#etymology').val()
+				  } 
+				  
+				  console.log(params);
+				  $.post('ajax.php', params);
+				});
+				
 				//create a paper slip for the selected wordform
 				$('.createPaperSlip').on('click', function () {
 				   let wordform = $(this).attr('data-wordform');

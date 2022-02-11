@@ -22,7 +22,7 @@ SQL;
 			$entry->setUpdated($result["updated"]);
 		} else {
 			$entry = self::createEntry(array("groupId" => $_SESSION["groupId"], "headword" => $headword,
-				"wordclass" => $wordclass, "notes" => ""), $db);
+				"wordclass" => $wordclass), $db);
 		}
 		return $entry;
 	}
@@ -40,6 +40,8 @@ SQL;
 			$entry->setHeadword($result["headword"]);
 			$entry->setWordclass($result["wordclass"]);
 			$entry->setNotes($result["notes"]);
+			$entry->setSubclass($result["subclass"]);
+			$entry->setEtymology($result["etymology"]);
 			$entry->setUpdated($result["updated"]);
 			return $entry;
 		} else {
@@ -49,30 +51,15 @@ SQL;
 
 	public static function createEntry($params, $db) {
 		$sql = <<<SQL
-        INSERT INTO entry (group_id, headword, wordclass, notes) 
-        	VALUES (:groupId, :headword, :wordclass, :notes) 
+        INSERT INTO entry (group_id, headword, wordclass) 
+        	VALUES (:groupId, :headword, :wordclass) 
 SQL;
 		$db->exec($sql, array(":groupId" => $params["groupId"], ":headword" => $params["headword"],
-			":wordclass" => $params["wordclass"], ":notes" => $params["notes"]));
+			":wordclass" => $params["wordclass"]));
 		$entryId = $db->getLastInsertId();
 		$entry = new entry($entryId);
 		return $entry;
 	}
-
-	/*
-	public static function updateEntry($params) {
-		$db = new database();
-		$sql = <<<SQL
-      UPDATE entry	 
-        SET group_id = :groupId, headword = :headword, wordlcass = :wordclass, notes = :notes
-				WHERE id = :id
-SQL;
-		$db->execute($sql, array(":group_id" => $params["groupId"], ":headword" => $params["headword"],
-			":wordclass" => $params["wordclass"], ":notes" => $params["notes"], ":id" => $params["id"]));
-		$entry = new entry($params["id"]);
-		return $entry;
-	}
-*/
 
   public static function getActiveEntryIds($db) {
     $entryIds = array();
