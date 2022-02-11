@@ -119,15 +119,27 @@ HTML;
 		echo <<<HTML
 			<div>
         <h5>Edit:</h5>
-        <div class="form-group">
+        <div>
 					{$this->_getSubclassHtml()}
-					<div class="row">
-						<label class="form-label col-2" for="etymology">Etymology</label>
-						<textarea id="etymology">{$this->_entry->getEtymology()}</textarea>
+					<div class="row form-group">
+						<label class="form-label col-1" for="etymology">Etymology</label>
+						<textarea id="etymology" class="form-control">{$this->_entry->getEtymology()}</textarea>
+						<script>
+	            CKEDITOR.replace('etymology', {
+	              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+	              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
+	            });  
+            </script>
 					</div>
-					<div class="row">
-						<label class="form-label col-2" for="notes">Notes</label>
-						<textarea id="notes">{$this->_entry->getNotes()}</textarea>
+					<div class="row form-group">
+						<label class="form-label col-1" for="notes">Notes</label>
+						<textarea id="notes" class="form-control">{$this->_entry->getNotes()}</textarea>
+						<script>
+	            CKEDITOR.replace('notes', {
+	              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+	              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
+	            });  
+            </script>
 					</div>
 				</div>
 				<button type="button" id="saveEntry" class="btn btn-primary">save</button>
@@ -136,6 +148,7 @@ HTML;
 				</a>
 			</div>
 HTML;
+		echo $this->_writeEntryModal();
 	}
 
 	private function _getSubclassHtml() {
@@ -151,8 +164,8 @@ HTML;
 HTML;
 		}
 		$subclassHtml = <<<HTML
-      <div class="row">
-        <label class="form-label col-2" for="sublcass">Subclass</label>
+      <div class="row form-group">
+        <label class="form-label col-1" for="sublcass">Subclass</label>
         <select id="subclass" class="form-control col-2">
           {$optionHtml}
 				</select>
@@ -486,6 +499,21 @@ HTML;
 		return $html;
 	}
 
+	private function _writeEntryModal() {
+		$html = <<<HTML
+        <div id="entrySavedModal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h2>Entry Saved</h2>
+                </div>
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
+
 	private function _writeJavascript() {
 		echo <<<HTML
 			<script>
@@ -495,12 +523,13 @@ HTML;
 				    action: "saveEntry",
 				    id: '{$this->_entry->getId()}',
 				    subclass: $('#subclass').val(),
-				    notes: $('#notes').val(),
-				    etymology: $('#etymology').val()
+				    notes: CKEDITOR.instances['notes'].getData(),
+				    etymology: CKEDITOR.instances['etymology'].getData()
 				  } 
-				  
-				  console.log(params);
-				  $.post('ajax.php', params);
+				  $.post('ajax.php', params, function () {
+				  }) .done(function () {
+				    $('#entrySavedModal').modal();   //show the saved messsage
+				  })
 				});
 				
 				//create a paper slip for the selected wordform

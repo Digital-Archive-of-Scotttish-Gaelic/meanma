@@ -320,7 +320,7 @@ switch ($_REQUEST["action"]) {
 		$entry->setNotes($_POST["notes"]);
 		$entry->setEtymology($_POST["etymology"]);
 		$entry->saveEntry($db);
-
+		break;
 	case "getSlowSearchResults":
 		$slowSearch = new slow_search($_GET["id"], $db);
 		$xpath = urldecode($_GET["xpath"]);
