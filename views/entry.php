@@ -296,6 +296,7 @@ HTML;
 					"filename" => $row["filename"],
 					"uri" => "",
 					"date" => $row["date"],
+					"date_internal" => $row["date_internal"],
 					"title" => $row["title"],
 					"page" => $row["page"]
 				);
@@ -311,6 +312,7 @@ HTML;
 						data-filename="{$row["filename"]}"
 						data-id="{$row["id"]}"
 						data-tid="{$row["tid"]}"
+						data-date_internal="{$row["date_internal"]}"
 						data-date="{$row["date"]}">
 					<!--td data-toggle="tooltip"
 						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_display"]}"
@@ -409,6 +411,7 @@ HTML;
 					"filename" => $row["filename"],
 					"uri" => "",
 					"date" => $row["date"],
+					"date_internal" => $row["date_internal"],
 					"title" => $row["title"],
 					"page" => $row["page"]
 				);
@@ -421,6 +424,7 @@ HTML;
 							data-precontextscope="{$row["preContextScope"]}"
 							data-postcontextscope="{$row["postContextScope"]}"
 							data-translation="{$translation}"
+							data-date_internal="{$row["date_internal"]}"
 							data-date="{$row["date"]}">
 						<!--td data-toggle="tooltip"
 							title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]} : {$translation}"
@@ -517,6 +521,11 @@ HTML;
 	private function _writeJavascript() {
 		echo <<<HTML
 			<script>
+				//enable tooltips
+				$(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+				});
+
 				//save the entry
 				$('#saveEntry').on('click', function () {
 				  var params = {
@@ -593,9 +602,10 @@ HTML;
 			      var formsOnly = $("input[name='formsOptions']:checked").val() == "formsOnly" ? true : false;  
 			      var slipId = $(this).attr('data-slipid');
 			      var date = $(this).attr('data-date');
+			      var internalDate = $(this).attr('data-date_internal');
 			      var html = '';
 			      if (date) {
-			        html += '<span class="text-muted">' + date + '.</span> ';
+			        html += '<a href="#" data-toggle="tooltip" title="'+internalDate+'" class="text-muted">' + date + '.</a> ';
 			      } 
 			      var wid = $(this).attr('data-id');
 			      var tid = $(this).attr('data-tid');
