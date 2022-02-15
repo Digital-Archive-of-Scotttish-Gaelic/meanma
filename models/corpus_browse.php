@@ -10,6 +10,7 @@ class corpus_browse // models a corpus text or subtext
   private $_title; // the title of the text (optional)
   private $_date, $_displayDate, $_publicationDate;
 	private $_level, $_notes;
+	private $_referenceTemplate;  // the template used to generate a text reference
   private $_type; //used to flag manuscripts ("ms")
   private $_filepath; // the path to the text XML (simple texts only)
   private $_transformedText; // simple texts only
@@ -31,7 +32,7 @@ class corpus_browse // models a corpus text or subtext
 	 */
 	private function _load() {
 		$sql = <<<SQL
-			SELECT title, partOf, filepath, date, date_display, date_publication, level, notes, type
+			SELECT title, partOf, filepath, date, date_display, date_publication, level, notes, type, reference
 				FROM text
 				WHERE id = :id
 SQL;
@@ -64,6 +65,9 @@ SQL;
 		}
 		if ($type = $textData["type"]) {
 			$this->_setType($type);
+		}
+		if ($reference = $textData["reference"]) {
+			$this->_setReferenceTemplate($reference);
 		}
 		$this->_setWriters();
 	}
@@ -108,6 +112,10 @@ SQL;
 
 	private function _setType($type) {
 		$this->_type = $type;
+	}
+
+	private function _setReferenceTemplate($reference) {
+		$this->_referenceTemplate = $reference;
 	}
 
 	/**
@@ -157,6 +165,10 @@ SQL;
 
 	public function getType() {
 		return $this->_type;
+	}
+
+	public function getReferenceTemplate() {
+		return $this->_referenceTemplate;
 	}
 
 	/**
@@ -271,12 +283,13 @@ SQL;
 	  if (!empty($data["textTitle"])) { //ensure there are form data to be saved
 			$sql = <<<SQL
 				UPDATE text SET title = :title, date = :date, date_display = :date_display, date_publication = :date_publication, 
-				                filepath = :filepath, level = :level, notes = :notes 
+				                filepath = :filepath, level = :level, notes = :notes, reference = :reference
 					WHERE id = :id
 SQL;
 			$this->_db->exec($sql, array(":id"=>$this->getId(), ":title"=>$data["textTitle"], ":date"=>$data["textDate"],
 				":date_display"=>$data["textDisplayDate"], ":date_publication"=>$data["textPublicationDate"],
-				":filepath"=>$data["filepath"], ":level"=>$data["textLevel"], ":notes"=>$data["textNotes"]));
+				":filepath"=>$data["filepath"], ":level"=>$data["textLevel"], ":notes"=>$data["textNotes"],
+				":reference"=>$data["textReferenceTemplate"]));
 			//save new writer ID
 		  if ($data["writerId"]) {
 			  $sql = <<<SQL

@@ -172,6 +172,10 @@ HTML;
 						{$levelHtml}
 					</div>
 					<div class="form-group row">
+						<label class="col-sm-2 col-form-label" for="textDate">Reference Template</label>
+						<input class="form-control col-sm-4" type="text" name="textReferenceTemplate" id="textReferenceTemplate" value="{$this->_model->getReferenceTemplate()}">
+					</div>
+					<div class="form-group row">
 						<label class="col-sm-2 col-form-label" for="textNotes">Text Notes</label>
 						<textarea class="form-control col-sm-4" id="textNotes" name="textNotes" rows="10">{$this->_model->getNotes()}</textarea>
 					</div>
@@ -376,6 +380,7 @@ HTML;
 					{$this->_getWritersHtml()}
 					{$this->_getDateHtml()}
 					{$this->_getLevelHtml()}
+					{$this->_getReferenceTemplateHtml()}
 					{$this->_getNotesHtml()}
 					{$this->_getParentTextHtml()}
 					<!-- $this->_getMetadataLinkHtml()} -->
@@ -412,6 +417,13 @@ HTML;
 			<i class="fas fa-star {$levelColours[$level]}"></i>
 HTML;
 		return "<tr><td>level</td><td>{$levelHtml}</td></tr>";
+	}
+
+	private function _getReferenceTemplateHtml() {
+		if (!$this->_model->getReferenceTemplate()) {
+			return "";
+		}
+		return "<tr><td>reference template</td><td>{$this->_model->getReferenceTemplate()}</td></tr>";
 	}
 
 	private function _getNotesHtml() {
