@@ -154,7 +154,7 @@ $(function () {
         body += '</div>';
       });
       body += '<p class="text-muted"><span data-toggle="tooltip" data-html="true" title="' + '<em>' + title + '</em> p.';
-      body +=  page + '">' + date + ' ' + data.referenceTemplate + '</span></p>';
+      body +=  page + '">' + date + ' ' + data.referenceTemplate.replace('%p', 'p.'+page) + '</span></p>';
       body += '<hr/>';
       body += '<ul class="list-inline">';
       $.each(data.senses, function (id, sense) {

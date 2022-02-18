@@ -347,7 +347,7 @@ HTML;
 		$context = $result["context"];
 		$pos = new models\partofspeech($result["pos"]);
 
-		$reference = str_replace("p%", " p." . $result["page"], $result["reference"]);
+		$reference = str_replace("%p", " p." . $result["page"], $result["reference"]);
 		$reference = <<<HTML
 			<span data-toggle="tooltip" data-placement="top" title="text ID: #{$result["tid"]}">{$reference}</span>
 HTML;
