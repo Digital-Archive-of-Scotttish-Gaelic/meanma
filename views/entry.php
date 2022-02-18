@@ -416,6 +416,7 @@ HTML;
 					"page" => $row["page"]
 				);
 				$textLink = $row["filename"] ? '<a target="_blank" href="#" class="entryCitationTextLink"><small>view in text</small>' : '';
+				$emojiHtml = $row["filename"] ? "" : '<span data-toggle="tooltip" data-placement="top" title="paper slip">&#x1F4DD;</span>';
 				$slipList .= <<<HTML
 					<tr id="#slip_{$row["auto_id"]}" data-slipid="{$row["auto_id"]}"
 							data-filename="{$row["filename"]}"
@@ -431,7 +432,8 @@ HTML;
 							class="entryCitationContext"></td-->
 						<td class="entryCitationContext"></td>
 						<td id="citationSlip_{$row["auto_id"]}" class="citationType"></td>
-						<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>					
+						<td>{$emojiHtml}</td>		
+						<td class="entryCitationSlipLink">{$this->_getSlipLink($slipLinkData)}</td>							
 						<td>{$textLink}</td>
 					</tr>
 HTML;
