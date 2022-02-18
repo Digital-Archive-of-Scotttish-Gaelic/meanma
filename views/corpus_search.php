@@ -346,9 +346,12 @@ HTML;
 	private function _writeSearchResult($result, $index) {
 		$context = $result["context"];
 		$pos = new models\partofspeech($result["pos"]);
-		$shortTitle = mb_strlen($result["title"], "UTF-8") < 30
-			? $result["title"]
-			: mb_substr($result["title"], 0, 29, "UTF-8") . "...";
+
+		$reference = str_replace("p%", " p." . $result["page"], $result["reference"]);
+		$reference = <<<HTML
+			<span data-toggle="tooltip" data-placement="top" title="text ID: #{$result["tid"]}">{$reference}</span>
+HTML;
+
 
 		$title = <<<HTML
         Headword: {$result["lemma"]}<br>
@@ -358,11 +361,10 @@ HTML;
         Page No: {$result["page"]}<br><br>
         {$result["filename"]}<br>{$result["id"]}
 HTML;
-		$textNum = stristr($result["filename"], "_", true);
 		$slipLinkHtml = models\collection::getSlipLinkHtml($result, $index, $this->_db);
 		echo <<<HTML
 				<td class="extendedField">{$result["date_display"]}</td>
-				<td class="extendedField">#{$textNum} {$shortTitle}</td>
+				<td class="extendedField">{$reference}</td>
         <td style="text-align: right;">{$context["pre"]["output"]}</td>
         <td style="text-align: center;">
             <a target="_blank" href="?m=corpus&a=browse&id={$result["tid"]}&wid={$result["id"]}"

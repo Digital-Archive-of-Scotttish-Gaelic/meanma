@@ -365,7 +365,7 @@ SQL;
 	}
 
 	/**
-	 * @return string HTML anchor with link for opening this slip
+	 * @return string HTML anchor with link for opening the modal for this slip
 	 */
 	public function getSlipLinkHtml() {
 		$slipLinkText = $this->getId();

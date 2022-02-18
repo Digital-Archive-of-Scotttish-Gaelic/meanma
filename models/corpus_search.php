@@ -131,6 +131,7 @@ class corpus_search
 			$fileResults[$i]["lemma"] = $result["lemma"];
 			$fileResults[$i]["pos"] = $result["pos"];
 			$fileResults[$i]["date_display"] = $result["date_display"];
+			$fileResults[$i]["reference"] = $result["reference"];
 			$fileResults[$i]["filename"] = $result["filename"];
 			$fileResults[$i]["auto_id"] = $result["auto_id"];
 			$fileResults[$i]["title"] = $result["title"];
@@ -247,7 +248,7 @@ SQL;
 		} else {  // the MAIN search query
 			$query["sql"] = <<<SQL
 				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, date_display, t.title,
-                page, medium, t.id AS tid
+                t.reference AS reference, page, medium, t.id AS tid
             FROM lemmas AS l
 						JOIN text t ON t.filepath = l.filename 
             {$textJoinSql}
