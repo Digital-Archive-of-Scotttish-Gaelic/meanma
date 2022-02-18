@@ -4,7 +4,7 @@ namespace models;
 
 class corpus_slip extends slip
 {
-  public function __construct($filename, $wid, $auto_id = null, $pos, $db) {
+  public function __construct($filename = null, $wid = null, $auto_id = null, $pos = null, $db) {
     $this->_filename = $filename;
     $this->_wid = $wid;
     //test if a slip already exists (if there is a slip with the same groupId, filename, id combination)

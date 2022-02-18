@@ -213,8 +213,9 @@ HTML;
 				$context = $testCitation->getContext();
 				$tableBodyHtml .= <<<HTML
 					<tr>
+						<td>{$slip->getText()->getDisplayDate()} {$slip->getText()->getReferenceTemplate()}</td>
 						<td>{$context["html"]}</td>
-						<td>{$slipId}</td>
+						<td>{$slip->getSlipLinkHtml()}</td>
 					</tr>
 HTML;
 			}
@@ -225,6 +226,7 @@ HTML;
         <table id="browseSlipsTable" data-toggle="table" data-pagination="true" data-search="true">
           <thead>
             <tr>
+              <th data-sortable="true">Reference</th>
               <th data-sortable="true">Context</th>
               <th data-sortable="true">ID</th>
             </tr>

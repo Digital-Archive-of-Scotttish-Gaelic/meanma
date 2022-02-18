@@ -7,9 +7,10 @@ class slip
 	const SCOPE_DEFAULT = 80;
 
 	private $_id; //the slip ID (called 'auto_id' in the DB)
-	protected $_type; //used to differiantate between types of slip, e.g. paper or corpus
+	protected $_type; //used to differentiate between types of slip, e.g. paper or corpus
 	protected $_db; //an instance of models\database
 	protected $_textId = null;
+	protected $_text = null; //an instance of models\corpus_browse
 	protected $_reference = null; //used for lexicographers to manually store a reference as HTML
 	protected $_filename = null;
 	protected $_wid = null;
@@ -86,6 +87,13 @@ class slip
 
 	public function getTextId() {
 		return $this->_textId;
+	}
+
+	public function getText() {
+		if (!$this->_text) {
+			$this->_text = new corpus_browse($this->getTextId(), $this->_db);
+		}
+		return $this->_text;
 	}
 
 	public function getSlipIsAttachedTiCitation($citationId) {
@@ -354,5 +362,26 @@ SQL;
 			}
 		}
 		return $this->_citations;
+	}
+
+	/**
+	 * @return string HTML anchor with link for opening this slip
+	 */
+	public function getSlipLinkHtml() {
+		$slipLinkText = $this->getId();
+		$html = <<<HTML
+        <a href="#" data-url="class="slipLink2"
+            data-toggle="modal" data-target="#slipModal"
+            data-auto_id="{$this->getId()}"
+            data-headword="{$this->getHeadword()}"
+            data-pos="{$this->getPOS()}"
+            data-id="{$this->getWid()}"
+            data-filename="{$this->getFilename()}"
+            data-date="{$this->getText()->getDisplayDate()}"
+        >
+            {$slipLinkText}
+        </a>
+HTML;
+		return $html;
 	}
 }

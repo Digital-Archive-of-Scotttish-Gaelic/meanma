@@ -56,9 +56,8 @@ switch ($_REQUEST["action"]) {
 	    ? new paper_slip($_GET["auto_id"], $_GET["entryId"], null, $db)
 	    : new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db);
     $slip->updateResults($_GET["index"]); //ensure that "view slip" (and not "create slip") displays
-    $filenameElems = explode('_', $slip->getFilename());
-    $textId = $filenameElems[0];
-    $referenceTemplate = $slip->getReferenceTemplate();
+    $textId = $slip->getTextId();
+    $referenceTemplate = $slip->getText()->getReferenceTemplate();
     $results = array("locked"=>$slip->getLocked(), "auto_id"=>$slip->getId(), "owner"=>$slip->getOwnedBy(),
 	    "starred"=>$slip->getStarred(), "notes"=>$slip->getNotes(), "type"=>$slip->getType(),
       "wordClass"=>$slip->getWordClass(), "senses"=>$slip->getSensesInfo(),
@@ -93,7 +92,7 @@ switch ($_REQUEST["action"]) {
 			$translation = isset($translations[0]) ? $translations[0]->getContent() : null;
 			$slip = $citation->getSlip();
 			$reference = $slip->getReference();   //deprecate once auto references are in place
-			$referenceTemplate = $slip->getReferenceTemplate(); //refactor once manual references are deprecated
+			$referenceTemplate = $slip->getText()->getReferenceTemplate(); //refactor once manual references are deprecated
 			$citationInfo[$citation->getType()] = array("cid"=>$cid, "context"=>$citation->getContext(false), "translation"=>$translation, "reference"=>$reference,
 				"referenceTemplate"=>$referenceTemplate);
 		}
