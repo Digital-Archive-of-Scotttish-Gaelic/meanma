@@ -206,6 +206,8 @@ HTML;
 		$slipIds = $this->_entry->getSlipIds($this->_db);
 		foreach ($slipIds as $slipId) {
 			$slip = models\collection::getSlipBySlipId($slipId, $this->_db);
+			$pageHtml = $slip->getPage() ? "p." . $slip->getPage() : "";
+			$referenceHtml = str_replace("%p", $pageHtml, $slip->getText()->getReferenceTemplate());
 			$citations = $slip->getCitations();
 
 			$testCitation = array_pop($citations);
@@ -213,7 +215,7 @@ HTML;
 				$context = $testCitation->getContext();
 				$tableBodyHtml .= <<<HTML
 					<tr>
-						<td>{$slip->getText()->getDisplayDate()} {$slip->getText()->getReferenceTemplate()}</td>
+						<td>{$slip->getText()->getDisplayDate()} {$referenceHtml}</td>
 						<td>{$context["html"]}</td>
 						<td>{$slip->getSlipLinkHtml()}</td>
 					</tr>
@@ -674,7 +676,11 @@ HTML;
 						html += info.context.html;
 					}
 				  if (info.referenceTemplate) { //auto generated reference
-				    html += '<br><span class="text-muted">' + info.referenceTemplate + '</span>';
+				    var pageHtml = '';
+				    if (info.page) {    //temporary code until we work more on reference placeholders SB
+				      pageHtml = 'p.' + info.page;
+				    }
+				    html += '<br><span class="text-muted">' + info.referenceTemplate.replace('%p', pageHtml) + '</span>';
 				  } else if (info.reference) {  //manually entered reference
 					  html += '<br>' + info.reference;
 					}

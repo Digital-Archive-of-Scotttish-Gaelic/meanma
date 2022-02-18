@@ -374,14 +374,30 @@ SQL;
             data-toggle="modal" data-target="#slipModal"
             data-auto_id="{$this->getId()}"
             data-headword="{$this->getHeadword()}"
+            data-page="{$this->getPage()}"
             data-pos="{$this->getPOS()}"
             data-id="{$this->getWid()}"
             data-filename="{$this->getFilename()}"
+            data-entryid="{$this->getEntryId()}"
             data-date="{$this->getText()->getDisplayDate()}"
         >
             {$slipLinkText}
         </a>
 HTML;
 		return $html;
+	}
+
+	/*
+	 * TEMP SB
+	 * Convenience method until we code this properly using page numbers in the slips table
+	 */
+	public function getPage() {
+		$sql = <<<SQL
+			SELECT page FROM lemmas WHERE filename = ? AND id = ?
+SQL;
+		$result = $this->_db->fetch($sql, array($this->getFilename(), $this->getWid()));
+		if ($result) {
+			return $result[0]["page"];
+		}
 	}
 }

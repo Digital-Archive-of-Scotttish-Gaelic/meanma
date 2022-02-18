@@ -92,9 +92,10 @@ switch ($_REQUEST["action"]) {
 			$translation = isset($translations[0]) ? $translations[0]->getContent() : null;
 			$slip = $citation->getSlip();
 			$reference = $slip->getReference();   //deprecate once auto references are in place
+			$page = $slip->getPage();   //also a temporary solution SB - remember that this WILL slow the system
 			$referenceTemplate = $slip->getText()->getReferenceTemplate(); //refactor once manual references are deprecated
 			$citationInfo[$citation->getType()] = array("cid"=>$cid, "context"=>$citation->getContext(false), "translation"=>$translation, "reference"=>$reference,
-				"referenceTemplate"=>$referenceTemplate);
+				"referenceTemplate"=>$referenceTemplate, "page"=>$page);
 		}
 		echo json_encode($citationInfo);
     break;
