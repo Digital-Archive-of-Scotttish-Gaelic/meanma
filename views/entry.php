@@ -313,7 +313,8 @@ HTML;
 						data-id="{$row["id"]}"
 						data-tid="{$row["tid"]}"
 						data-date_internal="{$row["date_internal"]}"
-						data-date="{$row["date"]}">
+						data-date="{$row["date"]}"
+						data-reference="{$row["referenceTemplate"]}">
 					<!--td data-toggle="tooltip"
 						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_display"]}"
 						class="entryCitationContext"></td-->
@@ -426,7 +427,8 @@ HTML;
 							data-postcontextscope="{$row["postContextScope"]}"
 							data-translation="{$translation}"
 							data-date_internal="{$row["date_internal"]}"
-							data-date="{$row["date"]}">
+							data-date="{$row["date"]}"
+							data-reference="{$row["referenceTemplate"]}">
 						<!--td data-toggle="tooltip"
 							title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]} : {$translation}"
 							class="entryCitationContext"></td-->
@@ -616,7 +618,7 @@ HTML;
 						var url = 'ajax.php?action=getCitationsBySlipId&slipId='+slipId;
 			      $.getJSON(url, function (data) {
 			        var corpusLink = 'index.php?m=corpus&a=browse&id=' + tid + '&wid=' + wid; //title id and word id
-				      tr.find('.entryCitationTextLink').attr('href', corpusLink); //add the link to text url
+				      tr.find('.entryCitationTextLink').attr('href', corpusLink); //add the link to text url			      
 				      if (type == "form") {     //default to short citation for forms 	  
 							  if (!data.form) {
 							    if (!data.sense) {
@@ -664,13 +666,18 @@ HTML;
 			    citationsLink.addClass('hideCitations');
 			  });
 				
-				function getCitationHtml(citationType, info, slipId = null) {
-				  let translation = info.translation;
-					html = info.context.html;
-					if (info.reference) {
+				function getCitationHtml(citationType, info, slipId = null) {				  
+				  html = "";
+				  if (info.context != undefined) {
+						html += info.context.html;
+					}
+				  if (info.referenceTemplate) { //auto generated reference
+				    html += '<br><span class="text-muted">' + info.referenceTemplate + '</span>';
+				  } else if (info.reference) {  //manually entered reference
 					  html += '<br>' + info.reference;
 					}
-					if (translation) {
+					if (info.translation) {
+				    let translation = info.translation;
 					  html += getTranslationHtml(translation, info.cid);
 					}
 					//write the icon

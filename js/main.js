@@ -153,7 +153,8 @@ $(function () {
         });
         body += '</div>';
       });
-      body += '<p class="text-muted"><span data-toggle="tooltip" data-html="true" title="' + '<em>' + title + '</em> p.' + page + '">#' + textId + ': ' + date + '</span></p>';
+      body += '<p class="text-muted"><span data-toggle="tooltip" data-html="true" title="' + '<em>' + title + '</em> p.';
+      body +=  page + '">' + date + ' ' + data.referenceTemplate + '</span></p>';
       body += '<hr/>';
       body += '<ul class="list-inline">';
       $.each(data.senses, function (id, sense) {

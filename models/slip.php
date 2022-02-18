@@ -43,8 +43,21 @@ class slip
 		return $this->_id;
 	}
 
+	/**
+	 * ! This should be deprecated once automatic reference templates are in place
+	 * @return string
+	 */
 	public function getReference() {
 		return $this->_reference;
+	}
+
+	/**
+	 * Will refactor this once old manual references are deprecated
+	 */
+	public function getReferenceTemplate() {
+		$sql = "SELECT reference FROM text WHERE id = :id";
+		$result = $this->_db->fetch($sql, array(":id"=>$this->getTextId()));
+		return $result[0]["reference"];
 	}
 
 	public function getType() {

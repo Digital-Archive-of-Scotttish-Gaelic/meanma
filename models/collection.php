@@ -274,7 +274,7 @@ SQL;
       SELECT s.filename as filename, s.id as id, auto_id, pos, lemma,
               date, l.title AS title, page, starred, t.id AS tid, entry_id, 
               e.headword AS headword, t.date_display AS date, t.date_publication AS 
-      				date_publication, t.date AS date_internal
+      				date_publication, t.date AS date_internal, t.reference AS referenceTemplate
           FROM slips s
           JOIN entry e ON e.id = s.entry_id
           JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
@@ -289,7 +289,8 @@ SQL;
 		}
 		$sql = <<<SQL
 			SELECT auto_id, starred, t.id AS tid, entry_id, e.headword AS headword, 
-					date_display as date, t.date_publication AS date_publication, date AS date_internal
+					date_display as date, t.date_publication AS date_publication, date AS date_internal, t.reference AS 
+					referenceTemplate
 				FROM slips s JOIN entry e ON e.id = s.entry_id JOIN text t ON s.text_id = t.id
 				WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId
 SQL;

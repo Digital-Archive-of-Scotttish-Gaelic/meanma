@@ -58,10 +58,12 @@ switch ($_REQUEST["action"]) {
     $slip->updateResults($_GET["index"]); //ensure that "view slip" (and not "create slip") displays
     $filenameElems = explode('_', $slip->getFilename());
     $textId = $filenameElems[0];
+    $referenceTemplate = $slip->getReferenceTemplate();
     $results = array("locked"=>$slip->getLocked(), "auto_id"=>$slip->getId(), "owner"=>$slip->getOwnedBy(),
 	    "starred"=>$slip->getStarred(), "notes"=>$slip->getNotes(), "type"=>$slip->getType(),
       "wordClass"=>$slip->getWordClass(), "senses"=>$slip->getSensesInfo(),
-      "lastUpdated"=>$slip->getLastUpdated(), "textId"=>$textId, "slipMorph"=>$slip->getSlipMorph()->getProps());
+      "lastUpdated"=>$slip->getLastUpdated(), "textId"=>$textId, "slipMorph"=>$slip->getSlipMorph()->getProps(),
+	    "referenceTemplate"=>$referenceTemplate);
     //code required for modal slips
     $citations = $slip->getCitations();
     foreach ($citations as $citation) {
@@ -90,8 +92,10 @@ switch ($_REQUEST["action"]) {
 			$translations = $citation->getTranslations();
 			$translation = isset($translations[0]) ? $translations[0]->getContent() : null;
 			$slip = $citation->getSlip();
-			$reference = $slip->getReference();
-			$citationInfo[$citation->getType()] = array("cid"=>$cid, "context"=>$citation->getContext(false), "translation"=>$translation, "reference"=>$reference);
+			$reference = $slip->getReference();   //deprecate once auto references are in place
+			$referenceTemplate = $slip->getReferenceTemplate(); //refactor once manual references are deprecated
+			$citationInfo[$citation->getType()] = array("cid"=>$cid, "context"=>$citation->getContext(false), "translation"=>$translation, "reference"=>$reference,
+				"referenceTemplate"=>$referenceTemplate);
 		}
 		echo json_encode($citationInfo);
     break;
