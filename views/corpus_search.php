@@ -352,7 +352,6 @@ HTML;
 			<span data-toggle="tooltip" data-placement="top" title="text ID: #{$result["tid"]}">{$reference}</span>
 HTML;
 
-
 		$title = <<<HTML
         Headword: {$result["lemma"]}<br>
         POS: {$result["pos"]} ({$pos->getLabel()})<br>
@@ -363,7 +362,8 @@ HTML;
 HTML;
 		$slipLinkHtml = models\collection::getSlipLinkHtml($result, $index, $this->_db);
 		echo <<<HTML
-				<td class="extendedField">{$result["date_display"]}</td>
+				<td class="extendedField"><span data-toggle="tooltip" title="{$result["date_display"]}">
+					{$result["date_internal"]}</span></td>
 				<td class="extendedField">{$reference}</td>
         <td style="text-align: right;">{$context["pre"]["output"]}</td>
         <td style="text-align: center;">

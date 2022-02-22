@@ -43,8 +43,9 @@ SQL;
 			$sql = "";
 			if ($type == "corpus") {      //this is a corpus slip query
 				$sql = <<<SQL
-					SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, l.wordform AS wordform, firstname, lastname,
-                date_display AS date, t.title, page, CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
+					SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, l.wordform AS wordform, 
+					      firstname, lastname, t.date AS date_internal, date_display AS date_display, t.title, page, 
+					      CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
              		l.pos as pos, s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
             FROM slips s
             JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
@@ -117,7 +118,7 @@ HTML;
                     data-pos="{$slip["pos"]}"
                     data-id="{$slip["id"]}"
                     data-filename="{$slip["filename"]}"
-                    data-date="{$slip["date"]}"
+                    data-date="{$slip["date_internal"]}"
                     data-title="{$slip["title"]}"
                     data-page="{$slip["page"]}"
                     data-resultindex="-1"
@@ -565,7 +566,7 @@ HTML;
             data-id="{$data["id"]}"
             data-filename="{$data["filename"]}"
             data-uri="{$data["context"]["uri"]}"
-            data-date="{$data["date_display"]}"
+            data-date="{$data["date_internal"]}"
             data-page="{$data["page"]}"
             data-resultindex="{$index}">
             {$slipLinkText}

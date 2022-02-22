@@ -153,11 +153,13 @@ $(function () {
         });
         body += '</div>';
       });
-      body += '<p class="text-muted"><span data-toggle="tooltip" data-html="true" title="' + '<em>' + title + '</em> p.';
+      body += '<p class="text-muted">';
+        //<span data-toggle="tooltip" data-html="true" title="' + '<em>' + title + '</em> p.';
 
       //temp work for page number placeholders - revisit
       let pageHtml = page ? 'p.'+page : '';
-      body +=  page + '">' + date + ' ' + data.referenceTemplate.replace('%p', pageHtml) + '</span></p>';
+      let reference = data.referenceTemplate ? data.referenceTemplate.replace('%p', pageHtml) : '';
+      body +=  date + ' ' + reference + '</p>';
 
       body += '<hr/>';
       body += '<ul class="list-inline">';
