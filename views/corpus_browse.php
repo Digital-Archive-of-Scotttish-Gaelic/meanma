@@ -173,7 +173,18 @@ HTML;
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-2 col-form-label" for="textDate">Reference Template</label>
-						<input class="form-control col-sm-4" type="text" name="textReferenceTemplate" id="textReferenceTemplate" value="{$this->_model->getReferenceTemplate()}">
+						<textarea id="referenceTemplate" name="textReferenceTemplate">{$this->_model->getReferenceTemplate()}</textarea>
+						<script>
+	            CKEDITOR.replace('referenceTemplate', {
+	              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+	              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js',
+	              stylesSet : 'my_styles'
+	            });
+	            //add the small caps option for author names
+	            CKEDITOR.stylesSet.add( 'my_styles', [
+	              { name: 'small caps', element: 'span', styles: { 'font-variant': 'small-caps' } } 
+							]);
+            </script>
 					</div>
 					<div class="form-group row">
 						<label class="col-sm-2 col-form-label" for="textNotes">Text Notes</label>
