@@ -210,6 +210,15 @@ HTML;
 			$referenceHtml = str_replace("%p", $pageHtml, $slip->getText()->getReferenceTemplate());
 			$citations = $slip->getCitations();
 
+
+
+	/*		foreach($citations as $cit) {
+				if ($cit->getType() == "draft") {
+					$citation = $cit;
+					break;
+				}
+			}
+*/
 			$testCitation = array_pop($citations);
 			if (!empty($testCitation)) {
 				$context = $testCitation->getContext();
@@ -316,9 +325,8 @@ HTML;
 						data-filename="{$row["filename"]}"
 						data-id="{$row["id"]}"
 						data-tid="{$row["tid"]}"
-						data-date_internal="{$row["date_internal"]}"
-						data-date="{$row["date"]}"
-						data-reference="{$row["referenceTemplate"]}">
+						data-date_display="{$row["date_display"]}"
+						data-date_internal="{$row["date_internal"]}">
 					<!--td data-toggle="tooltip"
 						title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_display"]}"
 						class="entryCitationContext"></td-->
@@ -348,7 +356,7 @@ HTML;
                     data-pos="{$result["pos"]}"
                     data-id="{$result["id"]}"
                     data-filename ="{$result["filename"]}"
-                    data-date="{$result["date"]}"
+                    data-date_internal="{$result["date_internal"]}"
                     data-title="{$result["title"]}"
                     data-page="{$result["page"]}"
                     data-resultindex="">
@@ -415,7 +423,7 @@ HTML;
 					"id" => $row["id"],
 					"filename" => $row["filename"],
 					"uri" => "",
-					"date" => $row["date"],
+					"date_display" => $row["date_display"],
 					"date_internal" => $row["date_internal"],
 					"title" => $row["title"],
 					"page" => $row["page"]
@@ -430,9 +438,8 @@ HTML;
 							data-precontextscope="{$row["preContextScope"]}"
 							data-postcontextscope="{$row["postContextScope"]}"
 							data-translation="{$translation}"
-							data-date_internal="{$row["date_internal"]}"
-							data-date="{$row["date"]}"
-							data-reference="{$row["referenceTemplate"]}">
+							data-date_display="{$row["date_display"]}"
+							data-date_internal="{$row["date_internal"]}">
 						<!--td data-toggle="tooltip"
 							title="#{$filenameElems[0]} p.{$row["page"]}: {$row["date_of_lang"]} : {$translation}"
 							class="entryCitationContext"></td-->
@@ -670,13 +677,13 @@ HTML;
 			    citationsLink.addClass('hideCitations');
 			  });
 				
-				function getCitationHtml(citationType, info, slipId = null) {				  
-				  html = "";
+				function getCitationHtml(citationType, info, slipId = null) {		
+				  html = '';
 				  if (info.context != undefined) {
 						html += info.context.html;
 					}
 				  if (info.referenceTemplate) { //auto generated reference
-				    var pageHtml = '';
+				    var pageHtml = 'x';
 				    if (info.page) {    //temporary code until we work more on reference placeholders SB
 				      pageHtml = 'p.' + info.page;
 				    }

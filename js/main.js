@@ -109,7 +109,7 @@ $(function () {
     var slipType = filename ? "corpus" : "paper";
     var textId = filename.split('_')[0];
     var uri = slipLink.data('uri');
-    var date = slipLink.data('date');
+    var date = slipLink.data('date_internal');
     var title = slipLink.data('title');
     var page = slipLink.data('page');
     var resultindex = slipLink.data('resultindex');

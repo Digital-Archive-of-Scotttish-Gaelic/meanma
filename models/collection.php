@@ -52,7 +52,8 @@ SQL;
 SQL;
 			} else {        //this is a paper slip query
 				$sql = <<<SQL
-					SELECT SQL_CALC_FOUND_ROWS auto_id, s.wordform AS wordform, firstname, lastname, t.title, date_display AS date,
+					SELECT SQL_CALC_FOUND_ROWS auto_id, s.wordform AS wordform, firstname, lastname, t.title, 
+					       date_display AS date_display, t.date AS date_internal,
                 CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
              		s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
             FROM slips s
@@ -118,7 +119,7 @@ HTML;
                     data-pos="{$slip["pos"]}"
                     data-id="{$slip["id"]}"
                     data-filename="{$slip["filename"]}"
-                    data-date="{$slip["date_internal"]}"
+                    data-date_internal="{$slip["date_internal"]}"
                     data-title="{$slip["title"]}"
                     data-page="{$slip["page"]}"
                     data-resultindex="-1"
@@ -135,6 +136,7 @@ HTML;
     }
   }
 
+  /*
   public static function getAllPaperSlipInfo($offset = 0, $limit = 10, $search = "", $sort = "headword", $order = "ASC", $db) {
 	  $sort = empty($sort) ? "headword" : $sort;
 	  $order = empty($order) ? "asc" : $order;
@@ -243,6 +245,7 @@ HTML;
 		  echo $e->getMessage();
 	  }
   }
+*/
 
   public static function slipExists($groupId, $filename, $id, $db) {
 	  $sql = <<<SQL
@@ -274,7 +277,7 @@ SQL;
 		$sql = <<<SQL
       SELECT s.filename as filename, s.id as id, auto_id, pos, lemma,
               date, l.title AS title, page, starred, t.id AS tid, entry_id, 
-              e.headword AS headword, t.date_display AS date, t.date_publication AS 
+              e.headword AS headword, t.date_display AS date_display, t.date_publication AS 
       				date_publication, t.date AS date_internal, t.reference AS referenceTemplate
           FROM slips s
           JOIN entry e ON e.id = s.entry_id
@@ -290,7 +293,7 @@ SQL;
 		}
 		$sql = <<<SQL
 			SELECT auto_id, starred, t.id AS tid, entry_id, e.headword AS headword, 
-					date_display as date, t.date_publication AS date_publication, date AS date_internal, t.reference AS 
+					date_display as date_display, t.date_publication AS date_publication, date AS date_internal, t.reference AS 
 					referenceTemplate
 				FROM slips s JOIN entry e ON e.id = s.entry_id JOIN text t ON s.text_id = t.id
 				WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId

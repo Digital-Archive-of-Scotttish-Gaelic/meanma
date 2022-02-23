@@ -364,6 +364,25 @@ SQL;
 		return $this->_citations;
 	}
 
+	public function getCitationsByType($type) {
+		$citations = array();
+		$sql = <<<SQL
+			SELECT c.id AS cid FROM citation c 
+			 JOIN slip_citation s ON c.id = citation_id 
+				WHERE type = :type AND slip_id = :id ORDER BY cid ASC
+SQL;
+		$results = $this->_db->fetch($sql, array(":id" => $this->getId(), ":type" => $type));
+		foreach ($results as $result) {
+			$citationId = $result["citation_id"];
+			$citations[] = new citation($this->_db, $citationId);
+
+		}
+		foreach ($citations as $citation) {
+			$citation->attachToSlip($this->getId());
+		}
+		return $citations;
+	}
+
 	/**
 	 * @return string HTML anchor with link for opening the modal for this slip
 	 */
@@ -379,7 +398,7 @@ SQL;
             data-id="{$this->getWid()}"
             data-filename="{$this->getFilename()}"
             data-entryid="{$this->getEntryId()}"
-            data-date="{$this->getText()->getDisplayDate()}"
+            data-date_internal="{$this->getText()->getDate()}"
         >
             {$slipLinkText}
         </a>
