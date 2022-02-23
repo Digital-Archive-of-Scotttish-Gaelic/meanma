@@ -364,23 +364,18 @@ SQL;
 		return $this->_citations;
 	}
 
-	public function getCitationsByType($type) {
-		$citations = array();
-		$sql = <<<SQL
-			SELECT c.id AS cid FROM citation c 
-			 JOIN slip_citation s ON c.id = citation_id 
-				WHERE type = :type AND slip_id = :id ORDER BY cid ASC
-SQL;
-		$results = $this->_db->fetch($sql, array(":id" => $this->getId(), ":type" => $type));
-		foreach ($results as $result) {
-			$citationId = $result["citation_id"];
-			$citations[] = new citation($this->_db, $citationId);
-
-		}
+	/**
+	 * Returns the first citation of type $type in the _citations array
+	 * @param $type string type
+	 * @return citation object
+	 */
+	public function getCitationByType($type) {
+		$citations = $this->getCitations();
 		foreach ($citations as $citation) {
-			$citation->attachToSlip($this->getId());
+			if ($citation->getType() == $type) {
+				return $citation;
+			}
 		}
-		return $citations;
 	}
 
 	/**

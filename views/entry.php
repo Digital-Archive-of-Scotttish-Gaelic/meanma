@@ -208,24 +208,21 @@ HTML;
 			$slip = models\collection::getSlipBySlipId($slipId, $this->_db);
 			$pageHtml = $slip->getPage() ? "p." . $slip->getPage() : "";
 			$referenceHtml = str_replace("%p", $pageHtml, $slip->getText()->getReferenceTemplate());
-			$citations = $slip->getCitations();
-
-
-
-	/*		foreach($citations as $cit) {
-				if ($cit->getType() == "draft") {
-					$citation = $cit;
-					break;
-				}
+			//get the citation in order of preference : draft > sense > form
+			$citation = $slip->getCitationByType("draft")
+				? $slip->getCitationByType("draft")
+				: $slip->getCitationByType("sense");
+			if (empty($citation)) {
+				$citation = $slip->getCitationByType("form");
 			}
-*/
-			$testCitation = array_pop($citations);
-			if (!empty($testCitation)) {
-				$context = $testCitation->getContext();
+
+			if (!empty($citation)) {
+				$context = $citation->getContext();
 				$tableBodyHtml .= <<<HTML
 					<tr>
-						<td>{$slip->getText()->getDisplayDate()} {$referenceHtml}</td>
-						<td>{$context["html"]}</td>
+						<td>{$slip->getText()->getDate()}</td>
+						<td>{$referenceHtml}</td>
+						<td>{$context["html"]}  <strong>{$citation->getType()}</strong></td>
 						<td>{$slip->getSlipLinkHtml()}</td>
 					</tr>
 HTML;
@@ -237,6 +234,7 @@ HTML;
         <table id="browseSlipsTable" data-toggle="table" data-pagination="true" data-search="true">
           <thead>
             <tr>
+              <th data-sortable="true">Date</th>
               <th data-sortable="true">Reference</th>
               <th data-sortable="true">Context</th>
               <th data-sortable="true">ID</th>
