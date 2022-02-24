@@ -106,6 +106,7 @@ switch ($_REQUEST["action"]) {
 		} else {
 			$citation = new citation($db, $_GET["id"]);
 		}
+		$collocates = $_GET["collocates"] == true ? true : false;
 		$slip = $citation->getSlip();
 		$slipType = $slip->getType();
 		$translations = $citation->getTranslations();
@@ -116,7 +117,7 @@ switch ($_REQUEST["action"]) {
 			$firstTranslationContent = $translations[0]->getContent();
 			$firstTranslationType = $translations[0]->getType();
 		}
-		$context = $citation->getContext(true); //check context 1st to ensure correct pre and post scope values
+		$context = $citation->getContext(true, $collocates); //check context 1st to ensure correct pre and post scope values
 		$citationData = array("id" => $citation->getId(), "preScope" => $citation->getPreContextScope(),
 			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(),
 			"firstTranslationContent" => $firstTranslationContent, "firstTranslationType" => $firstTranslationType,

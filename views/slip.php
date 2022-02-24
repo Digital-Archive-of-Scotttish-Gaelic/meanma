@@ -38,7 +38,6 @@ HTML;
 				<div class="row flex-fill" style="min-height: 0;">
 					<div id="lhs" class="col-6 mh-100" style="overflow-y: scroll;">
 						{$this->_writeCitations()}
-						<!-- {$this->_writeCollocatesView()} -->
         </div>  <!-- end LHS -->
         
 				<div id="rhs" class="col-6 mh-100" style="overflow-y: scroll;"> <!-- RHS panel -->
@@ -116,6 +115,7 @@ HTML;
         </div>
 				{$this->_writeUpdatedBy()}
 				{$this->_writeCitationEditModal()}
+				{$this->_writeEmendationModal()}
 				{$this->_writeTranslationEditModal()}
         {$this->_writeFooter()}
         {$this->_writeEnterTextIdModal()}
@@ -253,6 +253,60 @@ HTML;
             </div>
           </div>
         </div>
+HTML;
+		return $html;
+	}
+
+	private function _writeEmendationModal() {
+		$html = <<<HTML
+        <div id="emendationModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="emendationModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                  <div id="emendationContext"></div>
+                </div>
+                <span data-citationid="" data-entryid="{$this->_slip->getEntryId()}" data-precontextscope="" data-postcontextscope="" id="emendationContext" class="emendationContext">
+                <div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
+                  <button type="button" id="saveEmendation" data-emendationid="" data-citationid="" class="btn btn-primary">save</button>
+								</div>
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
+
+	private function _getEmendationEditHtml() {
+
+		return;     //TODO: reintroduce this at a later date SB
+		$handler = new models\xmlfilehandler($this->_slip->getFilename());
+
+		//TODO: revisit this with new citation model - following vars just for placeholding
+		$preScope = $postScope = 20;
+		$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, true, false);
+
+		$contextHtml = $context["pre"]["output"];
+		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
+			$contextHtml .= ' ';    //  <div style="display:inline;">
+		}
+		$contextHtml .= <<<HTML
+			<span>{$context["word"]}</span>
+HTML;
+		if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
+			$contextHtml .= ' ';  //  <div style="display:inline;">
+		}
+		$contextHtml .= $context["post"]["output"];
+		$html = <<<HTML
+            <div id="slipCollocatesContainer" class="hide editSlipSectionContainer">
+              <div class="floatRight">
+                <a class="btn btn-success" href="#" id="showCitationView">citation view</a>
+              </div>
+              <h5>Tag citation collocates</h5>
+              <span class="citationContext">
+                {$contextHtml}
+              </span>
+            </div>
 HTML;
 		return $html;
 	}
@@ -651,7 +705,8 @@ HTML;
 							({$citation->getType()})
 						</span>
 					</em>
-					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal">edit</a>
+					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal">context</a>
+					<a href="#" class="editEmendation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#emendationModal">insertions</a>
 					{$deleteCitHtml}
 				</li>
 				<li class="citationContainer_{$cid}">{$transHtml}</li>
@@ -667,40 +722,6 @@ HTML;
 HTML;
     return $html;
   }
-
-	private function _writeCollocatesView() {
-
-  	return;     //TODO: reintroduce this at a later date SB
-		$handler = new models\xmlfilehandler($this->_slip->getFilename());
-
-		//TODO: revisit this with new citation model - following vars just for placeholding
-		$preScope = $postScope = 20;
-		$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, true, false);
-
-		$contextHtml = $context["pre"]["output"];
-		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
-			$contextHtml .= ' ';    //  <div style="display:inline;">
-		}
-		$contextHtml .= <<<HTML
-			<span>{$context["word"]}</span>
-HTML;
-		if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
-			$contextHtml .= ' ';  //  <div style="display:inline;">
-		}
-		$contextHtml .= $context["post"]["output"];
-		$html = <<<HTML
-            <div id="slipCollocatesContainer" class="hide editSlipSectionContainer">
-              <div class="floatRight">
-                <a class="btn btn-success" href="#" id="showCitationView">citation view</a>
-              </div>
-              <h5>Tag citation collocates</h5>
-              <span class="citationContext">
-                {$contextHtml}
-              </span>
-            </div>
-HTML;
-		return $html;
-	}
 
   private function _writeJavascript() {
     $html = <<<HTML
@@ -787,6 +808,23 @@ HTML;
               });
             });
             
+            //populate emendation modal on button click
+            $(document).on('show.bs.modal', '#emendationModal', function (event) {
+              var modal = $(this);
+              var editLink = $(event.relatedTarget);
+              let cid = editLink.attr('data-citationid');
+              let slipId = {$this->_slip->getId()};
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&collocates=true')
+              .done(function(data) {
+                $('#emendationContext').attr('data-citationid', data.id);
+                if (data.context) {   //corpus slip
+                  $('#emendationContext').attr('data-precontextscope', data.preScope);
+                  $('#emendationContext').attr('data-postcontextscope', data.postScope);
+                  $('#emendationContext').html(data.context['html']);
+                } 
+              });
+            });
+            
             //save the citation from the modal
             $('#saveCitation').on('click', function() {
               let context = $('#citationContext');
@@ -823,7 +861,8 @@ HTML;
                 } else {                           //citation does not yet exist so add it                 
                     var citHtml = '<li class="citationContainer_'+cid+'" style="border-top: 1px solid gray;"><span id="citation_'+cid+'">'+html+'</span>';
                     citHtml += '<em><span id="citationType_'+cid+'">&nbsp;('+type+')&nbsp;</span></em>';
-                    citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal">edit</a>';
+                    citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal">context</a>';
+                    citHtml += '<a href="#" class="editEmendation" data-citationid="'+cid+'" data-toggle="modal" data-target="#emendationEditModal">insertions</a>';
                     citHtml += '<a href="#" class="deleteCitation danger float-right" data-cid="'+cid+'"><small>delete citation</small></a>';
                     // delete code here
                     citHtml += '</li><li class="citationContainer_'+cid+'">';
