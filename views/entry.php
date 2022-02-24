@@ -614,11 +614,11 @@ HTML;
 			      var tr = $(this);
 			      var formsOnly = $("input[name='formsOptions']:checked").val() == "formsOnly" ? true : false;  
 			      var slipId = $(this).attr('data-slipid');
-			      var date = $(this).attr('data-date');
 			      var internalDate = $(this).attr('data-date_internal');
+			      var displayDate = $(this).attr('data-date_display');
 			      var html = '';
 			      if (internalDate) {
-			        html += '<a href="#" data-toggle="tooltip" title="'+date+'" class="text-muted">' + internalDate + '.</a> ';
+			        html += '<a href="#" data-toggle="tooltip" title="'+displayDate+'" class="text-muted">' + internalDate + '.</a> ';
 			      } 
 			      var wid = $(this).attr('data-id');
 			      var tid = $(this).attr('data-tid');
