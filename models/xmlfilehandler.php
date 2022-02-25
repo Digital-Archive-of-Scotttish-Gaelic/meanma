@@ -148,9 +148,10 @@ XPATH;
         $endJoin = (string)$attributes["join"];
       }
 
-      $spacer = ' ';    //default to using simple single space character
+      $spacer = ' ';    //default to using simple single space character.
 			if ($tagCollocates) {
-				$token = $isWord ? $this->_getCollocateDropdown($element, $wordId) : $element[0];
+				//$token = $isWord ? $this->_getCollocateDropdown($element, $wordId) : $element[0];
+				$token = $this->_getCollocateDropdown($element, $wordId);
 				$spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
 			} else if ($tagContext) {
 				$startOrEnd = $section == "pre" ? "start" : "end";
@@ -191,21 +192,60 @@ XPATH;
   private function _getCollocateDropdown($word, $wordId) {
   	$existingCollocate = in_array($wordId, $this->_collocateIds) ? "existingCollocate" : "";
 	  return <<<HTML
+
+			<style>
+				.dropdown-submenu{
+			    position: relative;
+			}
+			.dropdown-submenu a::after{
+			    transform: rotate(-90deg);
+			    position: absolute;
+			    right: 3px;
+			    top: 40%;
+			}
+			.dropdown-submenu:hover .dropdown-menu, .dropdown-submenu:focus .dropdown-menu{
+			    display: flex;
+			    flex-direction: column;
+			    position: absolute !important;
+			    margin-top: -30px;
+			    left: 100%;
+			}
+			@media (max-width: 992px) {
+			    .dropdown-menu{
+			        width: 50%;
+			    }
+			    .dropdown-menu .dropdown-submenu{
+			        width: auto;
+			    }
+			}
+			</style>
+			
+			
 			<div class="dropdown show d-inline collocate" data-wordid="{$wordId}">
 		    <a class="dropdown-toggle collocateLink {$existingCollocate}" href="#" id="dropdown_{$wordId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$word[0]}</a>
-			  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$wordId}">
-			    <div class="dropdown-header">
-			      <h5><span class="collocateHeadword"></span></h5>
-					</div>
-					<div class="dropdown-divider"></div>
+			  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$wordId}">
+			      <li class="dropdown-submenu">
+							<a class="dropdown-item" tabindex="-1" href="#">insert before</a>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item" tabindex="-1" href="#">ellipsis</a></li>
+							</ul>
+						</li>
+						<li class="dropdown-submenu">
+							<a class="dropdown-item" tabindex="-1" href="#">insert after</a>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item" tabindex="-1" href="#">ellipsis</a></li>
+							</ul>
+						</li>
+						
+						<!--li>insert after</li>
 				    <a id="subject_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">subject of</a>
 				    <a id="complement_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">complement of</a>
 				    <a id="modifier_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">modifier of</a>
 				    <a id="specifier_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">specifier of</a>
 				    <a id="has_subject_{$wordId}" class="dropdown-item collocateGrammar" href="#">has subject</a>
 				    <a id="has_modifier_{$wordId}" class="dropdown-item collocateGrammar" href="#">has modifier</a>
-				    <a id="has_specifier_{$wordId}" class="dropdown-item collocateGrammar" href="#">has specifier</a>
-			  </div>
+				    <a id="has_specifier_{$wordId}" class="dropdown-item collocateGrammar" href="#">has specifier</a-->
+			  </li>
 			</div>
 HTML;
   }

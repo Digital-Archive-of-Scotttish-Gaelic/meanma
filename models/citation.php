@@ -91,7 +91,7 @@ SQL;
 	}
 
 	/**
-	 * Gets the data required to correctly format the context as a citation
+	 * Gets the data required to correctly format the context as a citation.
 	 * @return string array : an associative array of strngs comprising context output and flags for processing:
 	 *    : string html : the generated html based on the pre and post contexts, the word, and any required joins
 	 *    : string preIncrementDisable : empty or 'disabled' if the start of the document has been reached
@@ -131,7 +131,8 @@ HTML;
 			$contextHtml .= $context["post"]["output"];
 		}
 		return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
-			$postIncrementDisable, "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"]);
+			$postIncrementDisable, "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"],
+			"pre"=>$context["pre"]["output"], "post"=>$context["post"]["output"], "word"=>$context["word"]);    //pre, post, word just here for testing
 	}
 
 	/**

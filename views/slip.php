@@ -116,6 +116,7 @@ HTML;
 				{$this->_writeUpdatedBy()}
 				{$this->_writeCitationEditModal()}
 				{$this->_writeEmendationModal()}
+				{$this->_writeInsertionModal()}
 				{$this->_writeTranslationEditModal()}
         {$this->_writeFooter()}
         {$this->_writeEnterTextIdModal()}
@@ -269,6 +270,26 @@ HTML;
                 <div class="modal-footer">
 									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
                   <button type="button" id="saveEmendation" data-emendationid="" data-citationid="" class="btn btn-primary">save</button>
+								</div>
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
+
+	private function _writeInsertionModal() {
+		$html = <<<HTML
+        <div id="insertionModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="insertionModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                  <div id="insertionContext" style="overflow-wrap: break-word;"></div>
+                </div>
+                <span data-citationid="" data-entryid="{$this->_slip->getEntryId()}" data-precontextscope="" data-postcontextscope="" id="insertionContext" class="insertionContext">
+                <div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
+                  <button type="button" id="saveInsertion" data-insertionid="" data-citationid="" class="btn btn-primary">save</button>
 								</div>
             </div>
           </div>
@@ -706,7 +727,8 @@ HTML;
 						</span>
 					</em>
 					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal">context</a>
-					<a href="#" class="editEmendation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#emendationModal">insertions</a>
+					<a href="#" class="editInsertion" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#insertionModal">insertions{1}</a>
+					<a href="#" class="editEmendation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#emendationModal">insertions{2}</a>
 					{$deleteCitHtml}
 				</li>
 				<li class="citationContainer_{$cid}">{$transHtml}</li>
@@ -821,6 +843,30 @@ HTML;
                   $('#emendationContext').attr('data-precontextscope', data.preScope);
                   $('#emendationContext').attr('data-postcontextscope', data.postScope);
                   $('#emendationContext').html(data.context['html']);
+                } 
+              });
+            });
+            
+            //populate insertion modal on button click.
+            $(document).on('show.bs.modal', '#insertionModal', function (event) {
+              var modal = $(this);
+              var editLink = $(event.relatedTarget);
+              let cid = editLink.attr('data-citationid');
+              let slipId = {$this->_slip->getId()};
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&context=false')
+              .done(function(data) {
+                $('#insertionContext').attr('data-citationid', data.id);
+                if (data.context) {   //corpus slip
+                  //replace whitespace with links for insertions
+                  var pre = data.context['pre'].trim();
+                  var post = data.context['post'].trim();
+                  let linkHtml = '<a href="#" data-toggle="tooltip" title="insert ellipsis">+</a>';   
+                  pre = linkHtml + pre.replaceAll(/\s+/g, linkHtml) + linkHtml;
+                  post = linkHtml + post.replaceAll(/\s+/g, linkHtml) + linkHtml;
+									let context = pre + data.context['word'] + post; 
+                  $('#insertionContext').attr('data-precontextscope', data.preScope);
+                  $('#insertionContext').attr('data-postcontextscope', data.postScope);
+                  $('#insertionContext').html(context);
                 } 
               });
             });
