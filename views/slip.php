@@ -263,7 +263,7 @@ HTML;
         <div id="emendationModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="emendationModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div class="modal-body">
+                <div class="modal-body" style="font-size:1.2rem;">
                   <div id="emendationContext"></div>
                 </div>
                 <span data-citationid="" data-entryid="{$this->_slip->getEntryId()}" data-precontextscope="" data-postcontextscope="" id="emendationContext" class="emendationContext">
@@ -283,7 +283,7 @@ HTML;
         <div id="insertionModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="insertionModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div class="modal-body">
+                <div class="modal-body" style="font-size:1.2rem;">
                   <div id="insertionContext" style="overflow-wrap: break-word;"></div>
                 </div>
                 <span data-citationid="" data-entryid="{$this->_slip->getEntryId()}" data-precontextscope="" data-postcontextscope="" id="insertionContext" class="insertionContext">
@@ -726,9 +726,9 @@ HTML;
 							({$citation->getType()})
 						</span>
 					</em>
-					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal">context</a>
-					<a href="#" class="editInsertion" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#insertionModal">insertions{1}</a>
-					<a href="#" class="editEmendation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#emendationModal">insertions{2}</a>
+					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal"><small>context</small></a>
+					<a href="#" class="editInsertion" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#insertionModal"><small>insertions{1}</small></a>
+					<a href="#" class="editEmendation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#emendationModal"><small>insertions{2}</small></a>
 					{$deleteCitHtml}
 				</li>
 				<li class="citationContainer_{$cid}">{$transHtml}</li>
@@ -836,7 +836,7 @@ HTML;
               var editLink = $(event.relatedTarget);
               let cid = editLink.attr('data-citationid');
               let slipId = {$this->_slip->getId()};
-              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&collocates=true')
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&collocates=1')
               .done(function(data) {
                 $('#emendationContext').attr('data-citationid', data.id);
                 if (data.context) {   //corpus slip
@@ -853,17 +853,27 @@ HTML;
               var editLink = $(event.relatedTarget);
               let cid = editLink.attr('data-citationid');
               let slipId = {$this->_slip->getId()};
-              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&context=false')
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&context=false&collocates=2')
               .done(function(data) {
                 $('#insertionContext').attr('data-citationid', data.id);
                 if (data.context) {   //corpus slip
                   //replace whitespace with links for insertions
-                  var pre = data.context['pre'].trim();
+      /*            var pre = data.context['pre'].trim();
                   var post = data.context['post'].trim();
-                  let linkHtml = '<a href="#" data-toggle="tooltip" title="insert ellipsis">+</a>';   
-                  pre = linkHtml + pre.replaceAll(/\s+/g, linkHtml) + linkHtml;
-                  post = linkHtml + post.replaceAll(/\s+/g, linkHtml) + linkHtml;
-									let context = pre + data.context['word'] + post; 
+                  var linkHtml = ' <div class="dropdown show d-inline collocate">';
+                  linkHtml += '<a class="dropdown-toggle collocateLink {$existingCollocate}" href="#" id="dropdown_{$wordId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                  linkHtml += '<a class="updateContext" href="#" data-toggle="tooltip" title="insert note here"><i class="fas fa-plus"></i></a> ';
+                  linkHtml += '<ul class="dropdown-menu">';
+									linkHtml += '<li><a class="dropdown-item" tabindex="-1" href="#">sic</a></li>';
+									linkHtml += '<li><a class="dropdown-item" tabindex="-1" href="#">sc.</a></li>';
+									linkHtml += '<li><a class="dropdown-item" tabindex="-1" href="#">:</a></li>';
+									linkHtml += '</ul></div> ';
+       */           
+                  
+     //             pre = linkHtml + pre.replaceAll(/\s+/g, linkHtml) + linkHtml;
+     //             post = linkHtml + post.replaceAll(/\s+/g, linkHtml) + linkHtml;
+			//						let context = pre + data.context['word'] + post;
+									let context = data.context["html"]; 
                   $('#insertionContext').attr('data-precontextscope', data.preScope);
                   $('#insertionContext').attr('data-postcontextscope', data.postScope);
                   $('#insertionContext').html(context);

@@ -107,7 +107,7 @@ switch ($_REQUEST["action"]) {
 			$citation = new citation($db, $_GET["id"]);
 		}
 		$tagContext = $_GET["context"] == "false" ? false : true;     //used to provide popups for trimming context
-		$tagCollocates = $_GET["collocates"] == true ? true : false;//used to provide dropdown menus for editing citation
+		$tagCollocates = $_GET["collocates"];//used to provide dropdown menus for editing citation
 		$slip = $citation->getSlip();
 		$slipType = $slip->getType();
 		$translations = $citation->getTranslations();

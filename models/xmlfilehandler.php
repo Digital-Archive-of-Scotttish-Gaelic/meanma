@@ -149,10 +149,68 @@ XPATH;
       }
 
       $spacer = ' ';    //default to using simple single space character.
-			if ($tagCollocates) {
+			if ($tagCollocates == 1) {
 				//$token = $isWord ? $this->_getCollocateDropdown($element, $wordId) : $element[0];
 				$token = $this->_getCollocateDropdown($element, $wordId);
 				$spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
+
+
+
+
+
+
+
+			} else if ($tagCollocates == 2) {
+				$token = functions::cleanForm($element[0]); // ensure display of tags within the element (e.g. <abbr>)
+				$spacer = <<<HTML
+					<style>
+							.dropdown-submenu{
+						    position: relative;
+						}
+						.dropdown-submenu a::after{
+						    transform: rotate(-90deg);
+						    position: absolute;
+						    right: 3px;
+						    top: 40%;
+						}
+						.dropdown-submenu:hover .dropdown-menu, .dropdown-submenu:focus .dropdown-menu{
+						    display: flex;
+						    flex-direction: column;
+						    position: absolute !important;
+						    margin-top: -30px;
+						    left: 100%;
+						}
+						@media (max-width: 992px) {
+						    .dropdown-menu{
+						        width: 50%;
+						    }
+						    .dropdown-menu .dropdown-submenu{
+						        width: auto;
+						    }
+						}
+					</style>
+
+					<div class="dropdown show d-inline collocate">
+            &nbsp;<a class="updateContext dropdown-toggle collocateLink href="#" id="dropdown_{$wordId}" 
+              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-plus"></i></a>&nbsp;
+              <ul class="dropdown-menu">
+									<li class="dropdown-submenu">
+										<a class="dropdown-item" tabindex="-1" href="#">insert note here</a>
+										<ul class="dropdown-menu">
+											<li><a class="dropdown-item" tabindex="-1" href="#">sic</a></li>
+											<li><a class="dropdown-item" tabindex="-1" href="#">sc.</a></li>
+											<li><a class="dropdown-item" tabindex="-1" href="#">:</a></li>
+										</ul>
+									</li>
+							</ul>
+						</div>
+HTML;
+
+
+
+
+
+
 			} else if ($tagContext) {
 				$startOrEnd = $section == "pre" ? "start" : "end";
 				$token = '<a data-toggle="tooltip" data-html="true" class="contextLink ' . $section . '" data-position="' . $position . '"';
@@ -227,13 +285,17 @@ XPATH;
 			      <li class="dropdown-submenu">
 							<a class="dropdown-item" tabindex="-1" href="#">insert before</a>
 							<ul class="dropdown-menu">
-								<li><a class="dropdown-item" tabindex="-1" href="#">ellipsis</a></li>
+								<li><a class="dropdown-item" tabindex="-1" href="#">sic</a></li>
+								<li><a class="dropdown-item" tabindex="-1" href="#">sc.</a></li>
+								<li><a class="dropdown-item" tabindex="-1" href="#">:</a></li>
 							</ul>
 						</li>
 						<li class="dropdown-submenu">
 							<a class="dropdown-item" tabindex="-1" href="#">insert after</a>
 							<ul class="dropdown-menu">
-								<li><a class="dropdown-item" tabindex="-1" href="#">ellipsis</a></li>
+								<li><a class="dropdown-item" tabindex="-1" href="#">sic</a></li>
+								<li><a class="dropdown-item" tabindex="-1" href="#">sc.</a></li>
+								<li><a class="dropdown-item" tabindex="-1" href="#">:</a></li>
 							</ul>
 						</li>
 						
