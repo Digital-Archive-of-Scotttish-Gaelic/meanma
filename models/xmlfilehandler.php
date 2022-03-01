@@ -135,10 +135,10 @@ XPATH;
 		$position = $section == "pre" ? $this->_preScope : 1; // the position of this token in the context
     foreach ($chunk as $i => $element) {
     	// !! $isWord is only used when we need to tag collocates
-	    $isWord = false;
-	    if ($tagCollocates) {
-		    $isWord = ($wordId = $element->attributes()["id"]) ? true : false;  //maybe change to name() of element
-	    }
+	//    $isWord = false;
+	//    if ($tagCollocates) {
+	//	    $isWord = ($wordId = $element->attributes()["id"]) ? true : false;  //maybe change to name() of element
+	//    }
       $followingToken = ($i < (count($chunk)-1)) ? $chunk[$i+1] : null;
       $followingJoin = $followingToken ? $followingToken->attributes()["join"] : "";
       $attributes = $element->attributes();
@@ -149,68 +149,10 @@ XPATH;
       }
 
       $spacer = ' ';    //default to using simple single space character.
-			if ($tagCollocates == 1) {
+			if ($tagCollocates) {
 				//$token = $isWord ? $this->_getCollocateDropdown($element, $wordId) : $element[0];
-				$token = $this->_getCollocateDropdown($element, $wordId);
+				$token = $this->_getCollocateDropdown($element, $i);
 				$spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
-
-
-
-
-
-
-
-			} else if ($tagCollocates == 2) {
-				$token = functions::cleanForm($element[0]); // ensure display of tags within the element (e.g. <abbr>)
-				$spacer = <<<HTML
-					<style>
-							.dropdown-submenu{
-						    position: relative;
-						}
-						.dropdown-submenu a::after{
-						    transform: rotate(-90deg);
-						    position: absolute;
-						    right: 3px;
-						    top: 40%;
-						}
-						.dropdown-submenu:hover .dropdown-menu, .dropdown-submenu:focus .dropdown-menu{
-						    display: flex;
-						    flex-direction: column;
-						    position: absolute !important;
-						    margin-top: -30px;
-						    left: 100%;
-						}
-						@media (max-width: 992px) {
-						    .dropdown-menu{
-						        width: 50%;
-						    }
-						    .dropdown-menu .dropdown-submenu{
-						        width: auto;
-						    }
-						}
-					</style>
-
-					<div class="dropdown show d-inline collocate">
-            &nbsp;<a class="updateContext dropdown-toggle collocateLink href="#" id="dropdown_{$wordId}" 
-              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-plus"></i></a>&nbsp;
-              <ul class="dropdown-menu">
-									<li class="dropdown-submenu">
-										<a class="dropdown-item" tabindex="-1" href="#">insert note here</a>
-										<ul class="dropdown-menu">
-											<li><a class="dropdown-item" tabindex="-1" href="#">sic</a></li>
-											<li><a class="dropdown-item" tabindex="-1" href="#">sc.</a></li>
-											<li><a class="dropdown-item" tabindex="-1" href="#">:</a></li>
-										</ul>
-									</li>
-							</ul>
-						</div>
-HTML;
-
-
-
-
-
-
 			} else if ($tagContext) {
 				$startOrEnd = $section == "pre" ? "start" : "end";
 				$token = '<a data-toggle="tooltip" data-html="true" class="contextLink ' . $section . '" data-position="' . $position . '"';

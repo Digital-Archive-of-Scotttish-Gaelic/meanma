@@ -116,7 +116,6 @@ HTML;
 				{$this->_writeUpdatedBy()}
 				{$this->_writeCitationEditModal()}
 				{$this->_writeEmendationModal()}
-				{$this->_writeInsertionModal()}
 				{$this->_writeTranslationEditModal()}
         {$this->_writeFooter()}
         {$this->_writeEnterTextIdModal()}
@@ -268,66 +267,12 @@ HTML;
                 </div>
                 <span data-citationid="" data-entryid="{$this->_slip->getEntryId()}" data-precontextscope="" data-postcontextscope="" id="emendationContext" class="emendationContext">
                 <div class="modal-footer">
-									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
                   <button type="button" id="saveEmendation" data-emendationid="" data-citationid="" class="btn btn-primary">save</button>
 								</div>
             </div>
           </div>
         </div>
-HTML;
-		return $html;
-	}
-
-	private function _writeInsertionModal() {
-		$html = <<<HTML
-        <div id="insertionModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="insertionModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-body" style="font-size:1.2rem;">
-                  <div id="insertionContext" style="overflow-wrap: break-word;"></div>
-                </div>
-                <span data-citationid="" data-entryid="{$this->_slip->getEntryId()}" data-precontextscope="" data-postcontextscope="" id="insertionContext" class="insertionContext">
-                <div class="modal-footer">
-									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
-                  <button type="button" id="saveInsertion" data-insertionid="" data-citationid="" class="btn btn-primary">save</button>
-								</div>
-            </div>
-          </div>
-        </div>
-HTML;
-		return $html;
-	}
-
-	private function _getEmendationEditHtml() {
-
-		return;     //TODO: reintroduce this at a later date SB
-		$handler = new models\xmlfilehandler($this->_slip->getFilename());
-
-		//TODO: revisit this with new citation model - following vars just for placeholding
-		$preScope = $postScope = 20;
-		$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, true, false);
-
-		$contextHtml = $context["pre"]["output"];
-		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
-			$contextHtml .= ' ';    //  <div style="display:inline;">
-		}
-		$contextHtml .= <<<HTML
-			<span>{$context["word"]}</span>
-HTML;
-		if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
-			$contextHtml .= ' ';  //  <div style="display:inline;">
-		}
-		$contextHtml .= $context["post"]["output"];
-		$html = <<<HTML
-            <div id="slipCollocatesContainer" class="hide editSlipSectionContainer">
-              <div class="floatRight">
-                <a class="btn btn-success" href="#" id="showCitationView">citation view</a>
-              </div>
-              <h5>Tag citation collocates</h5>
-              <span class="citationContext">
-                {$contextHtml}
-              </span>
-            </div>
 HTML;
 		return $html;
 	}
@@ -727,8 +672,7 @@ HTML;
 						</span>
 					</em>
 					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal"><small>context</small></a>
-					<a href="#" class="editInsertion" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#insertionModal"><small>insertions{1}</small></a>
-					<a href="#" class="editEmendation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#emendationModal"><small>insertions{2}</small></a>
+					<a href="#" class="editEmendation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#emendationModal"><small>insertions</small></a>
 					{$deleteCitHtml}
 				</li>
 				<li class="citationContainer_{$cid}">{$transHtml}</li>
@@ -847,40 +791,6 @@ HTML;
               });
             });
             
-            //populate insertion modal on button click.
-            $(document).on('show.bs.modal', '#insertionModal', function (event) {
-              var modal = $(this);
-              var editLink = $(event.relatedTarget);
-              let cid = editLink.attr('data-citationid');
-              let slipId = {$this->_slip->getId()};
-              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&context=false&collocates=2')
-              .done(function(data) {
-                $('#insertionContext').attr('data-citationid', data.id);
-                if (data.context) {   //corpus slip
-                  //replace whitespace with links for insertions
-      /*            var pre = data.context['pre'].trim();
-                  var post = data.context['post'].trim();
-                  var linkHtml = ' <div class="dropdown show d-inline collocate">';
-                  linkHtml += '<a class="dropdown-toggle collocateLink {$existingCollocate}" href="#" id="dropdown_{$wordId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-                  linkHtml += '<a class="updateContext" href="#" data-toggle="tooltip" title="insert note here"><i class="fas fa-plus"></i></a> ';
-                  linkHtml += '<ul class="dropdown-menu">';
-									linkHtml += '<li><a class="dropdown-item" tabindex="-1" href="#">sic</a></li>';
-									linkHtml += '<li><a class="dropdown-item" tabindex="-1" href="#">sc.</a></li>';
-									linkHtml += '<li><a class="dropdown-item" tabindex="-1" href="#">:</a></li>';
-									linkHtml += '</ul></div> ';
-       */           
-                  
-     //             pre = linkHtml + pre.replaceAll(/\s+/g, linkHtml) + linkHtml;
-     //             post = linkHtml + post.replaceAll(/\s+/g, linkHtml) + linkHtml;
-			//						let context = pre + data.context['word'] + post;
-									let context = data.context["html"]; 
-                  $('#insertionContext').attr('data-precontextscope', data.preScope);
-                  $('#insertionContext').attr('data-postcontextscope', data.postScope);
-                  $('#insertionContext').html(context);
-                } 
-              });
-            });
-            
             //save the citation from the modal
             $('#saveCitation').on('click', function() {
               let context = $('#citationContext');
@@ -918,7 +828,7 @@ HTML;
                     var citHtml = '<li class="citationContainer_'+cid+'" style="border-top: 1px solid gray;"><span id="citation_'+cid+'">'+html+'</span>';
                     citHtml += '<em><span id="citationType_'+cid+'">&nbsp;('+type+')&nbsp;</span></em>';
                     citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal">context</a>';
-                    citHtml += '<a href="#" class="editEmendation" data-citationid="'+cid+'" data-toggle="modal" data-target="#emendationEditModal">insertions</a>';
+                    citHtml += '<a href="#" class="editEmendation" data-citationid="'+cid+'" data-toggle="modal" data-target="#emendationModal">insertions</a>';
                     citHtml += '<a href="#" class="deleteCitation danger float-right" data-cid="'+cid+'"><small>delete citation</small></a>';
                     // delete code here
                     citHtml += '</li><li class="citationContainer_'+cid+'">';
