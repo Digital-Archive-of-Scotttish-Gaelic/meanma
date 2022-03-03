@@ -97,8 +97,8 @@ SQL;
 	 *    : string preIncrementDisable : empty or 'disabled' if the start of the document has been reached
 	 *    : string postIncrementDisable : empty or 'disabled' if the end of the document has been reached
 	 */
-	public function getContext($tagContext = false, $tagCollocates = false) {
-		$contextHtml = $preIncrementDisable = $postIncrementDisable = $context["prelimit"] = $context["postlimit"] = "";
+	public function getContext($tagContext = false, $simple = false) {
+		$context["html"] = $context["preDisable"] = $context["postDisable"] = $context["prelimit"] = $context["postlimit"] = "";
 		if ($this->_slip->getType() == "paper") {       //paper slip
 			$contextHtml = $this->getPreContextString() . ' <mark class="hi">' . $this->_slip->getWordform() . '</mark> '
 				. $this->getPostContextString();
@@ -106,33 +106,79 @@ SQL;
 			$handler = new xmlfilehandler($this->_slip->getFilename());
 			$preScope = $this->getPreContextScope();
 			$postScope = $this->getPostContextScope();
-			$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, $tagCollocates, $tagContext);
-			$preIncrementDisable = $postIncrementDisable = "";
-			//check for start/end of document
-			if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
-				$this->setPreContextScope($context["prelimit"]);
-				$preIncrementDisable = "disabled";
-			}
-			if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
-				$this->setPostContextScope($context["postlimit"]);
-				$postIncrementDisable = "disabled";
-			}
-			$contextHtml = $context["pre"]["output"];
-			if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
-				$contextHtml .= ' ';
-			}
-			$contextHtml .= <<<HTML
-      <mark class="hi slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
+			$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, $simple, $tagContext);
+		}
+		if ($simple) {
+			$context = $this->_formatEmendationContext($context);
+		} else {
+			$context = $this->_formatStandardContext($context);
+		}
+		return array("html" => $context["html"], "preIncrementDisable" => $context["preDisable"], "postIncrementDisable" =>
+			$context["postDisable"], "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"]);
+	}
+
+	private function _formatStandardContext($context) {
+		$preIncrementDisable = $postIncrementDisable = "";
+		//check for start/end of document
+		if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
+			$this->setPreContextScope($context["prelimit"]);
+			$preIncrementDisable = "disabled";
+		}
+		if (isset($context["postlimit"])) { // the end of the citation is shorter than the postContextScope default
+			$this->setPostContextScope($context["postlimit"]);
+			$postIncrementDisable = "disabled";
+		}
+		$contextHtml = $context["pre"]["output"];
+		if ($context["pre"]["endJoin"] != "right" && $context["pre"]["endJoin"] != "both") {
+			$contextHtml .= ' ';
+		}
+		$contextHtml .= <<<HTML
+        <mark class="hi slipWordInContext" data-headwordid="{$context["headwordId"]}">{$context["word"]}</mark>
+HTML;
+		if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
+			$contextHtml .= ' ';
+		}
+		$contextHtml .= $context["post"]["output"];
+		$context["html"] = $contextHtml;
+		$context["preDisable"] = $preIncrementDisable;
+		$context["postDisable"] = $postIncrementDisable;
+		return $context;
+	}
+
+	private function _formatEmendationContext($context) {
+		$contextHtml = var_dump($context["pre"]["context"]) . $context["word"] . var_dump($context["post"]["context"]);
+		$context["html"] = "helllloooo!" . $contextHtml;
+		return $context;
+	}
+
+	private function _getEmendationDropdownHtml($token) {
+		$options = array("sic", "sc.", ":", "pr.", "MS", "erron. for ...", "Reference", "other 🚩");
+		$optionHtml = "";
+		foreach ($options as $option) {
+			$optionHtml .= <<<HTML
+				<li><a class="dropdown-item" tabindex="-1" href="#">{$option}</a></li>
 HTML;
 
-			if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
-				$contextHtml .= ' ';
-			}
-			$contextHtml .= $context["post"]["output"];
 		}
-		return array("html" => $contextHtml, "preIncrementDisable" => $preIncrementDisable, "postIncrementDisable" =>
-			$postIncrementDisable, "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"],
-			"pre"=>$context["pre"]["output"], "post"=>$context["post"]["output"], "word"=>$context["word"]);    //pre, post, word just here for testing
+		return <<<HTML
+			<div class="dropdown show d-inline collocate" data-wordid="{$wordId}">
+		    <a class="dropdown-toggle collocateLink {$existingCollocate}" href="#" id="dropdown_{$wordId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$word[0]}</a>
+			  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$wordId}">
+			      <li class="dropdown-submenu">
+							<a class="dropdown-item" tabindex="-1" href="#">insert before</a>
+							<ul class="dropdown-menu">
+								{$optionHtml}
+							</ul>
+						</li>
+						<li class="dropdown-submenu">
+							<a class="dropdown-item" tabindex="-1" href="#">insert after</a>
+							<ul class="dropdown-menu">
+								{$optionHtml}
+							</ul>
+						</li>
+			  </li>
+			</div>
+HTML;
 	}
 
 	/**

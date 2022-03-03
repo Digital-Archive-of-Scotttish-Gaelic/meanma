@@ -780,7 +780,7 @@ HTML;
               var editLink = $(event.relatedTarget);
               let cid = editLink.attr('data-citationid');
               let slipId = {$this->_slip->getId()};
-              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&collocates=1')
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&simple=1&context=false')
               .done(function(data) {
                 $('#emendationContext').attr('data-citationid', data.id);
                 if (data.context) {   //corpus slip

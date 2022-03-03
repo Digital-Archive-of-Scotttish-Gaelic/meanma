@@ -34,7 +34,7 @@ class xmlfilehandler
 	 * @param $id : word ID
 	 * @param int $preScope : the number of tokens for the pre context (default = 20 for results view)
 	 * @param int $postScope : the number of tokens for the post context (default = 20 for results view)
-	 * @param false $tagCollocates : flag to set whether to output with HTML markup for handling collocates
+	 * @param false $simple : flag to set whether to output without any markup
 	 * @param false $tagContext : flag to set whether the output should be HTML markup with tokens clickable by user to trim context
 	 * @return associative array of strings:
 	 *  id : wordId in XML doc
@@ -53,7 +53,7 @@ class xmlfilehandler
 	 *  [postlimit] : int : if end of context is end of "document" will return the number of tokens in post context
 	 *        used for +/- buttons in slip edit form ALSO used for [reset context]
 	 */
-	public function getContext($id, $preScope = 20, $postScope = 20, $tagCollocates = false, $tagContext = false) {
+	public function getContext($id, $preScope = 20, $postScope = 20, $simple = false, $tagContext = false) {
 		$this->_preScope = $preScope;
 		$this->_postScope = $postScope;
 		$context = array();
@@ -87,16 +87,16 @@ XPATH;
 			if (count($limitCheck) != count($pre)+1) {
 				$context["prelimit"] = count($pre);
 			}
-			$context["pre"] = $this->_normalisePunctuation($pre, $tagCollocates, $tagContext, $section = "pre");
+			$context["pre"] = $simple ? $pre
+				: $this->_normalisePunctuation($pre, false, $tagContext, $section = "pre");
 		}
 		/* - end pre context processing - */
 		$xpath = "//dasg:w[@id='{$id}']";
 		$word = $this->_xml->xpath($xpath);
 		$wordString = functions::cleanForm($word[0]);   //strips tags
-		$context["word"] = ($tagCollocates || $tagContext)
+		$context["word"] = ($tagContext)
 			? '<div style="display:inline; margin-left:4px;"><mark class="hi">' . $wordString . '</mark></div>'
 			: $wordString;
-
 		$xpath = <<<XPATH
 			//w[@id='{$id}']/following::*[(name()='w' and not(descendant::w)) or name()='pc' or name()='o']			
 XPATH;
@@ -111,7 +111,8 @@ XPATH;
 			if (count($limitCheck) != count($post)+1) {
 				$context["postlimit"] = count($post);
 			}
-			$context["post"] = $this->_normalisePunctuation($post, $tagCollocates, $tagContext, $section = "post");
+			$context["post"] = $simple ? $post
+				: $this->_normalisePunctuation($post, false, $tagContext, $section = "post");
 		}
 		return $context;
 	}
@@ -195,40 +196,11 @@ XPATH;
   	$optionHtml = "";
   	foreach ($options as $option) {
   		$optionHtml .= <<<HTML
-				<li><a class="dropdown-item" tabindex="-1" href="#">{$option}</a>
+				<li><a class="dropdown-item" tabindex="-1" href="#">{$option}</a></li>
 HTML;
 
 	  }
 	  return <<<HTML
-
-			<style>
-				.dropdown-submenu{
-			    position: relative;
-			}
-			.dropdown-submenu a::after{
-			    transform: rotate(-90deg);
-			    position: absolute;
-			    right: 3px;
-			    top: 40%;
-			}
-			.dropdown-submenu:hover .dropdown-menu, .dropdown-submenu:focus .dropdown-menu{
-			    display: flex;
-			    flex-direction: column;
-			    position: absolute !important;
-			    margin-top: -30px;
-			    left: 100%;
-			}
-			@media (max-width: 992px) {
-			    .dropdown-menu{
-			        width: 50%;
-			    }
-			    .dropdown-menu .dropdown-submenu{
-			        width: auto;
-			    }
-			}
-			</style>
-			
-			
 			<div class="dropdown show d-inline collocate" data-wordid="{$wordId}">
 		    <a class="dropdown-toggle collocateLink {$existingCollocate}" href="#" id="dropdown_{$wordId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$word[0]}</a>
 			  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$wordId}">
