@@ -191,6 +191,14 @@ XPATH;
 	 */
   private function _getCollocateDropdown($word, $wordId) {
   	$existingCollocate = in_array($wordId, $this->_collocateIds) ? "existingCollocate" : "";
+  	$options = array("sic", "sc.", ":", "pr.", "MS", "erron. for ...", "Reference", "other 🚩");
+  	$optionHtml = "";
+  	foreach ($options as $option) {
+  		$optionHtml .= <<<HTML
+				<li><a class="dropdown-item" tabindex="-1" href="#">{$option}</a>
+HTML;
+
+	  }
 	  return <<<HTML
 
 			<style>
@@ -227,28 +235,15 @@ XPATH;
 			      <li class="dropdown-submenu">
 							<a class="dropdown-item" tabindex="-1" href="#">insert before</a>
 							<ul class="dropdown-menu">
-								<li><a class="dropdown-item" tabindex="-1" href="#">sic</a></li>
-								<li><a class="dropdown-item" tabindex="-1" href="#">sc.</a></li>
-								<li><a class="dropdown-item" tabindex="-1" href="#">:</a></li>
+								{$optionHtml}
 							</ul>
 						</li>
 						<li class="dropdown-submenu">
 							<a class="dropdown-item" tabindex="-1" href="#">insert after</a>
 							<ul class="dropdown-menu">
-								<li><a class="dropdown-item" tabindex="-1" href="#">sic</a></li>
-								<li><a class="dropdown-item" tabindex="-1" href="#">sc.</a></li>
-								<li><a class="dropdown-item" tabindex="-1" href="#">:</a></li>
+								{$optionHtml}
 							</ul>
 						</li>
-						
-						<!--li>insert after</li>
-				    <a id="subject_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">subject of</a>
-				    <a id="complement_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">complement of</a>
-				    <a id="modifier_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">modifier of</a>
-				    <a id="specifier_of_{$wordId}" class="dropdown-item collocateGrammar" href="#">specifier of</a>
-				    <a id="has_subject_{$wordId}" class="dropdown-item collocateGrammar" href="#">has subject</a>
-				    <a id="has_modifier_{$wordId}" class="dropdown-item collocateGrammar" href="#">has modifier</a>
-				    <a id="has_specifier_{$wordId}" class="dropdown-item collocateGrammar" href="#">has specifier</a-->
 			  </li>
 			</div>
 HTML;

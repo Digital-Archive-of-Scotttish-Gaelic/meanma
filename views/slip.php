@@ -268,7 +268,7 @@ HTML;
                 <span data-citationid="" data-entryid="{$this->_slip->getEntryId()}" data-precontextscope="" data-postcontextscope="" id="emendationContext" class="emendationContext">
                 <div class="modal-footer">
 									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
-                  <button type="button" id="saveEmendation" data-emendationid="" data-citationid="" class="btn btn-primary">save</button>
+                  <button type="button" id="saveEmendation" data-emendationid="" data-citationid="" class="btn btn-primary invisible">save</button>
 								</div>
             </div>
           </div>
