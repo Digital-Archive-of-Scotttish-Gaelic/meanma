@@ -791,6 +791,24 @@ HTML;
               });
             });
             
+            //handle selected emendation
+            $(document).on('click', '.dropdown-item', function() {
+              let emendationText = $(this).text();
+              let placement = $(this).parent().parent().attr('data-placement');
+              let tokenId = $(this).closest('.emendation').attr('id');
+              switch (placement) {
+                case "before":
+                  $('#'+tokenId).before(" [" + emendationText + "]");
+                  break;
+                case "after":
+                  $('#'+tokenId).after(" [" + emendationText + "]");
+                  break;
+              }
+              
+
+              
+            }); 
+            
             //save the citation from the modal
             $('#saveCitation').on('click', function() {
               let context = $('#citationContext');

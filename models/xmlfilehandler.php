@@ -53,7 +53,8 @@ class xmlfilehandler
 	 *  [postlimit] : int : if end of context is end of "document" will return the number of tokens in post context
 	 *        used for +/- buttons in slip edit form ALSO used for [reset context]
 	 */
-	public function getContext($id, $preScope = 20, $postScope = 20, $simple = false, $tagContext = false) {
+	public function getContext($id, $preScope = 20, $postScope = 20, $emendations = false, $tagContext = false)
+	{
 		$this->_preScope = $preScope;
 		$this->_postScope = $postScope;
 		$context = array();
@@ -74,7 +75,7 @@ XPATH;
 XPATH;
 		$words = $subXML->xpath($xpath);
 		/* preContext processing */
-		$context["pre"] = array("output"=>"");
+		$context["pre"] = array("output" => "");
 		if ($preScope) {
 			$pre = array_slice($words, -$this->_preScope);
 			//check if preScope value is less than the number of available tokens
@@ -84,19 +85,24 @@ XPATH;
 			//check if we're one token away from the start of the document
 			$nextIndex = $this->_preScope + 1;
 			$limitCheck = array_slice($words, -$nextIndex);
-			if (count($limitCheck) != count($pre)+1) {
+			if (count($limitCheck) != count($pre) + 1) {
 				$context["prelimit"] = count($pre);
 			}
-			$context["pre"] = $simple ? $pre
-				: $this->_normalisePunctuation($pre, false, $tagContext, $section = "pre");
+			//		$context["pre"] = $simple ? $pre
+			//			: $this->_normalisePunctuation($pre, false, $tagContext, $section = "pre");
+			$context["pre"] = $this->_normalisePunctuation($pre, $emendations, $tagContext, "pre");
 		}
 		/* - end pre context processing - */
 		$xpath = "//dasg:w[@id='{$id}']";
 		$word = $this->_xml->xpath($xpath);
 		$wordString = functions::cleanForm($word[0]);   //strips tags
-		$context["word"] = ($tagContext)
-			? '<div style="display:inline; margin-left:4px;"><mark class="hi">' . $wordString . '</mark></div>'
-			: $wordString;
+		if ($emendations) {
+			$context["word"] = $this->_normalisePunctuation($word, $emendations, $tagContext, "word");
+		} else if ($tagContext) {
+			$context["word"] = '<div style="display:inline; margin-left:4px;"><mark class="hi">' . $wordString . '</mark></div>';
+		} else {
+			$context["word"] = $wordString;
+		}
 		$xpath = <<<XPATH
 			//w[@id='{$id}']/following::*[(name()='w' and not(descendant::w)) or name()='pc' or name()='o']			
 XPATH;
@@ -111,8 +117,7 @@ XPATH;
 			if (count($limitCheck) != count($post)+1) {
 				$context["postlimit"] = count($post);
 			}
-			$context["post"] = $simple ? $post
-				: $this->_normalisePunctuation($post, false, $tagContext, $section = "post");
+			$context["post"] = $this->_normalisePunctuation($post, $emendations, $tagContext, $section = "post");
 		}
 		return $context;
 	}
@@ -128,18 +133,13 @@ XPATH;
    *   startJoin => one of possible values : left, right, both, none
    *   endJoin => one of possible values : left, right, both, none
    */
-  private function _normalisePunctuation (array $chunk, $tagCollocates, $tagContext, $section) {
+  private function _normalisePunctuation (array $chunk, $emendations, $tagContext, $section) {
     $output = $startJoin = $endJoin = "";
     $rightJoin = true;  // should this token join to the next
-		$this->_collocateIds = lemmas::getCollocateIds($this->getFilename());
+	//	$this->_collocateIds = lemmas::getCollocateIds($this->getFilename());
 		//used to track the position of each token in the pre/post context
 		$position = $section == "pre" ? $this->_preScope : 1; // the position of this token in the context
     foreach ($chunk as $i => $element) {
-    	// !! $isWord is only used when we need to tag collocates
-	//    $isWord = false;
-	//    if ($tagCollocates) {
-	//	    $isWord = ($wordId = $element->attributes()["id"]) ? true : false;  //maybe change to name() of element
-	//    }
       $followingToken = ($i < (count($chunk)-1)) ? $chunk[$i+1] : null;
       $followingJoin = $followingToken ? $followingToken->attributes()["join"] : "";
       $attributes = $element->attributes();
@@ -148,11 +148,9 @@ XPATH;
       } else if ($i == (count($chunk) -1)) {    //last element in the array
         $endJoin = (string)$attributes["join"];
       }
-
       $spacer = ' ';    //default to using simple single space character.
-			if ($tagCollocates) {
-				//$token = $isWord ? $this->_getCollocateDropdown($element, $wordId) : $element[0];
-				$token = $this->_getCollocateDropdown($element, $i);
+			if ($emendations) {
+				$token = $this->_getEmendationsDropdown($element, $section . "_" . $i);
 				$spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
 			} else if ($tagContext) {
 				$startOrEnd = $section == "pre" ? "start" : "end";
@@ -187,11 +185,10 @@ XPATH;
 
 	/**
 	 * @param $token:
-	 * @param $wordId
+	 * @param $tokenId
 	 * @return string : the HTML required for dropdown options for the given word (collocate)
 	 */
-  private function _getCollocateDropdown($word, $wordId) {
-  	$existingCollocate = in_array($wordId, $this->_collocateIds) ? "existingCollocate" : "";
+  private function _getEmendationsDropdown($token, $tokenId) {
   	$options = array("sic", "sc.", ":", "pr.", "MS", "erron. for ...", "Reference", "other 🚩");
   	$optionHtml = "";
   	foreach ($options as $option) {
@@ -201,18 +198,18 @@ HTML;
 
 	  }
 	  return <<<HTML
-			<div class="dropdown show d-inline collocate" data-wordid="{$wordId}">
-		    <a class="dropdown-toggle collocateLink {$existingCollocate}" href="#" id="dropdown_{$wordId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$word[0]}</a>
-			  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$wordId}">
+			<div id="{$tokenId}" class="dropdown show d-inline emendation">
+		    <a class="dropdown-toggle collocateLink" href="#" id="dropdown_{$tokenId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$token[0]}</a>
+			  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$tokenId}">
 			      <li class="dropdown-submenu">
 							<a class="dropdown-item" tabindex="-1" href="#">insert before</a>
-							<ul class="dropdown-menu">
+							<ul class="dropdown-menu" data-placement="before">
 								{$optionHtml}
 							</ul>
 						</li>
 						<li class="dropdown-submenu">
 							<a class="dropdown-item" tabindex="-1" href="#">insert after</a>
-							<ul class="dropdown-menu">
+							<ul class="dropdown-menu" data-placement="after">
 								{$optionHtml}
 							</ul>
 						</li>
