@@ -198,7 +198,7 @@ HTML;
 
 	  }
 	  return <<<HTML
-			<div id="{$tokenId}" class="dropdown show d-inline emendation">
+			<div id="{$tokenId}" class="dropdown show d-inline emendation-select">
 		    <a class="dropdown-toggle collocateLink" href="#" id="dropdown_{$tokenId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$token[0]}</a>
 			  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$tokenId}">
 			      <li class="dropdown-submenu">

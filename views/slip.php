@@ -793,21 +793,28 @@ HTML;
             
             //handle selected emendation
             $(document).on('click', '.dropdown-item', function() {
-              let emendationText = $(this).text();
+              let emendationText = '[' + $(this).text() + ']';
               let placement = $(this).parent().parent().attr('data-placement');
-              let tokenId = $(this).closest('.emendation').attr('id');
+              let tokenId = $(this).closest('.emendation-select').attr('id');
               switch (placement) {
                 case "before":
-                  $('#'+tokenId).before(" [" + emendationText + "]");
+                  $('#'+tokenId).before(addDropdownHtml(emendationText));
                   break;
                 case "after":
-                  $('#'+tokenId).after(" [" + emendationText + "]");
+                  $('#'+tokenId).after(addDropdownHtml(emendationText));
                   break;
-              }
-              
-
-              
+              }       
             }); 
+            
+            function addDropdownHtml(text) {
+              var html = '<div id="[id]" class="dropdown show d-inline emendation-select">';
+		          html += '<a class="dropdown-toggle collocateLink" href="#" id="dropdown_[id]" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+text+'</a>';
+			        html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$tokenId}">'
+			        html += '<li><a class="dropdown-item" tabindex="-1" href="#">edit</a></li>';
+			        html += '<li><a class="dropdown-item" tabindex="-1" href="#">delete</a></li>';
+							html += '</div>';
+							return html;
+            }
             
             //save the citation from the modal
             $('#saveCitation').on('click', function() {
