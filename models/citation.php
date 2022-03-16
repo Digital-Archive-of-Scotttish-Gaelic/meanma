@@ -8,6 +8,7 @@ class citation
 	private $_id, $_type, $_preContextScope, $_postContextScope, $_preContextString, $_postContextString;
 	private $_lastUpdated;
 	private $_translations = array(); //an array of translation objects
+	private $_emendations = array(); //an array of emendation objects
 	private $_slip; //an instance of \models\slip - the slip this citation is attached to
 
 	const SCOPE_DEFAULT = 80;

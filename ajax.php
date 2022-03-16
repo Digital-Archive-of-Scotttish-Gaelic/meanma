@@ -353,6 +353,9 @@ switch ($_REQUEST["action"]) {
 		}
 		echo json_encode(array("message" => $message));
 		break;
+	case "createEmendation":
+
+		break;
 	default:
 		echo json_encode(array("error"=>"undefined action"));
 }

@@ -134,6 +134,7 @@ XPATH;
    *   endJoin => one of possible values : left, right, both, none
    */
   private function _normalisePunctuation (array $chunk, $emendations, $tagContext, $section) {
+  	$numTokens = count($chunk);
     $output = $startJoin = $endJoin = "";
     $rightJoin = true;  // should this token join to the next
 	//	$this->_collocateIds = lemmas::getCollocateIds($this->getFilename());
@@ -150,7 +151,18 @@ XPATH;
       }
       $spacer = ' ';    //default to using simple single space character.
 			if ($emendations) {
-				$token = $this->_getEmendationsDropdown($element, $section . "_" . $i);
+				//count DOWN for pre context and UP for post
+				switch ($section) {
+					case "pre":
+						$tokenNum = $numTokens - $i;
+						break;
+					case "word":
+						$tokenNum = 0;
+						break;
+					case "post":
+						$tokenNum = $i + 1;
+				}
+				$token = $this->_getEmendationsDropdown($element, $section . "_" . $tokenNum);
 				$spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
 			} else if ($tagContext) {
 				$startOrEnd = $section == "pre" ? "start" : "end";
