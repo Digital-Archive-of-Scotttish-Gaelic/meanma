@@ -794,7 +794,6 @@ HTML;
             //add a new emendation
             $(document).on('click', '.new-emendation', function() {
               let type = $(this).text();
-              let emendationText = '[' + type + ']';
               let placement = $(this).parent().parent().attr('data-placement');
               let tokenId = $(this).closest('.emendation-select').attr('id');
               let cid = $('#emendationContext').attr('data-citationid');
@@ -803,28 +802,62 @@ HTML;
                 let emendationId = data.id;                
                 switch (placement) {
                 case "before":
-                  $('#'+tokenId).before(addDropdownHtml(emendationText, emendationId));
+                  $('#'+tokenId).before(addDropdownHtml(type, emendationId));
                   break;
                 case "after":
-                  $('#'+tokenId).after(addDropdownHtml(emendationText, emendationId));
+                  $('#'+tokenId).after(addDropdownHtml(type, emendationId));
                   break;
               } 
               });    
             }); 
             
-            function addDropdownHtml(text, emendationId) {
+            function addDropdownHtml(type, emendationId) {
+              let text = '[' + type + ']';
               var html = '<div id="emendation_'+emendationId+'" class="dropdown show d-inline emendation-action">';
-		          html += '<a class="dropdown-toggle collocateLink" href="#" id="dropdown_'+emendationId+'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+text+'</a>';
+		          html += '<a class="dropdown-toggle collocateLink" href="#" id="dropdown_'+emendationId+'" ';
+		          html += 'data-type="'+type+'" data-content=""';
+		          html += 'data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+text+'</a>';
 			        html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+emendationId+'">';
 			        html += '<li><a class="dropdown-item edit-emendation" data-id="'+emendationId+'" tabindex="-1" href="#">edit</a></li>';
-			        html += '<li><a class="dropdown-item delete-emendation" data-id="'+emendationId+'"  tabindex="-1" href="#">delete</a></li>';
+			        html += '<li><a class="dropdown-item delete-emendation" data-id="'+emendationId+'"  tabindex="-1" href="#">delete</a></li></ul>';
 							html += '</div>';
+							html += '<div id="edit_emendation_'+emendationId+'" class="hide">';
+							html += '<input type="text" class="emendation_input" id="edit_'+emendationId+'" value="">';
+							html += '</div> ';
 							return html;
             }
             
             //edit an emendation
             $(document).on('click', '.edit-emendation', function() {
-              
+              let id = $(this).attr('data-id');
+              //hide the dropdown and menu
+              $('#emendation_'+id).removeClass('show d-inline');
+              $('#emendation_'+id).hide();
+              $('#dropdown_'+id).dropdown('hide');
+              //show the edit box container
+              $('#edit_emendation_'+id).removeClass('hide');
+              $('#edit_emendation_'+id).addClass('inline-block');
+              $('#edit_'+id).focus();
+            });
+            
+            //update an emendation
+            $(document).on('blur', '.emendation_input', function() {
+              let content = $(this).val();
+              let id = $(this).attr('id');
+              let parts = id.split('_');
+              let emendationId = parts[1];
+              let type = $('#dropdown_'+emendationId).attr('data-type');  //get the type from the <a> tag
+              $('#dropdown_'+emendationId).attr('data-content', content); //store the content in the <a> tag
+              let displayedText = (content) ? '[' + type + ' ' + content + ']' : '[' + type + ']';
+              $.ajax('ajax.php?action=updateEmendation&id='+emendationId+'&content='+content);          
+              //hide the input field container
+              $('#edit_emendation_'+emendationId).removeClass('inline-block');
+              $('#edit_emendation_'+emendationId).addClass('hide');
+              //update the displayed text in dropdown's <a> tag
+              $('#emendation_'+emendationId+' > a').text(displayedText);
+              //show the dropdown
+              $('#emendation_'+emendationId).addClass('show d-inline');
+              $('#emendation_'+emendationId).show();
             });
             
             //delete an emendation

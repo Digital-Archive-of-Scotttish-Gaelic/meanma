@@ -361,6 +361,11 @@ switch ($_REQUEST["action"]) {
 		$emendation->save();
 		echo json_encode(array("id" => $emendation->getId()));
 		break;
+	case updateEmendation:
+		$emendation = new emendation($db, $_GET["id"]);
+		$emendation->setContent($_GET["content"]);
+		$emendation->save();
+		break;
 	case "deleteEmendation":
 		emendation::delete($_GET["id"], $db);
 		break;

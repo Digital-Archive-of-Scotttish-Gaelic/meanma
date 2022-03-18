@@ -225,7 +225,7 @@ HTML;
 								{$optionHtml}
 							</ul>
 						</li>
-			  </li>
+			  </ul>
 			</div>
 HTML;
   }
