@@ -791,30 +791,50 @@ HTML;
               });
             });
             
-            //handle selected emendation
-            $(document).on('click', '.dropdown-item', function() {
-              let emendationText = '[' + $(this).text() + ']';
+            //add a new emendation
+            $(document).on('click', '.new-emendation', function() {
+              let type = $(this).text();
+              let emendationText = '[' + type + ']';
               let placement = $(this).parent().parent().attr('data-placement');
               let tokenId = $(this).closest('.emendation-select').attr('id');
-              switch (placement) {
+              let cid = $('#emendationContext').attr('data-citationid');
+              $.getJSON('ajax.php?action=createEmendation&cid='+cid+'&type='+type+'&tid='+tokenId+'&pos='+placement)
+              .done(function(data) {
+                let emendationId = data.id;                
+                switch (placement) {
                 case "before":
-                  $('#'+tokenId).before(addDropdownHtml(emendationText));
+                  $('#'+tokenId).before(addDropdownHtml(emendationText, emendationId));
                   break;
                 case "after":
-                  $('#'+tokenId).after(addDropdownHtml(emendationText));
+                  $('#'+tokenId).after(addDropdownHtml(emendationText, emendationId));
                   break;
-              }       
+              } 
+              });    
             }); 
             
-            function addDropdownHtml(text) {
-              var html = '<div id="[id]" class="dropdown show d-inline emendation-select">';
-		          html += '<a class="dropdown-toggle collocateLink" href="#" id="dropdown_[id]" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+text+'</a>';
-			        html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$tokenId}">'
-			        html += '<li><a class="dropdown-item" tabindex="-1" href="#">edit</a></li>';
-			        html += '<li><a class="dropdown-item" tabindex="-1" href="#">delete</a></li>';
+            function addDropdownHtml(text, emendationId) {
+              var html = '<div id="emendation_'+emendationId+'" class="dropdown show d-inline emendation-action">';
+		          html += '<a class="dropdown-toggle collocateLink" href="#" id="dropdown_'+emendationId+'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+text+'</a>';
+			        html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+emendationId+'">';
+			        html += '<li><a class="dropdown-item edit-emendation" data-id="'+emendationId+'" tabindex="-1" href="#">edit</a></li>';
+			        html += '<li><a class="dropdown-item delete-emendation" data-id="'+emendationId+'"  tabindex="-1" href="#">delete</a></li>';
 							html += '</div>';
 							return html;
             }
+            
+            //edit an emendation
+            $(document).on('click', '.edit-emendation', function() {
+              
+            });
+            
+            //delete an emendation
+            $(document).on('click', '.delete-emendation', function() {
+              if (confirm('Are you sure you want to delete this emendation?')) {
+                let id = $(this).attr('data-id');
+                $.ajax('ajax.php?action=deleteEmendation&id='+id);
+                $('#emendation_'+id).remove();
+              }
+            });
             
             //save the citation from the modal
             $('#saveCitation').on('click', function() {

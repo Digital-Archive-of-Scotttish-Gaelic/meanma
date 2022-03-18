@@ -63,10 +63,12 @@ SQL;
 
 	public function save() {
 		$sql = <<<SQL
-			UPDATE emendation SET `type` = :type, `token_id` = :tokenId, `position` = :position, `content` = :content
+			UPDATE emendation 
+				SET `type` = :type, `token_id` = :tokenId, `position` = :position, `content` = :content
 				WHERE id = :id
 SQL;
-		$this->_db->exec($sql, array(":type" => $this->getType(), ":content" => $this->getContent(), ":id" => $this->getId()));
+		$this->_db->exec($sql, array(":type" => $this->getType(), ":tokenId" => $this->getTokenId(),
+			":position" => $this->getPosition(), ":content" => $this->getContent(), ":id" => $this->getId()));
 	}
 
 	public function getType() {

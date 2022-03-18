@@ -354,7 +354,15 @@ switch ($_REQUEST["action"]) {
 		echo json_encode(array("message" => $message));
 		break;
 	case "createEmendation":
-
+		$emendation = new emendation($db, null, $_GET["cid"]);
+		$emendation->setType($_GET["type"]);
+		$emendation->setTokenId($_GET["tid"]);
+		$emendation->setPosition($_GET["pos"]);
+		$emendation->save();
+		echo json_encode(array("id" => $emendation->getId()));
+		break;
+	case "deleteEmendation":
+		emendation::delete($_GET["id"], $db);
 		break;
 	default:
 		echo json_encode(array("error"=>"undefined action"));

@@ -201,11 +201,11 @@ XPATH;
 	 * @return string : the HTML required for dropdown options for the given word (collocate)
 	 */
   private function _getEmendationsDropdown($token, $tokenId) {
-  	$options = array("sic", "sc.", ":", "pr.", "MS", "erron. for ...", "Reference", "other 🚩");
+  	$options = array("sic", "sc.", ":", "pr.", "MS", "erron. for ...", "Reference", "other");
   	$optionHtml = "";
   	foreach ($options as $option) {
   		$optionHtml .= <<<HTML
-				<li><a class="dropdown-item" tabindex="-1" href="#">{$option}</a></li>
+				<li><a class="dropdown-item new-emendation" tabindex="-1" href="#">{$option}</a></li>
 HTML;
 
 	  }
