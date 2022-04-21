@@ -4,10 +4,10 @@ namespace models;
 
 class emendation
 {
-public static $types = array("working");
-		private $_id, $_type, $_tokenId, $_position, $_content, $_lastUpdated; //an instance of models\database
-	private $_db; //an instance of models\citation
-private $_citation;  //the possible values for translation type
+	public static $types = array("working");
+	private $_id, $_type, $_tokenId, $_position, $_content, $_lastUpdated;
+	private $_db;   //an instance of models\database
+	private $_citation;  //an instance of models\citation
 
 	public function __construct($db, $id = null, $citationId = null) {
 		$this->_db = $db;

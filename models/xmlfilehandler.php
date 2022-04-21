@@ -34,7 +34,7 @@ class xmlfilehandler
 	 * @param $id : word ID
 	 * @param int $preScope : the number of tokens for the pre context (default = 20 for results view)
 	 * @param int $postScope : the number of tokens for the post context (default = 20 for results view)
-	 * @param false $simple : flag to set whether to output without any markup
+	 * @param false $emendations : an (optional) array of emendation objects
 	 * @param false $tagContext : flag to set whether the output should be HTML markup with tokens clickable by user to trim context
 	 * @return associative array of strings:
 	 *  id : wordId in XML doc
@@ -53,8 +53,7 @@ class xmlfilehandler
 	 *  [postlimit] : int : if end of context is end of "document" will return the number of tokens in post context
 	 *        used for +/- buttons in slip edit form ALSO used for [reset context]
 	 */
-	public function getContext($id, $preScope = 20, $postScope = 20, $emendations = false, $tagContext = false)
-	{
+	public function getContext($id, $preScope = 20, $postScope = 20, $emendations = null, $tagContext = false) {
 		$this->_preScope = $preScope;
 		$this->_postScope = $postScope;
 		$context = array();
@@ -125,7 +124,7 @@ XPATH;
   /**
    * Parses an array of SimpleXML objects and formats the punctuation
    * @param array $chunk : array of SimpleXML objects (w, pc, or o)
-   * @param bool $tagCollocates : flag to set whether to output with HTML markup for handling collocates
+   * @param $emendations : an (optional) array of emendation objects
    * @param bool $tagContext :  flag to set whether the output should be HTML markup with tokens clickable by user to trim context
    * @param string $section : either pre or post
    * @return associative array : an array containing output string and flags for start and end joins
@@ -162,8 +161,12 @@ XPATH;
 					case "post":
 						$tokenNum = $i + 1;
 				}
-				$token = $this->_getEmendationsDropdown($element, $section . "_" . $tokenNum);
 				$spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
+				$tokenId = $section . "_" . $tokenNum;
+
+
+
+				$token = $this->_getEmendationsDropdown($element, $tokenId, $emendations);
 			} else if ($tagContext) {
 				$startOrEnd = $section == "pre" ? "start" : "end";
 				$token = '<a data-toggle="tooltip" data-html="true" class="contextLink ' . $section . '" data-position="' . $position . '"';
@@ -198,18 +201,37 @@ XPATH;
 	/**
 	 * @param $token:
 	 * @param $tokenId
+	 * @param $emendations : an array of emendation objects
 	 * @return string : the HTML required for dropdown options for the given word (collocate)
 	 */
-  private function _getEmendationsDropdown($token, $tokenId) {
+  private function _getEmendationsDropdown($token, $tokenId, $emendations) {
+
+	  foreach ($emendations as $emendation) {
+	  	$preEmendHtml = $postEmendHtml = "";
+		  if ($tokenId == $emendation->getTokenId()) {
+		  	$emId = $emendation->getId();
+		  	$emType = $emendation->getType();
+		  	$emContent = $emendation->getContent();
+		  	$content = $emContent ? $emContent : $emType;     //perhaps do this in _getEmendationHtml ??
+		  	if ($emendation->getPosition() == "pre") {
+		  		$preEmendHtml = $this->_getEmendationHtml($emType, $content, $emId);
+		  		break;
+			  } else {
+		  		$postEmendHtml = $this->_getEmendationHtml($emType, $content, $emId);
+		  		break;
+			  }
+		  }
+	  }
+
   	$options = array("sic", "sc.", ":", "pr.", "MS", "erron. for ...", "Reference", "other");
   	$optionHtml = "";
   	foreach ($options as $option) {
   		$optionHtml .= <<<HTML
 				<li><a class="dropdown-item new-emendation" tabindex="-1" href="#">{$option}</a></li>
 HTML;
-
 	  }
 	  return <<<HTML
+			{$preEmendHtml}
 			<div id="{$tokenId}" class="dropdown show d-inline emendation-select">
 		    <a class="dropdown-toggle collocateLink" href="#" id="dropdown_{$tokenId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$token[0]}</a>
 			  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$tokenId}">
@@ -227,6 +249,24 @@ HTML;
 						</li>
 			  </ul>
 			</div>
+			{$postEmendHtml}
 HTML;
+  }
+
+  private function _getEmendationHtml($type, $content, $emendationId) {
+  	$html = <<<HTML
+			<div id="emendation_{$emendationId}" class="dropdown show d-inline emendation-action">
+		  <a class="dropdown-toggle collocateLink" href="#" id="dropdown_{$emendationId}" 
+		          data-type="{$type}" data-content="{$content}"
+		          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> [{$content}] </a>
+			        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$emendationId}">
+			        <li><a class="dropdown-item edit-emendation" data-id="{$emendationId}" tabindex="-1" href="#">edit</a></li>
+			        <li><a class="dropdown-item delete-emendation" data-id="{$emendationId}"  tabindex="-1" href="#">delete</a></li></ul>
+							</div>
+							<div id="edit_emendation_{$emendationId}" class="hide">
+							<input type="text" class="emendation_input" id="edit_{$emendationId}" value="">
+							</div>
+HTML;
+  	return $html;
   }
 }

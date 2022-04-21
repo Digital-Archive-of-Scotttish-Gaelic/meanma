@@ -63,6 +63,7 @@ SQL;
 		$this->_lastUpdated = $row["lastUpdated"];
 		$this->getSlip();
 		$this->_loadTranslations();
+		$this->_loadEmendations();
 	}
 
 	private function _loadTranslations() {
@@ -72,6 +73,16 @@ SQL;
 		$result = $this->_db->fetch($sql, array(":id" => $this->getId()));
 		foreach ($result as $row) {
 			$this->_translations[] = new translation($this->_db, $row["translation_id"]);
+		}
+	}
+
+	private function _loadEmendations() {
+		$sql = <<<SQL
+			SELECT id FROM emendation WHERE citation_id = :cid
+SQL;
+		$result = $this->_db->fetch($sql, array(":cid" => $this->getId()));
+		foreach ($result as $row) {
+			$this->_emendations[] = new emendation($this->_db, $row["id"]);
 		}
 	}
 
@@ -107,6 +118,7 @@ SQL;
 			$handler = new xmlfilehandler($this->_slip->getFilename());
 			$preScope = $this->getPreContextScope();
 			$postScope = $this->getPostContextScope();
+			$emendations = $this->getEmendations();
 			$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, $emendations, $tagContext);
 
 			//check for start/end of document
@@ -134,7 +146,8 @@ HTML;
 			$context["preDisable"] = $preIncrementDisable;
 			$context["postDisable"] = $postIncrementDisable;
 		}
-		return array("html" => $context["html"], "preIncrementDisable" => $context["preDisable"], "postIncrementDisable" =>
+
+		return array("emendations" => $emen, "html" => $context["html"], "preIncrementDisable" => $context["preDisable"], "postIncrementDisable" =>
 			$context["postDisable"], "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"]);
 	}
 
@@ -213,6 +226,10 @@ SQL;
 			$this->_slip = collection::getSlipBySlipId($result[0]["slip_id"], $this->_db);
 		}
 		return $this->_slip;
+	}
+
+	public function getEmendations() {
+		return $this->_emendations;
 	}
 
 	//SETTERS
