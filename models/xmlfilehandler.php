@@ -34,8 +34,9 @@ class xmlfilehandler
 	 * @param $id : word ID
 	 * @param int $preScope : the number of tokens for the pre context (default = 20 for results view)
 	 * @param int $postScope : the number of tokens for the post context (default = 20 for results view)
-	 * @param false $emendations : an (optional) array of emendation objects
-	 * @param false $tagContext : flag to set whether the output should be HTML markup with tokens clickable by user to trim context
+	 * @param bool $emendations : an (optional) array of emendation objects
+	 * @param bool $tagContext : flag to set whether the output should be HTML markup with tokens clickable by user to trim context
+	 * @param bool $edit : flag to determine whether or not to display edit interface for emendations
 	 * @return associative array of strings:
 	 *  id : wordId in XML doc
 	 *  filename : path of XML document
@@ -53,7 +54,7 @@ class xmlfilehandler
 	 *  [postlimit] : int : if end of context is end of "document" will return the number of tokens in post context
 	 *        used for +/- buttons in slip edit form ALSO used for [reset context]
 	 */
-	public function getContext($id, $preScope = 20, $postScope = 20, $emendations = null, $tagContext = false) {
+	public function getContext($id, $preScope = 20, $postScope = 20, $emendations = null, $tagContext = false, $edit = false) {
 		$this->_preScope = $preScope;
 		$this->_postScope = $postScope;
 		$context = array();
@@ -89,14 +90,14 @@ XPATH;
 			}
 			//		$context["pre"] = $simple ? $pre
 			//			: $this->_normalisePunctuation($pre, false, $tagContext, $section = "pre");
-			$context["pre"] = $this->_normalisePunctuation($pre, $emendations, $tagContext, "pre");
+			$context["pre"] = $this->_normalisePunctuation($pre, $emendations, $tagContext, "pre", $edit);
 		}
 		/* - end pre context processing - */
 		$xpath = "//dasg:w[@id='{$id}']";
 		$word = $this->_xml->xpath($xpath);
 		$wordString = functions::cleanForm($word[0]);   //strips tags
 		if ($emendations) {
-			$context["word"] = $this->_normalisePunctuation($word, $emendations, $tagContext, "word");
+			$context["word"] = $this->_normalisePunctuation($word, $emendations, $tagContext, "word", $edit);
 		} else if ($tagContext) {
 			$context["word"] = '<div style="display:inline; margin-left:4px;"><mark class="hi">' . $wordString . '</mark></div>';
 		} else {
@@ -116,10 +117,11 @@ XPATH;
 			if (count($limitCheck) != count($post)+1) {
 				$context["postlimit"] = count($post);
 			}
-			$context["post"] = $this->_normalisePunctuation($post, $emendations, $tagContext, $section = "post");
+			$context["post"] = $this->_normalisePunctuation($post, $emendations, $tagContext, $section = "post", $edit);
 		}
 		return $context;
 	}
+
 
   /**
    * Parses an array of SimpleXML objects and formats the punctuation
@@ -127,12 +129,13 @@ XPATH;
    * @param $emendations : an (optional) array of emendation objects
    * @param bool $tagContext :  flag to set whether the output should be HTML markup with tokens clickable by user to trim context
    * @param string $section : either pre or post
+   * @param bool $edit : flag to determine whether or not to display edit interface for emendations
    * @return associative array : an array containing output string and flags for start and end joins
    *   output => the context string, possible with HTML markup
    *   startJoin => one of possible values : left, right, both, none
    *   endJoin => one of possible values : left, right, both, none
    */
-  private function _normalisePunctuation (array $chunk, $emendations, $tagContext, $section) {
+  private function _normalisePunctuation (array $chunk, $emendations, $tagContext, $section, $edit = false) {
   	$numTokens = count($chunk);
     $output = $startJoin = $endJoin = "";
     $rightJoin = true;  // should this token join to the next
@@ -161,12 +164,32 @@ XPATH;
 					case "post":
 						$tokenNum = $i + 1;
 				}
-				$spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
 				$tokenId = $section . "_" . $tokenNum;
+				if ($edit) {    //show the edit emendation dropdown
+					$spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
+					$token = $this->_getEmendationsDropdown($element, $tokenId, $emendations);
+				} else {  //write the emendation out normally
 
+					$preEmendHtml = $postEmendHtml = "";
+					foreach ($emendations as $emendation) {
+						if ($tokenId == $emendation->getTokenId()) {
+							$emType = $emendation->getType();
+							$emContent = $emendation->getContent();
+							$content = $emContent ? $emContent : $emType;
+							if ($emendation->getPosition() == "pre") {
+								$preEmendHtml = "[" . $content . "]";
+								break;
+							} else {
+								$postEmendHtml = $spacer . "[" . $content . "]";
+								break;
+							}
+						}
+					}
+					$token = $preEmendHtml;
+					$token .= functions::cleanForm($element[0]); // ensure display of tags within the element (e.g. <abbr>)
+					$token .= $postEmendHtml;
+				}
 
-
-				$token = $this->_getEmendationsDropdown($element, $tokenId, $emendations);
 			} else if ($tagContext) {
 				$startOrEnd = $section == "pre" ? "start" : "end";
 				$token = '<a data-toggle="tooltip" data-html="true" class="contextLink ' . $section . '" data-position="' . $position . '"';

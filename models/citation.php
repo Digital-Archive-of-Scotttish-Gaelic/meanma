@@ -102,6 +102,7 @@ SQL;
 		$this->_slip->addCitation($this);
 	}
 
+
 	/**
 	 * Gets the data required to correctly format the context as a citation.
 	 * @return string array : an associative array of strngs comprising context output and flags for processing:
@@ -109,7 +110,7 @@ SQL;
 	 *    : string preIncrementDisable : empty or 'disabled' if the start of the document has been reached
 	 *    : string postIncrementDisable : empty or 'disabled' if the end of the document has been reached
 	 */
-	public function getContext($tagContext = false, $emendations = false) {
+	public function getContext($tagContext = false, $edit = false) {
 		$context["html"] = $context["preDisable"] = $context["postDisable"] = $context["prelimit"] = $context["postlimit"] = "";
 		if ($this->_slip->getType() == "paper") {       //paper slip
 			$context["html"] = $this->getPreContextString() . ' <mark class="hi">' . $this->_slip->getWordform() . '</mark> '
@@ -119,7 +120,7 @@ SQL;
 			$preScope = $this->getPreContextScope();
 			$postScope = $this->getPostContextScope();
 			$emendations = $this->getEmendations();
-			$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, $emendations, $tagContext);
+			$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, $emendations, $tagContext, $edit);
 
 			//check for start/end of document
 			if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default

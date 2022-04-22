@@ -107,7 +107,7 @@ switch ($_REQUEST["action"]) {
 			$citation = new citation($db, $_GET["id"]);
 		}
 		$tagContext = $_GET["context"] == "false" ? false : true;     //used to provide popups for trimming context
-		$emendations = $_GET["simple"] == 1 ? true : false;   //used to provide dropdown menus for editing citation
+		$edit = $_GET["edit"] == 1 ? true : false;   //used to provide dropdown menus for editing citation
 		$slip = $citation->getSlip();
 		$slipType = $slip->getType();
 		$translations = $citation->getTranslations();
@@ -118,7 +118,7 @@ switch ($_REQUEST["action"]) {
 			$firstTranslationContent = $translations[0]->getContent();
 			$firstTranslationType = $translations[0]->getType();
 		}
-		$context = $citation->getContext($tagContext, $emendations); //check context 1st to ensure correct pre and post scope values
+		$context = $citation->getContext($tagContext, $edit); //check context 1st to ensure correct pre and post scope values
 		$citationData = array("id" => $citation->getId(), "preScope" => $citation->getPreContextScope(),
 			"postScope" => $citation->getPostContextScope(), "type" => $citation->getType(),
 			"firstTranslationContent" => $firstTranslationContent, "firstTranslationType" => $firstTranslationType,

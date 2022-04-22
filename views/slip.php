@@ -774,13 +774,13 @@ HTML;
               });
             });
             
-            //populate emendation modal on button click
+            //populate emendation modal on button click.
             $(document).on('show.bs.modal', '#emendationModal', function (event) {
               var modal = $(this);
               var editLink = $(event.relatedTarget);
               let cid = editLink.attr('data-citationid');
               let slipId = {$this->_slip->getId()};
-              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&simple=1&context=false')
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&edit=1&context=false')
               .done(function(data) {
                 $('#emendationContext').attr('data-citationid', data.id);
                 if (data.context) {   //corpus slip
