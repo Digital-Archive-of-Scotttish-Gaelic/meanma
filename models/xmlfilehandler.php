@@ -152,23 +152,27 @@ XPATH;
         $endJoin = (string)$attributes["join"];
       }
       $spacer = ' ';    //default to using simple single space character.
-			if ($emendations) {
-				//count DOWN for pre context and UP for post
-				switch ($section) {
-					case "pre":
-						$tokenNum = $numTokens - $i;
-						break;
-					case "word":
-						$tokenNum = 0;
-						break;
-					case "post":
-						$tokenNum = $i + 1;
-				}
-				$tokenId = $section . "_" . $tokenNum;
-				if ($edit) {    //show the edit emendation dropdown
-					$spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
-					$token = $this->_getEmendationsDropdown($element, $tokenId, $emendations);
-				} else {  //write the emendation out normally
+
+	    //count DOWN for pre context and UP for post
+	    switch ($section) {
+		    case "pre":
+			    $tokenNum = $numTokens - $i;
+			    break;
+		    case "word":
+			    $tokenNum = 0;
+			    break;
+		    case "post":
+			    $tokenNum = $i + 1;
+	    }
+	    $tokenId = $section . "_" . $tokenNum;
+	    if ($edit) {    //show the edit emendation dropdown
+		    $spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
+		    $token = $this->_getEmendationsDropdown($element, $tokenId, $emendations);
+	    }
+
+	    else if ($emendations) {
+
+	//			else {  //write the emendation out normally
 
 					$preEmendHtml = $postEmendHtml = "";
 					foreach ($emendations as $emendation) {
@@ -176,19 +180,21 @@ XPATH;
 							$emType = $emendation->getType();
 							$emContent = $emendation->getContent();
 							$content = $emContent ? $emContent : $emType;
-							if ($emendation->getPosition() == "pre") {
-								$preEmendHtml = "[" . $content . "]";
-								break;
-							} else {
-								$postEmendHtml = $spacer . "[" . $content . "]";
-								break;
+							if ($emendation->getPosition() == "before") {
+								$preEmendHtml .= "[" . $content . "]";
+								//break;
+							}
+
+							if ($emendation->getPosition() == "after") {
+								$postEmendHtml .= $spacer . "[" . $content . "]";
+								//break;
 							}
 						}
 					}
 					$token = $preEmendHtml;
 					$token .= functions::cleanForm($element[0]); // ensure display of tags within the element (e.g. <abbr>)
 					$token .= $postEmendHtml;
-				}
+//				}
 
 			} else if ($tagContext) {
 				$startOrEnd = $section == "pre" ? "start" : "end";
@@ -228,24 +234,23 @@ XPATH;
 	 * @return string : the HTML required for dropdown options for the given word (collocate)
 	 */
   private function _getEmendationsDropdown($token, $tokenId, $emendations) {
-
+	  $preEmendHtml = $postEmendHtml = "";
 	  foreach ($emendations as $emendation) {
-	  	$preEmendHtml = $postEmendHtml = "";
 		  if ($tokenId == $emendation->getTokenId()) {
 		  	$emId = $emendation->getId();
 		  	$emType = $emendation->getType();
 		  	$emContent = $emendation->getContent();
 		  	$content = $emContent ? $emContent : $emType;     //perhaps do this in _getEmendationHtml ??
-		  	if ($emendation->getPosition() == "pre") {
-		  		$preEmendHtml = $this->_getEmendationHtml($emType, $content, $emId);
-		  		break;
-			  } else {
-		  		$postEmendHtml = $this->_getEmendationHtml($emType, $content, $emId);
-		  		break;
+		  	if ($emendation->getPosition() == "before") {
+		  		$preEmendHtml .= $this->_getEmendationHtml($emType, $content, $emId);
+	//	  		break;
+			  }
+		  	if ($emendation->getPosition() == "after") {
+		  		$postEmendHtml .= $this->_getEmendationHtml($emType, $content, $emId);
+	//	  		break;
 			  }
 		  }
 	  }
-
   	$options = array("sic", "sc.", ":", "pr.", "MS", "erron. for ...", "Reference", "other");
   	$optionHtml = "";
   	foreach ($options as $option) {

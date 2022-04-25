@@ -791,6 +791,16 @@ HTML;
               });
             });
             
+            //repopulate citation on emendation modal close
+            $(document).on('hide.bs.modal', '#emendationModal', function (event) {
+              let cid = $('#emendationContext').attr('data-citationid');
+              let slipId = {$this->_slip->getId()};
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&edit=0&context=false')
+              .done(function(data) {
+                  $('#citation_'+cid).html(data.context['html']);
+              });
+            });
+            
             //add a new emendation
             $(document).on('click', '.new-emendation', function() {
               let type = $(this).text();
