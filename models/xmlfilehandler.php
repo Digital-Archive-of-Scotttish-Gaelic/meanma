@@ -168,34 +168,24 @@ XPATH;
 	    if ($edit) {    //show the edit emendation dropdown
 		    $spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
 		    $token = $this->_getEmendationsDropdown($element, $tokenId, $emendations);
-	    }
-
-	    else if ($emendations) {
-
-	//			else {  //write the emendation out normally
-
+	    } else if ($emendations) {
 					$preEmendHtml = $postEmendHtml = "";
 					foreach ($emendations as $emendation) {
 						if ($tokenId == $emendation->getTokenId()) {
 							$emType = $emendation->getType();
 							$emContent = $emendation->getContent();
-							$content = $emContent ? $emContent : $emType;
+							$content = $emContent ? $emType . ' ' . $emContent : $emType;
 							if ($emendation->getPosition() == "before") {
-								$preEmendHtml .= "[" . $content . "]";
-								//break;
+								$preEmendHtml .= '<span class="emendation">[' . $content . ']</span>';
 							}
-
 							if ($emendation->getPosition() == "after") {
-								$postEmendHtml .= $spacer . "[" . $content . "]";
-								//break;
+								$postEmendHtml .= $spacer . '<span class="emendation">[' . $content . ']</span>';;
 							}
 						}
 					}
 					$token = $preEmendHtml;
 					$token .= functions::cleanForm($element[0]); // ensure display of tags within the element (e.g. <abbr>)
 					$token .= $postEmendHtml;
-//				}
-
 			} else if ($tagContext) {
 				$startOrEnd = $section == "pre" ? "start" : "end";
 				$token = '<a data-toggle="tooltip" data-html="true" class="contextLink ' . $section . '" data-position="' . $position . '"';
@@ -240,14 +230,12 @@ XPATH;
 		  	$emId = $emendation->getId();
 		  	$emType = $emendation->getType();
 		  	$emContent = $emendation->getContent();
-		  	$content = $emContent ? $emContent : $emType;     //perhaps do this in _getEmendationHtml ??
+		  	$content = $emContent ? $emType . ' ' . $emContent : $emType;     //perhaps do this in _getEmendationHtml ??
 		  	if ($emendation->getPosition() == "before") {
 		  		$preEmendHtml .= $this->_getEmendationHtml($emType, $content, $emId);
-	//	  		break;
 			  }
 		  	if ($emendation->getPosition() == "after") {
 		  		$postEmendHtml .= $this->_getEmendationHtml($emType, $content, $emId);
-	//	  		break;
 			  }
 		  }
 	  }
@@ -284,7 +272,7 @@ HTML;
   private function _getEmendationHtml($type, $content, $emendationId) {
   	$html = <<<HTML
 			<div id="emendation_{$emendationId}" class="dropdown show d-inline emendation-action">
-		  <a class="dropdown-toggle collocateLink" href="#" id="dropdown_{$emendationId}" 
+		  <a class="dropdown-toggle emendation collocateLink" href="#" id="dropdown_{$emendationId}" 
 		          data-type="{$type}" data-content="{$content}"
 		          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> [{$content}] </a>
 			        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$emendationId}">

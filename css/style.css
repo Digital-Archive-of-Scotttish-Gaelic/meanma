@@ -314,3 +314,9 @@ a.updateContext:hover {
     }
 }
 
+/**
+    Editorial ememdations
+ */
+.emendation {
+    color: #28a745;
+}
