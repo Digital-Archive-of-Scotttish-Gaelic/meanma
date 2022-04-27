@@ -248,10 +248,9 @@ SQL;
 SQL;
 		} else {  // the MAIN search query
 			$query["sql"] = <<<SQL
-				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, date_display, t.date AS 
-					date_internal, t.title, t.reference AS reference, page, medium, t.id AS tid
-            FROM lemmas AS l
-						JOIN text t ON t.filepath = l.filename 
+				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, date_display, date_of_lang AS 
+					date_internal, textTitle, reference, page, medium, tid
+            FROM lemmas_ex AS l
             {$textJoinSql}
         		{$writerJoinSql}
             WHERE {$mssRestrict} AND {$whereClause}
