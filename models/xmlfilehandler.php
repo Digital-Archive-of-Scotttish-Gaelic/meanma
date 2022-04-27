@@ -166,7 +166,7 @@ XPATH;
 	    }
 	    $tokenId = $section . "_" . $tokenNum;
 	    if ($edit) {    //show the edit emendation dropdown
-		    $spacer = '<div style="margin-right:-4px;display:inline;">&thinsp;</div>';
+		    $spacer = '<div style="margin-right:-2px;display:inline;">&thinsp;</div>';
 		    $token = $this->_getEmendationsDropdown($element, $tokenId, $emendations);
 	    } else if ($emendations) {
 					$preEmendHtml = $postEmendHtml = "";
