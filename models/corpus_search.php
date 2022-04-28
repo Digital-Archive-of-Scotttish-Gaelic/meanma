@@ -161,10 +161,10 @@ class corpus_search
 		} else {
 			$params["term"] = urldecode($params["term"]); //need to decode if passed via JS encodeURI (auto create slips)
 		}
-		$searchPrefix = ''; // "[[:<:]]";  Use for newer MySQL versions (e.g. Mac local)
-		$searchSuffix = ''; // "[[:>:]]";
-//		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP - use for older (eg. DASG) MySQL versions
-//		$searchSuffix = "[[:>:]]";
+//		$searchPrefix = ''; // "[[:<:]]";  Use for newer MySQL versions (e.g. Mac local)
+//		$searchSuffix = ''; // "[[:>:]]";
+		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP - use for older (eg. DASG) MySQL versions
+		$searchSuffix = "[[:>:]]";
 		$whereClause = "";
 		switch ($params["order"]) {
 			case "random":
