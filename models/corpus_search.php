@@ -163,7 +163,7 @@ class corpus_search
 		}
 //		$searchPrefix = ''; // "[[:<:]]";  Use for newer MySQL versions (e.g. Mac local)
 //		$searchSuffix = ''; // "[[:>:]]";
-		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP - use for older (eg. DASG) MySQL versions
+		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP - use for older (eg. DASG) MySQL versions.
 		$searchSuffix = "[[:>:]]";
 		$whereClause = "";
 		switch ($params["order"]) {
