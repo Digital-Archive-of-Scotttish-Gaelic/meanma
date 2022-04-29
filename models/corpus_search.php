@@ -161,10 +161,10 @@ class corpus_search
 		} else {
 			$params["term"] = urldecode($params["term"]); //need to decode if passed via JS encodeURI (auto create slips)
 		}
-//		$searchPrefix = ''; // "[[:<:]]";  Use for newer MySQL versions (e.g. Mac local)
-//		$searchSuffix = ''; // "[[:>:]]";
-		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP - use for older (eg. DASG) MySQL versions.
-		$searchSuffix = "[[:>:]]";
+		$searchPrefix = ''; // "[[:<:]]";  Use for newer MySQL versions (e.g. Mac local)
+		$searchSuffix = ''; // "[[:>:]]";
+//		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP - use for older (eg. DASG) MySQL versions.
+//		$searchSuffix = "[[:>:]]";
 		$whereClause = "";
 		switch ($params["order"]) {
 			case "random":
@@ -249,7 +249,7 @@ SQL;
 		} else {  // the MAIN search query
 			$query["sql"] = <<<SQL
 				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, date_display, date_of_lang AS 
-					date_internal, textTitle, page, medium
+					date_internal, textTitle, page, medium, reference
             FROM lemma_search AS l
             {$textJoinSql}
         		{$writerJoinSql}
