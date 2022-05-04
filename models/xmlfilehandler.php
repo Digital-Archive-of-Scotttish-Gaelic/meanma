@@ -34,9 +34,10 @@ class xmlfilehandler
 	 * @param $id : word ID
 	 * @param int $preScope : the number of tokens for the pre context (default = 20 for results view)
 	 * @param int $postScope : the number of tokens for the post context (default = 20 for results view)
-	 * @param bool $emendations : an (optional) array of emendation objects
+	 * @param array $emendations : an (optional) array of emendation objects
 	 * @param bool $tagContext : flag to set whether the output should be HTML markup with tokens clickable by user to trim context
-	 * @param bool $edit : flag to determine whether or not to display edit interface for emendations
+	 * @param int $edit : flag for edit interfaces : 0 = none; 1 = emendations; 2 = deletions
+	 * @param array $deletions : an (optional) array of deletion objects
 	 * @return associative array of strings:
 	 *  id : wordId in XML doc
 	 *  filename : path of XML document
@@ -54,7 +55,7 @@ class xmlfilehandler
 	 *  [postlimit] : int : if end of context is end of "document" will return the number of tokens in post context
 	 *        used for +/- buttons in slip edit form ALSO used for [reset context]
 	 */
-	public function getContext($id, $preScope = 20, $postScope = 20, $emendations = null, $tagContext = false, $edit = false) {
+	public function getContext($id, $preScope = 20, $postScope = 20, $emendations = null, $tagContext = false, $edit = 0, $deletions = null) {
 		$this->_preScope = $preScope;
 		$this->_postScope = $postScope;
 		$context = array();
@@ -90,14 +91,14 @@ XPATH;
 			}
 			//		$context["pre"] = $simple ? $pre
 			//			: $this->_normalisePunctuation($pre, false, $tagContext, $section = "pre");
-			$context["pre"] = $this->_normalisePunctuation($pre, $emendations, $tagContext, "pre", $edit);
+			$context["pre"] = $this->_normalisePunctuation($pre, $emendations, $tagContext, "pre", $edit, $deletions);
 		}
 		/* - end pre context processing - */
 		$xpath = "//dasg:w[@id='{$id}']";
 		$word = $this->_xml->xpath($xpath);
 		$wordString = functions::cleanForm($word[0]);   //strips tags
 		if ($emendations) {
-			$context["word"] = $this->_normalisePunctuation($word, $emendations, $tagContext, "word", $edit);
+			$context["word"] = $this->_normalisePunctuation($word, $emendations, $tagContext, "word", $edit, $deletions);
 		} else if ($tagContext) {
 			$context["word"] = '<div style="display:inline; margin-left:4px;"><mark class="hi">' . $wordString . '</mark></div>';
 		} else {
@@ -117,7 +118,7 @@ XPATH;
 			if (count($limitCheck) != count($post)+1) {
 				$context["postlimit"] = count($post);
 			}
-			$context["post"] = $this->_normalisePunctuation($post, $emendations, $tagContext, $section = "post", $edit);
+			$context["post"] = $this->_normalisePunctuation($post, $emendations, $tagContext, $section = "post", $edit, $deletions);
 		}
 		return $context;
 	}
@@ -129,19 +130,21 @@ XPATH;
    * @param $emendations : an (optional) array of emendation objects
    * @param bool $tagContext :  flag to set whether the output should be HTML markup with tokens clickable by user to trim context
    * @param string $section : either pre or post
-   * @param bool $edit : flag to determine whether or not to display edit interface for emendations
+   * @param int $edit : flag for edit interfaces : 0 = none; 1 = emendations; 2 = deletions
+   * @param array $deletions : an (optional) array of deletion objects
    * @return associative array : an array containing output string and flags for start and end joins
    *   output => the context string, possible with HTML markup
    *   startJoin => one of possible values : left, right, both, none
    *   endJoin => one of possible values : left, right, both, none
    */
-  private function _normalisePunctuation (array $chunk, $emendations, $tagContext, $section, $edit = false) {
+  private function _normalisePunctuation (array $chunk, $emendations, $tagContext, $section, $edit = 0, $deletions = null) {
   	$numTokens = count($chunk);
     $output = $startJoin = $endJoin = "";
     $rightJoin = true;  // should this token join to the next
 	//	$this->_collocateIds = lemmas::getCollocateIds($this->getFilename());
 		//used to track the position of each token in the pre/post context
 		$position = $section == "pre" ? $this->_preScope : 1; // the position of this token in the context
+	  $deleted = false; //flag to mark whether current token should be 'deleted'
     foreach ($chunk as $i => $element) {
       $followingToken = ($i < (count($chunk)-1)) ? $chunk[$i+1] : null;
       $followingJoin = $followingToken ? $followingToken->attributes()["join"] : "";
@@ -165,10 +168,35 @@ XPATH;
 			    $tokenNum = $i + 1;
 	    }
 	    $tokenId = $section . "_" . $tokenNum;
-	    if ($edit) {    //show the edit emendation dropdown
-		    $spacer = '<div style="margin-right:-2px;display:inline;">&thinsp;</div>';
-		    $token = $this->_getEmendationsDropdown($element, $tokenId, $emendations);
-	    } else if ($emendations) {
+			$token = "";
+
+	    //check for deletions
+	    foreach ($deletions as $deletion) {
+		    if ($tokenId == $deletion->getTokenIdStart()) {   //start of deletion
+		    	$deletionId = $deletion->getId();
+			    $deleted = true;
+			    $token = ($edit == 2)
+				    ? '<div id="deletion_' . $deletionId . '" class="dropdown show d-inline emendation-action">
+		            <a class="dropdown-toggle deletion collocateLink" href="#" id="dropdown_' . $deletionId . '"
+		              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> [...] </a>
+			          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_' . $deletionId . '">
+			            <li><a class="dropdown-item delete-deletion" data-id="' . $deletionId . '" tabindex="-1" href="#">delete</a></li>
+			           </ul>
+			         </div>'
+						: ' <span class="deletion">[...]</span> ';
+		    } else if ($tokenId == $deletion->getTokenIdEnd()) {  //end of deletion
+			    $lastDeletedToken = true;
+		    }
+	    }
+
+			if (!$deleted) {
+				if ($edit == 1) {    //show the edit emendation dropdown
+					$spacer = '<div style="margin-right:-2px;display:inline;">&thinsp;</div>';
+					$token = $this->_getEmendationsDropdown($element, $tokenId, $emendations);
+				} else if ($edit == 2) {  //show the edit deletion dropdown
+					$spacer = '<div style="margin-right:-2px;display:inline;">&thinsp;</div>';
+					$token = $this->_getDeletionsDropdown($element, $tokenId);
+				} else if ($emendations) {
 					$preEmendHtml = $postEmendHtml = "";
 					foreach ($emendations as $emendation) {
 						if ($tokenId == $emendation->getTokenId()) {
@@ -186,13 +214,20 @@ XPATH;
 					$token = $preEmendHtml;
 					$token .= functions::cleanForm($element[0]); // ensure display of tags within the element (e.g. <abbr>)
 					$token .= $postEmendHtml;
-			} else if ($tagContext) {
-				$startOrEnd = $section == "pre" ? "start" : "end";
-				$token = '<a data-toggle="tooltip" data-html="true" class="contextLink ' . $section . '" data-position="' . $position . '"';
-				$token .= ' title="' . $startOrEnd . ' context with <em><strong>' . $element[0] . '</strong></em>">' . $element[0] . '</a>';
-			} else {
-				$token = functions::cleanForm($element[0]); // ensure display of tags within the element (e.g. <abbr>)
+				} else if ($tagContext) {
+					$startOrEnd = $section == "pre" ? "start" : "end";
+					$token = '<a data-toggle="tooltip" data-html="true" class="contextLink ' . $section . '" data-position="' . $position . '"';
+					$token .= ' title="' . $startOrEnd . ' context with <em><strong>' . $element[0] . '</strong></em>">' . $element[0] . '</a>';
+				} else {
+					$token = functions::cleanForm($element[0]); // ensure display of tags within the element (e.g. <abbr>)
+				}
 			}
+
+			if ($deleted && $lastDeletedToken) {  //reset the deletion detect flags
+				$lastDeletedToken = false;
+				$deleted = false;
+			}
+
 			//decrement/increment the position in the context
 			$position = $section == "pre" ? $position - 1 : $position + 1;
 
@@ -216,6 +251,20 @@ XPATH;
     }
     return array("output" => $output, "startJoin" => $startJoin, "endJoin" => $endJoin);
   }
+
+  private function _getDeletionsDropdown($token, $tokenId) {
+  	return <<<HTML
+			<div id="{$tokenId}" class="dropdown show d-inline deletion-select">
+		    <a class="dropdown-toggle collocateLink" href="#" id="dropdown_{$tokenId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$token[0]}</a>
+			  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$tokenId}">
+			      <li>
+							<a class="dropdown-item new-deletion" tabindex="-1" href="#">start ellision here</a>
+							<a class="dropdown-item end-deletion disabled" tabindex="-1" href="#">end ellision here</a>
+						</li>
+			  </ul>
+			</div>
+HTML;
+	}
 
 	/**
 	 * @param $token:
