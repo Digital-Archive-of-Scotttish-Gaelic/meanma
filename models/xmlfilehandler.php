@@ -258,8 +258,8 @@ XPATH;
 		    <a class="dropdown-toggle collocateLink" href="#" id="dropdown_{$tokenId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$token[0]}</a>
 			  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$tokenId}">
 			      <li>
-							<a class="dropdown-item new-deletion" tabindex="-1" href="#">start ellision here</a>
-							<a class="dropdown-item end-deletion disabled" tabindex="-1" href="#">end ellision here</a>
+							<a class="dropdown-item new-deletion" tabindex="-1" href="#">start ellipsis here</a>
+							<a class="dropdown-item end-deletion disabled" tabindex="-1" href="#">end ellipsis here</a>
 						</li>
 			  </ul>
 			</div>
