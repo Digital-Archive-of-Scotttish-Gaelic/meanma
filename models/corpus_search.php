@@ -163,7 +163,7 @@ class corpus_search
 		}
 //		$searchPrefix = ''; // "[[:<:]]";  Use for newer MySQL versions (e.g. Mac local)
 //		$searchSuffix = ''; // "[[:>:]]";
-		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP - use for older (eg. DASG) MySQL versions
+		$searchPrefix = "[[:<:]]";  //default to word boundary at start for REGEXP - use for older (eg. DASG) MySQL versions.
 		$searchSuffix = "[[:>:]]";
 		$whereClause = "";
 		switch ($params["order"]) {
@@ -188,10 +188,13 @@ class corpus_search
 			default:
 				$orderBy = "date_of_lang ASC, page ASC";
 		}
+		//if this is a query within a text then add a JOIN for text
+		$textJoinSql = ($params["id"])
+			? " JOIN text t ON t.filepath = l.filename "
+			: "";
 		//text restrictions
-		$textJoinSql = "";
 		if ($params["id"]) {    //restrict to this text
-			$textJoinSql = <<<SQL
+			$textJoinSql .= <<<SQL
 				  AND (t.id = '{$params["id"]}' OR t.id LIKE '{$params["id"]}-%')
 SQL;
 		}
@@ -199,7 +202,8 @@ SQL;
 		$writerJoinSql = "";
 		if ($params["district"]) {
 			if (count($params["district"]) < 15) {   //restrict by district (location)
-				$writerJoinSql = <<<SQL
+				$writerJoinSql = $textJoinSql == "" ? " JOIN text t ON t.filepath = l.filename " : "";  //add a JOIN to text table if none already written
+				$writerJoinSql .= <<<SQL
 						JOIN text_writer tw ON t.id = tw.text_id
 						JOIN writer w ON tw.writer_id = w.id
 SQL;
@@ -248,9 +252,9 @@ SQL;
 SQL;
 		} else {  // the MAIN search query
 			$query["sql"] = <<<SQL
-				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, date_display, date_of_lang AS 
-					date_internal, textTitle, reference, page, medium, tid
-            FROM lemmas_ex AS l
+				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, l.date_display, date_of_lang AS 
+					date_internal, textTitle AS title, page, medium, l.reference, tid
+            FROM lemma_search AS l
             {$textJoinSql}
         		{$writerJoinSql}
             WHERE {$mssRestrict} AND {$whereClause}

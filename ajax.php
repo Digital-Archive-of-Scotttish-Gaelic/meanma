@@ -107,7 +107,7 @@ switch ($_REQUEST["action"]) {
 			$citation = new citation($db, $_GET["id"]);
 		}
 		$tagContext = $_GET["context"] == "false" ? false : true;     //used to provide popups for trimming context
-		$edit = $_GET["edit"] == 1 ? true : false;   //used to provide dropdown menus for editing citation
+		$edit = $_GET["edit"];   //used to provide dropdown menus for editing citations
 		$slip = $citation->getSlip();
 		$slipType = $slip->getType();
 		$translations = $citation->getTranslations();
@@ -368,6 +368,21 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "deleteEmendation":
 		emendation::delete($_GET["id"], $db);
+		break;
+	case "createDeletion":
+		$deletion = new deletion($db, null, $_GET["cid"]);
+		$deletion->setTokenIdStart($_GET["tid"]);
+		$deletion->save();
+		echo json_encode(array("id" => $deletion->getId()));
+		break;
+	case "updateDeletion":
+		$deletion = new deletion($db, $_GET["id"]);
+		$deletion->setTokenIdEnd($_GET["tid"]);
+		$deletion->save();
+		echo json_encode(array("message" => "saved"));
+		break;
+	case "deleteDeletion":
+		deletion::delete($_GET["id"], $db);
 		break;
 	default:
 		echo json_encode(array("error"=>"undefined action"));

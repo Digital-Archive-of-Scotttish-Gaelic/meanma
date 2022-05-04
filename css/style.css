@@ -317,6 +317,6 @@ a.updateContext:hover {
 /**
     Editorial ememdations
  */
-.emendation {
+.emendation, .deletion {
     color: #28a745;
 }

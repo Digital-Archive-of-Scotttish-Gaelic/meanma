@@ -9,6 +9,7 @@ class citation
 	private $_lastUpdated;
 	private $_translations = array(); //an array of translation objects
 	private $_emendations = array(); //an array of emendation objects
+	private $_deletions = array(); //an array of deletion objects
 	private $_slip; //an instance of \models\slip - the slip this citation is attached to
 
 	const SCOPE_DEFAULT = 80;
@@ -64,6 +65,7 @@ SQL;
 		$this->getSlip();
 		$this->_loadTranslations();
 		$this->_loadEmendations();
+		$this->_loadDeletions();
 	}
 
 	private function _loadTranslations() {
@@ -83,6 +85,16 @@ SQL;
 		$result = $this->_db->fetch($sql, array(":cid" => $this->getId()));
 		foreach ($result as $row) {
 			$this->_emendations[] = new emendation($this->_db, $row["id"]);
+		}
+	}
+
+	private function _loadDeletions() {
+		$sql = <<<SQL
+			SELECT id FROM deletion WHERE citation_id = :cid
+SQL;
+		$result = $this->_db->fetch($sql, array(":cid" => $this->getId()));
+		foreach ($result as $row) {
+			$this->_deletions[] = new deletion($this->_db, $row["id"]);
 		}
 	}
 
@@ -120,7 +132,8 @@ SQL;
 			$preScope = $this->getPreContextScope();
 			$postScope = $this->getPostContextScope();
 			$emendations = $this->getEmendations();
-			$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, $emendations, $tagContext, $edit);
+			$deletions = $this->getDeletions();
+			$context = $handler->getContext($this->_slip->getWid(), $preScope, $postScope, $emendations, $tagContext, $edit, $deletions);
 
 			//check for start/end of document
 			if (isset($context["prelimit"])) {  // the start of the citation is shorter than the preContextScope default
@@ -231,6 +244,10 @@ SQL;
 
 	public function getEmendations() {
 		return $this->_emendations;
+	}
+
+	public function getDeletions() {
+		return $this->_deletions;
 	}
 
 	//SETTERS

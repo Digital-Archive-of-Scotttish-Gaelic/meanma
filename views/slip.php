@@ -116,6 +116,7 @@ HTML;
 				{$this->_writeUpdatedBy()}
 				{$this->_writeCitationEditModal()}
 				{$this->_writeEmendationModal()}
+				{$this->_writeDeletionModal()}
 				{$this->_writeTranslationEditModal()}
         {$this->_writeFooter()}
         {$this->_writeEnterTextIdModal()}
@@ -269,6 +270,26 @@ HTML;
                 <div class="modal-footer">
 									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
                   <button type="button" id="saveEmendation" data-emendationid="" data-citationid="" class="btn btn-primary invisible">save</button>
+								</div>
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
+
+	private function _writeDeletionModal() {
+		$html = <<<HTML
+        <div id="deletionModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="deletionModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body" style="font-size:1.2rem;">
+                  <div id="deletionContext"></div>
+                </div>
+                <span id="deletionContext" class="deletionContext">
+                <div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
+                  <button type="button" id="saveDeletion" data-deletionid="" data-citationid="" class="btn btn-primary invisible">save</button>
 								</div>
             </div>
           </div>
@@ -673,6 +694,7 @@ HTML;
 					</em>
 					<a href="#" class="editCitation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#citationEditModal"><small>context</small></a>
 					<a href="#" class="editEmendation" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#emendationModal"><small>insertions</small></a>
+					<a href="#" class="editDeletion" data-citationid="{$citation->getId()}" data-toggle="modal" data-target="#deletionModal"><small>deletions</small></a>
 					{$deleteCitHtml}
 				</li>
 				<li class="citationContainer_{$cid}">{$transHtml}</li>
@@ -772,6 +794,77 @@ HTML;
                 }
                 $('#citationType').val(data.type);
               });
+            });
+            
+            //populate deletion modal on button click.
+            $(document).on('show.bs.modal', '#deletionModal', function (event) {
+              var modal = $(this);
+              var editLink = $(event.relatedTarget);
+              let cid = editLink.attr('data-citationid');
+              let slipId = {$this->_slip->getId()};
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&edit=2&context=false')
+              .done(function(data) {
+                $('#deletionContext').attr('data-citationid', data.id);
+                if (data.context) {   //corpus slip
+                  $('#deletionContext').html(data.context['html']);
+                } 
+              });
+            });
+            
+            //repopulate citation on deletion modal close
+            $(document).on('hide.bs.modal', '#deletionModal', function (event) {
+              let cid = $('#deletionContext').attr('data-citationid');
+              let slipId = {$this->_slip->getId()};
+              $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId='+slipId+'&edit=0&context=false')
+              .done(function(data) {
+                  $('#citation_'+cid).html(data.context['html']);
+              });
+            });
+            
+            //add a new deletion
+            $(document).on('click', '.new-deletion', function() {
+              let tokenIdStart = $(this).closest('.deletion-select').attr('id');
+              let cid = $('#deletionContext').attr('data-citationid');
+              $.getJSON('ajax.php?action=createDeletion&cid='+cid+'&tid='+tokenIdStart)
+              .done(function(data) {
+                $('.new-deletion').addClass('disabled');
+                $('.end-deletion').removeClass('disabled');
+                let deletionId = data.id;                
+                $('#saveDeletion').attr('data-deletionid', deletionId); //store for recall on select deletion end
+              });    
+            }); 
+            
+            //save the deletion on click of end point
+            $(document).on('click', '.end-deletion', function () {
+              let deletionId = $('#saveDeletion').attr('data-deletionid');
+              let tokenIdEnd = $(this).closest('.deletion-select').attr('id');
+              let cid = $('#deletionContext').attr('data-citationid');
+              $.getJSON('ajax.php?action=updateDeletion&id='+deletionId+'&tid='+tokenIdEnd)
+              .done(function() {
+                $('.new-deletion').removeClass('disabled');
+                $('.end-deletion').addClass('disabled');
+                //refresh the context with the deletion
+                $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId={$this->_slip->getId()}&edit=2&context=false')
+	              .done(function(data) {
+	                 $('#deletionContext').html(data.context['html']);
+	              });
+              });
+            });
+            
+            //delete a deletion
+            $(document).on('click', '.delete-deletion', function() {
+              if (confirm('Are you sure you want to delete this ellipsis?')) {
+                let id = $(this).attr('data-id');
+                let cid = $('#deletionContext').attr('data-citationid');
+                $.ajax('ajax.php?action=deleteDeletion&id='+id)
+                  .done(function() {
+                    //refresh the context with the deletion
+	                  $.getJSON('ajax.php?action=loadCitation&id='+cid+'&slipId={$this->_slip->getId()}&edit=2&context=false')
+		                .done(function(data) {
+		                  $('#deletionContext').html(data.context['html']);
+		                });    
+                });
+              }
             });
             
             //populate emendation modal on button click.
@@ -917,6 +1010,7 @@ HTML;
                     citHtml += '<em><span id="citationType_'+cid+'">&nbsp;('+type+')&nbsp;</span></em>';
                     citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal">context</a>';
                     citHtml += '<a href="#" class="editEmendation" data-citationid="'+cid+'" data-toggle="modal" data-target="#emendationModal">insertions</a>';
+                    citHtml += '<a href="#" class="editDeletion" data-citationid="'+cid+'" data-toggle="modal" data-target="#deletionModal">deletions</a>';
                     citHtml += '<a href="#" class="deleteCitation danger float-right" data-cid="'+cid+'"><small>delete citation</small></a>';
                     // delete code here
                     citHtml += '</li><li class="citationContainer_'+cid+'">';
