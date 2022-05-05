@@ -286,7 +286,7 @@ HTML;
                 <div class="modal-body" style="font-size:1.2rem;">
                   <div id="deletionContext"></div>
                 </div>
-                <span id="deletionContext" class="deletionContext">
+                <span id="deletionContext" data-startindex="" class="deletionContext">
                 <div class="modal-footer">
 									<button type="button" class="btn btn-secondary" data-dismiss="modal">close</button>
                   <button type="button" id="saveDeletion" data-deletionid="" data-citationid="" class="btn btn-primary invisible">save</button>
@@ -824,8 +824,11 @@ HTML;
             //add a new deletion
             $(document).on('click', '.new-deletion', function() {
               let tokenIdStart = $(this).closest('.deletion-select').attr('id');
+              let index = $(this).attr('data-index');
+              $('#deletionContext').attr('data-startindex', index);
+              $('#deletionContext').attr('data-starttokenid', tokenIdStart);
               let cid = $('#deletionContext').attr('data-citationid');
-              $('#'+tokenIdStart).children('a').addClass('deletionStart'); //mark the deletion start point for the user
+              $('#'+tokenIdStart + '> .collocateLink').addClass('deletionStart'); //mark the deletion start-point for the user
               $.getJSON('ajax.php?action=createDeletion&cid='+cid+'&tid='+tokenIdStart)
               .done(function(data) {
                 $('.new-deletion').addClass('disabled');
@@ -837,10 +840,19 @@ HTML;
             
             //save the deletion on click of end point
             $(document).on('click', '.end-deletion', function () {
+              var startId = ''; //only used to swap start/end point if need be
               let deletionId = $('#saveDeletion').attr('data-deletionid');
               let tokenIdEnd = $(this).closest('.deletion-select').attr('id');
               let cid = $('#deletionContext').attr('data-citationid');
-              $.getJSON('ajax.php?action=updateDeletion&id='+deletionId+'&tid='+tokenIdEnd)
+              let index = $(this).attr('data-index');
+              let startIndex = $('#deletionContext').attr('data-startindex');
+              //check if the end of the deletion is before the start
+              if (index < startIndex) {
+                //it is, so swap the start and end tokenIds in the database
+                startId = tokenIdEnd;
+                tokenIdEnd = $('#deletionContext').attr('data-starttokenid');
+              }
+              $.getJSON('ajax.php?action=updateDeletion&id='+deletionId+'&tid='+tokenIdEnd+'&startId='+startId)
               .done(function() {
                 $('.new-deletion').removeClass('disabled');
                 $('.end-deletion').addClass('disabled');

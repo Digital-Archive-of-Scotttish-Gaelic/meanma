@@ -378,6 +378,9 @@ switch ($_REQUEST["action"]) {
 	case "updateDeletion":
 		$deletion = new deletion($db, $_GET["id"]);
 		$deletion->setTokenIdEnd($_GET["tid"]);
+		if ($_GET["startId"]) {
+			$deletion->setTokenIdStart($_GET["startId"]);
+		}
 		$deletion->save();
 		echo json_encode(array("message" => "saved"));
 		break;

@@ -190,14 +190,14 @@ XPATH;
 		      $lastDeletedToken = true;
 	      }
 	    }
-			// -- end deletions
+			// --- end deletions
 			if (!$deleted) {
 				if ($edit == 1) {    //show the edit emendation dropdown
 					$spacer = '<div style="margin-right:-2px;display:inline;">&thinsp;</div>';
 					$token = $this->_getEmendationsDropdown($element, $tokenId, $emendations);
 				} else if ($edit == 2) {  //show the edit deletion dropdown
 					$spacer = '<div style="margin-right:-2px;display:inline;">&thinsp;</div>';
-					$token = $this->_getDeletionsDropdown($element, $tokenId);
+					$token = $this->_getDeletionsDropdown($element, $tokenId, $i);
 				} else if ($emendations) {
 					$preEmendHtml = $postEmendHtml = "";
 					foreach ($emendations as $emendation) {
@@ -254,14 +254,14 @@ XPATH;
     return array("output" => $output, "startJoin" => $startJoin, "endJoin" => $endJoin);
   }
 
-  private function _getDeletionsDropdown($token, $tokenId) {
+  private function _getDeletionsDropdown($token, $tokenId, $index) {
   	return <<<HTML
 			<div id="{$tokenId}" class="dropdown show d-inline deletion-select">
 		    <a class="dropdown-toggle collocateLink" href="#" id="dropdown_{$tokenId}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$token[0]}</a>
 			  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$tokenId}">
 			      <li>
-							<a class="dropdown-item new-deletion" tabindex="-1" href="#">start ellipsis here</a>
-							<a class="dropdown-item end-deletion disabled" tabindex="-1" href="#">end ellipsis here</a>
+							<a class="dropdown-item new-deletion" data-index="{$index}" tabindex="-1" href="#">start ellipsis here</a>
+							<a class="dropdown-item end-deletion disabled" data-index="{$index}" tabindex="-1" href="#">end ellipsis here</a>
 						</li>
 			  </ul>
 			</div>
