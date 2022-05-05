@@ -169,26 +169,28 @@ XPATH;
 	    }
 	    $tokenId = $section . "_" . $tokenNum;
 			$token = "";
-
-	    //check for deletions
+	    /**
+	     * Deletions
+	     */
 	    foreach ($deletions as $deletion) {
 		    if ($tokenId == $deletion->getTokenIdStart()) {   //start of deletion
-		    	$deletionId = $deletion->getId();
+			    $deletionId = $deletion->getId();
 			    $deleted = true;
 			    $token = ($edit == 2)
 				    ? '<div id="deletion_' . $deletionId . '" class="dropdown show d-inline emendation-action">
 		            <a class="dropdown-toggle deletion collocateLink" href="#" id="dropdown_' . $deletionId . '"
-		              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> [...] </a>
+		              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' . $spacer . '[...]' . $spacer . '</a>
 			          <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_' . $deletionId . '">
 			            <li><a class="dropdown-item delete-deletion" data-id="' . $deletionId . '" tabindex="-1" href="#">delete</a></li>
 			           </ul>
 			         </div>'
-						: ' <span class="deletion">[...]</span> ';
-		    } else if ($tokenId == $deletion->getTokenIdEnd()) {  //end of deletion
-			    $lastDeletedToken = true;
+				    : ' <span class="deletion">[...]</span> ';
 		    }
+	      if ($tokenId == $deletion->getTokenIdEnd()) {  //end of deletion
+		      $lastDeletedToken = true;
+	      }
 	    }
-
+			// -- end deletions
 			if (!$deleted) {
 				if ($edit == 1) {    //show the edit emendation dropdown
 					$spacer = '<div style="margin-right:-2px;display:inline;">&thinsp;</div>';
