@@ -171,10 +171,10 @@ class corpus_search
 				$orderBy = "RAND()";
 				break;
 			case "dateAsc":
-				$orderBy = "date ASC, page ASC";
+				$orderBy = "date_internal ASC, page ASC";
 				break;
 			case "dateDesc":
-				$orderBy = "date DESC, page ASC";
+				$orderBy = "date_internal DESC, page ASC";
 				break;
 			/*case "precedingWord":
 				$orderBy = "preceding_word ASC";
@@ -186,7 +186,7 @@ class corpus_search
 				$orderBy = "following_word ASC";
 				break;*/
 			default:
-				$orderBy = "date_of_lang ASC, page ASC";
+				$orderBy = "date_internal ASC, page ASC";
 		}
 		//if this is a query within a text then add a JOIN for text
 		$textJoinSql = ($params["id"])
@@ -312,7 +312,7 @@ SQL;
 
 	private function _getDateWhereClause() {
 		$dates = explode('-', $this->_params["selectedDates"]);
-		$whereClause = " AND date >= {$dates[0]} AND date <= {$dates[1]} ";
+		$whereClause = " AND date_of_lang >= {$dates[0]} AND date_of_lang <= {$dates[1]} ";
 		return $whereClause;
 	}
 
