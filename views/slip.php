@@ -825,6 +825,7 @@ HTML;
             $(document).on('click', '.new-deletion', function() {
               let tokenIdStart = $(this).closest('.deletion-select').attr('id');
               let cid = $('#deletionContext').attr('data-citationid');
+              $('#'+tokenIdStart).children('a').addClass('deletionStart'); //mark the deletion start point for the user
               $.getJSON('ajax.php?action=createDeletion&cid='+cid+'&tid='+tokenIdStart)
               .done(function(data) {
                 $('.new-deletion').addClass('disabled');

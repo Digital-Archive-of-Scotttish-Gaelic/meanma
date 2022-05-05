@@ -320,3 +320,7 @@ a.updateContext:hover {
 .emendation, .deletion {
     color: #28a745;
 }
+
+.deletionStart {
+    color: #dc3545;
+}
