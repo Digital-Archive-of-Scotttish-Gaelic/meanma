@@ -1021,9 +1021,9 @@ HTML;
                 } else {                           //citation does not yet exist so add it                 
                     var citHtml = '<li class="citationContainer_'+cid+'" style="border-top: 1px solid gray;"><span id="citation_'+cid+'">'+html+'</span>';
                     citHtml += '<em><span id="citationType_'+cid+'">&nbsp;('+type+')&nbsp;</span></em>';
-                    citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal">context</a>';
-                    citHtml += '<a href="#" class="editEmendation" data-citationid="'+cid+'" data-toggle="modal" data-target="#emendationModal">insertions</a>';
-                    citHtml += '<a href="#" class="editDeletion" data-citationid="'+cid+'" data-toggle="modal" data-target="#deletionModal">ellipses</a>';
+                    citHtml += '<a href="#" class="editCitation" data-citationid="'+cid+'" data-toggle="modal" data-target="#citationEditModal"><small>context </small></a>';
+                    citHtml += '<a href="#" class="editEmendation" data-citationid="'+cid+'" data-toggle="modal" data-target="#emendationModal"><small> insertions </small></a>';
+                    citHtml += '<a href="#" class="editDeletion" data-citationid="'+cid+'" data-toggle="modal" data-target="#deletionModal"><small> ellipses </small></a>';
                     citHtml += '<a href="#" class="deleteCitation danger float-right" data-cid="'+cid+'"><small>delete citation</small></a>';
                     // delete code here
                     citHtml += '</li><li class="citationContainer_'+cid+'">';
