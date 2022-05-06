@@ -383,7 +383,7 @@ HTML;
 	private function _writeDictionaryView() { // added by MM
 		$_GET["pp"] = null;   //don't limit the results - fetch them all
 		//instantiate a new model to set the per page to null
-		$model = new models\corpus_search($_GET);
+		$model = new models\corpus_search($_GET, true, $this->_db);
 		$searchResults = $model->getResults();
 		echo '<h4>' . $searchResults[0]['lemma'] . '</h4>';
 		echo '<h5>' . $this->_model->getHits() .' results</h5>';
