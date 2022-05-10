@@ -29,8 +29,8 @@ class slip
 		"other" => array("d", "c", "z", "o", "D", "Dx", "ax", "px", "q", "nd", ""));
 	protected $_entry;  //an instance of models\entry
 	protected $_slipMorph;  //an instance of models\slipmorphfeature
-	protected $_senses = array();
-	protected $_sensesInfo = array();   //used to store sense info (in place of object data) for AJAX use
+	protected $_piles = array();
+	protected $_pilesInfo = array();   //used to store pile info (in place of object data) for AJAX use
 	protected $_citations;  //an array of citation objects
 
 	public function __construct($id = null, $db) {
@@ -101,11 +101,11 @@ class slip
 	}
 
 	/**
-	 * Fetches a list of all unused senses for this headword and wordclass combination
+	 * Fetches a list of all unused piles for this headword and wordclass combination
 	 * @return array of sense objects
 	 */
-	public function getUnusedSenses() {
-		$senses = array();
+	public function getUnusedPiles() {
+		$piles = array();
 		$sql = <<<SQL
 			SELECT se.id AS id FROM sense se
 				JOIN entry e ON e.id = se.entry_id
@@ -114,12 +114,12 @@ SQL;
 		$results = $this->_db->fetch($sql, array(":entryId"=>$this->getEntryId()));
 		foreach ($results as $result) {
 			$id = $result["id"];
-			if (array_key_exists($id, $this->getSenses())) {  //skip exisiting senses for this slip
+			if (array_key_exists($id, $this->getPiles())) {  //skip existing piles for this slip
 				continue;
 			}
-			$senses[$id] = new sense($id, $this->_db);
+			$piles[$id] = new pile($id, $this->_db);
 		}
-		return $senses;
+		return $piles;
 	}
 
 	public function getSlipMorph() {
@@ -162,12 +162,12 @@ SQL;
 		return $this->_headword;
 	}
 
-	public function getSenses() {
-		return $this->_senses;
+	public function getPiles() {
+		return $this->_piles;
 	}
 
-	public function getSensesInfo() {
-		return $this->_sensesInfo;
+	public function getPilesInfo() {
+		return $this->_pilesInfo;
 	}
 
 	public function getLocked() {
@@ -265,7 +265,7 @@ SQL;
 		if ($wordclass != $this->getWordClass()) {
 			$this->_wordClass = $wordclass;
 			//remove all the senses
-			sensecategories::deleteSensesForSlip($this->getId());
+			pilecategories::deleteSensesForSlip($this->getId());
 			//hack to workaround POS issues - TODO: discuss with MM
 			$tempPOS = array("noun" => "n", "noun phrase" => "nphr", "verb" => "v", "preposition" => "p", "verbal noun" => "vn",
 				"adjective" => "a", "adverb" => "A", "other" => "");
@@ -276,12 +276,12 @@ SQL;
 		if ($headword != $this->getHeadword()) {
 			$this->_headword = $headword;
 			//remove all the senses
-			sensecategories::deleteSensesForSlip($this->getId());
+			pilecategories::deletePilesForSlip($this->getId());
 		}
 		$this->_entry = entries::getEntryByHeadwordAndWordclass($headword, $wordclass, $this->_db);
 	}
 
-	protected function loadSenses() {
+	protected function loadPiles() {
 		$sql = <<<SQL
         SELECT sense_id as id FROM slip_sense
         	WHERE slip_id = :auto_id 
@@ -290,9 +290,9 @@ SQL;
 		if ($results) {
 			foreach ($results as $key => $value) {
 				$id = $value["id"];
-				$this->_senses[$id] = new sense($id, $this->_db); //create and store sense objects
-				$this->_sensesInfo[$id]["name"] = $this->_senses[$id]->getName();  //store id and name for AJAX use
-				$this->_sensesInfo[$id]["description"] = $this->_senses[$id]->getDescription();
+				$this->_piles[$id] = new pile($id, $this->_db); //create and store pile objects
+				$this->_pilesInfo[$id]["name"] = $this->_piles[$id]->getName();  //store id and name for AJAX use
+				$this->_pilesInfo[$id]["description"] = $this->_piles[$id]->getDescription();
 			}
 		}
 		return $this;

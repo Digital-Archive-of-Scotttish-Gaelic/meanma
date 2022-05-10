@@ -139,7 +139,7 @@ SQL;
 		return $isEmpty;
   }
 
-  public static function addSenseIdsForEntry($entry, $db) {
+  public static function addPileIdsForEntry($entry, $db) {
 		$sql = <<<SQL
 			SELECT se.id as id, auto_id AS slipId FROM sense se
 					JOIN slip_sense ss ON ss.sense_id = se.id
@@ -151,9 +151,9 @@ SQL;
 SQL;
 		$results = $db->fetch($sql, array("entryId"=>$entry->getId()));
 	  foreach ($results as $row) {
-		  $sense = new sense($row["id"], $db);
+		  $pile = new pile($row["id"], $db);
 		  $slipId = $row["slipId"];
-		  $entry->addSense($sense, $slipId);
+		  $entry->addPile($pile, $slipId);
 	  }
 	  //query for paper slips -
 	  $sql2 = <<<SQL
@@ -165,9 +165,9 @@ SQL;
 SQL;
 	  $results2 = $db->fetch($sql2, array("entryId"=>$entry->getId()));
 	  foreach ($results2 as $row) {
-		  $sense = new sense($row["id"], $db);
+		  $pile = new pile($row["id"], $db);
 		  $slipId = $row["slipId"];
-		  $entry->addSense($sense, $slipId);
+		  $entry->addPile($pile, $slipId);
 	  }
 		return $entry;
   }

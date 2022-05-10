@@ -66,7 +66,7 @@ HTML;
 	          </div>
             {$this->_writePartOfSpeechSelects()}
 				</div> <!-- end morphoSyntactic -->
-				{$this->_writeSenseCategories()}
+				{$this->_writePileCategories()}
 				<div style="margin: 0 0 10px 10px;">
           <small><a href="#notesSection" id="toggleNotes" data-toggle="collapse" aria-expanded="true" aria-controls="notesSection">
             show/hide notes
@@ -124,7 +124,7 @@ HTML;
 		</div> <!-- end container -->
 		{$this->_writeSavedModal()}
 HTML;
-    models\sensecategories::writeSenseModal();
+    models\pilecategories::writePileModal();
   }
 
   private function _getLockedDiv($locked) {
@@ -575,68 +575,68 @@ HTML;
     return $html;
   }
 
-  private function _writeSenseCategories() {
-  	$unusedSenses = $this->_slip->getUnusedSenses();
-		$savedSenses = $this->_slip->getSenses();
+  private function _writePileCategories() {
+  	$unusedPiles = $this->_slip->getUnusedPiles();
+		$savedPiles = $this->_slip->getPiles();
     $dropdownHtml = '<option data-category="">-- select a pile --</option>';
-    foreach ($unusedSenses as $sense) {
-    	$senseId = $sense->getId();
-    	$senseName = $sense->getName();
+    foreach ($unusedPiles as $pile) {
+    	$pileId = $pile->getId();
+    	$pileName = $pile->getName();
       $dropdownHtml .= <<<HTML
-        <option data-sense="{$senseId}" data-sense-description="{$sense->getDescription()}" 
-          data-sense-name="{$senseName}" value="{$senseId}">{$senseName}</option>
+        <option data-pile="{$pileId}" data-pile-description="{$pile->getDescription()}" 
+          data-pile-name="{$pileName}" value="{$pileId}">{$pileName}</option>
 HTML;
     }
     $savedCatHtml = "";
-    foreach ($savedSenses as $sense) {
-    	$senseId = $sense->getId();
-    	$senseName = $sense->getName();
-    	$senseDescription = $sense->getDescription();
+    foreach ($savedPiles as $pile) {
+    	$pileId = $pile->getId();
+    	$pileName = $pile->getName();
+    	$pileDescription = $pile->getDescription();
       $savedCatHtml .= <<<HTML
-        <li class="badge badge-success senseBadge" data-title="{$senseDescription}"
-          data-toggle="modal" data-target="#senseModal" data-slip-id="{$this->_slip->getId()}"
-          data-sense="{$senseId}" data-sense-name="{$senseName}" data-sense-description="{$senseDescription}">
-					{$senseName}
+        <li class="badge badge-success pileBadge" data-title="{$pileDescription}"
+          data-toggle="modal" data-target="#pileModal" data-slip-id="{$this->_slip->getId()}"
+          data-pile="{$pileId}" data-pile-name="{$pileName}" data-pile-description="{$pileDescription}">
+					{$pileName}
 				</li>
 HTML;
     }
     $html = <<<HTML
 				<div style="margin-left: 10px;">
-					<small><a href="#senses" id="toggleSenses" data-toggle="collapse" aria-expanded="true" aria-controls="senses">
-            show/hide senses
+					<small><a href="#piles" id="togglePiles" data-toggle="collapse" aria-expanded="true" aria-controls="piles">
+            show/hide piles
           </a></small>
         </div>
-        <div id="senses" class="editSlipSectionContainer collapse show">
-          <!--h5>Sense Categories</h5-->
+        <div id="piles" class="editSlipSectionContainer collapse show">
+          <!--h5>Pile Categories</h5-->
           <div class="form-group row">
             <div class="col-sm-2">
-                  <label for="senseCategorySelect" class="col-form-label">Choose existing pile:</label>
+                  <label for="pileCategorySelect" class="col-form-label">Choose existing pile:</label>
             </div>
             <div>
-                <select class="form-control" id="senseCategorySelect">{$dropdownHtml}</select>
+                <select class="form-control" id="pileCategorySelect">{$dropdownHtml}</select>
             </div>
             <div class="col-sm-2">
-                  <button type="button" class="form-control btn btn-primary" id="chooseSenseCategory">Add</button>
+                  <button type="button" class="form-control btn btn-primary" id="choosePileCategory">Add</button>
               </div>
           </div>
           <div class="form-group row">
               <div class="col-sm-2">
-                  <label for="senseCategory" class="col-form-label">Assign to new pile:</label>
+                  <label for="pileCategory" class="col-form-label">Assign to new pile:</label>
               </div>
               <div class="col-sm-2">
-									<label class="col-form-label" for="newSenseName">Name</label>
-                  <input type="text" class="form-control" id="newSenseName">
+									<label class="col-form-label" for="newPileName">Name</label>
+                  <input type="text" class="form-control" id="newPileName">
               </div>
               <div class="col-sm-3">
-                  <label class="col-form-label" for="newSenseDefinition">Definition</label>
-                  <input type="text" class="form-control" id="newSenseDefinition">
+                  <label class="col-form-label" for="newPileDefinition">Definition</label>
+                  <input type="text" class="form-control" id="newPileDefinition">
 							</div>
               <div class="col-sm-2">
-                  <button type="button" class="form-control btn btn-primary" id="addSense">Add</button>
+                  <button type="button" class="form-control btn btn-primary" id="addPile">Add</button>
               </div>
           </div>
           <div>
-            <ul id="senseCategories">
+            <ul id="pileCategories">
                 {$savedCatHtml}
             </ul>
           </div>
@@ -1242,49 +1242,49 @@ HTML;
             });
 
             /**
-            * Senses
+            * Piles
 						*/  
-            $("#chooseSenseCategory").on('click', function () {
-              var elem = $( "#senseCategorySelect option:selected" );
-              var sense = elem.text();
-              if (!elem.attr('data-sense')) {
+            $("#choosePileCategory").on('click', function () {
+              var elem = $( "#pileCategorySelect option:selected" );
+              var pile = elem.text();
+              if (!elem.attr('data-pile')) {
                 return false;
               }
-              var senseId = elem.attr('data-sense');
-              var senseName = elem.attr("data-sense-name");
-              var senseDescription = elem.attr('data-sense-description');
-              var html = '<li class="badge badge-success senseBadge" data-sense="' + senseId + '"';
-              html += ' data-toggle="modal" data-target="#senseModal"';
-              html += ' data-title="' + senseDescription +  '" data-sense-name="' + senseName + '">' + sense + '</li>';
-              $('#senseCategories').append(html);
+              var pileId = elem.attr('data-pile');
+              var pileName = elem.attr("data-pile-name");
+              var pileDescription = elem.attr('data-pile-description');
+              var html = '<li class="badge badge-success pileBadge" data-pile="' + pileId + '"';
+              html += ' data-toggle="modal" data-target="#pileModal"';
+              html += ' data-title="' + pileDescription +  '" data-pile-name="' + pileName + '">' + pile + '</li>';
+              $('#pileCategories').append(html);
               elem.remove();
-              var data = {action: 'saveSlipSense', slipId: '{$this->_slip->getId()}',
-                senseId: senseId}
+              var data = {action: 'saveSlipPile', slipId: '{$this->_slip->getId()}',
+                pileId: pileId}
               $.post("ajax.php", data, function (response) {
                 console.log(response);        //TODO: add some response code on successful save
               });
             });
 
-            $(document).on('click', '#addSense', function () {
-              var newSenseName = $('#newSenseName').val();
-              var newSenseDefinition = $('#newSenseDefinition').val();
+            $(document).on('click', '#addPile', function () {
+              var newPileName = $('#newPileName').val();
+              var newPileDefinition = $('#newPileDefinition').val();
               var entryId = $('#citationContext').attr('data-entryid');      
-              if (newSenseName == "") {
+              if (newPileName == "") {
                 return false;
               }
-              $('#newSenseName').val('');
-              $('#newSenseDefinition').val('');
-              var data = {action: 'addSense', slipId: '{$this->_slip->getId()}',
-                name: newSenseName, description: newSenseDefinition, entryId: entryId
+              $('#newPileName').val('');
+              $('#newPileDefinition').val('');
+              var data = {action: 'addPile', slipId: '{$this->_slip->getId()}',
+                name: newPileName, description: newPileDefinition, entryId: entryId
               }
               $.getJSON("ajax.php", data, function (response) {
-                var html = '<li class="badge badge-success senseBadge" data-sense="' + response.senseId + '"';
-                html += ' data-title="' + response.senseDescription +'"';
+                var html = '<li class="badge badge-success pileBadge" data-pile="' + response.pileId + '"';
+                html += ' data-title="' + response.pileDescription +'"';
                 html += ' data-slip-id="{$this->_slip->getId()}"';
-                html += ' data-sense-name="' + newSenseName + '" data-sense-description="' + newSenseDefinition + '"';
-                html += ' data-toggle="modal" data-target="#senseModal"';
-                html += '>' + newSenseName + '</li>';
-                $('#senseCategories').append(html);
+                html += ' data-pile-name="' + newPileName + '" data-pile-description="' + newPileDefinition + '"';
+                html += ' data-toggle="modal" data-target="#pileModal"';
+                html += '>' + newPileName + '</li>';
+                $('#pileCategories').append(html);
               });
             });
 
@@ -1340,11 +1340,11 @@ HTML;
                   $('#verbSelects').hide();
                   $('#prepSelects').hide();
               }
-              //update the sense categories 
-              $('.senseBadge').remove();
-              $('#senseCategorySelect').empty();
-              $('#senseCategorySelect').append('<option data-category="">-- select a category --</option>');
-              var url = 'ajax.php?action=getSenseCategoriesForNewWordclass';
+              //update the pile categories 
+              $('.pileBadge').remove();
+              $('#pileCategorySelect').empty();
+              $('#pileCategorySelect').append('<option data-category="">-- select a category --</option>');
+              var url = 'ajax.php?action=getPileCategoriesForNewWordclass';
               url += '&slipType={$this->_slip->getType()}&entryId={$this->_slip->getEntryId()}';
               url += '&filename={$this->_slip->getFilename()}&id={$this->_slip->getWid()}&auto_id={$this->_slip->getId()}';
               url += '&pos={$this->_slip->getPOS()}&headword=' + headword + '&wordclass=' + wordclass;
@@ -1352,10 +1352,10 @@ HTML;
               $.getJSON(url, function (data) { 
                   entryId = data.entryId;
                   $('#citationContext').attr('data-entryid', entryId);
-                  $.each(data.senseInfo, function (index, sense) {
-                    var html = '<option data-sense="' + index + '" data-sense-description="' + sense.description + '"';
-                    html += ' data-sense-name="' + sense.name + '" value="' + index + '">' + sense.name + '</optin>';
-                    $('#senseCategorySelect').append(html);
+                  $.each(data.pileInfo, function (index, pile) {
+                    var html = '<option data-pile="' + index + '" data-pile-description="' + pile.description + '"';
+                    html += ' data-pile-name="' + pile.name + '" value="' + index + '">' + pile.name + '</option>';
+                    $('#pileCategorySelect').append(html);
                   });
               })
               .done(function () {   //raise and save an issue with the slip and headword/wordclass information

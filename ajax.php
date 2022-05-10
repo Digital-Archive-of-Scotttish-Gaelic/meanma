@@ -60,7 +60,7 @@ switch ($_REQUEST["action"]) {
     $referenceTemplate = $slip->getText()->getReferenceTemplate();
     $results = array("locked"=>$slip->getLocked(), "auto_id"=>$slip->getId(), "owner"=>$slip->getOwnedBy(),
 	    "starred"=>$slip->getStarred(), "notes"=>$slip->getNotes(), "type"=>$slip->getType(),
-      "wordClass"=>$slip->getWordClass(), "senses"=>$slip->getSensesInfo(),
+      "wordClass"=>$slip->getWordClass(), "senses"=>$slip->getPilesInfo(),
       "lastUpdated"=>$slip->getLastUpdated(), "textId"=>$textId, "slipMorph"=>$slip->getSlipMorph()->getProps(),
 	    "referenceTemplate"=>$referenceTemplate);
     //code required for modal slips
@@ -208,7 +208,7 @@ switch ($_REQUEST["action"]) {
 		$slip = new paper_slip(null, $_GET["entryId"], $_GET["wordform"], $db);
 		echo json_encode(array("id" => $slip->getId(), "wordclass" => $slip->getWordClass(), "pos" => $slip->getPOS()));
 		break;
-	case "getSenseCategoriesForNewWordclass":
+	case "getPileCategoriesForNewWordclass":
 		$slip = ($_GET["slipType"] == "corpus")
 			? new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db)
 			: new paper_slip($_GET["auto_id"], $_GET["entryId"], null, $db);
@@ -220,12 +220,12 @@ switch ($_REQUEST["action"]) {
 		if (entries::isEntryEmpty($oldEntryId, $db)) {
 			entries::deleteEntry($oldEntryId, $db);
 		}
-		$senses = $slip->getUnusedSenses();
-		$unusedSenseInfo = array();
-		foreach ($senses as $sense) {
-			$unusedSenseInfo[$sense->getId()] = array("name" => $sense->getName(), "description" => $sense->getDescription());
+		$piles = $slip->getUnusedPiles();
+		$unusedPileInfo = array();
+		foreach ($piles as $pile) {
+			$unusedPileInfo[$pile->getId()] = array("name" => $pile->getName(), "description" => $pile->getDescription());
 		}
-		echo json_encode(array("entryId" => $slip->getEntryId(), "senseInfo" => $unusedSenseInfo));
+		echo json_encode(array("entryId" => $slip->getEntryId(), "pileInfo" => $unusedPileInfo));
 		break;
   case "saveSlip":
     $slip = ($_GET["slipType"] == "corpus")
@@ -257,21 +257,21 @@ switch ($_REQUEST["action"]) {
 		}
 		echo json_encode(array("success" => true));
 		break;
-  case "saveSlipSense":
-    sensecategories::saveSlipSense($_POST["slipId"], $_POST["senseId"], $db);
+  case "saveSlipPile":
+    pilecategories::saveSlipPile($_POST["slipId"], $_POST["pileId"], $db);
     collection::touchSlip($_POST["slipId"]);
     echo "success";
     break;
-	case "addSense":
-		$senseId = sensecategories::addSense($_GET["name"], $_GET["description"], $_GET["entryId"], $db);
-		sensecategories::saveSlipSense($_GET["slipId"], $senseId, $db);
-		echo json_encode(array("senseId" => $senseId, "senseDescription" => $_GET["description"]));
+	case "addPile":
+		$pileId = pilecategories::addPile($_GET["name"], $_GET["description"], $_GET["entryId"], $db);
+		pilecategories::saveSlipPile($_GET["slipId"], $pileId, $db);
+		echo json_encode(array("pileId" => $pileId, "pileDescription" => $_GET["description"]));
 		break;
-	case "editSense":
-		sensecategories::updateSense($_GET["id"], $_GET["name"], $_GET["description"], $db);
+	case "editPile":
+		pilecategories::updatePile($_GET["id"], $_GET["name"], $_GET["description"], $db);
 		//remove association with slip
 		if ($_GET["slipId"]) {
-			sensecategories::deleteSlipSense($_GET["slipId"], $_GET["id"], $db);
+			pilecategories::deleteSlipPile($_GET["slipId"], $_GET["id"], $db);
 			collection::touchSlip($_GET["slipId"]);
 		}
 		break;

@@ -78,7 +78,7 @@ HTML;
 HTML;
 
     models\collection::writeSlipDiv();
-    models\sensecategories::writeSenseModal();
+    models\pilecategories::writePileModal();
     $this->_writeJavascript();
   }
 

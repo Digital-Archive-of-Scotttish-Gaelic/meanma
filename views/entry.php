@@ -34,8 +34,11 @@ HTML;
 			case "edit":
 				$this->_writeEditView();
 				break;
+			case "senses":
+				$this->writeSensesView();
+				break;
 			case "piles":
-				$this->_writeSensesView();
+				$this->_writePilesView();
 				break;
 			case "slips":
 				$this->_writeSlipsView();
@@ -68,7 +71,7 @@ HTML;
 HTML;
 		}
 		models\collection::writeSlipDiv();
-		models\sensecategories::writeSenseModal();
+		models\pilecategories::writePileModal();
 		$this->_writeJavascript();
 	}
 
@@ -78,14 +81,25 @@ HTML;
 			case "edit":
 				$listItemHtml = <<<HTML
 					<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
+					<li class="nav-item"><a class="nav-link" title="senses" href="?m=entries&a=view&type=senses&id={$this->_entry->getId()}">senses</a></li>
 					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
 					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>    	
 					<li class="nav-item"><div class="nav-link active">edit</div></li>
 HTML;
 				break;
+			case "senses":
+				$listItemHtml = <<<HTML
+					<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
+					<li class="nav-item"><div class="nav-link active">senses</div></li>
+					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
+					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>    	
+					<li class="nav-item"><a class="nav-link" title="edit" href="?m=entries&a=view&type=edit&id={$this->_entry->getId()}">edit</a></li>
+HTML;
+				break;
 			case "piles":
 				$listItemHtml = <<<HTML
 					<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
+					<li class="nav-item"><a class="nav-link" title="senses" href="?m=entries&a=view&type=senses&id={$this->_entry->getId()}">senses</a></li>
 					<li class="nav-item"><div class="nav-link active">piles</div></li>
 					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>  
 					<li class="nav-item"><a class="nav-link" title="edit" href="?m=entries&a=view&type=edit&id={$this->_entry->getId()}">edit</a></li>
@@ -95,6 +109,7 @@ HTML;
 			case "slips":
 				$listItemHtml = <<<HTML
 					<li class="nav-item"><a class="nav-link" title="forms" href="?m=entries&a=view&type=forms&id={$this->_entry->getId()}">forms</a></li>
+					<li class="nav-item"><a class="nav-link" title="senses" href="?m=entries&a=view&type=senses&id={$this->_entry->getId()}">senses</a></li>
 					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
 			    <li class="nav-item"><div class="nav-link active">slips</div></li>	
 					<li class="nav-item"><a class="nav-link" title="edit" href="?m=entries&a=view&type=edit&id={$this->_entry->getId()}">edit</a></li>
@@ -104,6 +119,7 @@ HTML;
 				$listItemHtml = <<<HTML
 					<li class="nav-item"><div class="nav-link active">forms</div></li>
 					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
+					<li class="nav-item"><a class="nav-link" title="senses" href="?m=entries&a=view&type=senses&id={$this->_entry->getId()}">senses</a></li>
 					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>   										
 					<li class="nav-item"><a class="nav-link" title="edit" href="?m=entries&a=view&type=edit&id={$this->_entry->getId()}">edit</a></li>
 HTML;
@@ -194,9 +210,19 @@ HTML;
 
 	private function _writeSensesView() {
 		echo <<<HTML
+			<div>
+        <h5>Senses:</h5>
+        {$this->_getSensesHtml()}
+			</div>
+HTML;
+		return;
+	}
+
+	private function _writePilesView() {
+		echo <<<HTML
 				<div>
 					<h5>Piles:</h5>
-					{$this->_getSensesHtml()}
+					{$this->_getPilesHtml()}
 				</div>
 HTML;
 	}
@@ -365,38 +391,43 @@ HTML;
 	}
 
 	private function _getSensesHtml() {
-		//orphaned (uncategorised) senses
-		$orphanedSensesHtml = $this->_getOrphanSensesHtml();
-		if ($orphanedSensesHtml != "") {
-			$html = "<ul>" . $orphanedSensesHtml . "</ul>";
+		$html = "<h2>hello world</h2>";
+		return $html;
+	}
+
+	private function _getPilesHtml() {
+		//orphaned (uncategorised) piles
+		$orphanedPilesHtml = $this->_getOrphanPilesHtml();
+		if ($orphanedPilesHtml != "") {
+			$html = "<ul>" . $orphanedPilesHtml . "</ul>";
 		}
 		$html .= <<<HTML
-			<div id="groupedSenses">
-				<h6>Grouped Piles <a id="showIndividual" href="#" title="show individual senses"><small>show individual</small></a></h6> 
+			<div id="groupedPiles">
+				<h6>Grouped Piles <a id="showIndividual" href="#" title="show individual piles"><small>show individual</small></a></h6> 
 				<ul>
 HTML;
-		//grouped senses
-		$html .= $this->_getGroupedSensesHtml();
+		//grouped piles
+		$html .= $this->_getGroupedPilesHtml();
 		$html .= '</ul></div>';
-		//individual senses
+		//individual piles
 		$html .= <<<HTML
-			<div id="individualSenses" class="hide">
-				<h6>Individual Piles <a id="showGrouped" href="#" title="show grouped senses"><small>show grouped</small></a></h6> 
+			<div id="individualPiles" class="hide">
+				<h6>Individual Piles <a id="showGrouped" href="#" title="show grouped piles"><small>show grouped</small></a></h6> 
 				<ul>
 HTML;
-		$html .= $this->_getIndividualSensesHtml();
+		$html .= $this->_getIndividualPilesHtml();
 		$html .= '</ul></div>';
 		return $html;
 	}
 
-	private function _getOrphanSensesHtml() {
-		/* Get any citations without senses */
+	private function _getOrphanPilesHtml() {
+		/* Get any citations without piles */
 		$html = "";
-		$nonSenseSlipIds = models\sensecategories::getNonCategorisedSlipIds($this->_entry->getId(), $this->_db);
-		if (count($nonSenseSlipIds)) {
+		$nonPileSlipIds = models\pilecategories::getNonCategorisedSlipIds($this->_entry->getId(), $this->_db);
+		if (count($nonPileSlipIds)) {
 			$slipData = array();
 			$index = 0;
-			foreach ($nonSenseSlipIds as $slipId) {
+			foreach ($nonPileSlipIds as $slipId) {
 				$index++;
 				$slipData[] = models\collection::getSlipInfoBySlipId($slipId, $this->_db);
 			}
@@ -405,7 +436,7 @@ HTML;
 		return $html;
 	}
 
-	private function _getSlipListHtml($slipData, $senseIds, $index) {
+	private function _getSlipListHtml($slipData, $pileIds, $index) {
 		$slipList = '<table class="table"><tbody>';
 		foreach($slipData as $data) {
 			foreach ($data as $row) {
@@ -459,59 +490,59 @@ HTML;
 					{$slipList}
 				</div>
 HTML;
-		$senseString = "";
-		if ($senseIds[0] == "uncategorised") {
-			$senseString = <<<HTML
-				<span data-toggle="modal" data-target="#senseModal" title="rename this sense" class="badge badge-secondary entrySense">
+		$pileString = "";
+		if ($pileIds[0] == "uncategorised") {
+			$pileString = <<<HTML
+				<span data-toggle="modal" data-target="#pileModal" title="rename this pile" class="badge badge-secondary entryPile">
 						uncategorised
 					</span> 
 HTML;
 		} else {
-			$senseIds = explode('|', $senseIds);
-			foreach ($senseIds as $senseId) {
-				$sense = new models\sense($senseId, $this->_db);
-				$senseDescription = $sense->getDescription();
-				$senseString .= <<<HTML
-					<span data-toggle="modal" data-target="#senseModal" data-sense="{$senseId}" 
-					data-sense-description="{$sense->getDescription()}" data-sense-name="{$sense->getName()}"
-					data-title="{$senseDescription}" class="badge badge-success senseBadge">
-						{$sense->getName()}
+			$pileIds = explode('|', $pileIds);
+			foreach ($pileIds as $pileId) {
+				$pile = new models\pile($pileId, $this->_db);
+				$pileDescription = $pile->getDescription();
+				$pileString .= <<<HTML
+					<span data-toggle="modal" data-target="#pileModal" data-pile="{$pileId}" 
+					data-pile-description="{$pile->getDescription()}" data-pile-name="{$pile->getName()}"
+					data-title="{$pileDescription}" class="badge badge-success pileBadge">
+						{$pile->getName()}
 					</span> 
 HTML;
 			}
 		}
 		$html = <<<HTML
-				<li>{$senseString} {$citationsHtml}</li>
+				<li>{$pileString} {$citationsHtml}</li>
 HTML;
 		return $html;
 	}
 
-	private function _getGroupedSensesHtml() {
-		/* Get the citations with grouped senses */
+	private function _getGroupedPilesHtml() {
+		/* Get the citations with grouped piles */
 		$index = 0;
-		foreach ($this->_entry->getUniqueSenseIds($this->_db) as $slipId => $senseIds) {
+		foreach ($this->_entry->getUniquePileIds($this->_db) as $slipId => $pileIds) {
 			$slipData = array();
-			$senseSlipIds = $this->_entry->getSenseSlipIds($slipId);
-			foreach ($senseSlipIds as $id) {
+			$pileSlipIds = $this->_entry->getPileSlipIds($slipId);
+			foreach ($pileSlipIds as $id) {
 				$index++;
 				$slipData[] = models\collection::getSlipInfoBySlipId($id, $this->_db);
 			}
-			$html .= $this->_getSlipListHtml($slipData, $senseIds, "grp_".$index);
+			$html .= $this->_getSlipListHtml($slipData, $pileIds, "grp_".$index);
 		}
 		return $html;
 	}
 
-	private function _getIndividualSensesHtml() {
-		/* Get citations for individual senses */
-		$individualSenses = $this->_entry->getIndividualSenses();
+	private function _getIndividualPilesHtml() {
+		/* Get citations for individual piles */
+		$individualPiles = $this->_entry->getIndividualPiles();
 		$index = 0;
-		foreach ($individualSenses as $sense => $slipIds) {
+		foreach ($individualPiles as $pile => $slipIds) {
 			$slipData = array();
 			foreach ($slipIds as $slipId) {
 				$index++;
 				$slipData[] = models\collection::getSlipInfoBySlipId($slipId, $this->_db);
 			}
-			$html .= $this->_getSlipListHtml($slipData, $sense, "ind_".$index);
+			$html .= $this->_getSlipListHtml($slipData, $pile, "ind_".$index);
 		}
 		return $html;
 	}
@@ -567,14 +598,14 @@ HTML;
 				});
 				
 				$('#showIndividual').on('click', function () {
-				  $('#groupedSenses').hide();
-				  $('#individualSenses').show();
+				  $('#groupedPiles').hide();
+				  $('#individualPiles').show();
 				  return false;
 				});
 				
 				$('#showGrouped').on('click', function () {
-				  $('#individualSenses').hide();
-				  $('#groupedSenses').show();
+				  $('#individualPiles').hide();
+				  $('#groupedPiles').show();
 				  return false;
 				});
 					
@@ -677,6 +708,10 @@ HTML;
 				
 				function getCitationHtml(citationType, info, slipId = null) {		
 				  html = '';
+				  
+				  console.log('called');
+				  console.log(info);
+				  
 				  if (info.context != undefined) {
 						html += info.context.html;
 					}

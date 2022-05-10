@@ -256,12 +256,12 @@ a.updateContext:hover {
     display: none;
 }
 
-/* Senses */
+/* Piles */
 #modalSlipRemoveSection {
     display: none;
 }
 
-.senseBadge {
+.pileBadge {
     cursor: pointer;
 }
 

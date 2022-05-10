@@ -4,7 +4,7 @@
 namespace models;
 
 
-class sense
+class pile
 {
 	private $_id, $_name, $_description, $_entryId;
 	private $_db;  //database connection

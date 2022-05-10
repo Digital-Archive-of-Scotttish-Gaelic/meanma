@@ -46,44 +46,44 @@ $(function () {
   });
 
   /**
-   * Sense category editing
+   * Pile category editing
    */
-  $(document).on('click', '.senseBadge', function() {
+  $(document).on('click', '.pileBadge', function() {
     var thisBadge = $(this);
     //add a flag in case of deletion
     thisBadge.addClass('delete');
-    var senseId = $(this).attr('data-sense');
-    var senseDescription = $(this).attr('data-sense-description');
-    var senseName = $(this).attr('data-sense-name');
+    var pileId = $(this).attr('data-pile');
+    var pileDescription = $(this).attr('data-pile-description');
+    var pileName = $(this).attr('data-pile-name');
     var slipId = $(this).attr('data-slip-id');
-    $('#senseId').val(senseId);
+    $('#pileId').val(pileId);
     if (slipId) {
       $('#modalSlipId').val(slipId);
       $('#modalSlipIdDisplay').text(slipId);
       $('#modalSlipRemoveSection').show();
     }
-    $('#modalSenseName').val(senseName);
-    $('#modalSenseDescription').val(senseDescription)
+    $('#modalPileName').val(pileName);
+    $('#modalPileDescription').val(pileDescription)
   });
 
-  $('#editSense').on('click', function () {
-    var name = $('#modalSenseName').val();
-    var description = $('#modalSenseDescription').val();
-    var id = $('#senseId').val();
-    var senseBadge = $('[data-sense='+id+']');
-    senseBadge.attr('data-title', description);
-    senseBadge.attr('data-description', description);
-    senseBadge.attr('data-sense-name', name);
-    senseBadge.text(name);
-    var url = 'ajax.php?action=editSense&id=' + id;
+  $('#editPile').on('click', function () {
+    var name = $('#modalPileName').val();
+    var description = $('#modalPileDescription').val();
+    var id = $('#pileId').val();
+    var pileBadge = $('[data-pile='+id+']');
+    pileBadge.attr('data-title', description);
+    pileBadge.attr('data-description', description);
+    pileBadge.attr('data-pile-name', name);
+    pileBadge.text(name);
+    var url = 'ajax.php?action=editPile&id=' + id;
     url += '&name=' + encodeURIComponent(name) + '&description=' + encodeURIComponent(description);
     //check if a slip association is to be removed
-    if ($('#modalSenseSlipRemove').prop('checked')) {
+    if ($('#modalPileSlipRemove').prop('checked')) {
       $('.delete').remove();    //get rid of the badge
       url += '&slipId=' + $('#modalSlipId').val();
     }
     $('.delete').removeClass('delete');
-    $('#senseModal').modal('hide');
+    $('#pileModal').modal('hide');
     $.ajax({url: url}, function () {
     });
   });

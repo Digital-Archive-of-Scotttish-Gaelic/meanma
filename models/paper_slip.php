@@ -45,7 +45,7 @@ SQL;
 		$slipData = $result[0];
 		$this->populateClass($slipData);
 		$this->loadSlipMorph();  //load the slipMorph data from the DB
-		$this->loadSenses(); //load the sense objects
+		$this->loadPiles(); //load the sense objects
 		return $this;
 	}
 

@@ -386,7 +386,7 @@ SQL;
 SQL;
 			$db->exec($sql, array(":slipId" => $slipId));
 							// delete sense categories for this slip
-			sensecategories::deleteSensesForSlip($slipId);
+			pilecategories::deleteSensesForSlip($slipId);
 							// delete citations for this slip
 			$citationIds = self::getCitationIdsForSlip($slipId, $db);
 			foreach ($citationIds as $cid) {

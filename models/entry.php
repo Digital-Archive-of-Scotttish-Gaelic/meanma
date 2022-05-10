@@ -7,10 +7,10 @@ namespace models;
 class entry
 {
 	private $_id, $_groupId, $_headword, $_wordclass, $_notes, $_updated;
-	private $_senses = array();   //array of sense objects
-	private $_senseSlipIds = array();
-	private $_slipSenses = array();
-	private $_individualSenses = array();
+	private $_piles = array();   //array of pile objects
+	private $_pileSlipIds = array();
+	private $_slipPiles = array();
+	private $_individualPiles = array();
 	private $_etymology;
 	private $_subclass;
 	private $_subclasses = array(
@@ -50,9 +50,9 @@ class entry
 		$this->_etymology = $text;
 	}
 
-	public function addSense($sense, $slipId) {
-		$this->_senses[$slipId][] = $sense;
-		$this->_individualSenses[$sense->getId()][] = $slipId;
+	public function addPile($pile, $slipId) {
+		$this->_piles[$slipId][] = $pile;
+		$this->_individualPiles[$pile->getId()][] = $slipId;
 	}
 
 	// GETTERS
@@ -107,26 +107,6 @@ SQL;
 
 	public function getWordforms($db) {
 		$wordforms = array();
-		//get the corpus_slip wordforms
-/*		$sql = <<<SQL
-			SELECT l.wordform AS wordform, auto_id AS slipId
-				FROM lemmas l 
-				JOIN slips s ON s.id = l.id AND s.filename = l.filename
-				JOIN entry e ON e.id = s.entry_id
-				WHERE e.id = :entryId
-				ORDER BY date_of_lang
-SQL;
-		$results = $db->fetch($sql, array(":entryId"=>$this->getId()));
-
-		//get the paper_slip wordforms
-		$sql = <<<SQL
-			SELECT wordform, auto_id AS slipId
-				FROM slips 
-				WHERE wordform IS NOT NULL AND entry_id = :entryId
-SQL;
-		$results = array_merge($results, $db->fetch($sql, array(":entryId"=>$this->getId())));
-*/
-
 		$sql = <<<SQL
 			SELECT wordform, auto_id AS slipId
 				FROM slips
@@ -137,14 +117,8 @@ SQL;
 		$results = $db->fetch($sql, array(":entryId"=>$this->getId()));
 		foreach ($results as $row) {
 			$wordform = mb_strtolower($row["wordform"], "UTF-8");
-
-			// 		$entryForm = new entry_form($wordform);
-
 			$slipId = $row["slipId"];
 			$slipMorphResults = collection::getSlipMorphBySlipId($slipId, $db);
-
-			//	  $entryForm->addMorphFeature();
-
 			$morphString = implode('|', $slipMorphResults);
 			$wordforms[$wordform][$morphString][] = $slipId;
 		}
@@ -154,44 +128,44 @@ SQL;
 		return $wordforms;
 	}
 
-	public function getSenses($db) {
-		if (empty($this->_senses)) {
-			entries::addSenseIdsForEntry($this, $db);
+	public function getPiles($db) {
+		if (empty($this->_piles)) {
+			entries::addPileIdsForEntry($this, $db);
 		}
-		return $this->_senses;
+		return $this->_piles;
 	}
 
-	public function getIndividualSenses() {
-		return $this->_individualSenses;
+	public function getIndividualPiles() {
+		return $this->_individualPiles;
 	}
 
-	public function getSenseSlipIds($slipId) {
-		return $this->_senseSlipIds[$slipId];
+	public function getPileSlipIds($slipId) {
+		return $this->_pileSlipIds[$slipId];
 	}
 
 	/**
-	 * Groups the senses together
-	 * Adds the IDs of the grouped slips into _senseSlipIds for parsing in citations.
+	 * Groups the piles together
+	 * Adds the IDs of the grouped slips into _pileSlipIds for parsing in citations.
 	 */
-	public function getUniqueSenseIds($db) {
-		foreach ($this->getSenses($db) as $slipId => $senseGroup) {
-			$senseIds = array();
-			foreach ($senseGroup as $sense) {
-				array_push($senseIds, $sense->getId());
+	public function getUniquePileIds($db) {
+		foreach ($this->getPiles($db) as $slipId => $pileGroup) {
+			$pileIds = array();
+			foreach ($pileGroup as $pile) {
+				array_push($pileIds, $pile->getId());
 			}
-			$this->_slipSenses[$slipId] = $senseIds;
-			sort($this->_slipSenses[$slipId]);
-			$this->_slipSenses[$slipId] = implode('|', $this->_slipSenses[$slipId]);
+			$this->_slipPiles[$slipId] = $pileIds;
+			sort($this->_slipPiles[$slipId]);
+			$this->_slipPiles[$slipId] = implode('|', $this->_slipPiles[$slipId]);
 		}
 		$uniqueIds = array();
-		foreach ($this->_slipSenses as $slipId => $senseIds) {
-			if (in_array($senseIds, $uniqueIds)) {
-				$id = array_search($senseIds, $uniqueIds);
-				array_push($this->_senseSlipIds[$id], $slipId);
+		foreach ($this->_slipPiles as $slipId => $pileIds) {
+			if (in_array($pileIds, $uniqueIds)) {
+				$id = array_search($pileIds, $uniqueIds);
+				array_push($this->_pileSlipIds[$id], $slipId);
 			} else {
-				$this->_senseSlipIds[$slipId] = array($slipId);
+				$this->_pileSlipIds[$slipId] = array($slipId);
 			}
-			$uniqueIds[$slipId] = $senseIds;
+			$uniqueIds[$slipId] = $pileIds;
 		}
 		return array_unique($uniqueIds);
 	}
