@@ -387,6 +387,13 @@ switch ($_REQUEST["action"]) {
 	case "deleteDeletion":
 		deletion::delete($_GET["id"], $db);
 		break;
+	case "addSense":
+		$sense = new sense($this->_db, null, $_POST["entryId"]);
+		$sense->setLabel($_POST["label"]);
+		$sense->setDefinition($_POST["definition"]);
+		$sense->save();
+		echo json_encode(array("id" => $sense->getId()));
+		break;
 	default:
 		echo json_encode(array("error"=>"undefined action"));
 }

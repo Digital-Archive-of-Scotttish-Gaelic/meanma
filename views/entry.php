@@ -35,7 +35,7 @@ HTML;
 				$this->_writeEditView();
 				break;
 			case "senses":
-				$this->writeSensesView();
+				$this->_writeSensesView();
 				break;
 			case "piles":
 				$this->_writePilesView();
@@ -118,8 +118,8 @@ HTML;
 			default:
 				$listItemHtml = <<<HTML
 					<li class="nav-item"><div class="nav-link active">forms</div></li>
-					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
 					<li class="nav-item"><a class="nav-link" title="senses" href="?m=entries&a=view&type=senses&id={$this->_entry->getId()}">senses</a></li>
+					<li class="nav-item"><a class="nav-link" title="piles" href="?m=entries&a=view&type=piles&id={$this->_entry->getId()}">piles</a></li>
 					<li class="nav-item"><a class="nav-link" title="slips" href="?m=entries&a=view&type=slips&id={$this->_entry->getId()}">slips</a></li>   										
 					<li class="nav-item"><a class="nav-link" title="edit" href="?m=entries&a=view&type=edit&id={$this->_entry->getId()}">edit</a></li>
 HTML;
@@ -215,7 +215,7 @@ HTML;
         {$this->_getSensesHtml()}
 			</div>
 HTML;
-		return;
+		$this->_writeSenseModal();
 	}
 
 	private function _writePilesView() {
@@ -391,7 +391,15 @@ HTML;
 	}
 
 	private function _getSensesHtml() {
-		$html = "<h2>hello world</h2>";
+		$html = <<<HTML
+				<div class="row">
+					<div class="col">
+						<div class="mx-auto" style="width: 150px;">
+              <a href="#" data-toggle="modal" data-target="#addSenseModal" title="add sense" id="addSense" class="btn btn-success">add sense</a>
+            </div>
+					</div>
+				</div>
+HTML;
 		return $html;
 	}
 
@@ -562,6 +570,36 @@ HTML;
 		return $html;
 	}
 
+	private function _writeSenseModal() {
+		echo <<<HTML
+        <div id="senseModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="senseModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Add sense</h5>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+										<div class="row">		
+											<label class="col-4" for="senseLabel">Label:</label>
+											<input type="text" class="form-control col-7" id="senseLabel" name="senseLabel" autofocus/>             
+										</div>
+										<div class="row">		
+											<label class="col-4" for="senseDefinition">Definition:</label>
+											<textarea class="form-control col-7" id="senseDefinition" name="senseDefinition"></textarea>             
+										</div>
+                </div>
+                <div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
+                  <button type="button" id="addSense" class="btn btn-primary">add</button>
+								</div>
+							</div>
+            </div>
+          </div>
+        </div>
+HTML;
+	}
+
 	private function _writeJavascript() {
 		echo <<<HTML
 			<script>
@@ -570,6 +608,13 @@ HTML;
           $('[data-toggle="tooltip"]').tooltip()
 				});
 
+				//senses
+				
+				//add sense
+				$('#addSense').on('click', function () {
+					$('#senseModal').modal();  
+				});
+				
 				//save the entry
 				$('#saveEntry').on('click', function () {
 				  var params = {
