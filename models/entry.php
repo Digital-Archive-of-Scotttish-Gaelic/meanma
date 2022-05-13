@@ -11,6 +11,7 @@ class entry
 	private $_pileSlipIds = array();
 	private $_slipPiles = array();
 	private $_individualPiles = array();
+	private $_senses = array(); //array of sense objects
 	private $_etymology;
 	private $_subclass;
 	private $_subclasses = array(
@@ -168,6 +169,18 @@ SQL;
 			$uniqueIds[$slipId] = $pileIds;
 		}
 		return array_unique($uniqueIds);
+	}
+
+	public function getSenses($db) {
+		if (!empty($this->_senses)) {
+			return $this->_senses;
+		}
+		$sql = "SELECT id FROM subsense WHERE subsense_of IS NULL AND entry_id = :entryId";
+		$results = $db->fetch($sql, array(":entryId" => $this->getId()));
+		foreach ($results as $result) {
+			$this->_senses[] = new sense($db, $result["id"]);
+		}
+		return $this->_senses;
 	}
 
 	/**

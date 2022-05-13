@@ -387,10 +387,13 @@ switch ($_REQUEST["action"]) {
 	case "deleteDeletion":
 		deletion::delete($_GET["id"], $db);
 		break;
-	case "addSense":
-		$sense = new sense($this->_db, null, $_POST["entryId"]);
+	case "saveSense":
+		$sense = new sense($db, $_POST["id"], $_POST["entryId"]);
 		$sense->setLabel($_POST["label"]);
 		$sense->setDefinition($_POST["definition"]);
+		if ($_POST["parentId"]) {
+			$sense->setSubsenseOf($_POST["parentId"]);
+		}
 		$sense->save();
 		echo json_encode(array("id" => $sense->getId()));
 		break;

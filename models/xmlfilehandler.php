@@ -323,16 +323,18 @@ HTML;
   private function _getEmendationHtml($type, $content, $emendationId) {
   	$html = <<<HTML
 			<div id="emendation_{$emendationId}" class="dropdown show d-inline emendation-action">
-		  <a class="dropdown-toggle emendation collocateLink" href="#" id="dropdown_{$emendationId}" 
-		          data-type="{$type}" data-content="{$content}"
-		          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> [{$type} {$content}] </a>
-			        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$emendationId}">
-			        <li><a class="dropdown-item edit-emendation" data-id="{$emendationId}" tabindex="-1" href="#">edit</a></li>
-			        <li><a class="dropdown-item delete-emendation" data-id="{$emendationId}"  tabindex="-1" href="#">delete</a></li></ul>
-							</div>
-							<div id="edit_emendation_{$emendationId}" class="hide">
-							<input type="text" class="emendation_input" id="edit_{$emendationId}" value="{$content}">
-							</div>
+		    <a class="dropdown-toggle emendation collocateLink" href="#" id="dropdown_{$emendationId}" 
+          data-type="{$type}" data-content="{$content}"
+          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> [{$type} {$content}] 
+        </a>
+	      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$emendationId}">
+	        <li><a class="dropdown-item edit-emendation" data-id="{$emendationId}" tabindex="-1" href="#">edit</a></li>
+	        <li><a class="dropdown-item delete-emendation" data-id="{$emendationId}"  tabindex="-1" href="#">delete</a></li>
+	      </ul>
+			</div>
+			<div id="edit_emendation_{$emendationId}" class="hide">
+				<input type="text" class="emendation_input" id="edit_{$emendationId}" value="{$content}">
+			</div>
 HTML;
   	return $html;
   }

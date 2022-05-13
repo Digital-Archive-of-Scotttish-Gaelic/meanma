@@ -391,7 +391,13 @@ HTML;
 	}
 
 	private function _getSensesHtml() {
-		$html = <<<HTML
+		$html = "<ul>";
+		$senses = $this->_entry->getSenses($this->_db);
+		foreach ($senses as $sense) {
+			$html .= $this->_getSenseHtml($sense);
+		}
+		$html .= "</ul>";
+		$html .= <<<HTML
 				<div class="row">
 					<div class="col">
 						<div class="mx-auto" style="width: 150px;">
@@ -399,6 +405,33 @@ HTML;
             </div>
 					</div>
 				</div>
+HTML;
+		return $html;
+	}
+
+	/**
+	 * Recursive method to generate required HTML for (sub)senses
+	 * @param $sense
+	 */
+	private function _getSenseHtml($sense) {
+		$subsenseHtml = "";
+		//recursive call to assemble subsenseHtml
+		foreach ($sense->getSubsenses() as $subsense) {
+			$subsenseHtml .= $this->_getSenseHtml($subsense);
+		}
+		$sid = $sense->getId();
+		$html = <<<HTML
+				<li>
+					<div id="sense_{$sid}" class="dropdown show d-inline emendation-action">
+				    <a class="dropdown-toggle badge badge-success" href="#" id="dropdown_{$sid}" 
+		          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$sense->getLabel()} – {$sense->getDefinition()}
+		        </a>
+			      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
+			        <li><a class="dropdown-item add-subsense" data-id="{$sid}" tabindex="-1" href="#">add subsense</a></li>
+			      </ul>
+					</div>
+					<ul id="subsenses_{$sid}">{$subsenseHtml}</ul>
+				</li>
 HTML;
 		return $html;
 	}
@@ -576,7 +609,7 @@ HTML;
           <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title">Add sense</h5>
+                  <h5 class="modal-title">Sense</h5>
                 </div>
                 <div class="modal-body">
                   <div class="form-group">
@@ -590,8 +623,10 @@ HTML;
 										</div>
                 </div>
                 <div class="modal-footer">
+                  <input type="hidden" name="parentId" id="parentId" val=""/>
+                  <input type="hidden" name="senseId" id="senseId" val=""/>
 									<button type="button" class="btn btn-secondary" data-dismiss="modal">cancel</button>
-                  <button type="button" id="addSense" class="btn btn-primary">add</button>
+                  <button type="button" id="saveSense" class="btn btn-primary">save</button>
 								</div>
 							</div>
             </div>
@@ -613,6 +648,47 @@ HTML;
 				//add sense
 				$('#addSense').on('click', function () {
 					$('#senseModal').modal();  
+				});
+				
+				$('#saveSense').on('click', function () {
+				  let url = "ajax.php";
+				  let id = $('#senseId').val() == '' ? null : $('#senseId').val();
+				  let label = $('#senseLabel').val();
+				  let definition = $('#senseDefinition').val();
+				  let parentId = $('#parentId').val();
+				  let data = {
+				    action: "saveSense",
+				    id: id,
+				    entryId: '{$this->_entry->getId()}',
+				    label: label,
+				    definition: definition,
+				    parentId: parentId
+				  };
+				  $.ajax({
+					  dataType: "json",
+					  method: "post",
+					  url: url,
+					  data: data
+					})
+					.done(function(response) {
+					  let sid = response.id;	  
+					  var html = '<li><div id="sense_'+sid+'" class="dropdown show d-inline emendation-action">';
+				    html += '<a class="dropdown-toggle badge badge-success" href="#" id="dropdown_'+sid+'"'; 
+		        html += ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+label+' – '+definition+'</a>';
+			      html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+sid+'">';
+			      html += '<li><a class="dropdown-item add-subsense" data-id="'+sid+'" tabindex="-1" href="#">add subsense</a></li>';
+			      html += '</ul></div><ul id="subsenses_'+sid+'"></ul></li>';
+						$('#subsenses_'+parentId).append(html);
+					  $('#senseModal').modal('hide');
+					})
+				});
+				
+				//add a subsense
+				$(document).on('click', '.add-subsense', function () {
+				  let parentId = $(this).attr('data-id');
+				  console.log('parent: ' + parentId)
+				  $('#parentId').val(parentId);
+				  $('#senseModal').modal(); 
 				});
 				
 				//save the entry
@@ -753,10 +829,6 @@ HTML;
 				
 				function getCitationHtml(citationType, info, slipId = null) {		
 				  html = '';
-				  
-				  console.log('called');
-				  console.log(info);
-				  
 				  if (info.context != undefined) {
 						html += info.context.html;
 					}

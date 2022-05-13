@@ -28,7 +28,6 @@ SQL;
 	}
 
 	public static function getEntryById($id, $db) {
-//		$db = new database();
 		$sql = <<<SQL
         SELECT * FROM entry WHERE id = :id 
 SQL;

@@ -5,6 +5,7 @@ namespace models;
 class sense
 {
 	private $_id, $_label, $_definition, $_entryId, $_subsenseOf;
+	private $_subsenses;  //an array of sense objects that are subsenses of this sense
 	private $_entry;  //an instance of models\entry
 	private $_parentSense = null; //an (optional) instance of models\sense
 	private $_db; //an instance of models\database
@@ -16,9 +17,11 @@ class sense
 			$this->_id = $id;
 			$this->_load();
 		} else {
+			$this->_entryId = $entryId;
 			$this->_entry = entries::getEntryById($entryId, $db);
 			$this->_init();
 		}
+		return $this;
 	}
 
 	private function _load() {
@@ -30,26 +33,10 @@ SQL;
 		$this->_label = $row["label"];
 		$this->_definition = $row["definition"];
 		$this->_entryId = $row["entry_id"];
-		$this->_entry = entries::getEntryById($this->getEntryId(). $this->_db);
+		$this->_entry = entries::getEntryById($this->getEntryId(), $this->_db);
 		$this->_subsenseOf = $row["subsense_of"];
-		if ($this->getSubsenseOf()) {
-			$this->_parentSense = new sense($this->_db, $this->getSubsenseOf());
-		}
+		$this->_loadSubsenses();
 	}
-
-	public function getId() {
-		return $this->_id;
-	}
-
-	public function getEntryId() {
-		return $this->_entryId;
-	}
-
-	public function getSubsenseOf() {
-		return $this->_subsenseOf;
-	}
-
-	//GETTERS
 
 	private function _init() {
 		$sql = <<<SQL
@@ -58,6 +45,17 @@ SQL;
 		$this->_db->exec($sql, array(":entryId" => $this->getEntryId()));
 		$id = $this->_db->getLastInsertId();
 		$this->_id = $id;
+	}
+
+	private function _loadSubsenses() {
+		$sql = <<<SQL
+			SELECT id FROM subsense WHERE subsense_of = :id
+SQL;
+		$results = $this->_db->fetch($sql, array(":id" => $this->getId()));
+		foreach ($results as $result) {
+			$id = $result["id"];
+			$this->_subsenses[$id] = new sense($this->_db, $id);   echo "<h1>{$this->getId()} –> {$id}</h1>";
+		}
 	}
 
 	/**
@@ -77,7 +75,25 @@ SQL;
 				WHERE id = :id
 SQL;
 		$this->_db->exec($sql, array(":label" => $this->getLabel(), ":definition" => $this->getDefinition(),
-			":entryId" => $this->getEntryId(), ":subsenseOf" => $this->getSubsenseOf()));
+			":entryId" => $this->getEntryId(), ":subsenseOf" => $this->getSubsenseOf(), ":id" => $this->getId()));
+	}
+
+	// GETTERS
+
+	public function getId() {
+		return $this->_id;
+	}
+
+	public function getEntryId() {
+		return $this->_entryId;
+	}
+
+	public function getSubsenses() {
+		return $this->_subsenses;
+	}
+
+	public function getSubsenseOf() {
+		return $this->_subsenseOf;
 	}
 
 	public function getLabel() {
@@ -103,5 +119,9 @@ SQL;
 
 	public function setDefinition($text) {
 		$this->_definition = $text;
+	}
+
+	public function setSubsenseOf($parentId) {
+		$this->_subsenseOf = $parentId;
 	}
 }
