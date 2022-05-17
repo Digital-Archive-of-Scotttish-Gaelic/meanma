@@ -54,7 +54,7 @@ SQL;
 		$results = $this->_db->fetch($sql, array(":id" => $this->getId()));
 		foreach ($results as $result) {
 			$id = $result["id"];
-			$this->_subsenses[$id] = new sense($this->_db, $id);   echo "<h1>{$this->getId()} –> {$id}</h1>";
+			$this->_subsenses[$id] = new sense($this->_db, $id);
 		}
 	}
 

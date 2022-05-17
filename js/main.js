@@ -304,6 +304,7 @@ function resetSlip() {
 function saveSlip() {
   var slipType = $('#citationContext').attr('data-sliptype');
   var entryId = $('#citationContext').attr('data-entryid');
+  var senseId = $('#subsense_id').val();
   var textId = $('#textId').val();
   var reference = CKEDITOR.instances['reference'].getData();
   var wordform = $('#wordform').val();
@@ -315,7 +316,7 @@ function saveSlip() {
   var data = {action: "saveSlip", filename: $('#slipFilename').text(), id: $('#wordId').text(),
     auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred, reference: reference,
     notes: notes, status: status, wordClass: wordclass, wordform: wordform, text_id: textId,
-    locked: locked, text_id: $('#textId').val(), slipType: slipType, entryId: entryId};
+    locked: locked, text_id: $('#textId').val(), slipType: slipType, entryId: entryId, subsense_id: senseId};
   switch (wordclass) {
     case "noun":
       data['gender'] = $('#posGender').val();

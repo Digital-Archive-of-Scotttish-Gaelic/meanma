@@ -66,6 +66,7 @@ HTML;
 	          </div>
             {$this->_writePartOfSpeechSelects()}
 				</div> <!-- end morphoSyntactic -->
+				{$this->_writeSenseSelect()}
 				{$this->_writePileCategories()}
 				<div style="margin: 0 0 10px 10px;">
           <small><a href="#notesSection" id="toggleNotes" data-toggle="collapse" aria-expanded="true" aria-controls="notesSection">
@@ -105,6 +106,7 @@ HTML;
             <input type="hidden" id="auto_id" name="auto_id" value="{$this->_slip->getId()}">
             <input type="hidden" id="pos" name="pos" value="{$_REQUEST["pos"]}">
             <input type="hidden" id="textId" name="textId" value="{$this->_slip->getTextId()}">
+            <input type="hidden" id="subsense_id" name="subsense_id" value="{$this->_slip->getSenseId()}">
             <input type="hidden" name="action" value="save">
             {$lockedHtml}
             <div class="mx-2">
@@ -575,6 +577,70 @@ HTML;
     return $html;
   }
 
+	private function _writeSenseSelect() {
+		$senses = $this->_slip->getEntry()->getTopLevelSenses($this->_slip->getDb());
+		$selectedHtml = $this->_slip->getSense() ? $this->_slip->getSense()->getLabel() : "-- select a sense --";
+		$dropdownHtml = <<<HTML
+			<div class="dropdown show">
+        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          {$selectedHtml}
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+HTML;
+		foreach ($senses as $sense) {
+			$dropdownHtml .= $this->_getSenseOptions($sense);
+		}
+		$dropdownHtml .= <<<HTML
+        </ul>
+      </div>
+HTML;
+		$html = <<<HTML
+				<div style="margin-left: 10px;">
+					<small><a href="#sense" id="toggleSense" data-toggle="collapse" aria-expanded="true" aria-controls="sense">
+            show/hide sense
+          </a></small>
+        </div>
+        <div id="sense" class="editSlipSectionContainer collapse show">
+          <div class="form-group row">
+            <div class="col-sm-2">
+                  <label for="senseSelect" class="col-form-label">Sense:</label>
+            </div>
+            <div>
+                {$dropdownHtml}
+            </div>
+          </div>
+        </div>
+HTML;
+		return $html;
+	}
+
+	/**
+	 * Recursive method to assemble sense options for senses and subsenses
+	 * @param $sense
+	 */
+	private function _getSenseOptions($sense) {
+		if (!empty($sense->getSubsenses())) {   //there are subsenses, so write the dropdown link
+			$html = <<<HTML
+				<li class="dropdown-submenu">
+					<a class="dropdown-item dropdown-toggle" href="#">
+						{$sense->getLabel()}
+					</a>
+					<ul class="dropdown-menu">
+HTML;
+			foreach ($sense->getSubsenses() as $subsense) {
+				$html .= $this->_getSenseOptions($subsense);  //recursive call to get subsenses
+			}
+			$html .= "</ul>";
+		} else {    //this is a sense so write it
+			$html .= <<<HTML
+				<li><a class="dropdown-item senseSelect" data-id="{$sense->getId()}" href="#">{$sense->getLabel()}</a></li>
+HTML;
+
+		}
+		$html .= "</li>";
+		return $html;
+	}
+
   private function _writePileCategories() {
   	$unusedPiles = $this->_slip->getUnusedPiles();
 		$savedPiles = $this->_slip->getPiles();
@@ -723,6 +789,12 @@ HTML;
                 backdrop: 'static'
               });
             }
+            
+            //senses
+            $('.senseSelect').on('click', function () {
+                $('#subsense_id').val($(this).attr("data-id"));
+                $('#dropdownMenuLink').text($(this).text());
+            });
             
             //delete citation
             $(document).on('click', '.deleteCitation', function () {

@@ -392,7 +392,7 @@ HTML;
 
 	private function _getSensesHtml() {
 		$html = "<ul>";
-		$senses = $this->_entry->getSenses($this->_db);
+		$senses = $this->_entry->getTopLevelSenses($this->_db);
 		foreach ($senses as $sense) {
 			$html .= $this->_getSenseHtml($sense);
 		}

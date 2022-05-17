@@ -171,7 +171,8 @@ SQL;
 		return array_unique($uniqueIds);
 	}
 
-	public function getSenses($db) {
+
+	public function getTopLevelSenses($db) {
 		if (!empty($this->_senses)) {
 			return $this->_senses;
 		}

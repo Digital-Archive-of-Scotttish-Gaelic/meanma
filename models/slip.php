@@ -15,6 +15,7 @@ class slip
 	protected $_filename = null;
 	protected $_wid = null;
 	protected $_pos, $_wordform;
+	protected $_senseId; //an optional ID to identify subsense record
 	protected $_locked = 0;
 	protected $_starred, $_notes, $_ownedBy, $_entryId, $_headword, $_slipStatus;
 	protected $_wordClass, $_lastUpdatedBy, $_lastUpdated;
@@ -42,6 +43,10 @@ class slip
 
 	public function getId() {
 		return $this->_id;
+	}
+
+	public function getDb() {
+		return $this->_db;
 	}
 
 	/**
@@ -94,6 +99,17 @@ class slip
 			$this->_text = new corpus_browse($this->getTextId(), $this->_db);
 		}
 		return $this->_text;
+	}
+
+	public function getSenseId() {
+		return $this->_senseId;
+	}
+
+	public function getSense() {
+		if ($this->getSenseId()) {
+			return new sense($this->_db, $this->getSenseId());
+		}
+		return null;
 	}
 
 	public function getSlipIsAttachedTiCitation($citationId) {
@@ -225,6 +241,7 @@ SQL;
 		$this->_headword = $this->_entry->getHeadword();
 		$this->_wordClass = $this->_entry->getWordclass();
 		$this->_entryId = $params["entryId"];
+		$this->_senseId = $params["subsense_id"];
 		$this->setWordform($params["wordform"]);
 		$this->_locked = $params["locked"];
 		$this->_slipStatus = $params["slipStatus"];
@@ -246,12 +263,12 @@ SQL;
 		$sql = <<<SQL
         UPDATE slips 
             SET text_id = ?, reference = ?, locked = ?, starred = ?, notes = ?, 
-                entry_id = ?, wordform = ?, slipStatus = ?, 
+                entry_id = ?, subsense_id = ?, wordform = ?, slipStatus = ?, 
              		updatedBy = ?, lastUpdated = now()
             WHERE auto_id = ?
 SQL;
 		$this->_db->exec($sql, array($this->getTextId(), $this->getReference(), $locked, $this->getStarred(),
-			$this->getNotes(), $this->getEntryId(), $this->getWordform(),
+			$this->getNotes(), $this->getEntryId(), $this->getSenseId(), $this->getWordform(),
 			$this->getSlipStatus(), $this->getLastUpdatedBy(), $this->getId()));
 		return $this;
 	}
