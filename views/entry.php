@@ -293,7 +293,7 @@ HTML;
 
 			foreach ($wordforms as $wordform => $slipIds) {
 				$i++;
-				$slipList = $this->_getSlipListForForms($slipIds);
+				$slipList = $this->_getSlipList($slipIds);
 				$citationHtml = <<<HTML
 						<small><a href="#" class="citationsLink" data-type="form" data-index="{$i}">
 								citations
@@ -320,7 +320,7 @@ HTML;
 		return $html;
 	}
 
-	private function _getSlipListForForms($slipIds) {
+	private function _getSlipList($slipIds) {
 		$slipList = '<table class="table"><tbody>';
 		foreach ($slipIds as $id) {
 			$slipData = models\collection::getSlipInfoBySlipId($id, $this->_db);
@@ -391,7 +391,7 @@ HTML;
 	}
 
 	private function _getSensesHtml() {
-		$html = "<ul>";
+		$html = "<ul id=\"senses\">";
 		$senses = $this->_entry->getTopLevelSenses($this->_db);
 		foreach ($senses as $sense) {
 			$html .= $this->_getSenseHtml($sense);
@@ -420,12 +420,31 @@ HTML;
 			$subsenseHtml .= $this->_getSenseHtml($subsense);
 		}
 		$sid = $sense->getId();
+		$slipIds = $sense->getCitationSlipIds();
+		$citationHtml = "";
+		if (!empty($slipIds)) {   //there are citations for this sense
+			$slipList = $this->_getSlipList($slipIds);
+			$citationHtml = <<<HTML
+						<small><a href="#" class="citationsLink" data-type="sense" data-index="_s{$sid}">
+								citations
+						</a></small>
+						<div id="sense_citations_s{$sid}" data-loaded class="citation">
+							<div class="spinner">
+				        <div class="spinner-border" role="status">
+				          <span class="sr-only">Loading...</span>
+				        </div>
+							</div>
+							{$slipList}
+						</div>
+HTML;
+		}
+
 		$html = <<<HTML
 				<li>
-					<div id="sense_{$sid}" class="dropdown show d-inline emendation-action">
+					<div id="sense_{$sid}" class="dropdown show d-inline">
 				    <a class="dropdown-toggle badge badge-success" href="#" id="dropdown_{$sid}" 
 		          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$sense->getLabel()} – {$sense->getDefinition()}
-		        </a>
+		        </a> {$citationHtml}
 			      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
 			        <li><a class="dropdown-item add-subsense" data-id="{$sid}" tabindex="-1" href="#">add subsense</a></li>
 			      </ul>
@@ -678,7 +697,11 @@ HTML;
 			      html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+sid+'">';
 			      html += '<li><a class="dropdown-item add-subsense" data-id="'+sid+'" tabindex="-1" href="#">add subsense</a></li>';
 			      html += '</ul></div><ul id="subsenses_'+sid+'"></ul></li>';
-						$('#subsenses_'+parentId).append(html);
+			      if (parentId) {
+							$('#subsenses_'+parentId).append(html); 
+						} else {
+			        $('#senses').append(html);
+						}
 					  $('#senseModal').modal('hide');
 					})
 				});

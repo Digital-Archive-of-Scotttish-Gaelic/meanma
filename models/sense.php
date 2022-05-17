@@ -112,6 +112,37 @@ SQL;
 		return $this->_parentSense;
 	}
 
+	public function getCitationSlipIds() {
+		$slipIds = array();
+		$sql = <<<SQL
+			SELECT s.auto_id AS slipId FROM slips s
+				JOIN slip_citation sc ON s.auto_id = sc.slip_id
+				JOIN citation c ON c.id = sc.citation_id
+				WHERE subsense_id = :id AND c.type = "sense"
+SQL;
+		$results = $this->_db->fetch($sql, array(":id" => $this->getId()));
+		foreach ($results as $result) {
+			$slipIds[] = $result["slipId"];
+		}
+		return $slipIds;
+	}
+
+	/*
+	public function getCitations() {
+		$sql = <<<SQL
+			SELECT c.id AS cid FROM citation c 
+			    JOIN slip_citation sc ON c.id = citation_id
+					JOIN slips s ON sc.slip_id = s.auto_id
+				WHERE subsense_id = :id AND c.type = "sense"
+SQL;
+		$results = $this->_db->fetch($sql, array(":id" => $this->getId()));
+		foreach ($results as $result) {
+			$citations[] = new citation($this->_db, $result["cid"]);
+		}
+		return $citations;
+	}
+	*/
+
 	//SETTERS
 	public function setLabel($text) {
 		$this->_label = $text;
