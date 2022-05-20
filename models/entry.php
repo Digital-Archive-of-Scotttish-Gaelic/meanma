@@ -185,6 +185,26 @@ SQL;
 	}
 
 	/**
+	 * Gets an array of slip IDs for this entry that have not been assigned a sense
+	 * @param $db
+	 * @return array of slip ids (auto_id)
+	 */
+	public function getUnassignedToSense($db) {
+		$unassignedSlipIds = array();
+		$sql = <<<HTML
+			SELECT auto_id FROM slips s
+			 JOIN slip_citation sc ON s.auto_id = sc.slip_id
+			 JOIN citation c ON sc.citation_id = c.id
+			 WHERE subsense_id IS NULL AND entry_id = :entryId AND c.type = "sense"
+HTML;
+		$results = $db->fetch($sql, array(":entryId" => $this->getId()));
+		foreach ($results as $result) {
+			$unassignedSlipIds[] = $result["auto_id"];
+		}
+		return $unassignedSlipIds;
+	}
+
+	/**
 	 * Returns all possible subclass options for this entry (based on wordclass)
 	 * @return array: of strings
 	 */

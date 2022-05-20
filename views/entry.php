@@ -392,11 +392,34 @@ HTML;
 
 	private function _getSensesHtml() {
 		$html = "<ul id=\"senses\">";
+		$unassignedHtml = "";
+		$unassignedSlipIds = $this->_entry->getUnassignedToSense($this->_db);
+		if (!empty($unassignedSlipIds)) {
+			$slipList = $this->_getSlipList($unassignedSlipIds);
+			$unassignedHtml = <<<HTML
+				<span class="badge badge-secondary">unassigned</span>
+				<small><a href="#" class="citationsLink" data-type="sense" data-index="_us">
+								citations
+						</a></small>
+						<div id="sense_citations_us" data-loaded class="citation">
+							<div class="spinner">
+				        <div class="spinner-border" role="status">
+				          <span class="sr-only">Loading...</span>
+				        </div>
+							</div>
+							{$slipList}
+						</div>
+HTML;
+
+		}
 		$senses = $this->_entry->getTopLevelSenses($this->_db);
 		foreach ($senses as $sense) {
 			$html .= $this->_getSenseHtml($sense);
 		}
-		$html .= "</ul>";
+		$html .= <<<HTML
+			</ul>
+			{$unassignedHtml}
+HTML;
 		$html .= <<<HTML
 				<div class="row">
 					<div class="col">
