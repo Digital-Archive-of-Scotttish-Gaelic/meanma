@@ -397,6 +397,14 @@ switch ($_REQUEST["action"]) {
 		$sense->save();
 		echo json_encode(array("id" => $sense->getId()));
 		break;
+	case "swapSense":
+		$sense = new sense($db, $_GET["sid"]);
+		$swapId = $sense->swapSense($_GET["dir"]);
+		$position = $sense->getSensePosition(); //whether this sense is first and/or last in the sort order
+		$swapSense = new sense($db, $swapId);
+		$swapPosition = $swapSense->getSensePosition();
+		echo json_encode(array("id" => $swapId, "position" => $position, "swapPosition" => $swapPosition));
+		break;
 	default:
 		echo json_encode(array("error"=>"undefined action"));
 }

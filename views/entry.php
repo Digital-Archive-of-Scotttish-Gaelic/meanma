@@ -391,7 +391,7 @@ HTML;
 	}
 
 	private function _getSensesHtml() {
-		$html = "<ul id=\"senses\">";
+		$html = "<ul id=\"senses\" class=\"senses_list\">";
 		$unassignedHtml = "";
 		$unassignedSlipIds = $this->_entry->getUnassignedToSense($this->_db);
 		if (!empty($unassignedSlipIds)) {
@@ -413,8 +413,9 @@ HTML;
 
 		}
 		$senses = $this->_entry->getTopLevelSenses($this->_db);
-		foreach ($senses as $sense) {
-			$html .= $this->_getSenseHtml($sense);
+		$numSenses = count($senses);
+		foreach ($senses as $i => $sense) {
+			$html .= $this->_getSenseHtml($sense, $i, $numSenses);
 		}
 		$html .= <<<HTML
 			</ul>
@@ -436,11 +437,12 @@ HTML;
 	 * Recursive method to generate required HTML for (sub)senses
 	 * @param $sense
 	 */
-	private function _getSenseHtml($sense) {
+	private function _getSenseHtml($sense, $index, $numSenses) {
 		$subsenseHtml = "";
 		//recursive call to assemble subsenseHtml
-		foreach ($sense->getSubsenses() as $subsense) {
-			$subsenseHtml .= $this->_getSenseHtml($subsense);
+		$count = count($sense->getSubsenses());
+		foreach ($sense->getSubsenses() as $i => $subsense) {
+			$subsenseHtml .= $this->_getSenseHtml($subsense, $i, $count);
 		}
 		$sid = $sense->getId();
 		$slipIds = $sense->getCitationSlipIds();
@@ -461,18 +463,21 @@ HTML;
 						</div>
 HTML;
 		}
-
+		$moveUpHide = $index == 0 ? "d-none" : "";
+		$moveDownHide = $index == $numSenses-1 ? "d-none" : "";
 		$html = <<<HTML
-				<li>
-					<div id="sense_{$sid}" class="dropdown show d-inline">
+				<li id="sense_{$sid}">
+					<div class="dropdown show d-inline">
 				    <a class="dropdown-toggle badge badge-success" href="#" id="dropdown_{$sid}" 
 		          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$sense->getLabel()} – {$sense->getDefinition()}
-		        </a> {$citationHtml}
+		        </a> {$citationHtml} 
+		        <a href="#" id="up-arrow-{$sid}" data-senseid="{$sid}" data-direction="up" class="swap-sense {$moveUpHide}">&uarr;</a>
+		        <a href="#" id="down-arrow-{$sid}" data-senseid="{$sid}" data-direction="down" class="swap-sense {$moveDownHide}">&darr;</a>
 			      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
 			        <li><a class="dropdown-item add-subsense" data-id="{$sid}" tabindex="-1" href="#">add subsense</a></li>
 			      </ul>
 					</div>
-					<ul id="subsenses_{$sid}">{$subsenseHtml}</ul>
+					<ul id="subsenses_{$sid}" class="senses_list">{$subsenseHtml}</ul>
 				</li>
 HTML;
 		return $html;
@@ -705,7 +710,7 @@ HTML;
 				    label: label,
 				    definition: definition,
 				    parentId: parentId
-				  };
+				  };				  
 				  $.ajax({
 					  dataType: "json",
 					  method: "post",
@@ -714,27 +719,57 @@ HTML;
 					})
 					.done(function(response) {
 					  let sid = response.id;	  
-					  var html = '<li><div id="sense_'+sid+'" class="dropdown show d-inline emendation-action">';
+					  var html = '<li id="sense_'+sid+'"><div id="sense_'+sid+'" class="dropdown show d-inline emendation-action">';
 				    html += '<a class="dropdown-toggle badge badge-success" href="#" id="dropdown_'+sid+'"'; 
 		        html += ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+label+' – '+definition+'</a>';
+		        html += '&nbsp;<a href="#" id="up-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="up" class="swap-sense">&uarr;</a>';
+		        html += '&nbsp;<a href="#" id="down-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="down" class="swap-sense d-none">&darr;</a>';
 			      html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+sid+'">';
 			      html += '<li><a class="dropdown-item add-subsense" data-id="'+sid+'" tabindex="-1" href="#">add subsense</a></li>';
 			      html += '</ul></div><ul id="subsenses_'+sid+'"></ul></li>';
+			      var swapId = null;
 			      if (parentId) {
+			        swapId = $('#subsenses_'+parentId).children().last().attr("id");
 							$('#subsenses_'+parentId).append(html); 
 						} else {
+			        swapId = $('#senses').children().last().attr("id");
 			        $('#senses').append(html);
 						}
+			      if (swapId) {
+			        let elems = swapId.split('_');
+			        swapId = elems[1];
+			        $('#up-arrow-'+sid).removeClass('d-none');
+			        $('#down-arrow-'+swapId).removeClass('d-none');
+			      }
 					  $('#senseModal').modal('hide');
+			      $('#parentId').val('');   //reset the parentId
 					})
 				});
 				
 				//add a subsense
 				$(document).on('click', '.add-subsense', function () {
 				  let parentId = $(this).attr('data-id');
-				  console.log('parent: ' + parentId)
 				  $('#parentId').val(parentId);
 				  $('#senseModal').modal(); 
+				});
+				
+				//swap a sense
+				$(document).on('click', '.swap-sense', function () {
+					let sid = $(this).attr('data-senseid');
+					let senseLI = $('#sense_'+sid);
+					let dir = $(this).attr('data-direction');
+					$.getJSON('ajax.php?action=swapSense&dir='+dir+'&sid='+sid, function () {
+					})
+					.done(function (data) {
+					  let swapId = data.id;
+						if (dir == "up") {
+						  $(senseLI).insertBefore('#sense_'+swapId);
+						} else {
+						  $(senseLI).insertAfter('#sense_'+swapId);
+						}
+						toggleArrows(sid, data.position);
+						toggleArrows(swapId, data.swapPosition);
+					})
 				});
 				
 				//save the entry
@@ -894,6 +929,20 @@ HTML;
 					//write the icon
 					$('#citationSlip_'+slipId).html('<strong>'+citationType+'</strong>');
 					return html;
+				}
+				
+				//hide/show up/down arrows as appropriate
+				function toggleArrows(sid, position) {				
+					if (position['first']) {
+					  $('#up-arrow-'+sid).addClass('d-none');		  
+					} else {
+					  $('#up-arrow-'+sid).removeClass('d-none');
+					}
+					if (position['last']) {
+					  $('#down-arrow-'+sid).addClass('d-none');
+					} else {
+					  $('#down-arrow-'+sid).removeClass('d-none');
+					}  
 				}
 				
 				function getTranslationHtml(content, index) {

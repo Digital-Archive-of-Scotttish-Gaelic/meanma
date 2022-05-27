@@ -176,7 +176,7 @@ SQL;
 		if (!empty($this->_senses)) {
 			return $this->_senses;
 		}
-		$sql = "SELECT id FROM subsense WHERE subsense_of IS NULL AND entry_id = :entryId";
+		$sql = "SELECT id FROM subsense WHERE subsense_of IS NULL AND entry_id = :entryId ORDER BY sortOrder";
 		$results = $db->fetch($sql, array(":entryId" => $this->getId()));
 		foreach ($results as $result) {
 			$this->_senses[] = new sense($db, $result["id"]);
