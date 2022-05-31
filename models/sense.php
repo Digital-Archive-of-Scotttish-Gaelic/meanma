@@ -120,7 +120,7 @@ SQL;
 	}
 
 	public function getParentSense() {
-		return $this->_parentSense;
+		return new sense($this->_db, $this->getSubsenseOf());
 	}
 
 	public function getHighestSortOrder() {
@@ -148,10 +148,22 @@ SQL;
 	/**
 	 * Swap sense in the sort order and return swapped sense ID
 	 * @param string $direction
-	 * @return int $previousId  : the ID of the sense swapped with
+	 * @return int $swapId  : the ID of the sense swapped with
 	 */
 	public function swapSense($direction) {
-		$senseIds = $this->_getSenseIdsInOrder();
+		if ($direction == "left") {   //promote this sense up the hierarchy
+			$parentSense = $this->getParentSense();
+			$parentParentSenseId = $parentSense->getSubsenseOf();
+			$this->setSubsenseOf($parentParentSenseId);
+			$parentSenseIds = $parentSense->getSenseIdsInOrder();
+			$lastSenseId = array_pop($parentSenseIds);
+			$lastSense = new sense($this->_db, $lastSenseId);
+			$sortOrder = $lastSense->getSortOrder();
+			$this->setSortOrder($sortOrder+100);
+			$this->save();
+			return $lastSenseId;    //the last sense ID in the higher level list
+		}
+		$senseIds = $this->getSenseIdsInOrder();
 		$swapId = null;
 		while ($id = current($senseIds)) {  //iterate through the senseIds to find the current one
 			if ($id == $this->getId()) {
@@ -172,7 +184,7 @@ SQL;
 		return $swapId;
 	}
 
-	private function _getSenseIdsInOrder() {
+	public function getSenseIdsInOrder() {
 		$senseIds = array();
 		$subsenseHtml = $this->getSubsenseOf() ? "= {$this->getSubsenseOf()}" : "IS NULL";
 		$sql = <<<SQL

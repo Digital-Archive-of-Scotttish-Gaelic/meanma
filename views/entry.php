@@ -391,7 +391,7 @@ HTML;
 	}
 
 	private function _getSensesHtml() {
-		$html = "<ul id=\"senses\" class=\"senses_list\">";
+		$html = "<ol id=\"senses\" class=\"senses_list\">";
 		$unassignedHtml = "";
 		$unassignedSlipIds = $this->_entry->getUnassignedToSense($this->_db);
 		if (!empty($unassignedSlipIds)) {
@@ -418,7 +418,7 @@ HTML;
 			$html .= $this->_getSenseHtml($sense, $i, $numSenses);
 		}
 		$html .= <<<HTML
-			</ul>
+			</ol>
 			{$unassignedHtml}
 HTML;
 		$html .= <<<HTML
@@ -465,19 +465,22 @@ HTML;
 		}
 		$moveUpHide = $index == 0 ? "d-none" : "";
 		$moveDownHide = $index == $numSenses-1 ? "d-none" : "";
+		$moveLeftHide = $sense->getSubsenseOf() ? "" : "d-none";
 		$html = <<<HTML
 				<li id="sense_{$sid}">
 					<div class="dropdown show d-inline">
 				    <a class="dropdown-toggle badge badge-success" href="#" id="dropdown_{$sid}" 
-		          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{$sense->getLabel()} – {$sense->getDefinition()}
+		          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{$sense->getDefinition()}">
+							{$sense->getLabel()}
 		        </a> {$citationHtml} 
 		        <a href="#" id="up-arrow-{$sid}" data-senseid="{$sid}" data-direction="up" class="swap-sense {$moveUpHide}">&uarr;</a>
 		        <a href="#" id="down-arrow-{$sid}" data-senseid="{$sid}" data-direction="down" class="swap-sense {$moveDownHide}">&darr;</a>
-			      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
+		        <a href="#" id="left-arrow-{$sid}" data-senseid="{$sid}" data-direction="left" class="swap-sense {$moveLeftHide}">&larr;</a>
+			      <ol class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
 			        <li><a class="dropdown-item add-subsense" data-id="{$sid}" tabindex="-1" href="#">add subsense</a></li>
-			      </ul>
+			      </ol>
 					</div>
-					<ul id="subsenses_{$sid}" class="senses_list">{$subsenseHtml}</ul>
+					<ol id="subsenses_{$sid}" class="senses_list">{$subsenseHtml}</ol>
 				</li>
 HTML;
 		return $html;
@@ -721,19 +724,21 @@ HTML;
 					  let sid = response.id;	  
 					  var html = '<li id="sense_'+sid+'"><div id="sense_'+sid+'" class="dropdown show d-inline emendation-action">';
 				    html += '<a class="dropdown-toggle badge badge-success" href="#" id="dropdown_'+sid+'"'; 
-		        html += ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+label+' – '+definition+'</a>';
+				    html += ' title="'+definition+'"';
+		        html += ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+label+'</a>';
 		        html += '&nbsp;<a href="#" id="up-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="up" class="swap-sense">&uarr;</a>';
 		        html += '&nbsp;<a href="#" id="down-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="down" class="swap-sense d-none">&darr;</a>';
-			      html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+sid+'">';
+		        html += '&nbsp;<a href="#" id="left-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="left" class="swap-sense d-none">&larr;</a>';
+			      html += '<ol class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+sid+'">';
 			      html += '<li><a class="dropdown-item add-subsense" data-id="'+sid+'" tabindex="-1" href="#">add subsense</a></li>';
-			      html += '</ul></div><ul id="subsenses_'+sid+'"></ul></li>';
+			      html += '</ol></div><ol id="subsenses_'+sid+'"></ol></li>';
 			      var swapId = null;
 			      if (parentId) {
 			        swapId = $('#subsenses_'+parentId).children().last().attr("id");
-							$('#subsenses_'+parentId).append(html); 
+							$('#subsenses_'+parentId).append(html);     //subsense, so append to subsense list
 						} else {
 			        swapId = $('#senses').children().last().attr("id");
-			        $('#senses').append(html);
+			        $('#senses').append(html);    //top level, so append to main sense list
 						}
 			      if (swapId) {
 			        let elems = swapId.split('_');
@@ -762,11 +767,17 @@ HTML;
 					})
 					.done(function (data) {
 					  let swapId = data.id;
-						if (dir == "up") {
-						  $(senseLI).insertBefore('#sense_'+swapId);
-						} else {
-						  $(senseLI).insertAfter('#sense_'+swapId);
-						}
+					  switch (dir) {
+					    case "up":
+					      $(senseLI).insertBefore('#sense_'+swapId);
+					      break;
+				      case "down":
+				        $(senseLI).insertAfter('#sense_'+swapId);
+				        break;
+			        case "left":
+			          $(senseLI).insertAfter('#sense_'+swapId);
+		            break;
+					  }		  
 						toggleArrows(sid, data.position);
 						toggleArrows(swapId, data.swapPosition);
 					})

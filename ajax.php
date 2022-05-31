@@ -399,10 +399,22 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "swapSense":
 		$sense = new sense($db, $_GET["sid"]);
-		$swapId = $sense->swapSense($_GET["dir"]);
-		$position = $sense->getSensePosition(); //whether this sense is first and/or last in the sort order
-		$swapSense = new sense($db, $swapId);
-		$swapPosition = $swapSense->getSensePosition();
+		$swapId = null;
+		switch ($_GET["dir"]) {
+			case "up":
+			case "down":
+				$swapId = $sense->swapSense($_GET["dir"]);
+				$position = $sense->getSensePosition(); //whether this sense is first and/or last in the sort order
+				$swapSense = new sense($db, $swapId);
+				$swapPosition = $swapSense->getSensePosition();
+				break;
+			case "left":
+				$swapId = $sense->swapSense($_GET["dir"]);
+				$position = "last";
+				$swapPosition = null;
+				break;
+		}
+
 		echo json_encode(array("id" => $swapId, "position" => $position, "swapPosition" => $swapPosition));
 		break;
 	default:
