@@ -415,7 +415,7 @@ HTML;
 		$senses = $this->_entry->getTopLevelSenses($this->_db);
 		$numSenses = count($senses);
 		foreach ($senses as $i => $sense) {
-			$html .= $this->_getSenseHtml($sense, $i, $numSenses);
+			$html .= $this->_getSenseHtml($sense, $i, $numSenses, 0);
 		}
 		$html .= <<<HTML
 			</ol>
@@ -437,12 +437,15 @@ HTML;
 	 * Recursive method to generate required HTML for (sub)senses
 	 * @param $sense
 	 */
-	private function _getSenseHtml($sense, $index, $numSenses) {
+	private function _getSenseHtml($sense, $index, $numSenses, $depth) {
+		$listTypes = array("a", "i", "A", "1");
+		$listType = $listTypes[$depth];
+		$nextDepth = $depth == count($listTypes) ? 0 : $depth+1;  //prevent overflow
 		$subsenseHtml = "";
 		//recursive call to assemble subsenseHtml
 		$count = count($sense->getSubsenses());
 		foreach ($sense->getSubsenses() as $i => $subsense) {
-			$subsenseHtml .= $this->_getSenseHtml($subsense, $i, $count);
+			$subsenseHtml .= $this->_getSenseHtml($subsense, $i, $count, $nextDepth);
 		}
 		$sid = $sense->getId();
 		$slipIds = $sense->getCitationSlipIds();
@@ -476,11 +479,11 @@ HTML;
 		        <a href="#" id="up-arrow-{$sid}" data-senseid="{$sid}" data-direction="up" class="swap-sense {$moveUpHide}">&uarr;</a>
 		        <a href="#" id="down-arrow-{$sid}" data-senseid="{$sid}" data-direction="down" class="swap-sense {$moveDownHide}">&darr;</a>
 		        <a href="#" id="left-arrow-{$sid}" data-senseid="{$sid}" data-direction="left" class="swap-sense {$moveLeftHide}">&larr;</a>
-			      <ol class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
+			      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
 			        <li><a class="dropdown-item add-subsense" data-id="{$sid}" tabindex="-1" href="#">add subsense</a></li>
-			      </ol>
+			      </ul>
 					</div>
-					<ol id="subsenses_{$sid}" class="senses_list">{$subsenseHtml}</ol>
+					<ol type="{$listType}" data-depth="{$depth}" id="subsenses_{$sid}" class="senses_list">{$subsenseHtml}</ol>
 				</li>
 HTML;
 		return $html;
@@ -706,6 +709,9 @@ HTML;
 				  let label = $('#senseLabel').val();
 				  let definition = $('#senseDefinition').val();
 				  let parentId = $('#parentId').val();
+				  let depth = parentId ? parseInt($('#subsenses_'+parentId).attr('data-depth')) : 0;
+				  let listTypes = ["a", "i", "A", "1"];
+				  let nextDepth = depth+1 == listTypes.length ? 0 : depth+1;
 				  let data = {
 				    action: "saveSense",
 				    id: id,
@@ -728,10 +734,10 @@ HTML;
 		        html += ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+label+'</a>';
 		        html += '&nbsp;<a href="#" id="up-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="up" class="swap-sense">&uarr;</a>';
 		        html += '&nbsp;<a href="#" id="down-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="down" class="swap-sense d-none">&darr;</a>';
-		        html += '&nbsp;<a href="#" id="left-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="left" class="swap-sense d-none">&larr;</a>';
-			      html += '<ol class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+sid+'">';
+		        html += '&nbsp;<a href="#" id="left-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="left" class="swap-sense">&larr;</a>';
+			      html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+sid+'">';
 			      html += '<li><a class="dropdown-item add-subsense" data-id="'+sid+'" tabindex="-1" href="#">add subsense</a></li>';
-			      html += '</ol></div><ol id="subsenses_'+sid+'"></ol></li>';
+			      html += '</ul></div><ol type="'+listTypes[nextDepth]+'" data-depth="'+(nextDepth)+'" id="subsenses_'+sid+'"></ol></li>';
 			      var swapId = null;
 			      if (parentId) {
 			        swapId = $('#subsenses_'+parentId).children().last().attr("id");
@@ -739,6 +745,7 @@ HTML;
 						} else {
 			        swapId = $('#senses').children().last().attr("id");
 			        $('#senses').append(html);    //top level, so append to main sense list
+			        $('#left-arrow-'+sid).addClass('d-none'); //and hide left arrow
 						}
 			      if (swapId) {
 			        let elems = swapId.split('_');

@@ -410,8 +410,8 @@ switch ($_REQUEST["action"]) {
 				break;
 			case "left":
 				$swapId = $sense->swapSense($_GET["dir"]);
-				$position = null;
-				$swapPosition = "last";
+				$position = array("last" => 1);
+				$swapPosition = "";
 				break;
 		}
 		echo json_encode(array("id" => $swapId, "position" => $position, "swapPosition" => $swapPosition,
