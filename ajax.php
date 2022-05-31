@@ -410,12 +410,12 @@ switch ($_REQUEST["action"]) {
 				break;
 			case "left":
 				$swapId = $sense->swapSense($_GET["dir"]);
-				$position = "last";
-				$swapPosition = null;
+				$position = null;
+				$swapPosition = "last";
 				break;
 		}
-
-		echo json_encode(array("id" => $swapId, "position" => $position, "swapPosition" => $swapPosition));
+		echo json_encode(array("id" => $swapId, "position" => $position, "swapPosition" => $swapPosition,
+			"parentId" => $sense->getSubsenseOf()));
 		break;
 	default:
 		echo json_encode(array("error"=>"undefined action"));

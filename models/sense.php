@@ -203,7 +203,7 @@ SQL;
 	 * @return array $position : "first", "last", ""
 	 */
 	public function getSensePosition() {
-		$senseIds = $this->_getSenseIdsInOrder();
+		$senseIds = $this->getSenseIdsInOrder();
 		$position = array("first" => null, "last" => null);
 		$count = count($senseIds);
 		$key = array_search($this->getId(), $senseIds);
@@ -213,7 +213,6 @@ SQL;
 		if ($key == $count-1) {
 			$position["last"] = 1;
 		}
-
 		$position["key"] = $key;
 		return $position;
 	}

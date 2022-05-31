@@ -776,6 +776,10 @@ HTML;
 				        break;
 			        case "left":
 			          $(senseLI).insertAfter('#sense_'+swapId);
+			          //if top level hide left arrow
+			          if (data.parentId == null) {
+			            $('#left-arrow-'+sid).addClass('d-none');
+			          }
 		            break;
 					  }		  
 						toggleArrows(sid, data.position);
