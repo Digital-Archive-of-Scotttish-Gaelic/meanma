@@ -774,7 +774,7 @@ HTML;
 					})
 					.done(function (data) {
 					  let swapId = data.id;
-					  switch (dir) {
+					  switch (dir) {  //switch on direction
 					    case "up":
 					      $(senseLI).insertBefore('#sense_'+swapId);
 					      break;
