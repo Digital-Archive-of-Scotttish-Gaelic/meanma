@@ -48,7 +48,7 @@
 
   <xsl:template match="dasg:t">
     <p>
-      <small class="text-muted">[<xsl:value-of select="@ref"/>]</small>
+      <!--<small class="text-muted">[<xsl:value-of select="@ref"/>]</small>-->
       <br/>
       <xsl:apply-templates/>
     </p>
