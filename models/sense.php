@@ -5,7 +5,7 @@ namespace models;
 class sense
 {
 	private $_id, $_label, $_definition, $_entryId, $_subsenseOf, $_sortOrder;
-	private $_subsenses;  //an array of sense objects that are subsenses of this sense
+	private $_subsenses = array();  //an array of sense objects that are subsenses of this sense
 	private $_entry;  //an instance of models\entry
 	private $_parentSense = null; //an (optional) instance of models\sense
 	private $_db; //an instance of models\database
@@ -162,6 +162,20 @@ SQL;
 			$this->setSortOrder($sortOrder+100);
 			$this->save();
 			return $lastSenseId;    //the last sense ID in the higher level list
+		} else if ($direction == "right") { //demote this sense
+			$senseIds = $this->getSenseIdsInOrder();
+			//get the position of this sense in the array of sense IDs
+			$key = array_search($this->getId(), $senseIds);
+			//get the prior sense in the list to swap this sense into
+			$parentSense = new sense($this->_db, $senseIds[$key-1]);
+			$subsenses = $parentSense->getSubsenses();
+			$lastSubsense = array_pop($subsenses);
+			$newSortOrder = $lastSubsense ? $lastSubsense->getHighestSortOrder() + 100 : 100;
+			$this->setSortOrder($newSortOrder);   //set the new sort order
+			$this->setSubsenseOf($parentSense->getId());  //set the new parent
+			$this->save();
+			return $parentSense->getId();  //the swap ID = the last item in the existing subsense list
+																														//OR -1 if there is no subsense list yet
 		}
 		$senseIds = $this->getSenseIdsInOrder();
 		$swapId = null;

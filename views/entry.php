@@ -468,7 +468,8 @@ HTML;
 		}
 		$moveUpHide = $index == 0 ? "d-none" : "";
 		$moveDownHide = $index == $numSenses-1 ? "d-none" : "";
-		$moveLeftHide = $sense->getSubsenseOf() ? "" : "d-none";
+		$moveLeftHide = $sense->getSubsenseOf() ? "" : "d-none";;
+		$moveRightHide = $index == 0 ? "d-none" : "";
 		$html = <<<HTML
 				<li id="sense_{$sid}">
 					<div class="dropdown show d-inline">
@@ -479,6 +480,7 @@ HTML;
 		        <a href="#" id="up-arrow-{$sid}" data-senseid="{$sid}" data-direction="up" class="swap-sense {$moveUpHide}">&uarr;</a>
 		        <a href="#" id="down-arrow-{$sid}" data-senseid="{$sid}" data-direction="down" class="swap-sense {$moveDownHide}">&darr;</a>
 		        <a href="#" id="left-arrow-{$sid}" data-senseid="{$sid}" data-direction="left" class="swap-sense {$moveLeftHide}">&larr;</a>
+		        <a href="#" id="right-arrow-{$sid}" data-senseid="{$sid}" data-direction="right" class="swap-sense {$moveRightHide}">&rarr;</a>
 			      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
 			        <li><a class="dropdown-item add-subsense" data-id="{$sid}" tabindex="-1" href="#">add subsense</a></li>
 			      </ul>
@@ -788,6 +790,15 @@ HTML;
 			            $('#left-arrow-'+sid).addClass('d-none');
 			          }
 		            break;
+		          case "right":
+		            $('#subsenses_'+swapId).append(senseLI);
+		            
+		            /*
+		            if (swapId == -1) {   //need to create a new list 
+		              
+		            } else {    //already a list so add it onto that
+		              $(senseLI).insertAfter('#sense_'+swapId);
+		            }*/
 					  }		  
 						toggleArrows(sid, data.position);
 						toggleArrows(swapId, data.swapPosition);

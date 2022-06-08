@@ -409,7 +409,12 @@ switch ($_REQUEST["action"]) {
 				$swapPosition = $swapSense->getSensePosition();
 				break;
 			case "left":
-				$swapId = $sense->swapSense($_GET["dir"]);
+				$swapId = $sense->swapSense("left");
+				$position = array("last" => 1);
+				$swapPosition = "";
+				break;
+			case "right":
+				$swapId = $sense->swapSense("right");
 				$position = array("last" => 1);
 				$swapPosition = "";
 				break;
