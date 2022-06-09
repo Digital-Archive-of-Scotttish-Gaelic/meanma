@@ -282,7 +282,7 @@ SQL;
 		if ($wordclass != $this->getWordClass()) {
 			$this->_wordClass = $wordclass;
 			//remove all the senses
-			pilecategories::deleteSensesForSlip($this->getId());
+			pilecategories::deletePilesForSlip($this->getId());
 			//hack to workaround POS issues - TODO: discuss with MM
 			$tempPOS = array("noun" => "n", "noun phrase" => "nphr", "verb" => "v", "preposition" => "p", "verbal noun" => "vn",
 				"adjective" => "a", "adverb" => "A", "other" => "");
