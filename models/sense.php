@@ -177,6 +177,7 @@ SQL;
 			return $parentSense->getId();  //the swap ID = the last item in the existing subsense list
 																														//OR -1 if there is no subsense list yet
 		}
+		//code for senses moving up or down
 		$senseIds = $this->getSenseIdsInOrder();
 		$swapId = null;
 		while ($id = current($senseIds)) {  //iterate through the senseIds to find the current one

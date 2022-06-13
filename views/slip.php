@@ -1419,6 +1419,7 @@ HTML;
               var url = 'ajax.php?action=getPileCategoriesForNewWordclass';
               url += '&slipType={$this->_slip->getType()}&entryId={$this->_slip->getEntryId()}';
               url += '&filename={$this->_slip->getFilename()}&id={$this->_slip->getWid()}&auto_id={$this->_slip->getId()}';
+              url += '&text_id={$this->_slip->getTextId()}';
               url += '&pos={$this->_slip->getPOS()}&headword=' + headword + '&wordclass=' + wordclass;
 							var entryId;              
               $.getJSON(url, function (data) { 

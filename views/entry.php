@@ -792,13 +792,7 @@ HTML;
 		            break;
 		          case "right":
 		            $('#subsenses_'+swapId).append(senseLI);
-		            
-		            /*
-		            if (swapId == -1) {   //need to create a new list 
-		              
-		            } else {    //already a list so add it onto that
-		              $(senseLI).insertAfter('#sense_'+swapId);
-		            }*/
+		            $('#left-arrow-'+sid).removeClass('d-none');
 					  }		  
 						toggleArrows(sid, data.position);
 						toggleArrows(swapId, data.swapPosition);
@@ -964,12 +958,14 @@ HTML;
 					return html;
 				}
 				
-				//hide/show up/down arrows as appropriate
+				//hide/show arrows as appropriate
 				function toggleArrows(sid, position) {				
 					if (position['first']) {
 					  $('#up-arrow-'+sid).addClass('d-none');		  
+					  $('#right-arrow-'+sid).addClass('d-none');
 					} else {
 					  $('#up-arrow-'+sid).removeClass('d-none');
+					  $('#right-arrow-'+sid).removeClass('d-none');
 					}
 					if (position['last']) {
 					  $('#down-arrow-'+sid).addClass('d-none');
