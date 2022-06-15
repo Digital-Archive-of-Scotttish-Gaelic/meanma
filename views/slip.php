@@ -580,9 +580,10 @@ HTML;
 	private function _writeSenseSelect() {
 		$senses = $this->_slip->getEntry()->getTopLevelSenses($this->_slip->getDb());
 		$selectedHtml = $this->_slip->getSense() ? $this->_slip->getSense()->getLabel() : "-- select a sense --";
+		$unassignDisplay = $this->_slip->getSense() ? "" : 'style="display: none;"';
 		$dropdownHtml = <<<HTML
 			<div class="dropdown show">
-        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="btn btn-secondary dropdown-toggle sense-displayed" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           {$selectedHtml}
         </a>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
@@ -605,9 +606,12 @@ HTML;
             <div class="col-sm-2">
                   <label for="senseSelect" class="col-form-label">Sense:</label>
             </div>
-            <div>
+            <div class="col">
                 {$dropdownHtml}
             </div>
+            <div class="col">
+              <button class="btn btn-warning sense-unassign" {$unassignDisplay}>unassign sense</button>
+						</div>
           </div>
         </div>
 HTML;
@@ -622,7 +626,7 @@ HTML;
 		if (!empty($sense->getSubsenses())) {   //there are subsenses, so write the dropdown link
 			$html = <<<HTML
 				<li class="dropdown-submenu">
-					<a class="dropdown-item dropdown-toggle" href="#">
+					<a class="dropdown-item senseSelect" data-id="{$sense->getId()}" dropdown-toggle" href="#">
 						{$sense->getLabel()}
 					</a>
 					<ul class="dropdown-menu">
@@ -794,7 +798,15 @@ HTML;
             $('.senseSelect').on('click', function () {
                 $('#subsense_id').val($(this).attr("data-id"));
                 $('#dropdownMenuLink').text($(this).text());
+                $('.sense-unassign').show();
             });
+            
+            //unassign sense
+						$('.sense-unassign').on('click', function () {
+						  $.ajax('ajax.php?action=unassignSense&id={$this->_slip->getId()}');
+						  $('.sense-unassign').hide();
+						  $('.sense-displayed').text('-- select a sense --');
+						});
             
             //delete citation
             $(document).on('click', '.deleteCitation', function () {

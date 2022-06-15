@@ -476,11 +476,12 @@ HTML;
 				    <a class="dropdown-toggle badge badge-success" href="#" id="dropdown_{$sid}" 
 		          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{$sense->getDefinition()}">
 							{$sense->getLabel()}
-		        </a> {$citationHtml} 
+		        </a> 
 		        <a href="#" id="up-arrow-{$sid}" data-senseid="{$sid}" data-direction="up" class="swap-sense {$moveUpHide}">&uarr;</a>
 		        <a href="#" id="down-arrow-{$sid}" data-senseid="{$sid}" data-direction="down" class="swap-sense {$moveDownHide}">&darr;</a>
 		        <a href="#" id="left-arrow-{$sid}" data-senseid="{$sid}" data-direction="left" class="swap-sense {$moveLeftHide}">&larr;</a>
 		        <a href="#" id="right-arrow-{$sid}" data-senseid="{$sid}" data-direction="right" class="swap-sense {$moveRightHide}">&rarr;</a>
+		        {$citationHtml} 
 			      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
 			        <li><a class="dropdown-item add-subsense" data-id="{$sid}" tabindex="-1" href="#">add subsense</a></li>
 			      </ul>

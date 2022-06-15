@@ -432,6 +432,10 @@ switch ($_REQUEST["action"]) {
 		echo json_encode(array("id" => $swapId, "position" => $position, "swapPosition" => $swapPosition,
 			"parentId" => $sense->getSubsenseOf()));
 		break;
+	case "unassignSense":
+		$slip = new slip($_GET["id"], $db);
+		$slip->unassignSense();
+		break;
 	default:
 		echo json_encode(array("error"=>"undefined action"));
 }

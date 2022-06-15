@@ -273,6 +273,11 @@ SQL;
 		return $this;
 	}
 
+	public function unassignSense() {
+		$sql = "UPDATE slips SET subsense_id = null WHERE auto_id = {$this->getId()}";
+		$this->_db->exec($sql);
+	}
+
 	/*
 	 * Changes the entry for this slip when the headword or wordclass is changed
 	 * @param $headword
