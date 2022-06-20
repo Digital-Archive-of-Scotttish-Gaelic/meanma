@@ -485,6 +485,7 @@ HTML;
 		        {$citationHtml} 
 			      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
 			        <li><a class="dropdown-item add-subsense" data-id="{$sid}" tabindex="-1" href="#">add subsense</a></li>
+			        <li><a class="dropdown-item edit-sense" data-id="{$sid}" tabindex="-1" href="#">edit sense</a></li>
 			      </ul>
 					</div>
 					<ol type="{$listType}" data-depth="{$depth}" id="subsenses_{$sid}" class="senses_list">{$subsenseHtml}</ol>
@@ -670,13 +671,22 @@ HTML;
                 </div>
                 <div class="modal-body">
                   <div class="form-group">
+                    <div class="row" id="parentSenseRow">
+                      <h5 class="col-12">Parent : <span class="parentSenseDisplay"></span></h5>
+										</div>
 										<div class="row">		
 											<label class="col-4" for="senseLabel">Label:</label>
 											<input type="text" class="form-control col-7" id="senseLabel" name="senseLabel" autofocus/>             
 										</div>
 										<div class="row">		
 											<label class="col-4" for="senseDefinition">Definition:</label>
-											<textarea class="form-control col-7" id="senseDefinition" name="senseDefinition"></textarea>             
+											<textarea class="form-control col-7" id="senseDefinition" name="senseDefinition"></textarea>    
+											<script>
+						            CKEDITOR.replace('senseDefinition', {
+						              contentsCss: 'https://dasg.ac.uk/meanma/css/ckCSS.css',
+						              customConfig: 'https://dasg.ac.uk/meanma/js/ckConfig.js'
+						            });
+						          </script>
 										</div>
                 </div>
                 <div class="modal-footer">
@@ -704,6 +714,7 @@ HTML;
 				
 				//add sense
 				$('#addSense').on('click', function () {
+				  $('#parentSenseRow').addClass('d-none');
 					$('#senseModal').modal();  
 				});
 				
@@ -711,7 +722,7 @@ HTML;
 				  let url = "ajax.php";
 				  let id = $('#senseId').val() == '' ? null : $('#senseId').val();
 				  let label = $('#senseLabel').val();
-				  let definition = $('#senseDefinition').val();
+				  let definition = CKEDITOR.instances['senseDefinition'].getData();
 				  let parentId = $('#parentId').val();
 				  let depth = parentId ? parseInt($('#subsenses_'+parentId).attr('data-depth')) : 0;
 				  let listTypes = ["a", "i", "A", "1"];
@@ -732,42 +743,49 @@ HTML;
 					  data: data
 					})
 					.done(function(response) {
-					  let sid = response.id;	  
-					  var html = '<li id="sense_'+sid+'"><div id="sense_'+sid+'" class="dropdown show d-inline emendation-action">';
-				    html += '<a class="dropdown-toggle badge badge-success" href="#" id="dropdown_'+sid+'"'; 
-				    html += ' title="'+definition+'"';
-		        html += ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+label+'</a>';
-		        html += '&nbsp;<a href="#" id="up-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="up" class="swap-sense d-none">&uarr;</a>';
-		        html += '&nbsp;<a href="#" id="down-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="down" class="swap-sense d-none">&darr;</a>';
-		        html += '&nbsp;<a href="#" id="left-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="left" class="swap-sense">&larr;</a>';
-		        html += '&nbsp;<a href="#" id="right-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="right" class="swap-sense d-none">&rarr;</a>';
-			      html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+sid+'">';
-			      html += '<li><a class="dropdown-item add-subsense" data-id="'+sid+'" tabindex="-1" href="#">add subsense</a></li>';
-			      html += '</ul></div><ol type="'+listTypes[listIndex]+'" data-depth="'+(nextDepth)+'" id="subsenses_'+sid+'"></ol></li>';
-			      var swapId = null;
-			      if (parentId) {
-			        swapId = $('#subsenses_'+parentId).children().last().attr("id");
-							$('#subsenses_'+parentId).append(html);     //subsense, so append to subsense list
-							//if more than one item in list the show up arrow and right arrow
-							if ($('#subsenses_'+parentId).children("li").length > 1) {
-							  $('#up-arrow-'+sid).removeClass('d-none');
-							  $('#right-arrow-'+sid).removeClass('d-none');
+					  //if an existing sense has been edited
+					  if (id) {
+					    $('#dropdown_'+id).attr('title', definition);
+					    $('#dropdown_'+id).text(label);
+					  } else {  //else a new sense
+						  let sid = response.id;	  
+						  var html = '<li id="sense_'+sid+'"><div id="sense_'+sid+'" class="dropdown show d-inline emendation-action">';
+					    html += '<a class="dropdown-toggle badge badge-success" href="#" id="dropdown_'+sid+'"'; 
+					    html += ' title="'+definition+'"';
+			        html += ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+label+'</a>';
+			        html += '&nbsp;<a href="#" id="up-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="up" class="swap-sense d-none">&uarr;</a>';
+			        html += '&nbsp;<a href="#" id="down-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="down" class="swap-sense d-none">&darr;</a>';
+			        html += '&nbsp;<a href="#" id="left-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="left" class="swap-sense">&larr;</a>';
+			        html += '&nbsp;<a href="#" id="right-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="right" class="swap-sense d-none">&rarr;</a>';
+				      html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+sid+'">';
+				      html += '<li><a class="dropdown-item add-subsense" data-id="'+sid+'" tabindex="-1" href="#">add subsense</a></li>';
+				      html += '<li><a class="dropdown-item edit-sense" data-id="'+sid+'" tabindex="1" href="#">edit sense</a></li>';
+				      html += '</ul></div><ol type="'+listTypes[listIndex]+'" data-depth="'+(nextDepth)+'" id="subsenses_'+sid+'"></ol></li>';
+				      var swapId = null;
+				      if (parentId) {
+				        swapId = $('#subsenses_'+parentId).children().last().attr("id");
+								$('#subsenses_'+parentId).append(html);     //subsense, so append to subsense list
+								//if more than one item in list the show up arrow and right arrow
+								if ($('#subsenses_'+parentId).children("li").length > 1) {
+								  $('#up-arrow-'+sid).removeClass('d-none');
+								  $('#right-arrow-'+sid).removeClass('d-none');
+								}
+							} else {
+				        swapId = $('#senses').children().last().attr("id");
+				        $('#senses').append(html);    //top level, so append to main sense list
+				        $('#left-arrow-'+sid).addClass('d-none'); //and hide left arrow
+				        //if more than one item in list the show up arrow and right arrow   
+								if ($('#senses').children("li").length > 1) {
+								  $('#up-arrow-'+sid).removeClass('d-none');
+								  $('#right-arrow-'+sid).removeClass('d-none');
+								}
 							}
-						} else {
-			        swapId = $('#senses').children().last().attr("id");
-			        $('#senses').append(html);    //top level, so append to main sense list
-			        $('#left-arrow-'+sid).addClass('d-none'); //and hide left arrow
-			        //if more than one item in list the show up arrow and right arrow   
-							if ($('#senses').children("li").length > 1) {
-							  $('#up-arrow-'+sid).removeClass('d-none');
-							  $('#right-arrow-'+sid).removeClass('d-none');
-							}
-						}
-			      if (swapId) {
-			        let elems = swapId.split('_');
-			        swapId = elems[1];
-			        $('#up-arrow-'+sid).removeClass('d-none');
-			        $('#down-arrow-'+swapId).removeClass('d-none');
+				      if (swapId) {
+				        let elems = swapId.split('_');
+				        swapId = elems[1];
+				        $('#up-arrow-'+sid).removeClass('d-none');
+				        $('#down-arrow-'+swapId).removeClass('d-none');
+				      }
 			      }
 			      //check if new sense should display right arrow
 					  $('#senseModal').modal('hide');
@@ -778,8 +796,30 @@ HTML;
 				//add a subsense
 				$(document).on('click', '.add-subsense', function () {
 				  let parentId = $(this).attr('data-id');
+				  let parentLabel = $('#dropdown_'+parentId)[0].innerText;
+				  $('.parentSenseDisplay').html(parentLabel);
+				  $('#parentSenseRow').removeClass('d-none');
 				  $('#parentId').val(parentId);
 				  $('#senseModal').modal(); 
+				});
+				
+				//edit a sense
+				$(document).on('click', '.edit-sense', function () {
+					let sid = $(this).attr('data-id');
+					$('#senseId').val(sid);
+					$.getJSON('ajax.php?action=getSenseInfo&sid='+sid, function (data) {
+					  $('#senseLabel').val(data.label);
+				    CKEDITOR.instances['senseDefinition'].setData(data.definition);
+				    if (data.parentLabel) {
+				      $('.parentSenseDisplay').html(data.parentLabel);
+				      $('#parentSenseRow').removeClass('d-none');
+				    } else {
+				      $('#parentSenseRow').addClass('d-none'); 
+				    }
+					})
+					.done(function () {
+					  $('#senseModal').modal();
+					});
 				});
 				
 				//swap a sense

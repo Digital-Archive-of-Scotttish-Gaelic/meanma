@@ -397,38 +397,18 @@ switch ($_REQUEST["action"]) {
 		$sense->save();
 		echo json_encode(array("id" => $sense->getId()));
 		break;
+	case "getSenseInfo":
+		$sense = new sense($db, $_GET["sid"]);
+		$parentLabel = $sense->getParentSense() ? $sense->getParentSense()->getLabel() : null;
+		echo json_encode(array("label" => $sense->getLabel(), "definition" => $sense->getDefinition(),
+			"parentLabel" => $parentLabel));
+		break;
 	case "swapSense":
 		$sense = new sense($db, $_GET["sid"]);
-		$swapId = null;
-
 		$swapId = $sense->swapSense($_GET["dir"]);
 		$position = $sense->getSensePosition(); //whether this sense is first and/or last in the sort order
 		$swapSense = new sense($db, $swapId);
 		$swapPosition = $swapSense->getSensePosition();
-
-
-		/*
-		switch ($_GET["dir"]) {
-			case "up":
-			case "down":
-				$swapId = $sense->swapSense($_GET["dir"]);
-				$position = $sense->getSensePosition(); //whether this sense is first and/or last in the sort order
-				$swapSense = new sense($db, $swapId);
-				$swapPosition = $swapSense->getSensePosition();
-				break;
-			case "left":
-			case "right":
-				$swapId = $sense->swapSense($_GET["dir"]);
-				$position = array("last" => 1);
-				$swapPosition = "";
-				break;
-			case "ignoreme":
-				$swapId = $sense->swapSense("right");
-				$position = $sense->getSensePosition(); //whether this sense is first and/or last in the sort order
-				$swapPosition = "";
-				break;
-		}*/
-
 		echo json_encode(array("id" => $swapId, "position" => $position, "swapPosition" => $swapPosition,
 			"parentId" => $sense->getSubsenseOf()));
 		break;
