@@ -715,7 +715,8 @@ HTML;
 				  let parentId = $('#parentId').val();
 				  let depth = parentId ? parseInt($('#subsenses_'+parentId).attr('data-depth')) : 0;
 				  let listTypes = ["a", "i", "A", "1"];
-				  let nextDepth = depth+1 == listTypes.length ? 0 : depth+1;  console.log(nextDepth);
+				  let nextDepth = depth+1 == listTypes.length ? 0 : depth+1; 
+				  let listIndex = nextDepth >= listTypes.length ? nextDepth % listTypes.length : nextDepth; //prevent array overflow
 				  let data = {
 				    action: "saveSense",
 				    id: id,
@@ -736,20 +737,31 @@ HTML;
 				    html += '<a class="dropdown-toggle badge badge-success" href="#" id="dropdown_'+sid+'"'; 
 				    html += ' title="'+definition+'"';
 		        html += ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+label+'</a>';
-		        html += '&nbsp;<a href="#" id="up-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="up" class="swap-sense">&uarr;</a>';
+		        html += '&nbsp;<a href="#" id="up-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="up" class="swap-sense d-none">&uarr;</a>';
 		        html += '&nbsp;<a href="#" id="down-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="down" class="swap-sense d-none">&darr;</a>';
 		        html += '&nbsp;<a href="#" id="left-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="left" class="swap-sense">&larr;</a>';
+		        html += '&nbsp;<a href="#" id="right-arrow-'+sid+'" data-senseid="'+sid+'" data-direction="right" class="swap-sense d-none">&rarr;</a>';
 			      html += '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_'+sid+'">';
 			      html += '<li><a class="dropdown-item add-subsense" data-id="'+sid+'" tabindex="-1" href="#">add subsense</a></li>';
-			      html += '</ul></div><ol type="'+listTypes[nextDepth]+'" data-depth="'+(nextDepth)+'" id="subsenses_'+sid+'"></ol></li>';
+			      html += '</ul></div><ol type="'+listTypes[listIndex]+'" data-depth="'+(nextDepth)+'" id="subsenses_'+sid+'"></ol></li>';
 			      var swapId = null;
 			      if (parentId) {
 			        swapId = $('#subsenses_'+parentId).children().last().attr("id");
 							$('#subsenses_'+parentId).append(html);     //subsense, so append to subsense list
+							//if more than one item in list the show up arrow and right arrow
+							if ($('#subsenses_'+parentId).children("li").length > 1) {
+							  $('#up-arrow-'+sid).removeClass('d-none');
+							  $('#right-arrow-'+sid).removeClass('d-none');
+							}
 						} else {
 			        swapId = $('#senses').children().last().attr("id");
 			        $('#senses').append(html);    //top level, so append to main sense list
 			        $('#left-arrow-'+sid).addClass('d-none'); //and hide left arrow
+			        //if more than one item in list the show up arrow and right arrow   
+							if ($('#senses').children("li").length > 1) {
+							  $('#up-arrow-'+sid).removeClass('d-none');
+							  $('#right-arrow-'+sid).removeClass('d-none');
+							}
 						}
 			      if (swapId) {
 			        let elems = swapId.split('_');
@@ -757,6 +769,7 @@ HTML;
 			        $('#up-arrow-'+sid).removeClass('d-none');
 			        $('#down-arrow-'+swapId).removeClass('d-none');
 			      }
+			      //check if new sense should display right arrow
 					  $('#senseModal').modal('hide');
 			      $('#parentId').val('');   //reset the parentId
 					})
