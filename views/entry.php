@@ -419,7 +419,6 @@ HTML;
 		}
 		$html .= <<<HTML
 			</ol>
-			{$unassignedHtml}
 HTML;
 		$html .= <<<HTML
 				<div class="row">
@@ -429,6 +428,7 @@ HTML;
             </div>
 					</div>
 				</div>
+				{$unassignedHtml}
 HTML;
 		return $html;
 	}
@@ -439,8 +439,9 @@ HTML;
 	 */
 	private function _getSenseHtml($sense, $index, $numSenses, $depth) {
 		$listTypes = array("a", "i", "A", "1");
-		$listType = $listTypes[$depth];
-		$nextDepth = $depth == count($listTypes) ? 0 : $depth+1;  //prevent overflow
+		$listIndex = ($depth >= count($listTypes)) ? ($depth % count($listTypes)) : $depth; //prevent array overflow
+		$listType = $listTypes[$listIndex];
+		$nextDepth = $depth +1;
 		$subsenseHtml = "";
 		//recursive call to assemble subsenseHtml
 		$count = count($sense->getSubsenses());
@@ -714,7 +715,7 @@ HTML;
 				  let parentId = $('#parentId').val();
 				  let depth = parentId ? parseInt($('#subsenses_'+parentId).attr('data-depth')) : 0;
 				  let listTypes = ["a", "i", "A", "1"];
-				  let nextDepth = depth+1 == listTypes.length ? 0 : depth+1;
+				  let nextDepth = depth+1 == listTypes.length ? 0 : depth+1;  console.log(nextDepth);
 				  let data = {
 				    action: "saveSense",
 				    id: id,

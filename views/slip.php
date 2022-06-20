@@ -586,7 +586,7 @@ HTML;
         <a class="btn btn-secondary dropdown-toggle sense-displayed" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           {$selectedHtml}
         </a>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
 HTML;
 		foreach ($senses as $sense) {
 			$dropdownHtml .= $this->_getSenseOptions($sense);
