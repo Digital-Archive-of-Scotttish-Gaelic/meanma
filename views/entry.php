@@ -795,6 +795,8 @@ HTML;
 				
 				//add a subsense
 				$(document).on('click', '.add-subsense', function () {
+				  //clear any senseId value
+				  $('#senseId').val('');
 				  let parentId = $(this).attr('data-id');
 				  let parentLabel = $('#dropdown_'+parentId)[0].innerText;
 				  $('.parentSenseDisplay').html(parentLabel);
