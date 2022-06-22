@@ -714,6 +714,8 @@ HTML;
 				
 				//add sense
 				$('#addSense').on('click', function () {
+				  //clear any senseId value
+				  $('#senseId').val('');
 				  $('#parentSenseRow').addClass('d-none');
 					$('#senseModal').modal();  
 				});
