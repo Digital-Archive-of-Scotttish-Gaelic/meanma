@@ -206,7 +206,7 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "loadSenseData":                           //this is only used externally as an API (by e.g. briathradan
 		$sense = new sense($db, $_GET["id"]);
-		$senseHtml = _getSenseHtml($sense);
+		$senseHtml = _getSenseHtml($sense, $db);
 		echo $senseHtml;
 		break;
 	case "createPaperSlip":
@@ -429,50 +429,35 @@ switch ($_REQUEST["action"]) {
  * Recursive method to generate required HTML for (sub)senses
  * @param $sense
  */
-function _getSenseHtml($sense) {
+function _getSenseHtml($sense, $db) {
 	$subsenseHtml = "";
 	//recursive call to assemble subsenseHtml
 	foreach ($sense->getSubsenses() as $subsense) {
-		$subsenseHtml .= _getSenseHtml($subsense);
+		$subsenseHtml .= _getSenseHtml($subsense, $db);
 	}
 	$sid = $sense->getId();
 	$slipIds = $sense->getCitationSlipIds();
 	$citationHtml = "";
-
-	/*
 	if (!empty($slipIds)) {   //there are citations for this sense
-		$slipList = $this->_getSlipList($slipIds);
-		$citationHtml = <<<HTML
-						<small><a href="#" class="citationsLink" data-type="sense" data-index="_s{$sid}">
-								citations
-						</a></small>
-						<!--div id="sense_citations_s{$sid}" data-loaded class="citation">
-							<div class="spinner">
-				        <div class="spinner-border" role="status">
-				          <span class="sr-only">Loading...</span>
-				        </div>
-							</div>
-							{$slipList}
-						</div>
+		foreach($slipIds as $slipId) {
+			$slip = collection::getSlipBySlipId($slipId, $db);
+			$citation = $slip->getCitationByType('sense');
+			$context = $citation->getContext();
+			$citationHtml = '<table class="table"><tbody>';
+				$citationHtml .= <<<HTML
+					<tr>
+						<td>{$context['html']}</td>
+					</tr>
 HTML;
+			$citationHtml .= '</tbody></table>';
+		}
 	}
-	*/
 	$html = <<<HTML
 				<li id="sense_{$sid}">
 					<a class="badge badge-success" href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="{$sense->getDefinition()}">
 						{$sense->getLabel()}
 					</a>
-					<!--div class="dropdown show d-inline">
-				    <a class="dropdown-toggle badge badge-success" href="#" id="dropdown_{$sid}" 
-		          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{$sense->getDefinition()}">
-							{$sense->getLabel()}
-		        </a> 
-		        {$citationHtml} 
-			      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$sid}">
-			        <li><a class="dropdown-item add-subsense" data-id="{$sid}" tabindex="-1" href="#">add subsense</a></li>
-			        <li><a class="dropdown-item edit-sense" data-id="{$sid}" tabindex="-1" href="#">edit sense</a></li>
-			      </ul>
-					</div-->
+					{$citationHtml} 
 					<ol id="subsenses_{$sid}" class="senses_list">{$subsenseHtml}</ol>
 				</li>
 HTML;
