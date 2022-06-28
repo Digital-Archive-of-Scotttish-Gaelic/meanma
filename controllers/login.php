@@ -54,6 +54,7 @@ HTML;
           $this->_view->writeModal("login", "This link has expired");
         } else {
           $_SESSION["email"] = $email;
+          echo "reset : " . $email;
           $this->_view->writeModal("resetPassword");
         }
         break;
@@ -70,6 +71,7 @@ HTML;
   }
 
   private function _savePassword() {
+  	echo "save : " . $_SESSION["email"];
     $user = models\users::getUser($_SESSION["email"]);
     $user->setPassword($_POST["pass1"]);
     $user->encryptPassword();
