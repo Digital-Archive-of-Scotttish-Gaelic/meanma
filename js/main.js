@@ -17,7 +17,7 @@ $(function () {
       .done(function () {
         $('#passwordLabel').show();
         $('#emailSelectContainer').hide();
-        $('#passwordContainer').show();
+        $('#passwordContainer').removeClass('hide');
         $('#password').focus();
         $('#login').removeClass('loginButton');
         $('#loginCancel').removeClass('loginButton');
@@ -27,7 +27,7 @@ $(function () {
   $('#loginCancel').on('click', function () {
     $('#email option:first').prop('selected',true);
     $('#emailSelectContainer').show();
-    $('#passwordContainer').hide();
+    $('#passwordContainer').addClass('hide');
     $('#login').addClass('loginButton');
     $('#loginCancel').addClass('loginButton');
     $('.loginMessage').text('');
