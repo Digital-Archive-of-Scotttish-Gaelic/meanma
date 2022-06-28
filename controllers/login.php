@@ -59,7 +59,8 @@ HTML;
         }
         break;
       case "savePassword":
-          $this->_savePassword();
+      	$_SESSION["email"] = $_REQUEST["email"];
+      	$this->_savePassword();
           //do not write modal
         break;
       default:
