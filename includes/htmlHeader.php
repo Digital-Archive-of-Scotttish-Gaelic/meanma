@@ -1,7 +1,7 @@
 <?php
 
 /** Prevent browser cache, at least during development */
-session_cache_limiter('nocache');
+//session_cache_limiter('nocache');
 /**  */
 
 require_once "include.php";
