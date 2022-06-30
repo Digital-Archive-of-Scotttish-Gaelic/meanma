@@ -454,8 +454,8 @@ HTML;
 	}
 	$html = <<<HTML
 				<li id="sense_{$sid}">
-					<a class="badge badge-success" href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="{$sense->getDefinition()}">
-						{$sense->getLabel()}
+					<a class="badge badge-success" href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="{$sense->getLabel()}">
+						{$sense->getDefinition()}
 					</a>
 					{$citationHtml} 
 					<ol id="subsenses_{$sid}" class="senses_list">{$subsenseHtml}</ol>
