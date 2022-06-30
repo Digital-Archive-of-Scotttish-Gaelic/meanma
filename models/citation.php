@@ -161,7 +161,7 @@ HTML;
 			$context["postDisable"] = $postIncrementDisable;
 		}
 
-		return array("emendations" => $emen, "html" => $context["html"], "preIncrementDisable" => $context["preDisable"], "postIncrementDisable" =>
+		return array("html" => $context["html"], "preIncrementDisable" => $context["preDisable"], "postIncrementDisable" =>
 			$context["postDisable"], "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"]);
 	}
 

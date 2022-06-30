@@ -92,10 +92,10 @@ switch ($_REQUEST["action"]) {
 			$translation = isset($translations[0]) ? $translations[0]->getContent() : null;
 			$slip = $citation->getSlip();
 			$reference = $slip->getReference();   //deprecate once auto references are in place
-			$page = $slip->getPage();   //also a temporary solution SB - remember that this WILL slow the system
-			$referenceTemplate = $slip->getText()->getReferenceTemplate(); //refactor once manual references are deprecated
+	//		$page = $slip->getPage();   //also a temporary solution SB - remember that this WILL slow the system
+			$referenceFromTemplate = $slip->getReferenceFromTemplate(); //refactor once manual references are deprecated
 			$citationInfo[$citation->getType()] = array("cid"=>$cid, "context"=>$citation->getContext(false), "translation"=>$translation, "reference"=>$reference,
-				"referenceTemplate"=>$referenceTemplate, "page"=>$page);
+				"referenceFromTemplate"=>$referenceFromTemplate);
 		}
 		echo json_encode($citationInfo);
     break;
@@ -426,7 +426,7 @@ switch ($_REQUEST["action"]) {
 }
 
 /**
- * Recursive method to generate required HTML for (sub)senses
+ * Recursive method to generate required HTML for (sub)senses //TODO: move to somewhere sensible
  * @param $sense
  */
 function _getSenseHtml($sense, $db) {
@@ -441,15 +441,35 @@ function _getSenseHtml($sense, $db) {
 	if (!empty($slipIds)) {   //there are citations for this sense
 		foreach($slipIds as $slipId) {
 			$slip = collection::getSlipBySlipId($slipId, $db);
-			$citation = $slip->getCitationByType('sense');
-			$context = $citation->getContext();
-			$citationHtml = '<table class="table"><tbody>';
+			$citations = $slip->getCitationsByType('sense');
+			foreach ($citations as $citation) {
+				//translation
+				$translations = $citation->getTranslations();
+				$translationHtml = "";
+				if (!empty($translations[0])) {
+					$translation = $translations[0]->getContent();
+					$translationHtml = <<<HTML
+					<tr>
+						<small class="text-muted">{$translation}</small>
+					</tr>
+HTML;
+				}
+				//reference
+				$reference = $slip->getReferenceFromTemplate();
+				//context
+				$context = $citation->getContext();
+				$citationHtml = '<table class="table"><tbody>';
 				$citationHtml .= <<<HTML
 					<tr>
 						<td>{$context['html']}</td>
 					</tr>
+					{$translationHtml}
+					<tr>
+						<td>{$reference}</td>
+					</tr>
 HTML;
-			$citationHtml .= '</tbody></table>';
+				$citationHtml .= '</tbody></table>';
+			}
 		}
 	}
 	$html = <<<HTML

@@ -999,12 +999,8 @@ HTML;
 				  if (info.context != undefined) {
 						html += info.context.html;
 					}
-				  if (info.referenceTemplate) { //auto generated reference
-				    var pageHtml = 'x';
-				    if (info.page) {    //temporary code until we work more on reference placeholders SB
-				      pageHtml = 'p.' + info.page;
-				    }
-				    html += '<br><span class="text-muted">' + info.referenceTemplate.replace('%p', pageHtml) + '</span>';
+				  if (info.referenceFromTemplate) { //auto generated reference
+				    html += '<br><span class="text-muted">' + info.referenceFromTemplate + '</span>';
 				  } else if (info.reference) {  //manually entered reference
 					  html += '<br>' + info.reference;
 					}

@@ -66,6 +66,15 @@ class slip
 		return $result[0]["reference"];
 	}
 
+	/**
+	 * Parses the reference template and returns a completed reference
+	 */
+	public function getReferenceFromTemplate() {
+		$template = $this->getReferenceTemplate();
+		$reference = str_ireplace("%p", "p.{$this->getPage()}", $template);
+		return $reference;
+	}
+
 	public function getType() {
 		return $this->_type;
 	}
@@ -398,6 +407,22 @@ SQL;
 				return $citation;
 			}
 		}
+	}
+
+	/**
+	 * Returns ALL citations of type $type in the _citations array
+	 * @param $type string type
+	 * @return array of citation objects
+	 */
+	public function getCitationsByType($type) {
+		$citations = $this->getCitations();
+		$citationsByType = array();
+		foreach ($citations as $citation) {
+			if ($citation->getType() == $type) {
+				$citationsByType[] = $citation;
+			}
+		}
+		return $citationsByType;
 	}
 
 	/**
