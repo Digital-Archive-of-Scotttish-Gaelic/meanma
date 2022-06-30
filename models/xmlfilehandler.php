@@ -204,7 +204,8 @@ XPATH;
 						if ($tokenId == $emendation->getTokenId()) {
 							$emType = $emendation->getType();
 							$emContent = $emendation->getContent();
-							$content = $emContent ? $emType . ' ' . $emContent : $emType;
+							$displayType = ($emType == "other") ? "" : $emType . " ";
+							$content = $emContent ? $displayType . $emContent : $emType;
 							if ($emendation->getPosition() == "before") {
 								$preEmendHtml .= '<span class="emendation">[' . $content . ']</span>';
 							}
@@ -272,7 +273,7 @@ HTML;
 	 * @param $token:
 	 * @param $tokenId
 	 * @param $emendations : an array of emendation objects
-	 * @return string : the HTML required for dropdown options for the given word (collocate)
+	 * @return html : the HTML required for dropdown options for the given emendation
 	 */
   private function _getEmendationsDropdown($token, $tokenId, $emendations) {
 	  $preEmendHtml = $postEmendHtml = "";
@@ -281,7 +282,8 @@ HTML;
 		  	$emId = $emendation->getId();
 		  	$emType = $emendation->getType();
 		  	$emContent = $emendation->getContent();
-		  	$content = $emContent ? $emType . ' ' . $emContent : $emType;     //perhaps do this in _getEmendationHtml ??
+		  	$displayType = ($emType == "other") ? "" : $emType . " xx";
+		  	$content = $emContent ? $displayType . $emContent : $emType;     //perhaps do this in _getEmendationHtml ??
 		  	if ($emendation->getPosition() == "before") {
 		  		$preEmendHtml .= $this->_getEmendationHtml($emType, $content, $emId);
 			  }
@@ -321,11 +323,12 @@ HTML;
   }
 
   private function _getEmendationHtml($type, $content, $emendationId) {
+  	$displayType = ($type == "other") ? "" : "{$type} ";
   	$html = <<<HTML
 			<div id="emendation_{$emendationId}" class="dropdown show d-inline emendation-action">
 		    <a class="dropdown-toggle emendation collocateLink" href="#" id="dropdown_{$emendationId}" 
           data-type="{$type}" data-content="{$content}"
-          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> [{$type} {$content}] 
+          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> [{$displayType}{$content}] 
         </a>
 	      <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown_{$emendationId}">
 	        <li><a class="dropdown-item edit-emendation" data-id="{$emendationId}" tabindex="-1" href="#">edit</a></li>

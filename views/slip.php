@@ -1048,7 +1048,18 @@ HTML;
               let emendationId = parts[1];
               let type = $('#dropdown_'+emendationId).attr('data-type');  //get the type from the <a> tag
               $('#dropdown_'+emendationId).attr('data-content', content); //store the content in the <a> tag
-              let displayedText = (content) ? '[' + type + ' ' + content + ']' : '[' + type + ']';
+              
+              console.log('type : ' + type);
+              
+              let displayType = (type == "other") ? '' : type + ' ';
+              
+              console.log('displayType : ' + displayType );
+              
+              let displayedText = (content) ? '[' + displayType + content + ']' : '[' + type + ']'; 
+              
+              
+              console.log(displayedText);
+              
               $.ajax('ajax.php?action=updateEmendation&id='+emendationId+'&content='+content);          
               //hide the input field container
               $('#edit_emendation_'+emendationId).removeClass('inline-block');
