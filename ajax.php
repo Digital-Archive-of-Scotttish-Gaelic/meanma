@@ -450,7 +450,7 @@ function _getSenseHtml($sense, $db) {
 					$translation = $translations[0]->getContent();
 					$translationHtml = <<<HTML
 					<tr>
-						<small class="text-muted">{$translation}</small>
+						<td><small class="text-muted">{$translation}</small></td>
 					</tr>
 HTML;
 				}
