@@ -248,4 +248,67 @@ SQL;
 	public function setSortOrder($sortOrder) {
 		$this->_sortOrder = $sortOrder;
 	}
+
+	/**
+	 * ---- OTHER METHODS ----
+	 */
+	/**
+	 * Recursive method to generate required HTML for (sub)senses
+	 * Currently this is ONLY used for an AJAX call from Briathradan
+	 * @param $sense
+	 */
+	public static function getSenseHtml($sense, $db) {
+		$subsenseHtml = "";
+		//recursive call to assemble subsenseHtml
+		foreach ($sense->getSubsenses() as $subsense) {
+			$subsenseHtml .= self::getSenseHtml($subsense, $db);
+		}
+		$sid = $sense->getId();
+		$slipIds = $sense->getCitationSlipIds();
+		$citationHtml = "";
+		if (!empty($slipIds)) {   //there are citations for this sense
+			foreach($slipIds as $slipId) {
+				$slip = collection::getSlipBySlipId($slipId, $db);
+				$citations = $slip->getCitationsByType('sense');
+				foreach ($citations as $citation) {
+					//translation
+					$translations = $citation->getTranslations();
+					$translationHtml = "";
+					if (!empty($translations[0])) {
+						$translation = $translations[0]->getContent();
+						$translationHtml = <<<HTML
+					<tr>
+						<td><small class="text-muted">{$translation}</small></td>
+					</tr>
+HTML;
+					}
+					//reference
+					$reference = $slip->getReferenceFromTemplate();
+					//context
+					$context = $citation->getContext();
+					$citationHtml = '<table class="table"><tbody>';
+					$citationHtml .= <<<HTML
+					<tr>
+						<td>{$context['html']}</td>
+					</tr>
+					{$translationHtml}
+					<tr>
+						<td>{$reference}</td>
+					</tr>
+HTML;
+					$citationHtml .= '</tbody></table>';
+				}
+			}
+		}
+		$html = <<<HTML
+				<li id="sense_{$sid}">
+					<a class="badge badge-success" href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="{$sense->getLabel()}">
+						{$sense->getDefinition()}
+					</a>
+					{$citationHtml} 
+					<ol id="subsenses_{$sid}" class="senses_list">{$subsenseHtml}</ol>
+				</li>
+HTML;
+		return $html;
+	}
 }

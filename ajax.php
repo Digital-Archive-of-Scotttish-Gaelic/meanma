@@ -206,7 +206,7 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "loadSenseData":                           //this is only used externally as an API (by e.g. briathradan
 		$sense = new sense($db, $_GET["id"]);
-		$senseHtml = _getSenseHtml($sense, $db);
+		$senseHtml = sense::getSenseHtml($sense, $db);
 		echo $senseHtml;
 		break;
 	case "createPaperSlip":
@@ -423,63 +423,4 @@ switch ($_REQUEST["action"]) {
 		break;
 	default:
 		echo json_encode(array("error"=>"undefined action"));
-}
-
-/**
- * Recursive method to generate required HTML for (sub)senses //TODO: move to somewhere sensible
- * @param $sense
- */
-function _getSenseHtml($sense, $db) {
-	$subsenseHtml = "";
-	//recursive call to assemble subsenseHtml
-	foreach ($sense->getSubsenses() as $subsense) {
-		$subsenseHtml .= _getSenseHtml($subsense, $db);
-	}
-	$sid = $sense->getId();
-	$slipIds = $sense->getCitationSlipIds();
-	$citationHtml = "";
-	if (!empty($slipIds)) {   //there are citations for this sense
-		foreach($slipIds as $slipId) {
-			$slip = collection::getSlipBySlipId($slipId, $db);
-			$citations = $slip->getCitationsByType('sense');
-			foreach ($citations as $citation) {
-				//translation
-				$translations = $citation->getTranslations();
-				$translationHtml = "";
-				if (!empty($translations[0])) {
-					$translation = $translations[0]->getContent();
-					$translationHtml = <<<HTML
-					<tr>
-						<td><small class="text-muted">{$translation}</small></td>
-					</tr>
-HTML;
-				}
-				//reference
-				$reference = $slip->getReferenceFromTemplate();
-				//context
-				$context = $citation->getContext();
-				$citationHtml = '<table class="table"><tbody>';
-				$citationHtml .= <<<HTML
-					<tr>
-						<td>{$context['html']}</td>
-					</tr>
-					{$translationHtml}
-					<tr>
-						<td>{$reference}</td>
-					</tr>
-HTML;
-				$citationHtml .= '</tbody></table>';
-			}
-		}
-	}
-	$html = <<<HTML
-				<li id="sense_{$sid}">
-					<a class="badge badge-success" href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="{$sense->getLabel()}">
-						{$sense->getDefinition()}
-					</a>
-					{$citationHtml} 
-					<ol id="subsenses_{$sid}" class="senses_list">{$subsenseHtml}</ol>
-				</li>
-HTML;
-	return $html;
 }
