@@ -12,7 +12,7 @@ class slipmorphfeature
 	    "verb"=>array("mode", "status", "imp_number", "fin_number",
 		    "imp_person", "fin_person", "tense", "mood"),
 		  "preposition"=>array("prep_mode", "prep_person", "prep_number", "prep_gender"),
-	    "adjective"=>array(),
+	    "adjective"=>array("form", "noun_type", "case"),
 	    "adverb"=>array(),
 	    "other"=>array()
   );
@@ -74,6 +74,7 @@ class slipmorphfeature
 		    break;
 	    case 'a':
 	    	$this->_type = "adjective";
+	    	$this->_props["form"] = "attributive";
 	    	break;
 	    case 'A':
 	    	$this->_type = "adverb";

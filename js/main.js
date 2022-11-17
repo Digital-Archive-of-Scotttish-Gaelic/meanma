@@ -352,6 +352,13 @@ function saveSlip() {
         }
       }
       break;
+    case "adjective":
+      data["form"] = $('#posForm').val();
+      if (data["form"] == "attributive") {
+        data["noun_type"] = $('#posNounType').val();
+        data["case"] = $('#posAdjCase').val();
+      }
+      break;
   }
   $.post("ajax.php", data, function (response) {
   })

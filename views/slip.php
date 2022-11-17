@@ -382,10 +382,11 @@ HTML;
     $html = $this->_writeWordClassesSelect();
     $props = $this->_slip->getSlipMorph()->getProps();  //the morph data
     $relations = array("number", "gender", "case", "mode", "fin_person", "imp_person", "fin_number",
-	    "imp_number", "status", "tense", "mood", "prep_mode", "prep_person", "prep_number", "prep_gender");
+	    "imp_number", "status", "tense", "mood", "prep_mode", "prep_person", "prep_number", "prep_gender",
+	    "form", "noun_type");
     $options["number"] = array("singular", "plural", "dual†", "unclear");
     $options["gender"] = array("masculine", "feminine", "neuter†", "unclear");
-    $options["case"] = array("nominative", "genitive", "dative", "vocative", "accusative†", "unclear");
+    $options["case"] = array("nominative", "accusative†", "genitive", "dative", "vocative", "unclear");
     $options["mode"] = array("unclear mode", "imperative", "finite", "verbal noun");
 	  $options["imp_person"] = array("second person", "first person", "third person", "unclear person");
     $options["fin_person"] = array("unmarked person", "first person", "second person", "third person");
@@ -399,6 +400,10 @@ HTML;
 	  $options["prep_person"] = array("first person", "second person", "third person", "unclear person");
 	  $options["prep_number"] = array("singular", "plural", "unclear number");
 	  $options["prep_gender"] = array("masculine", "feminine", "unclear gender");
+	  //adjectives
+	  $options["form"] = array("attributive", "predicative and adverbial", "comparative", "superlative");
+	  $options["noun_type"] = array("masculine singular", "masculine dual", "feminine singular", "feminine dual",
+		  "plural");
 		//create the HTML options for each relation
 	  $optionsHtml = array();
     foreach ($relations as $relation) {
@@ -422,6 +427,13 @@ HTML;
     //show/hide gender dropdown
     if ($conjPosPrepHide != "hide") {
     	$genderPrepHide = ($props["prep_person"] != "third person") || ($props["prep_number"] != "singular") ? "hide" : "";
+    }
+    //adjectives
+    $adjectiveSelectHide = "hide";
+    if ($this->_slip->getWordClass() == "adjective") {
+	    $adjectiveSelectHide = "";
+	    $adjNounTypeHide = ($props["form"] == "attributive") ? "" : "hide";
+	    $adjCaseHide = $adjNounTypeHide;
     }
     $html .= <<<HTML
         <div>
@@ -551,6 +563,30 @@ HTML;
 	                  </div>
                   </span>
                 </span>
+            </div>
+            <div id="adjectiveSelects" class="{$adjectiveSelectHide}">
+                <div class="row form-group">
+	                <label for="posForm" class="col-form-label col-sm-2">Form:</label>
+	                <select name="form" id="posForm" class="form-control col-4">
+	                  {$optionsHtml["form"]}
+	                </select>
+	              </div>
+	              <span id="adjectiveNounType" class="{$adjNounTypeHide}">
+		              <div class="row form-group">
+		                <label for="posNounType" class="col-form-label col-sm-2">Following noun type:</label>
+		                <select name="noun_type" id="posNounType" class="form-control col-4">
+		                  {$optionsHtml["noun_type"]}
+		                </select>
+		              </div>
+	              </span>
+	              <span id="adjectiveCase" class="{$adjCaseHide}">
+		              <div class="row form-group">
+		                <label for="posAdjCase" class="col-form-label col-sm-2">Case:</label>
+		                <select name="case" id="posAdjCase" class="form-control col-4">
+		                  {$optionsHtml["case"]}
+		                </select>
+		              </div>
+	              </span>
             </div>
         </div>
 HTML;
@@ -1410,24 +1446,35 @@ HTML;
                   $('#nounSelects').hide();
                   $('#nounPhraseSelects').hide();
                   $('#prepSelects').hide();
+                  $('#adjectiveSelects').hide();
                   break;
                 case "noun":
                   $('#nounSelects').show();
                   $('#nounPhraseSelects').hide();
                   $('#verbSelects').hide();
                   $('#prepSelects').hide();
+                  $('#adjectiveSelects').hide();
                   break;
                 case "noun phrase":              
                   $('#nounPhraseSelects').show();
                   $('#nounSelects').hide();
                   $('#verbSelects').hide();
                   $('#prepSelects').hide();
+                  $('#adjectiveSelects').hide();
                   break;
                 case "preposition":
                   $('#prepSelects').show();
                   $('#nounSelects').hide();
                   $('#nounPhraseSelects').hide();
                   $('#verbSelects').hide();
+                  $('#adjectiveSelects').hide();
+                  break;
+                case "adjective":
+                  $('#nounSelects').hide();
+                  $('#nounPhraseSelects').hide();
+                  $('#verbSelects').hide();
+                  $('#prepSelects').hide();
+                  $('#adjectiveSelects').show();
                   break;
                 default:
                   $('#nounSelects').hide();
@@ -1506,6 +1553,17 @@ HTML;
                 $('#genderPrepOptions').show();
               } else {
                 $('#genderPrepOptions').hide();
+              }
+            });
+            
+            $('#posForm').on('change', function () {
+              var form = $(this).val();
+              if (form == "attributive") {
+                $('#adjectiveNounType').removeClass('hide');
+                $('#adjectiveCase').removeClass('hide');
+              } else {
+                $('#adjectiveNounType').addClass('hide');
+                $('#adjectiveCase').addClass('hide');
               }
             });
           
