@@ -52,9 +52,9 @@ switch ($_REQUEST["action"]) {
 			echo json_encode(array("count" => count($_SESSION["printSlips"])));
 		break;
   case "loadSlip":
-    $slip = ($_GET["slipType"])
-	    ? new paper_slip($_GET["auto_id"], $_GET["entryId"], null, $db)
-	    : new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db);
+    $slip = ($_GET["filename"])
+	    ? new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db)
+	    : new paper_slip($_GET["auto_id"], $_GET["entryId"], null, $db);
     $slip->updateResults($_GET["index"]); //ensure that "view slip" (and not "create slip") displays
     $textId = $slip->getTextId();
     $referenceTemplate = $slip->getText()->getReferenceTemplate();

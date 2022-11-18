@@ -111,6 +111,9 @@ class slip
 	}
 
 	public function getSenseId() {
+		if (!$this->_senseId) {
+			$this->_senseId = null;
+		}
 		return $this->_senseId;
 	}
 
