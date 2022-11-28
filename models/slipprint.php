@@ -63,7 +63,7 @@ class slipprint
 			$translationHtml = ($translation) ? $translation->getContent() : "";
 				//checked
 			$checkmark = "";
-			if ($slipInfo["starred"]) {
+			if ($slip->getStarred()) {
 				$checkmark = $pdf->unhtmlentities("&#x2713;");
 			}
 			$checked = 'Ch <span style="font-family:dejavusans;">' . $checkmark . '</span>';
