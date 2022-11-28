@@ -842,6 +842,7 @@ HTML;
 						  $.ajax('ajax.php?action=unassignSense&id={$this->_slip->getId()}');
 						  $('.sense-unassign').hide();
 						  $('.sense-displayed').text('-- select a sense --');
+						  $('#subsense_id').val(null);
 						});
             
             //delete citation
