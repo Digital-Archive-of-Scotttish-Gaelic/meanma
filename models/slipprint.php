@@ -46,11 +46,12 @@ class slipprint
 			$headword = $slip->getHeadword();
 			$reference = $slip->getReference();
 			$textNum = $slip->getTextId();
-			$date = mb_substr(strip_tags($reference), 0, 4, "UTF-8");
+			$referenceParts = explode(" ", $reference);
+			$date = strip_tags($referenceParts[0]);
 				//assemble the reference if it's a corpus slip
 			if (empty($reference) && $slip->getType() == "corpus") {
 				$slipInfo = collection::getSlipInfoBySlipId($slipId, $db)[0];
-				$date = $slipInfo["date_of_lang"];
+				$date = round($slipInfo["date_internal"]);
 				$reference =  $date . ' <em>' . $slipInfo["title"] . '</em> ' . $slipInfo["page"];
 			}
 				//citation and translation
@@ -87,7 +88,7 @@ class slipprint
 		                <td colspan="3" style="text-align: center;">{$reference}</td>
 				</tr>
 				<tr>
-					<td>{$date}</td>          <td></td>                     <td></td>
+					<td>{$date}</td>          <td>{$spaceIndex}</td>                     <td></td>
 				</tr>
 			</table>
 EOD;
