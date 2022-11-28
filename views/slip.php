@@ -982,11 +982,11 @@ HTML;
               let index = $(this).attr('data-index');
               let startIndex = $('#deletionContext').attr('data-startindex');
               //check if the end of the deletion is before the start
-              if (index < startIndex) {
+              /*if (index < startIndex) {
                 //it is, so swap the start and end tokenIds in the database
                 startId = tokenIdEnd;
                 tokenIdEnd = $('#deletionContext').attr('data-starttokenid');
-              }
+              }*/
               $.getJSON('ajax.php?action=updateDeletion&id='+deletionId+'&tid='+tokenIdEnd+'&startId='+startId)
               .done(function() {
                 $('.new-deletion').removeClass('disabled');
