@@ -945,13 +945,6 @@ HTML;
             //add a new deletion
             $(document).on('click', '.new-deletion', function() {
               let tokenIdStart = $(this).closest('.deletion-select').attr('id');
-              
-              
-              //debug code
-              console.log('start ID : ' + tokenIdStart);
-              //
-              
-              
               let index = $(this).attr('data-index');
               $('#deletionContext').attr('data-startindex', index);
               $('#deletionContext').attr('data-starttokenid', tokenIdStart);
@@ -970,17 +963,15 @@ HTML;
             $(document).on('click', '.end-deletion', function () {
               var startId = ''; //only used to swap start/end point if need be
               let deletionId = $('#saveDeletion').attr('data-deletionid');
-              let tokenIdEnd = $(this).closest('.deletion-select').attr('id');
-              
-              
-              //debug code
-              console.log('end ID : ' + tokenIdEnd);
-              //
-              
-              
+              let tokenIdEnd = $(this).closest('.deletion-select').attr('id');            
               let cid = $('#deletionContext').attr('data-citationid');
               let index = $(this).attr('data-index');
               let startIndex = $('#deletionContext').attr('data-startindex');
+              //
+              /* Following commented out for now as it introduced a bug when adding an ellipsis to certain
+                  citations. (The system could incorrectly identify an end index as being less than a start index.) 
+                  Will reexamine. SB 
+              //
               //check if the end of the deletion is before the start
               /*if (index < startIndex) {
                 //it is, so swap the start and end tokenIds in the database
