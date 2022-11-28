@@ -945,6 +945,13 @@ HTML;
             //add a new deletion
             $(document).on('click', '.new-deletion', function() {
               let tokenIdStart = $(this).closest('.deletion-select').attr('id');
+              
+              
+              //debug code
+              console.log('start ID : ' + tokenIdStart);
+              //
+              
+              
               let index = $(this).attr('data-index');
               $('#deletionContext').attr('data-startindex', index);
               $('#deletionContext').attr('data-starttokenid', tokenIdStart);
@@ -964,6 +971,13 @@ HTML;
               var startId = ''; //only used to swap start/end point if need be
               let deletionId = $('#saveDeletion').attr('data-deletionid');
               let tokenIdEnd = $(this).closest('.deletion-select').attr('id');
+              
+              
+              //debug code
+              console.log('end ID : ' + tokenIdEnd);
+              //
+              
+              
               let cid = $('#deletionContext').attr('data-citationid');
               let index = $(this).attr('data-index');
               let startIndex = $('#deletionContext').attr('data-startindex');
