@@ -57,7 +57,7 @@ class Lemmatiser
 
 	public function tagFiles() {
 		foreach (new RecursiveIteratorIterator($this->_iterator) as $nextFile) {
-			if ($nextFile->getExtension()=='xml') {
+			if ($nextFile->getExtension()=='myxml') {                                           //CHANGE ME BACK!!!!!
 				$xml = simplexml_load_file($nextFile);
 				$xml->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
 				$status = $xml->xpath("/dasg:text/@status")[0];
@@ -96,8 +96,32 @@ class Lemmatiser
 								}
 							}
 						}
+						else {    //run a similarity check through the lexicon
+							$matches = [];
+							foreach ($this->_lexicon as $wordform => $elems) {
+
+								similar_text(strtolower($nextWord), strtolower($wordform), $perc);
+								if ($perc) {
+									$matches[$wordform] = $perc;
+								}
+							}
+							asort($matches); //sort matches in descending order of similarity
+							end($matches);    //point to the final (most likely) element in the array
+							$bestGuess = key($matches);  //get the key ('wordform')
+							$bestGuessPercentage = current($matches);
+
+							$bits = explode('|', $this->_lexicon[$bestGuess]);
+							$nextWord['lemma'] = $bits[0];
+							if ($bits[1]!='') {
+								$nextWord['pos'] = $bits[1];
+							}
+							else {
+								$nextWord['pos'] = False;
+							}
+							echo $nextWord . " ---> " . $nextWord['lemma'] . "({$nextWord['pos']})  = {$bestGuessPercentage}%\n";
+						}
 					}
-					$xml->asXML($nextFile);
+		//			$xml->asXML($nextFile);
 				}
 			}
 		}
