@@ -14,7 +14,7 @@ class email
   public function __construct($to, $subject, $message, $from) {
       $this->mail = new PHPMailer;
 
-	  $this->mail->SMTPDebug = 0;   //no debug info
+	  $this->mail->SMTPDebug = 3;
 	  $this->mail->isSMTP();
 	  $this->mail->Host = getenv(SMTPHost);
 	  $this->mail->SMTPAuth = true;
