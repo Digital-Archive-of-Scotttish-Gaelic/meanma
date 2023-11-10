@@ -1,0 +1,12 @@
+{
+    "name": "stephenbarrett/meanma",
+    "authors": [
+        {
+            "name": "steviebarrett",
+            "email": "mail@steviebarrett.com"
+        }
+    ],
+    "require": {
+        "phpmailer/phpmailer": "^6.8"
+    }
+}
