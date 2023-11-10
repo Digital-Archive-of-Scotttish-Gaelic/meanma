@@ -95,7 +95,7 @@ HTML;
 			<p>Kind regards</p>
 			<p>The DASG team</p>
 HTML;
-    $email = new models\email($this->_user->getEmail(), "MEANMA Password Reset", $emailText, "mail@dasg.ac.uk");
+    $email = new models\email($this->_user->getEmail(), "MEANMA Password Reset", $emailText, "mail@meanma.net");
     $email->send();
   }
 
