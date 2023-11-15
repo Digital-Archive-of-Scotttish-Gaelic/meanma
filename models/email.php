@@ -16,11 +16,11 @@ class email
 
 	  $this->mail->SMTPDebug = 3;
 	  $this->mail->isSMTP();
-	  $this->mail->Host = getenv(SMTPHost);
+	  $this->mail->Host = getenv("SMTPHost");
 	  $this->mail->SMTPAuth = true;
 //Provide username and password
-	  $this->mail->Username = getenv(SMTPUser);
-	  $this->mail->Password = getenv(SMTPPass);
+	  $this->mail->Username = getenv("SMTPUser");
+	  $this->mail->Password = getenv("SMTPPass");
 //If SMTP requires TLS encryption then set it
 	  $this->mail->SMTPSecure = "tls";
 //Set TCP port to connect to
