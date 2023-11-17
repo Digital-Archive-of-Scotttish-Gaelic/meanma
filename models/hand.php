@@ -13,7 +13,7 @@ class hand
 	 * @param $id
 	 */
 	public function __construct($id) {
-		$xml = simplexml_load_file("../mss/Transcribing/corpus.xml");
+		$xml = simplexml_load_file(INPUT_FILEPATH . "804_mss/corpus.xml");
 		$xml->registerXPathNamespace('tei','https://dasg.ac.uk/corpus/');
 		$this->_id = $id;
 		$results = $xml->xpath("//tei:handNote[@xml:id='{$id}']");
