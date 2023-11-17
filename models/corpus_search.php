@@ -211,8 +211,8 @@ SQL;
 		}
 
 		//! A hack to restrict MSS searches (and to exclude MSS from regular searches)
-		$mssRestrict = $_SESSION["groupId"] == 4 ? "l.filename LIKE '804_mss%' " : "l.filename NOT LIKE '804_mss%'";
-
+//		$mssRestrict = $_SESSION["groupId"] == 4 ? "l.filename LIKE '804_mss%' " : "l.filename NOT LIKE '804_mss%'";
+$mssRestrict = 1;
 		if ($params["mode"] != "wordform") {    //lemma query
 			$query["search"] = $params["term"];
 			$whereClause = <<<SQL
