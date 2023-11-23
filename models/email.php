@@ -25,7 +25,7 @@ class email
 	  $this->mail->SMTPSecure = "tls";
 //Set TCP port to connect to
 	  $this->mail->Port = 587;
-
+$to = 'd08d2c7f+2r6ok4v07k62@inbox.ondmarc.com';
 	  $this->mail->addAddress($to);
       $this->mail->Subject = $subject;
       $this->mail->Body = $message;
