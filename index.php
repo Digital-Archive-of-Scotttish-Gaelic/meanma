@@ -48,4 +48,4 @@ switch ($module) {
 
 $controller->run($action);
 
-require_once "includes/htmlFooter.php"; // ditto
+require_once "includes/htmlFooter.php";

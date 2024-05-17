@@ -29,15 +29,15 @@ switch ($_REQUEST["action"]) {
 		}
 		echo json_encode(array("firstname"=>$user->getFirstName(), "lastname"=>$user->getLastName()));
 		break;
-  case "getContext":
-  	$citation = new citation($db, $_GET["citationId"]);
-	  $citation->attachToSlip($_GET["slipId"]);
-  	$citation->setType($_GET["type"]);
-  	$citation->setPreContextScope($_GET["preScope"]);
-  	$citation->setPostContextScope($_GET["postScope"]);
-	  $context = $citation->getContext(true);
-    echo json_encode($context);
-    break;
+    case "getContext":
+  	    $citation = new citation($db, $_GET["citationId"]);
+	    $citation->attachToSlip($_GET["slipId"]);
+  	    $citation->setType($_GET["type"]);
+  	    $citation->setPreContextScope($_GET["preScope"]);
+  	    $citation->setPostContextScope($_GET["postScope"]);
+	    $context = $citation->getContext(true);
+        echo json_encode($context);
+        break;
 	case "getSlips":
 		$slipInfo = collection::getAllSlipInfo($_GET["offset"], $_GET["limit"], $_GET["search"], $_GET["sort"], $_GET["order"], $_GET["type"], $db);
 		echo json_encode($slipInfo);
@@ -366,7 +366,7 @@ switch ($_REQUEST["action"]) {
 		$emendation->save();
 		echo json_encode(array("id" => $emendation->getId()));
 		break;
-	case updateEmendation:
+	case "updateEmendation":
 		$emendation = new emendation($db, $_GET["id"]);
 		$emendation->setContent($_GET["content"]);
 		$emendation->save();
@@ -421,6 +421,29 @@ switch ($_REQUEST["action"]) {
 		$slip = new slip($_GET["id"], $db);
 		$slip->unassignSense();
 		break;
+    case "editLemma":
+        $id = $_GET["id"];
+        $textId = $_GET["textId"];
+        $fileHandler = new xmlfilehandler($textId.'.xml', XML_FILEPATH);
+        $xml = $fileHandler->getXml();
+        $result = $xml->xpath("//*[@id='{$id}']");
+        $element = $result[0];
+        $element['lemma'] = $_GET["lemma"];
+        $element['pos'] = $_GET["pos"];
+        if ($_GET["split"] == 1) {
+            $newForm = '';
+            unset($element['lemma']);
+            foreach ($_GET["lemmas"] as $key => $lemma) {
+                $form = $_GET["forms"][$key];
+                $newForm .= $form;
+                $newForm = $element->addChild('form', $form);
+                $newForm['lemma'] = $lemma;
+            }
+            $element = $newForm;
+        }
+        $saved = $xml->asXML(XML_FILEPATH . $textId  . '.xml');
+        echo json_encode(array('saved' => $saved, 'get' => $_GET));
+        break;
 	default:
 		echo json_encode(array("error"=>"undefined action"));
 }

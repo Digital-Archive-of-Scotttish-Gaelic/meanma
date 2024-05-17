@@ -12,12 +12,16 @@ class xmlfilehandler
 	private $_preScope; //int : the number of tokens in the pre context
 	private $_postScope;  //int: the number of tokens in the post context
 
-  public function __construct($filename) {
+  public function __construct($filename, $inputFilepath = INPUT_FILEPATH) {
   	if ($filename != $this->_filename) {  //check if the file has already been loaded
   		$this->_filename = $filename;
-  		$this->_xml = simplexml_load_file(INPUT_FILEPATH . $this->_filename, null, LIBXML_NOBLANKS);
+  		$this->_xml = simplexml_load_file($inputFilepath . $this->_filename, null, LIBXML_NOBLANKS);
 		  $this->_xml->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
 	  }
+  }
+
+  public function getXml() {
+      return $this->_xml;
   }
 
   public function getFilename() {
