@@ -430,9 +430,10 @@ switch ($_REQUEST["action"]) {
         $element = $result[0];
         $element['lemma'] = $_GET["lemma"];
         $element['pos'] = $_GET["pos"];
+        $newForm = '';
         if ($_GET["split"] == 1) {
-            $newForm = '';
             unset($element['lemma']);
+            $element->children()[0] = '';   //delete the existing wordform
             foreach ($_GET["lemmas"] as $key => $lemma) {
                 $form = $_GET["forms"][$key];
                 $newForm .= $form;

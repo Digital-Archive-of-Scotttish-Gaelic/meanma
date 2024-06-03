@@ -18,7 +18,7 @@ $text = $proc->transformToXML($xml);
 
 echo <<<HTML
 
-    <h2>Hello world</h2>
+    <h2>Lemma Editor</h2>
     
     {$text}
     
@@ -92,10 +92,11 @@ $(function () {
 });
  
 function addFormRow() {
-    let html = '<label for="lemma" class="label">lemma:</label>';
-    html += '<input type="text" name="lemma[]" class="form-control" value="" />';
-    html += '<label for="wordform" class="label">wordform:</label>';
+    let html = '<label for="wordform" class="label">wordform:</label>';
     html += '<input type="text" name="wordform[]" class="form-control" value="" />';
+    html += '<label for="lemma" class="label">lemma:</label>';
+    html += '<input type="text" name="lemma[]" class="form-control" value="" />';
+    
     $('#form').append(html);
 }
 </script>

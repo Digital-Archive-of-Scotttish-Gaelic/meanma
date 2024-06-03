@@ -79,6 +79,14 @@
   </xsl:template>
 
   <xsl:template match="dasg:w[name(following-sibling::*[1])='w' or name(following-sibling::*[1])='o' or name(following-sibling::*[1])='i' or name(following-sibling::*[1])='footnote']">
+    <xsl:variable name="forms">
+      <xsl:for-each select="dasg:form">
+        <xsl:value-of select="."/>
+        <xsl:if test="position() != last()">
+          <xsl:text>|</xsl:text>
+        </xsl:if>
+      </xsl:for-each>
+    </xsl:variable>
     <span class="word" data-toggle="tooltip" data-placement="top">
       <xsl:attribute name="data-pos">
         <xsl:value-of select="@pos"/>
@@ -102,12 +110,23 @@
       <xsl:attribute name="data-ref">
         <xsl:value-of select="@ref"/>
       </xsl:attribute>
+      <xsl:attribute name="data-forms">
+        <xsl:value-of select="$forms"/>
+      </xsl:attribute>
       <xsl:apply-templates/>
     </span>
     <xsl:text> </xsl:text>
   </xsl:template>
 
   <xsl:template match="dasg:w">
+    <xsl:variable name="forms">
+      <xsl:for-each select="dasg:form">
+        <xsl:value-of select="."/>
+        <xsl:if test="position() != last()">
+          <xsl:text>|</xsl:text>
+        </xsl:if>
+      </xsl:for-each>
+    </xsl:variable>
     <span class="word" data-toggle="tooltip" data-placement="top">
       <xsl:attribute name="data-pos">
         <xsl:value-of select="@pos"/>
@@ -128,8 +147,16 @@
           <xsl:value-of select="@pos"/>
         </xsl:if>
       </xsl:attribute>
+      <xsl:attribute name="data-forms">
+        <xsl:value-of select="$forms"/>
+      </xsl:attribute>
       <xsl:apply-templates/>
     </span>
+  </xsl:template>
+
+  <!-- added by SB to handle edit lemma functionailty -->
+  <xsl:template match="dasg:form">
+    <xsl:value-of select="."/>
   </xsl:template>
 
   <xsl:template match="dasg:pc[@join='right']">
