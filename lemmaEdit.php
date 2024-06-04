@@ -26,9 +26,23 @@ echo <<<HTML
 $(function () {
     
     $('.word').on('click', function () {
+        
+       //reset the form 
+       $('#form')[0].reset();
+       $('.new-row').remove();
+       
        let id = $(this).attr('id');
        let lemma = $(this).attr('data-lemma');
        let pos = $(this).attr('data-pos');
+       let formstring = $(this).attr('data-forms');
+       //check if word has multiple forms
+       if (formstring) {
+           let forms = formstring.split("|");
+           let lemmas = lemma.split('|');
+           forms.forEach(function (form, i) {
+              addFormRow(form, lemmas[i]); 
+           });
+       }
        $('#wordId').val(id);
        $('#lemma').val(lemma)
        $('#pos').val(pos);
@@ -91,11 +105,11 @@ $(function () {
     
 });
  
-function addFormRow() {
+function addFormRow(wordform = '', lemma = '') {
     let html = '<label for="wordform" class="label">wordform:</label>';
-    html += '<input type="text" name="wordform[]" class="form-control" value="" />';
+    html += '<input type="text" name="wordform[]" class="form-control new-row" value="'+wordform+'" />';
     html += '<label for="lemma" class="label">lemma:</label>';
-    html += '<input type="text" name="lemma[]" class="form-control" value="" />';
+    html += '<input type="text" name="lemma[]" class="form-control new-row" value="'+lemma+'" />';
     
     $('#form').append(html);
 }
