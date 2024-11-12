@@ -312,10 +312,10 @@ function saveSlip() {
   var starred = $('#slipStarred').prop('checked') ? 1 : 0;
   var locked = $('#locked').val();
   var notes = CKEDITOR.instances['slipNotes'].getData();
-  var status = $('#status').val();
+  var status = $('#status').val() ? $('#status').val() : 1; //set default status if not defined
   var data = {action: "saveSlip", filename: $('#slipFilename').text(), id: $('#wordId').text(),
     auto_id: $('#auto_id').text(), pos: $('#pos').val(), starred: starred, reference: reference,
-    notes: notes, status: status, wordClass: wordclass, wordform: wordform, text_id: textId,
+    notes: notes, slipStatus: status, wordClass: wordclass, wordform: wordform, text_id: textId,
     locked: locked, text_id: $('#textId').val(), slipType: slipType, entryId: entryId, subsense_id: senseId};
   switch (wordclass) {
     case "noun":
