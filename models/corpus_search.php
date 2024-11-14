@@ -8,6 +8,7 @@ class corpus_search
 	private $_term; // the word being searched for
 	private $_db; // an instance of models\database
 	private $_params; // an array of query string parameters
+    private $_fullsearch;
 	private $_dbResults;  // an array of search results from the database
 	private $_perpage, $_page, $_mode, $_case, $_accent, $_lenition, $_view, $_order;
 	private $_hits;
@@ -20,10 +21,8 @@ class corpus_search
 	public function __construct($params, $fullSearch=true, $db) {
 		$this->_db = $db;
 		$this->_params = $params;
-		$this->_init();
-		if (!empty($this->getTerm())) {  //only run the search if there is a search term
-			$this->_dbResults = $this->_getDBSearchResults($fullSearch);
-		}
+        $this->_fullsearch = $fullSearch;
+        $this->_init();
 	}
 
 	public function getDB() {
@@ -50,7 +49,8 @@ class corpus_search
 	// GETTERS
 
 	public function getDBResults() {
-		return $this->_dbResults;
+
+		return $this->_dbResults ? $this->_dbResults : $this->_getDBSearchResults();
 	}
 
 	public function getId() {
@@ -151,10 +151,10 @@ class corpus_search
 	 * @param bool $fullSearch : a flag for switching to result set required for auto slip creation
 	 * @return array of database results
 	 */
-	public function _getDBSearchResults($fullSearch) {
+	public function _getDBSearchResults() {
 		$params = $this->_params;
 		$perpage = "";
-		if ($fullSearch) {
+		if ($this->_fullsearch) {
 			$perpage = $params["pp"];
 			$pagenum = $params["page"];
 			$offset = $pagenum == 1 ? 0 : ($perpage * $pagenum) - $perpage;
@@ -240,7 +240,7 @@ SQL;
 			$query["search"] = $search;
 		}         //end wordform query build
 
-		if (!$fullSearch) { // a slightly different query for auto slip creation
+		if (!$this->_fullsearch) { // a slightly different query for auto slip creation
 			$query["sql"] = <<<SQL
 				SELECT s.auto_id AS auto_id, l.filename AS filename, l.id AS id, pos
 						FROM lemmas AS l
@@ -252,7 +252,7 @@ SQL;
 SQL;
 		} else {  // the MAIN search query
 			$query["sql"] = <<<SQL
-				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, l.date_display, date_of_lang AS 
+				SELECT SQL_CALC_FOUND_ROWS l.filename AS filename, l.id AS id, wordform, pos, lemma, l.date_display, ROUND(date_of_lang) AS 
 					date_internal, textTitle AS title, page, medium, l.reference, tid
             FROM lemma_search AS l
             {$textJoinSql}
@@ -299,11 +299,13 @@ SQL;
 		$query["sql"] .= <<<SQL
         ORDER BY {$orderBy}
 SQL;
-		if ($perpage) {
+/*		if ($perpage) {
 			$query["sql"] .= <<<SQL
 				LIMIT {$perpage} OFFSET {$offset}
 SQL;
 		}
+*/
+  //      die($query["sql"]);
 		$results = $this->_db->fetch($query["sql"], $pdoParams);
 		$hits = $this->_db->fetch("SELECT FOUND_ROWS() as hits;");
 		$this->_hits = $hits[0]["hits"];

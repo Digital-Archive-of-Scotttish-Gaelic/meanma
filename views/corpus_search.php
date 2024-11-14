@@ -254,6 +254,32 @@ HTML;
 	}
 
 	private function _writeSearchResults() {
+
+        $data = $_GET;
+        $data['action'] = 'search';
+        $queryString = http_build_query($data);
+//die($queryString);
+        echo <<<HTML
+            <table id="searchResults" data-toggle="table">
+       
+                <thead>
+                    <tr>
+                        <th data-field="id">ID</th>
+                        <th data-field="date_internal">Date</th>
+                        <th data-field="wordform">Word</td>
+                        <th data-field="title">Reference</th>
+                        <th data-field="context" data-formatter="formatContext">Context</th>
+                        
+                    </tr>
+                </thead>
+            <table>
+HTML;
+
+
+
+        $this->_writeResultsJavascript($queryString);       //DUPLICATE!!
+        return;
+
 		$results = $this->_model->getResults();
 		$resultTotal = $this->_model->getHits();
 		models\collection::writeSlipDiv();
@@ -268,7 +294,7 @@ HTML;
 		}
 		$rowNum = $this->_model->getPage() * $this->_model->getPerPage() - $this->_model->getPerPage() + 1;
 		echo <<<HTML
-        <table class="table">
+        <table id="searchResults" data-toggle="table" data-pagination="true">
             <tbody>
 HTML;
 		if (count($results)) {
@@ -444,13 +470,79 @@ HTML;
 	/**
 	 * Writes the Javascript required for the pagination
 	 */
-	private function _writeResultsJavascript() {
+	private function _writeResultsJavascript($queryString) {
 		//write the Javascript
 		echo <<<HTML
-				<script type="text/javascript" src="js/jquery.simplePagination.js"></script>
-        <script>
+				<!--script type="text/javascript" src="js/jquery.simplePagination.js"></script-->
+	
+    <script>
+            
+
+     
+            function formatContext(value, row, index) {
+                if (row.contextHtml) {
+                    // If the HTML is already loaded, return it immediately
+                    return row.contextHtml;
+                } else {
+                    $.getJSON('ajax.php?action=getResultContext&wid=' + row['id'] + '&filename=' + row['filename'] , function(data) {
+                        let html = '<td style="text-align: right;">'+data["pre"]["output"]+'</td><td style="text-align: center;">';
+                        html += '<a target="_blank" href="?m=corpus&a=browse&id='+row["tid"]+'&wid='+row["id"]+'" data-toggle="tooltip" data-html="true" title="'+row["title"]+'">';
+                        html += data["word"] + '</a></td><td>'+data["post"]["output"]+'</td>';
+                        
+                        // Update the row data with the formatted HTML for the next render
+            row.contextHtml = html;
+            
+            // Refresh the specific row to show the new data
+            $('#searchResults').bootstrapTable('updateRow', {
+                index: index,
+                row: row
+            });
+        });
+        // Return a placeholder while the AJAX call is pending
+        return 'Loading...';
+                     
+                }
+            }
+            
+            $('#searchResults').bootstrapTable({
+                url: 'ajax.php?{$queryString}',
+                pagination: true,
+                columns: [
+                    { field: 'id', title: 'ID' },                
+                    { field: 'date_internal', title: 'Date' },
+                    { field: 'wordform', title: 'Word' },
+                    { field: 'title', title: 'Title' }     ,
+                    { field: 'context', title: 'Context', formatter: formatContext }
+                   
+                ]
+            });
+            
+             
+            
         $(function() {
             
+            
+
+        // Later, access the hidden data as a data attribute
+        $('#searchResults').on('post-body.bs.table', function () { 
+            
+            var data = $('#table').bootstrapTable('getData');
+    console.log(data);
+   /*         data.forEach(function(row) {
+                console.log("Row ID:", row.id);               // Visible field
+                console.log("Row Name:", row.name);           // Visible field
+                console.log("Hidden Field:", row.filename);  // Hidden field from response
+            });
+    /*
+            $('#table tbody tr').each(function () {
+                var hiddenField = $(this).data('filename');  // Access the hidden data
+                console.log("Hidden Field:", hiddenField);
+            });
+            
+     */
+        });
+       
+                   
           $('#autoCreateRecords').on('click', function() {
             let check = confirm('Are you absolutely sure you want to automatically create ca. {$this->_model->getHits()} records? (Previously created records will not be affected.)');
             if (check) {
@@ -501,6 +593,7 @@ HTML;
 			     /*
 				    Pagination handler
 			     */
+			     /*
 		          $("#pagination").pagination({
 				          currentPage: {$this->_model->getPage()},
 		              items: {$this->_model->getHits()},
@@ -510,7 +603,9 @@ HTML;
 				            var url = 'index.php?{$_SERVER["QUERY_STRING"]}&page=' + pageNum;
                     window.location.assign(url);
 		              }
-		          });
+		          }); 
+		          */
+			     
 		      });
         
           function setBasicResultsView() {

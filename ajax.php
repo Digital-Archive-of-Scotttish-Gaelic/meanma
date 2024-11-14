@@ -240,11 +240,11 @@ switch ($_REQUEST["action"]) {
     $slip->saveSlip($_POST);
     echo "success";
     break;
-	case "addTextIdToSlip":
+  case "addTextIdToSlip":
 		collection::addTextIdToSlip($_GET["slipId"], $_GET["textId"], $db);
 		echo json_encode(array("msg" => "success"));
 		break;
-	case "getSlipLinkHtml":
+  case "getSlipLinkHtml":
 		$slipId = collection::slipExists($_SESSION["groupId"], $_GET["filename"], $_GET["id"], $db);
 		$lemma = urldecode($_GET["lemma"]); // decode required for MSS weird chrs
 		$data = $slipId
@@ -252,7 +252,7 @@ switch ($_REQUEST["action"]) {
 			: array("filename"=>$_GET["filename"], "id"=>$_GET["id"], "pos"=>$_GET["pos"], "lemma"=>$lemma);  //new slip
 		echo collection::getSlipLinkHtml($data, null, $db);
 		break;
-	case "autoCreateSlips":
+  case "autoCreateSlips":
 		$search = new corpus_search($_GET, false, $db);
 		$results = $search->getDBResults();
 		foreach ($results as $result) {
@@ -267,12 +267,12 @@ switch ($_REQUEST["action"]) {
     collection::touchSlip($_POST["slipId"]);
     echo "success";
     break;
-	case "addPile":
+  case "addPile":
 		$pileId = pilecategories::addPile($_GET["name"], $_GET["description"], $_GET["entryId"], $db);
 		pilecategories::saveSlipPile($_GET["slipId"], $pileId, $db);
 		echo json_encode(array("pileId" => $pileId, "pileDescription" => $_GET["description"]));
 		break;
-	case "editPile":
+  case "editPile":
 		pilecategories::updatePile($_GET["id"], $_GET["name"], $_GET["description"], $db);
 		//remove association with slip
 		if ($_GET["slipId"]) {
@@ -306,39 +306,39 @@ switch ($_REQUEST["action"]) {
     }
     echo json_encode($results);
     break;
-	case "getGrammarInfo":
+case "getGrammarInfo":
 		$grammarInfo = lemmas::getGrammarInfo($_GET["id"], $_GET["filename"]);
 		echo json_encode($grammarInfo);
 		break;
-	case "saveLemmaGrammar":
+case "saveLemmaGrammar":
 		echo lemmas::saveLemmaGrammar($_GET["id"], $_GET["filename"], $_GET["headwordId"],
 			$_GET["slipId"], $_GET["grammar"]);
 		break;
-	case "requestUnlock":
+case "requestUnlock":
 			collection::requestUnlock($_GET["slipId"]);
 		break;
-	case "setGroup":
+case "setGroup":
 		users::updateGroupLastUsed($_GET["groupId"]);
 		break;
-	case "createEntry":
+case "createEntry":
 		//creates an entry if the combination does not already exist
 		$entry = entries::getEntryByHeadwordAndWordclass($_GET["headword"], $_GET["wordclass"], $db);
 		echo json_encode(array("id" => $entry->getId()));
-		break;
-		case "saveEntry":
+        break;
+case "saveEntry":
 		$entry = entries::getEntryById($_POST["id"], $db);
 		$entry->setSubclass($_POST["subclass"]);
 		$entry->setNotes($_POST["notes"]);
 		$entry->setEtymology($_POST["etymology"]);
 		$entry->saveEntry($db);
 		break;
-	case "getSlowSearchResults":
+case "getSlowSearchResults":
 		$slowSearch = new slow_search($_GET["id"], $db);
 		$xpath = urldecode($_GET["xpath"]);
 		$results = $slowSearch->search($xpath, $_GET["chunkSize"], $_GET["offsetFilename"], $_GET["offsetId"], $_GET["index"]);
 		echo json_encode($results);
 		break;
-	case "raiseIssue":
+case "raiseIssue":
 		$issue = new issue();
 		$issue->init($_GET);
 		if ($issue->save()) {
@@ -348,7 +348,7 @@ switch ($_REQUEST["action"]) {
 		}
 		echo json_encode(array("message" => $message));
 		break;
-	case "updateIssue":
+case "updateIssue":
 		$issue = new issue($_GET["id"]);
 		$issue->init($_GET);
 		if ($issue->save()) {
@@ -358,7 +358,7 @@ switch ($_REQUEST["action"]) {
 		}
 		echo json_encode(array("message" => $message));
 		break;
-	case "createEmendation":
+case "createEmendation":
 		$emendation = new emendation($db, null, $_GET["cid"]);
 		$emendation->setType($_GET["type"]);
 		$emendation->setTokenId($_GET["tid"]);
@@ -366,21 +366,21 @@ switch ($_REQUEST["action"]) {
 		$emendation->save();
 		echo json_encode(array("id" => $emendation->getId()));
 		break;
-	case "updateEmendation":
+case "updateEmendation":
 		$emendation = new emendation($db, $_GET["id"]);
 		$emendation->setContent($_GET["content"]);
 		$emendation->save();
 		break;
-	case "deleteEmendation":
+case "deleteEmendation":
 		emendation::delete($_GET["id"], $db);
 		break;
-	case "createDeletion":
+case "createDeletion":
 		$deletion = new deletion($db, null, $_GET["cid"]);
 		$deletion->setTokenIdStart($_GET["tid"]);
 		$deletion->save();
 		echo json_encode(array("id" => $deletion->getId()));
 		break;
-	case "updateDeletion":
+case "updateDeletion":
 		$deletion = new deletion($db, $_GET["id"]);
 		$deletion->setTokenIdEnd($_GET["tid"]);
 		if ($_GET["startId"]) {
@@ -389,10 +389,10 @@ switch ($_REQUEST["action"]) {
 		$deletion->save();
 		echo json_encode(array("message" => "saved"));
 		break;
-	case "deleteDeletion":
+case "deleteDeletion":
 		deletion::delete($_GET["id"], $db);
 		break;
-	case "saveSense":
+case "saveSense":
 		$sense = new sense($db, $_POST["id"], $_POST["entryId"]);
 		$sense->setLabel($_POST["label"]);
 		$sense->setDefinition($_POST["definition"]);
@@ -402,13 +402,13 @@ switch ($_REQUEST["action"]) {
 		$sense->save();
 		echo json_encode(array("id" => $sense->getId()));
 		break;
-	case "getSenseInfo":
+case "getSenseInfo":
 		$sense = new sense($db, $_GET["sid"]);
 		$parentLabel = $sense->getParentSense() ? $sense->getParentSense()->getLabel() : null;
 		echo json_encode(array("label" => $sense->getLabel(), "definition" => $sense->getDefinition(),
 			"parentLabel" => $parentLabel));
 		break;
-	case "swapSense":
+case "swapSense":
 		$sense = new sense($db, $_GET["sid"]);
 		$swapId = $sense->swapSense($_GET["dir"]);
 		$position = $sense->getSensePosition(); //whether this sense is first and/or last in the sort order
@@ -417,11 +417,11 @@ switch ($_REQUEST["action"]) {
 		echo json_encode(array("id" => $swapId, "position" => $position, "swapPosition" => $swapPosition,
 			"parentId" => $sense->getSubsenseOf()));
 		break;
-	case "unassignSense":
+case "unassignSense":
 		$slip = new slip($_GET["id"], $db);
 		$slip->unassignSense();
 		break;
-    case "editLemma":
+case "editLemma":
         $id = $_GET["id"];
         $textId = $_GET["textId"];
         $fileHandler = new xmlfilehandler($textId.'.xml', XML_FILEPATH);
@@ -445,6 +445,23 @@ switch ($_REQUEST["action"]) {
         $saved = $xml->asXML(XML_FILEPATH . $textId  . '.xml');
         echo json_encode(array('saved' => $saved, 'get' => $_GET));
         break;
-	default:
+
+    case "search":
+        $search = new corpus_search($_GET, true, $db);
+        $results = $search->getDBResults();
+        /*foreach ($results as $result) {
+            $fh = new XMLFileHandler($result["filename"]);
+            $id = $result["id"];
+            $result["context"] = $fh->getContext($id, 12, 12);
+        }*/
+        echo json_encode($results);
+        break;
+    case "getResultContext":
+        $fh = new XMLFileHandler($_GET["filename"]);
+        $id = $_GET["wid"];
+        echo json_encode($fh->getContext($id, 12, 12));
+        break;
+
+    default:
 		echo json_encode(array("error"=>"undefined action"));
 }
