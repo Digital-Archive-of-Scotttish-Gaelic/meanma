@@ -268,6 +268,7 @@ HTML;
   .table tr td {
     border: none; /* Remove all cell borders */
     border-top: 1px solid #ddd; /* Add a top border to each row */
+  
   }
 </style>
 
@@ -504,9 +505,9 @@ HTML;
                     return row.contextHtml;
                 } else {
                     $.getJSON('ajax.php?action=getResultContext&wid=' + row['id'] + '&filename=' + row['filename'] , function(data) {
-                        let html = '<div style="display: flex; justify-content: center;"><table style="margin:auto;"><tr><td style="border:none;text-align: right;">'+data["pre"]["output"]+'</td><td style="border:none;text-align: center;">';
+                        let html = '<td style="border:none;text-align: right;">'+data["pre"]["output"]+'</td><td style="border:none;text-align: center;">';
                         html += '<a target="_blank" href="?m=corpus&a=browse&id='+row["tid"]+'&wid='+row["id"]+'" data-toggle="tooltip" data-html="true" title="'+row["title"]+'">';
-                        html += data["word"] + '</a></td><td style="border:none;">'+data["post"]["output"]+'</td></tr></table></div>';
+                        html += data["word"] + '</a></td><td style="border:none;">'+data["post"]["output"]+'</td>';
                         
                         // Update the row data with the formatted HTML for the next render
                         row.contextHtml = html;
@@ -529,7 +530,7 @@ HTML;
                     { field: 'id', title: 'ID' },                
                     { field: 'date_internal', title: 'Date' },
                     { field: 'wordform', title: 'Word' },
-                    { field: 'title', title: 'Title' }     ,
+                    { field: 'title', title: 'Title' },
                     { field: 'context', title: 'Context', formatter: formatContext }
                    
                 ]
