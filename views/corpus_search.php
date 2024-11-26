@@ -258,9 +258,20 @@ HTML;
         $data = $_GET;
         $data['action'] = 'search';
         $queryString = http_build_query($data);
-//die($queryString);
+
         echo <<<HTML
-            <table id="searchResults" data-toggle="table">
+
+<style>
+  .table tr {
+    border: none; /* Remove all row borders */
+  }
+  .table tr td {
+    border: none; /* Remove all cell borders */
+    border-top: 1px solid #ddd; /* Add a top border to each row */
+  }
+</style>
+
+            <table id="searchResults" class="table-borderless" data-toggle="table">
        
                 <thead>
                     <tr>
@@ -279,6 +290,13 @@ HTML;
 
         $this->_writeResultsJavascript($queryString);       //DUPLICATE!!
         return;
+
+
+
+
+
+
+
 
 		$results = $this->_model->getResults();
 		$resultTotal = $this->_model->getHits();
@@ -477,30 +495,30 @@ HTML;
 	
     <script>
             
-
-     
+            /*
+                // Boootstrap table code for search results
+             */
             function formatContext(value, row, index) {
                 if (row.contextHtml) {
                     // If the HTML is already loaded, return it immediately
                     return row.contextHtml;
                 } else {
                     $.getJSON('ajax.php?action=getResultContext&wid=' + row['id'] + '&filename=' + row['filename'] , function(data) {
-                        let html = '<td style="text-align: right;">'+data["pre"]["output"]+'</td><td style="text-align: center;">';
+                        let html = '<div style="display: flex; justify-content: center;"><table style="margin:auto;"><tr><td style="border:none;text-align: right;">'+data["pre"]["output"]+'</td><td style="border:none;text-align: center;">';
                         html += '<a target="_blank" href="?m=corpus&a=browse&id='+row["tid"]+'&wid='+row["id"]+'" data-toggle="tooltip" data-html="true" title="'+row["title"]+'">';
-                        html += data["word"] + '</a></td><td>'+data["post"]["output"]+'</td>';
+                        html += data["word"] + '</a></td><td style="border:none;">'+data["post"]["output"]+'</td></tr></table></div>';
                         
                         // Update the row data with the formatted HTML for the next render
-            row.contextHtml = html;
-            
-            // Refresh the specific row to show the new data
-            $('#searchResults').bootstrapTable('updateRow', {
-                index: index,
-                row: row
-            });
-        });
-        // Return a placeholder while the AJAX call is pending
-        return 'Loading...';
-                     
+                        row.contextHtml = html;
+                        
+                        // Refresh the specific row to show the new data
+                        $('#searchResults').bootstrapTable('updateRow', {
+                            index: index,
+                            row: row
+                        });
+                    });
+                    // Return a placeholder while the AJAX call is pending
+                    return 'Loading...';        
                 }
             }
             
@@ -517,32 +535,13 @@ HTML;
                 ]
             });
             
+            /*
+                //
+             */
              
             
         $(function() {
-            
-            
-
-        // Later, access the hidden data as a data attribute
-        $('#searchResults').on('post-body.bs.table', function () { 
-            
-            var data = $('#table').bootstrapTable('getData');
-    console.log(data);
-   /*         data.forEach(function(row) {
-                console.log("Row ID:", row.id);               // Visible field
-                console.log("Row Name:", row.name);           // Visible field
-                console.log("Hidden Field:", row.filename);  // Hidden field from response
-            });
-    /*
-            $('#table tbody tr').each(function () {
-                var hiddenField = $(this).data('filename');  // Access the hidden data
-                console.log("Hidden Field:", hiddenField);
-            });
-            
-     */
-        });
-       
-                   
+                     
           $('#autoCreateRecords').on('click', function() {
             let check = confirm('Are you absolutely sure you want to automatically create ca. {$this->_model->getHits()} records? (Previously created records will not be affected.)');
             if (check) {
