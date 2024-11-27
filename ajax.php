@@ -250,7 +250,7 @@ switch ($_REQUEST["action"]) {
 		$data = $slipId
 			? collection::getSlipInfoBySlipId($slipId, $db)[0]    //there is a slip so use the data
 			: array("filename"=>$_GET["filename"], "id"=>$_GET["id"], "pos"=>$_GET["pos"], "lemma"=>$lemma);  //new slip
-		echo json_encode(['html' => collection::getSlipLinkHtml($data, null, $db)]);
+		echo collection::getSlipLinkHtml($data, null, $db);
 
 		break;
   case "autoCreateSlips":

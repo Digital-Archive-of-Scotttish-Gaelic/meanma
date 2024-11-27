@@ -516,20 +516,20 @@ HTML;
                     return row.slipHtml;
                 } else {
                     
-                    $.getJSON('ajax.php?'+qs , function(data) {
-                        let html = data.html;
-                        
-                        console.log(html);
-                        
-                        // Update the row data with the formatted HTML for the next render
+                    var request = $.ajax({
+                        url: 'ajax.php?' + qs, 
+                        dataType: "html"}
+                      );
+                      request.done(function(html) {
                         row.slipHtml = html;
                         
                         // Refresh the specific row to show the new data
                         $('#searchResults').bootstrapTable('updateRow', {
                             index: index,
                             row: row
-                        });
+                        });       
                     });
+                   
                     // Return a placeholder while the AJAX call is pending
                     return 'Loading...';        
                 }
