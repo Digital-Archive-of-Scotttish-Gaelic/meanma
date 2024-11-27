@@ -250,7 +250,8 @@ switch ($_REQUEST["action"]) {
 		$data = $slipId
 			? collection::getSlipInfoBySlipId($slipId, $db)[0]    //there is a slip so use the data
 			: array("filename"=>$_GET["filename"], "id"=>$_GET["id"], "pos"=>$_GET["pos"], "lemma"=>$lemma);  //new slip
-		echo collection::getSlipLinkHtml($data, null, $db);
+		echo json_encode(['html' => collection::getSlipLinkHtml($data, null, $db)]);
+
 		break;
   case "autoCreateSlips":
 		$search = new corpus_search($_GET, false, $db);
@@ -461,7 +462,6 @@ case "editLemma":
         $id = $_GET["wid"];
         echo json_encode($fh->getContext($id, 12, 12));
         break;
-
     default:
 		echo json_encode(array("error"=>"undefined action"));
 }

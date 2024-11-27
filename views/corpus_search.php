@@ -264,30 +264,16 @@ HTML;
 <style>
   .table tr {
     border: none; /* Remove all row borders */
-  }
-  .table tr td {
-    border: none; /* Remove all cell borders */
     border-top: 1px solid #ddd; /* Add a top border to each row */
-  
   }
+  
 </style>
 
-            <table id="searchResults" class="table-borderless" data-toggle="table">
-       
-                <thead>
-                    <tr>
-                        <th data-field="id">ID</th>
-                        <th data-field="date_internal">Date</th>
-                        <th data-field="wordform">Word</td>
-                        <th data-field="title">Reference</th>
-                        <th data-field="context" data-formatter="formatContext">Context</th>
-                        
-                    </tr>
-                </thead>
+            <table id="searchResults" data-show-header="false" class="hide-headings table-borderless" data-toggle="table">
             <table>
 HTML;
 
-
+        models\collection::writeSlipDiv();              //DUPLICATE
 
         $this->_writeResultsJavascript($queryString);       //DUPLICATE!!
         return;
@@ -523,19 +509,45 @@ HTML;
                 }
             }
             
+            function addSlipLink(value, row, index) {          
+                let qs = '&action=getSlipLinkHtml&result&id=' + row['id'] +'&filename=' + row['filename'] + '&pos=' + row['pos'] + '&lemma=' + row['lemma'];
+                if (row.slipHtml) {
+                    // If the HTML is already loaded, return it immediately
+                    return row.slipHtml;
+                } else {
+                    
+                    $.getJSON('ajax.php?'+qs , function(data) {
+                        let html = data.html;
+                        
+                        console.log(html);
+                        
+                        // Update the row data with the formatted HTML for the next render
+                        row.slipHtml = html;
+                        
+                        // Refresh the specific row to show the new data
+                        $('#searchResults').bootstrapTable('updateRow', {
+                            index: index,
+                            row: row
+                        });
+                    });
+                    // Return a placeholder while the AJAX call is pending
+                    return 'Loading...';        
+                }
+            }
+            
             $('#searchResults').bootstrapTable({
                 url: 'ajax.php?{$queryString}',
                 pagination: true,
                 columns: [
-                    { field: 'id', title: 'ID' },                
+                    { field: 'row', title: 'Row', formatter: function(value, row, index) {return '<strong>' + (index + 1) + '</strong>'; }},
                     { field: 'date_internal', title: 'Date' },
-                    { field: 'wordform', title: 'Word' },
-                    { field: 'title', title: 'Title' },
-                    { field: 'context', title: 'Context', formatter: formatContext }
+                    { field: 'reference', title: 'Reference', formatter(value, row, index){return '<em>'+row['title']+'</em>'+' p.'+row['page']} },
+                    { field: 'context', title: 'Context', formatter: formatContext },
+                    { field: 'slip', title: 'Slip', formatter: addSlipLink }
                    
                 ]
             });
-            
+               
             /*
                 //
              */
