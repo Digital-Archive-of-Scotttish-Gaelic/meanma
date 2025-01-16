@@ -12,6 +12,23 @@ class email
   private $mail;
 
   public function __construct($to, $subject, $message, $from) {
+
+      // To send HTML mail, the Content-type header must be set
+      $headers[] = 'MIME-Version: 1.0';
+      $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+      $headers[] = $to;
+      $headers[] = 'From: DASG <mail@dasg.ac.uk>';
+
+      $message = '<html><body>' . $message . '</body></html>';
+
+      if (mail($to, $subject, $message, implode("\r\n", $headers))) {
+          echo "Email sent successfully!";
+      } else {
+          echo "Failed to send email.";
+      }
+
+      die();
+
       $this->mail = new PHPMailer;
 
 	  $this->mail->SMTPDebug = 3;
