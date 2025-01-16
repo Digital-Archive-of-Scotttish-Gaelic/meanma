@@ -32,7 +32,7 @@ class slip
 	protected $_slipMorph;  //an instance of models\slipmorphfeature
 	protected $_piles = array();
 	protected $_pilesInfo = array();   //used to store pile info (in place of object data) for AJAX use
-	protected $_citations;  //an array of citation objects
+	protected $_citations = array();  //an array of citation objects
 
 	public function __construct($id = null, $db) {
 		$this->_id = $id;
