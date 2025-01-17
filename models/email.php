@@ -14,7 +14,7 @@ class email
   public function __construct($to, $subject, $message, $from) {
 
       // To send HTML mail, the Content-type header must be set
-      $headers[] = 'MIME-Version: 1.0';
+ /*     $headers[] = 'MIME-Version: 1.0';
       $headers[] = 'Content-type: text/html; charset=iso-8859-1';
       $headers[] = $to;
       $headers[] = 'From: DASG <mail@dasg.ac.uk>';
@@ -28,20 +28,20 @@ class email
       }
 
       die();
-
+*/
       $this->mail = new PHPMailer;
 
 	  $this->mail->SMTPDebug = 3;
 	  $this->mail->isSMTP();
 	  $this->mail->Host = getenv("SMTPHost");
-	  $this->mail->SMTPAuth = true;
+//	  $this->mail->SMTPAuth = true;
 //Provide username and password
-	  $this->mail->Username = getenv("SMTPUser");
-	  $this->mail->Password = getenv("SMTPPass");
+	//  $this->mail->Username = getenv("SMTPUser");
+	//  $this->mail->Password = getenv("SMTPPass");
 //If SMTP requires TLS encryption then set it
 	  $this->mail->SMTPSecure = "tls";
 //Set TCP port to connect to
-	  $this->mail->Port = 587;
+	  $this->mail->Port = 25;
 
 	  $this->mail->addAddress($to);
       $this->mail->Subject = $subject;
