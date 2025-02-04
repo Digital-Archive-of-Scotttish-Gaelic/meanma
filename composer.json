@@ -1,0 +1,14 @@
+{
+    "name": "stephen.barrett/meanma",
+    "description": "Historical Lexicographty Manager",
+    "type": "project",
+    "require": {
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "authors": [
+        {
+            "name": "steviebarrett",
+            "email": "mail@steviebarrett.com"
+        }
+    ]
+}

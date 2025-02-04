@@ -31,7 +31,7 @@ class email
 */
       $this->mail = new PHPMailer;
 
-	  $this->mail->SMTPDebug = 3;
+	  //$this->mail->SMTPDebug = 3;
 	  $this->mail->isSMTP();
 	  $this->mail->Host = getenv("SMTPHost");
 //	  $this->mail->SMTPAuth = true;
