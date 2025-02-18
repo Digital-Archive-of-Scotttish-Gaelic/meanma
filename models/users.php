@@ -94,13 +94,13 @@ SQL;
     }
   }
 
-  public static function getAllUsers() {
+  public static function getAllUsers($isActive = 1) {
     $users = array();
     $db = new database();
     $dbh = $db->getDatabaseHandle();
     try {
-      $sth = $dbh->prepare("SELECT email, firstname FROM user ORDER BY firstname ASC;");
-      $sth->execute();
+      $sth = $dbh->prepare("SELECT email, firstname FROM user WHERE isActive = :isActive ORDER BY firstname ASC;");
+      $sth->execute([":isActive"=>$isActive]);
       while ($row = $sth->fetch()) {
         $users[] = self::getUser($row["email"]);
       }
