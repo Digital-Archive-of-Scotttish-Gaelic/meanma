@@ -457,6 +457,11 @@ case "editLemma":
         }*/
         echo json_encode($results);
         break;
+    case "xsearch":
+        $search = new xsearch();
+        $results = $search->getResults($_GET);
+        echo $results;
+        break;
     case "getResultContext":
         $fh = new XMLFileHandler($_GET["filename"]);
         $id = $_GET["wid"];
