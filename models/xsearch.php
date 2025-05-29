@@ -38,20 +38,30 @@ class xsearch
         $rows = [];
 
         foreach ($data['result'] as $i => $result) {
+            $match = false;
             foreach ($result['w'] as $word) {
-                $rows[] = [
-                    'text' => $word['#text'] ?? '',
-                    'lemma' => $word['lemma'] ?? '',
-                    'pos' => $word['pos'] ?? '',
-                    'wid' => $word['wid'] ?? '',
-                    'match' => ($word['match'] ?? '') === 'true' ? 'yes' : 'no',
-                    'sentence' => $i + 1
-                ];
+
+                preg_match('/_(\d+(?:-\d+)?)_/', $word['wid'], $matches);
+                $textId = $matches[1];;
+
+                $rows[$i]['textid'] = $textId;
+
+                if ($word['match'] === 'true') {
+                    $match = true;
+                    $rows[$i]['match'] = $word['#text'];
+                    continue;
+                }
+
+                if ($match) {   // word has been matched so assemble post context
+                    $rows[$i]['post'] .= $word['#text'] .  ' ';
+                } else {
+                    $rows[$i]['pre'] .= $word['#text'] . '  ';  //assemble pre context
+                }
             }
         }
 
         return json_encode([
-            'total' => count($rows),
+            'total' => count($data['result']),
             'rows' => $rows
         ]);
     }

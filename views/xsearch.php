@@ -54,6 +54,16 @@ HTML;
             <p><a href="index.php?m=corpus&a=xsearch&id=0 title="Back to search">&lt; Back to search</a></p>
             
             <table id="searchResults" data-show-header="false" class="hide-headings table-borderless" data-toggle="table">
+                  <thead>
+                    <tr>
+                      <th data-field="id">reference</th>
+                      <th data-field="pre" data-align="right">pre</th>
+                      <th data-field="match" data-align="center">match</th>
+                      <th data-field="post">post</th>
+                      <th data-field="slip">slip</th>
+                    </tr>
+                  </thead>
+  
                 <tbody>
             
 
@@ -73,12 +83,11 @@ HTML;
                     pagination: true,
                     columns: [
                         
-                        { field:   'text' }, 
-                        { field: 'lemma' },
-                        { field: 'pos' },
-                        { field: 'wid' },
+                        { field:   'textid' }, 
+                        { field: 'pre' },
                         { field: 'match' },
-                        { field: 'sentence' }
+                        { field: 'post' },
+                        { field: 'slip' }
                         
                  
                     ]
