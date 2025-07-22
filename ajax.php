@@ -234,7 +234,7 @@ switch ($_REQUEST["action"]) {
 		break;
   case "saveSlip":
     $slip = ($_GET["slipType"] == "corpus")
-	    ? new corpus_slip($_POST["filename"], $_POST["id"], $_POST["auto_id"], $_POST["pos"], $db)
+	    ? new corpus_slip($_POST["filename"], $_POST["id"], $_POST["auto_id"], $_POST["pos"], $db, $_POST["wordform"], $_POST["lemma"])
 	    : new paper_slip($_POST["auto_id"], $_POST["entryId"], $_POST["wordform"], $db);
     unset($_POST["action"]);
     $slip->saveSlip($_POST);
@@ -249,9 +249,8 @@ switch ($_REQUEST["action"]) {
 		$lemma = urldecode($_GET["lemma"]); // decode required for MSS weird chrs
 		$data = $slipId
 			? collection::getSlipInfoBySlipId($slipId, $db)[0]    //there is a slip so use the data
-			: array("filename"=>$_GET["filename"], "id"=>$_GET["id"], "pos"=>$_GET["pos"], "lemma"=>$lemma);  //new slip
+			: array("filename"=>$_GET["filename"], "id"=>$_GET["id"], "pos"=>$_GET["pos"], "lemma"=>$lemma, "wordform"=>$_GET["wordform"]);  //new slip
 		echo collection::getSlipLinkHtml($data, null, $db);
-
 		break;
   case "autoCreateSlips":
 		$search = new corpus_search($_GET, false, $db);
@@ -457,7 +456,7 @@ case "editLemma":
         }*/
         echo json_encode($results);
         break;
-    case "xsearch":
+    case "xsearch":                     // the newer XML search with eXist
         $search = new xsearch();
         $results = $search->getResults($_GET);
         echo $results;

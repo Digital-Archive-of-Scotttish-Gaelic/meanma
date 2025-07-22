@@ -27,7 +27,7 @@ class collection
     	$whereCondition = $type == "paper" ? "filename = '' AND" : ""; //paper slips have no filename
 			$whereClause = "WHERE {$whereCondition} group_id = {$_SESSION["groupId"]} ";
 			if (mb_strlen($search) > 1) {     //there is a search to run
-				$wordformField = $type == "corpus" ? "l.wordform" : "s.wordform";     //switch fields based on slip type
+				$wordformField =  "s.wordform";
 				$sth = $dbh->prepare("SET @search = :search");  //set a MySQL variable for the searchterm
 				$sth->execute(array(":search" => "%{$search}%"));
 				$whereClause .= <<<SQL
@@ -43,12 +43,12 @@ SQL;
 			$sql = "";
 			if ($type == "corpus") {      //this is a corpus slip query
 				$sql = <<<SQL
-					SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, pos, lemma, l.wordform AS wordform, 
-					      firstname, lastname, t.date AS date_internal, date_display AS date_display, t.title, page, 
+					SELECT SQL_CALC_FOUND_ROWS s.filename as filename, s.id as id, auto_id, s.wordform AS wordform,
+					      firstname, lastname, t.date AS date_internal, date_display AS date_display, t.title, 
 					      CONCAT(firstname, ' ', lastname) as fullname, locked, e.id AS entryId,
-             		l.pos as pos, s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
+             		 s.lastUpdated as lastUpdated, updatedBy, wordclass, e.headword as headword
             FROM slips s
-            JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
+            
 SQL;
 			} else {        //this is a paper slip query
 				$sql = <<<SQL
@@ -116,6 +116,7 @@ HTML;
                     data-toggle="modal" data-target="#slipModal"
                     data-auto_id="{$slip["auto_id"]}"
                     data-headword="{$headword}"
+                    data-wordform="{$slip["wordform"]}"
                     data-pos="{$slip["pos"]}"
                     data-id="{$slip["id"]}"
                     data-filename="{$slip["filename"]}"
@@ -275,15 +276,16 @@ SQL;
 		}
 		$slipInfo = array();
 		$sql = <<<SQL
-      SELECT s.filename as filename, s.id as id, auto_id, pos, lemma,
-              date, l.title AS title, page, starred, t.id AS tid, entry_id, 
-              e.headword AS headword, t.date_display AS date_display, t.date_publication AS 
-      				date_publication, t.date AS date_internal, t.reference AS referenceTemplate
-          FROM slips s
-          JOIN entry e ON e.id = s.entry_id
-          JOIN lemmas l ON s.filename = l.filename AND s.id = l.id
-          JOIN text t ON s.filename = t.filepath
-          WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId
+
+            SELECT s.filename as filename, s.id as id, auto_id,
+                          date, starred, t.id AS tid, entry_id, 
+                          e.headword AS headword, t.date_display AS date_display, t.date_publication AS 
+                                date_publication, t.date AS date_internal, t.reference AS referenceTemplate
+                      FROM slips s
+                      JOIN entry e ON e.id = s.entry_id
+                      
+                      JOIN text t ON s.filename = t.filepath
+                      WHERE group_id = {$_SESSION["groupId"]} AND s.auto_id = :slipId
 SQL;
 
 		$slipInfo = $db->fetch($sql, array(":slipId" => $slipId));
@@ -547,6 +549,7 @@ HTML;
 	  $slipUrl = "#";
 	  $slipClass = "slipLink2";
 	  $modalCode = "";
+      $lemma = $data["lemma"] ?? $data["headword"]; // in case of legacy issue with "lemma" vs "headword"
 	  $slipId = self::slipExists($_SESSION["groupId"], $data["filename"], $data["id"], $db);  //check if there is a slip for this group
 	  if ($slipId) {
 		  $slipLinkText = "view";
@@ -555,7 +558,7 @@ HTML;
 		  $dataUrl = "";
 	  } else {    //there is no slip so show link for adding one
 		  $dataUrl = "index.php?m=collection&a=add&filename=" . $data["filename"] . "&wid=".$data["id"];
-		  $dataUrl .= "&headword=" . $data["lemma"] . "&pos=" . $data["pos"];
+		  $dataUrl .= "&headword=" . $lemma . "&pos=" . $data["pos"] . "&wordform=" . $data["wordform"];
 		  $slipLinkText = "add";
 		  $createSlipStyle = "createSlipLink";
 		  $slipClass = "editSlipLink";
@@ -564,7 +567,8 @@ HTML;
         <a href="{$slipUrl}" data-url="{$dataUrl}" class="{$slipClass} {$createSlipStyle}"
             {$modalCode}
             data-auto_id="{$slipId}"
-            data-headword="{$data["headword"]}"
+            data-headword="{$lemma}"
+            data-wordform="{$data["wordform"]}"
             data-pos="{$data["pos"]}"
             data-id="{$data["id"]}"
             data-filename="{$data["filename"]}"

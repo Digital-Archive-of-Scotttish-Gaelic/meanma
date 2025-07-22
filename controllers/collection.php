@@ -31,7 +31,7 @@ class collection
 		    $view->show("edit");
 	    	break;
 	    case "add":
-	    	$slip = new models\corpus_slip($_GET["filename"], $_GET["wid"], null, $_GET["pos"], $this->_db);
+	    	$slip = new models\corpus_slip($_GET["filename"], $_GET["wid"], null, $_GET["pos"], $this->_db, $_GET["wordform"], $_GET["headword"]);
 	    	$view = new views\slip($slip);
 	    	$view->show("edit");
 	    	break;

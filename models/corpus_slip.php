@@ -4,7 +4,11 @@ namespace models;
 
 class corpus_slip extends slip
 {
-  public function __construct($filename = null, $wid = null, $auto_id = null, $pos = null, $db) {
+  public function __construct($filename = null, $wid = null, $auto_id = null, $pos = null, $db, $wordform = null, $headword = null) {
+
+      $this->_headword = $headword ?? '';    // added for v2
+      $this->_wordform = $wordform ?? '';    // added for v2
+
     $this->_filename = $filename;
     $this->_wid = $wid;
     //test if a slip already exists (if there is a slip with the same groupId, filename, id combination)
@@ -20,9 +24,13 @@ class corpus_slip extends slip
     $this->_slipMorph = new slipmorphfeature($this->getPOS());
     if (!$this->getId()) {  //create a new slip entry
       $this->_isNew = true;
+
+      /*
       $lemmaData = lemmas::getData($this->getWid(), $this->getFilename());
 	    $this->_headword = $lemmaData["lemma"];
 	    $this->_wordform = $lemmaData["wordform"];
+      */
+
       $this->extractWordClass($this->getPOS());
       //get the entry
 	    $this->_entry = entries::getEntryByHeadwordAndWordclass($this->getHeadword(), $this->getWordClass(), $this->_db);

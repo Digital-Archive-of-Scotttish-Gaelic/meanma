@@ -92,6 +92,8 @@ $(function () {
    * Load and display slip data in a modal
    */
   $('#slipModal').on('show.bs.modal', function (event) {
+
+    console.log('called');
     var modal = $(this);
     var slipLink = $(event.relatedTarget);
     //reset lock buttons

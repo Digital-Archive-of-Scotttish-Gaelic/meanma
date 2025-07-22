@@ -27,11 +27,11 @@ class xsearch extends search
 		        
 		        <div class="form-group">
 		          <div class="form-check form-check-inline">
-		            <input class="form-check-input" type="radio" name="mode" id="headwordRadio" value="headword">
+		            <input class="form-check-input" type="radio" name="mode" id="headwordRadio" value="head-form">
 		            <label class="form-check-label" for="headwordRadio">headword</label>
 		          </div>
 		          <div class="form-check form-check-inline">
-		            <input class="form-check-input" type="radio" name="mode" id="wordformRadio" value="wordform" checked>
+		            <input class="form-check-input" type="radio" name="mode" id="wordformRadio" value="word-form" checked>
 		            <label class="form-check-label" for="wordformRadio">wordform</label>
 		          </div>
 		        </div>
@@ -42,6 +42,9 @@ HTML;
 
     }
     public function showSearchResults($params) {
+
+        models\collection::writeSlipDiv();
+
         echo <<<HTML
             <style>
               .table tr {
@@ -79,19 +82,42 @@ HTML;
         echo <<<HTML
             <script>
                 $('#searchResults').bootstrapTable({
-                    url: 'ajax.php?action=xsearch&q={$params['q']}',
+                    url: 'ajax.php?action=xsearch&q={$params['q']}&mode={$params['mode']}',
                     pagination: true,
-                    columns: [
-                        
+                    columns: [            
                         { field:   'textid' }, 
                         { field: 'pre' },
                         { field: 'match' },
                         { field: 'post' },
-                        { field: 'slip' }
-                        
-                 
+                        { field: 'slip', title: 'Slip', formatter: addSlipLink }
                     ]
                 });
+                
+                function addSlipLink(value, row, index) {          
+                    let qs = '&action=getSlipLinkHtml&result&id=' + row['id'] +'&filename=' + row['textid'] + '.xml' + '&pos=' + row['pos'] + '&lemma=' + row['lemma'] + '&wordform=' + row['wordform'] ;
+                    if (row.slipHtml) {
+                        // If the HTML is already loaded, return it immediately
+                        return row.slipHtml;
+                    } else {
+                        
+                        var request = $.ajax({
+                            url: 'ajax.php?' + qs, 
+                            dataType: "html"}
+                          );
+                          request.done(function(html) {
+                            row.slipHtml = html;
+                            
+                            // Refresh the specific row to show the new data
+                            $('#searchResults').bootstrapTable('updateRow', {
+                                index: index,
+                                row: row
+                            });       
+                        });
+                       
+                        // Return a placeholder while the AJAX call is pending
+                        return 'Loading...';        
+                    }
+                }
             </script>
 HTML;
 

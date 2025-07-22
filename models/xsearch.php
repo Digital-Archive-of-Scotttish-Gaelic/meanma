@@ -6,9 +6,50 @@ class xsearch
 {
     public function getResults($params) {
 
+        $response = $this->_getCurlResponse($params);   //query exist/elemental and get the results
+
+        // Decode, restructure, and return
+        $data = json_decode($response, true);
+        $rows = [];
+
+        foreach ($data['result'] as $i => $result) {
+            $match = false;
+            foreach ($result['w'] as $word) {
+
+                preg_match('/_(\d+(?:-\d+)?)_/', $word['wid'], $matches);
+                $textId = $matches[1];;
+
+                $rows[$i]['textid'] = $textId;
+
+                if ($word['match'] === 'true') {        //this is the matched word
+                    $match = true;
+                    $rows[$i]['match'] = $rows[$i]['wordform'] = $word['#text'];
+                    $rows[$i]['pos'] = $word['pos'];
+                    $rows[$i]['lemma'] = $word['lemma'];
+                    $rows[$i]['id'] = $word['wid'];
+                    continue;
+                }
+
+                if ($match) {   // word has been matched so assemble post context
+                    $rows[$i]['post'] .= $word['#text'] .  ' ';
+                } else {
+                    $rows[$i]['pre'] .= $word['#text'] . '  ';  //assemble pre context
+                }
+            }
+        }
+
+        return json_encode([
+            'total' => count($data['result']),
+            'rows' => $rows
+        ]);
+    }
+
+    private function _getCurlResponse($params) {
+
         $baseUrl = 'http://localhost:8080/exist/restxq/word';
+        $mode = ($params['mode'] != 'head-form') ? 'word-form' : 'head-form';
         $curlParams = http_build_query([
-            'word-form' => $params['q'],
+            $mode => $params['q'],
             'experimental' => 'true'
         ]);
 
@@ -33,36 +74,6 @@ class xsearch
             return ['error' => "HTTP error $status"];
         }
 
-        // Decode, restructure, and return
-        $data = json_decode($response, true);
-        $rows = [];
-
-        foreach ($data['result'] as $i => $result) {
-            $match = false;
-            foreach ($result['w'] as $word) {
-
-                preg_match('/_(\d+(?:-\d+)?)_/', $word['wid'], $matches);
-                $textId = $matches[1];;
-
-                $rows[$i]['textid'] = $textId;
-
-                if ($word['match'] === 'true') {
-                    $match = true;
-                    $rows[$i]['match'] = $word['#text'];
-                    continue;
-                }
-
-                if ($match) {   // word has been matched so assemble post context
-                    $rows[$i]['post'] .= $word['#text'] .  ' ';
-                } else {
-                    $rows[$i]['pre'] .= $word['#text'] . '  ';  //assemble pre context
-                }
-            }
-        }
-
-        return json_encode([
-            'total' => count($data['result']),
-            'rows' => $rows
-        ]);
+        return $response;
     }
 }
