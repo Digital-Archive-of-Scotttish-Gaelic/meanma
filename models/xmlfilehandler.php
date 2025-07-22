@@ -16,7 +16,7 @@ class xmlfilehandler
   	if ($filename != $this->_filename) {  //check if the file has already been loaded
   		$this->_filename = $filename;
   		$this->_xml = simplexml_load_file($inputFilepath . $this->_filename, null, LIBXML_NOBLANKS);
-		  $this->_xml->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
+        $this->_xml->registerXPathNamespace('dasg','https://dasg.ac.uk/corpus/');
 	  }
   }
 
@@ -60,6 +60,7 @@ class xmlfilehandler
 	 *        used for +/- buttons in slip edit form ALSO used for [reset context]
 	 */
 	public function getContext($id, $preScope = 20, $postScope = 20, $emendations = null, $tagContext = false, $edit = 0, $deletions = null) {
+
 		$this->_preScope = $preScope;
 		$this->_postScope = $postScope;
 		$context = array();
@@ -68,7 +69,7 @@ class xmlfilehandler
 		// echo "<br>" . $this->_filename . " : {$id}";    // handy for debugging XML issues SB
 		// run xpath on p or lg or h or list element - possibly revert after MSS project
 		$xpath = <<<XPATH
-			//dasg:w[@id='{$id}']/ancestor::*[name()='p' or name()='lg' or name()='h' or name()='list']
+			//dasg:w[@wid='{$id}']/ancestor::*[name()='p' or name()='lg' or name()='h' or name()='list']
 XPATH;
 		$subXML = $this->_xml->xpath($xpath)[0];
 		$subXMLString = $subXML->asXML();
@@ -76,7 +77,7 @@ XPATH;
 		$subXMLString = str_replace("</l><l>", '<pc join="none">/</pc>', $subXMLString);
 		$subXML = new \SimpleXMLElement($subXMLString);
 		$xpath = <<<XPATH
-			//w[@id='{$id}']/preceding::*[(name()='w' and not(descendant::w)) or name()='pc' or name()='o']
+			//w[@wid='{$id}']/preceding::*[(name()='w' and not(descendant::w)) or name()='pc' or name()='o']
 XPATH;
 		$words = $subXML->xpath($xpath);
 		/* preContext processing */
@@ -98,7 +99,7 @@ XPATH;
 			$context["pre"] = $this->_normalisePunctuation($pre, $emendations, $tagContext, "pre", $edit, $deletions);
 		}
 		/* - end pre context processing - */
-		$xpath = "//dasg:w[@id='{$id}']";
+		$xpath = "//dasg:w[@wid='{$id}']";
 		$word = $this->_xml->xpath($xpath);
 		$wordString = functions::cleanForm($word[0]);   //strips tags
 		if ($emendations) {
@@ -109,7 +110,7 @@ XPATH;
 			$context["word"] = $wordString;
 		}
 		$xpath = <<<XPATH
-			//w[@id='{$id}']/following::*[(name()='w' and not(descendant::w)) or name()='pc' or name()='o']			
+			//w[@wid='{$id}']/following::*[(name()='w' and not(descendant::w)) or name()='pc' or name()='o']			
 XPATH;
 		$words = $subXML->xpath($xpath);
 		/* postContext processing */

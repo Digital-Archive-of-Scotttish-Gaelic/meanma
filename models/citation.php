@@ -104,7 +104,7 @@ SQL;
 
 	public function attachToSlip($slipId) {
 		$this->_slip = collection::getSlipBySlipId($slipId, $this->_db);
-		if ($this->_slip->getSlipIsAttachedTiCitation($this->getId())) {
+		if ($this->_slip->getSlipIsAttachedToCitation($this->getId())) {
 			return;   //slip is already attached
 		}
 		$sql = <<<SQL
@@ -122,12 +122,13 @@ SQL;
 	 *    : string preIncrementDisable : empty or 'disabled' if the start of the document has been reached
 	 *    : string postIncrementDisable : empty or 'disabled' if the end of the document has been reached
 	 */
-	public function getContext($tagContext = false, $edit = false) {
+	public function getContext($tagContext = false, $edit = false, $type = null) {
 		$context["html"] = $context["preDisable"] = $context["postDisable"] = $context["prelimit"] = $context["postlimit"] = "";
-		if ($this->_slip->getType() == "paper") {       //paper slip
+
+		if ($this->_slip->getType() == "paper") {      //paper slip
 			$context["html"] = $this->getPreContextString() . ' <mark class="hi">' . $this->_slip->getWordform() . '</mark> '
 				. $this->getPostContextString();
-		} else {                                        //corpus_slip
+		} else {                                         //corpus_slip
 			$handler = new xmlfilehandler($this->_slip->getFilename());
 			$preScope = $this->getPreContextScope();
 			$postScope = $this->getPostContextScope();
@@ -239,6 +240,7 @@ SQL;
 			$result = $this->_db->fetch($sql, array(":id" => $this->getId()));
 			$this->_slip = collection::getSlipBySlipId($result[0]["slip_id"], $this->_db);
 		}
+
 		return $this->_slip;
 	}
 

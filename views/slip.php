@@ -180,7 +180,7 @@ HTML;
 
 	private function _writeCitationEditModal() {
   	//set the input fields depending on slip type
-		if ($this->_slip->getType() == "corpus") {    //slip type is corpus
+		if ($this->_slip->getType() == "corpus") {     //slip type is corpus
 			$inputHtml = <<<HTML
 				<h5>Adjust citation context</h5>
         <div>
@@ -199,7 +199,7 @@ HTML;
 				<input type="hidden" class="form-control" name="wordform" id="wordform" placeholder="wordform" value="{$this->_slip->getWordform()}"/>
 HTML;
 
-		} else {            //slip type is paper
+		} else {           //slip type is paper
 			$inputHtml = <<<HTML
 				<div>					
 					<div class="form-group">
@@ -788,6 +788,7 @@ HTML;
     	$citationString = ($this->_slip->getType() == "corpus")
 		    ? $citation->getContext()["html"]
 		    : $citation->getPreContextString() . ' <mark class="hi">' . $this->_slip->getWordform() . '</mark> ' . $citation->getPostContextString();
+
 			$html .= <<<HTML
 				<li class="citationContainer_{$cid}" style="border-top: 1px solid gray;">
 					<span id="citation_{$citation->getId()}">

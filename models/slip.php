@@ -124,7 +124,7 @@ class slip
 		return null;
 	}
 
-	public function getSlipIsAttachedTiCitation($citationId) {
+	public function getSlipIsAttachedToCitation($citationId) {
 		return array_key_exists($citationId, $this->getCitations());
 	}
 

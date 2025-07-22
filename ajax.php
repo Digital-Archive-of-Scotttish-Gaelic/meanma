@@ -35,7 +35,9 @@ switch ($_REQUEST["action"]) {
   	    $citation->setType($_GET["type"]);
   	    $citation->setPreContextScope($_GET["preScope"]);
   	    $citation->setPostContextScope($_GET["postScope"]);
+
 	    $context = $citation->getContext(true);
+
         echo json_encode($context);
         break;
 	case "getSlips":
@@ -52,6 +54,7 @@ switch ($_REQUEST["action"]) {
 			echo json_encode(array("count" => count($_SESSION["printSlips"])));
 		break;
   case "loadSlip":
+
     $slip = ($_GET["filename"])
 	    ? new corpus_slip($_GET["filename"], $_GET["id"], $_GET["auto_id"], $_GET["pos"], $db)
 	    : new paper_slip($_GET["auto_id"], $_GET["entryId"], null, $db);

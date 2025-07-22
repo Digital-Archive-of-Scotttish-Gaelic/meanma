@@ -321,9 +321,8 @@ SQL;
 	 */
 	public static function getSlipBySlipId($slipId, $db) {
 		$sql = <<<SQL
-      SELECT s.filename AS filename, s.id AS wid, pos
+      SELECT s.filename AS filename, s.id AS wid
         FROM slips s
-      	JOIN lemmas l ON s.filename = l.filename AND s.id = l.id 
         WHERE auto_id = :slipId
 SQL;
 		$result = $db->fetch($sql, array(":slipId" => $slipId));

@@ -252,7 +252,7 @@ SQL;
    */
   public function getTextList() {
     $sql = <<<SQL
-      SELECT * FROM text WHERE partOf = '' ORDER BY CAST(id AS UNSIGNED) ASC
+      SELECT * FROM text ORDER BY CAST(id AS UNSIGNED) ASC
 SQL;
     foreach ($this->_db->fetch($sql) as $textResult) {
       $textsInfo[$textResult["id"]] = $textResult;
