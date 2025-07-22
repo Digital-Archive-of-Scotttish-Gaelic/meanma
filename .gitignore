@@ -4,4 +4,4 @@ meanma.xpr
 /vendor/
 populateTextDB.php
 
-includes/passwords.php
+/includes/passwords.php
