@@ -12,7 +12,25 @@ class xsearch
         $data = json_decode($response, true);
         $rows = [];
 
+        //This code for new wordx without context
         foreach ($data['result'] as $i => $result) {
+
+            $word = $result['w'];
+
+            preg_match('/_(\d+(?:-\d+)?)_/', $word['wid'], $matches);
+            $textId = $matches[1];;
+
+            $rows[$i]['tid'] = $textId;
+            $rows[$i]['filename'] = $textId . ".xml";
+
+            $rows[$i]['match'] = $rows[$i]['wordform'] = $word['#text'];
+            $rows[$i]['pos'] = $word['pos'];
+            $rows[$i]['lemma'] = $word['lemma'];
+            $rows[$i]['id'] = $word['wid'];
+        }
+
+        //The following code for EB API with pre and post context
+      /*  foreach ($data['result'] as $i => $result) {
             $match = false;
             foreach ($result['w'] as $word) {
 
@@ -29,7 +47,6 @@ class xsearch
                     $rows[$i]['id'] = $word['wid'];
                     continue;
                 }
-
                 if ($match) {   // word has been matched so assemble post context
                     $rows[$i]['post'] .= $word['#text'] .  ' ';
                 } else {
@@ -37,6 +54,7 @@ class xsearch
                 }
             }
         }
+      */
 
         return json_encode([
             'total' => count($data['result']),
@@ -46,7 +64,7 @@ class xsearch
 
     private function _getCurlResponse($params) {
 
-        $baseUrl = 'http://localhost:8080/exist/restxq/word';
+        $baseUrl = 'http://localhost:8080/exist/restxq/wordx';
         $mode = ($params['mode'] != 'head-form') ? 'word-form' : 'head-form';
         $curlParams = http_build_query([
             $mode => $params['q'],

@@ -84,14 +84,40 @@ HTML;
                 $('#searchResults').bootstrapTable({
                     url: 'ajax.php?action=xsearch&q={$params['q']}&mode={$params['mode']}',
                     pagination: true,
-                    columns: [            
-                        { field:   'textid' }, 
-                        { field: 'pre' },
-                        { field: 'match' },
-                        { field: 'post' },
+                    columns: [       
+                        { field: 'row', title: 'Row', formatter: function(value, row, index) {return '<strong>' + (index + 1) + '</strong>'; }},
+                        { field:   'tid', title: "Text ID" }, 
+                        { field: 'context', title: 'Context', formatter: formatContext },
                         { field: 'slip', title: 'Slip', formatter: addSlipLink }
                     ]
                 });
+                
+                /*
+                // Boootstrap table code for search results
+                 */
+                function formatContext(value, row, index) {
+                    if (row.contextHtml) {
+                        // If the HTML is already loaded, return it immediately
+                        return row.contextHtml;
+                    } else {
+                        $.getJSON('ajax.php?action=getResultContext&wid=' + row['id'] + '&filename=' + row['filename'] , function(data) {
+                            let html = '<td style="border:none;text-align: right;">'+data["pre"]["output"]+'</td><td style="border:none;text-align: center;">';
+                            html += '<a target="_blank" href="?m=corpus&a=browse&id='+row["tid"]+'&wid='+row["id"]+'" data-toggle="tooltip" data-html="true" title="'+row["title"]+'">';
+                            html += data["word"] + '</a></td><td style="border:none;">'+data["post"]["output"]+'</td>';
+                            
+                            // Update the row data with the formatted HTML for the next render
+                            row.contextHtml = html;
+                            
+                            // Refresh the specific row to show the new data
+                            $('#searchResults').bootstrapTable('updateRow', {
+                                index: index,
+                                row: row
+                            });
+                        });
+                        // Return a placeholder while the AJAX call is pending
+                        return 'Loading...';        
+                    }
+                }
                 
                 function addSlipLink(value, row, index) {          
                     let qs = '&action=getSlipLinkHtml&result&id=' + row['id'] +'&filename=' + row['textid'] + '.xml' + '&pos=' + row['pos'] + '&lemma=' + row['lemma'] + '&wordform=' + row['wordform'] ;
