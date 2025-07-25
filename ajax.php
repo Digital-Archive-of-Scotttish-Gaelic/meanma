@@ -464,6 +464,31 @@ case "editLemma":
         $results = $search->getResults($_GET);
         echo $results;
         break;
+    case "getCombinedMetadata":     // fetch the extra text and slip metadata required for search results from EB API
+        $input = json_decode(file_get_contents('php://input'), true);
+        $tids = $input['tids'] ?? [];
+        $wids = $input['wids'] ?? [];
+
+        $textMeta = [];
+        $slipMeta = [];
+
+        if (!empty($tids)) {
+            $placeholders = implode(',', array_fill(0, count($tids), '?'));
+            $sql = "SELECT id AS tid, date, date_display, title FROM text WHERE id IN ($placeholders)";
+            $textMeta = $db->fetchAssoc($sql, $tids);
+        }
+
+        if (!empty($wids)) {
+            $placeholders = implode(',', array_fill(0, count($wids), '?'));
+            $sql = "SELECT auto_id, id, text_id, filename, wordform FROM slips WHERE id IN ($placeholders)";
+            $slipMeta = $db->fetchAssoc($sql, $wids);
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'textMeta' => $textMeta,
+            'slipMeta' => $slipMeta]);
+        break;
     case "getResultContext":
         $fh = new XMLFileHandler($_GET["filename"]);
         $id = $_GET["wid"];

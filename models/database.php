@@ -2,6 +2,8 @@
 
 namespace models;
 
+use PDO;
+
 class database {
 
   private $_dbh, $_sth, $_queryCount;
@@ -49,6 +51,18 @@ class database {
       echo $e->getMessage();
     }
   }
+
+    public function fetchAssoc($sql, array $values = array()) {
+        try {
+            $this->_queryCount++;
+            $this->_sth = $this->_dbh->prepare($sql);
+            $this->_sth->execute($values);
+            $results = $this->_sth->fetchAll(PDO::FETCH_ASSOC);
+            return $results;
+        } catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+    }
 
   /**
    * A simple execute function to run a prepared query

@@ -11,7 +11,7 @@ class xsearch
         // Decode, restructure, and return
         $data = json_decode($response, true);
         $rows = [];
-
+/*
         //This code for new wordx without context
         foreach ($data['result'] as $i => $result) {
 
@@ -28,9 +28,9 @@ class xsearch
             $rows[$i]['lemma'] = $word['lemma'];
             $rows[$i]['id'] = $word['wid'];
         }
-
+*/
         //The following code for EB API with pre and post context
-      /*  foreach ($data['result'] as $i => $result) {
+        foreach ($data['result'] as $i => $result) {
             $match = false;
             foreach ($result['w'] as $word) {
 
@@ -54,7 +54,7 @@ class xsearch
                 }
             }
         }
-      */
+
 
         return json_encode([
             'total' => count($data['result']),
@@ -64,7 +64,7 @@ class xsearch
 
     private function _getCurlResponse($params) {
 
-        $baseUrl = 'http://localhost:8080/exist/restxq/wordx';
+        $baseUrl = 'http://localhost:8080/exist/restxq/word';
         $mode = ($params['mode'] != 'head-form') ? 'word-form' : 'head-form';
         $curlParams = http_build_query([
             $mode => $params['q'],
