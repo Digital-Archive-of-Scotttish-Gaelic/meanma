@@ -38,10 +38,21 @@ class corpus
                 break;
             case "xsearch":
                 $view = new views\xsearch();
-                if (isset($_GET["q"])) {
-                    $view->showSearchResults($_GET);
-                } else {
-                    $view->showSearchForm();
+                if (isset($_GET["q"])) {    //query, so show the search results
+           //         $view->showSearchResults($_GET);
+                    $params["q"] = htmlspecialchars($_GET["q"]);
+                    $params["mode"] = htmlspecialchars($_GET["mode"]);
+                    $params["text"] = $this->_assembleTextList($_GET);
+
+                    models\collection::writeSlipDiv();
+
+                    require_once 'views/xsearch-results.php';
+                } else {                    //no query, so show the search form
+                    $minMaxDates = models\corpus_search::getMinMaxDates();
+                    $districts = models\districts::getAllDistrictsInfo();
+                    $distinctPOS = models\partofspeech::getAllLabels();
+            //        $view->showSearchForm();
+                    require_once 'views/xsearch-form.php';
                 }
                 break;
             case "edit":
@@ -66,6 +77,13 @@ class corpus
                 $view = new views\slow_search($model);
                 $view->show($_GET["xpath"]);
                 break;
+        }
+    }
+
+    private function _assembleTextList($q) {
+        if ($q["allDistricts"] == "") {      //limit search by geographical origins (district)
+            $districts = $q["district"];    //an array of integers
+
         }
     }
 }

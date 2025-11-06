@@ -19,7 +19,7 @@ class xsearch extends search
 		            <div class="input-group-append">
 		              <input type="hidden" name="m" value="corpus">
 		              <input type="hidden" name="a" value="xsearch"/>
-		            
+		            <input type="hidden" name="text" value="_110"/>
 		              <button name="submit" class="btn btn-primary" type="submit">search</button>
 		            </div>
 		          </div>
@@ -71,7 +71,7 @@ HTML;
         echo <<<HTML
             <script>
             $(document).ready(function () {
-                $.getJSON('ajax.php?action=xsearch&q={$params['q']}&mode={$params['mode']}', function (rawData) {
+                $.getJSON('ajax.php?action=xsearch&q={$params['q']}&mode={$params['mode']}&texts={$params['text']}', function (rawData) {
                     if (!rawData || !rawData.rows || rawData.rows.length === 0) {
                         console.warn("No rows returned");
                         return;
