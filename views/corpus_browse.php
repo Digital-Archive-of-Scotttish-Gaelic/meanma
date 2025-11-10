@@ -275,7 +275,7 @@ HTML;
         <td>#{$text["id"]}</td>
         <td>{$levelHtml}</td>
         <td class="browseListTitle">
-          <a href="?m=corpus&a=browse&id={$text["id"]}">{$text["title"]}</a>
+          <a href="?m=corpus&a=browse&id={$text["id"]}">{$text["short_title"]} {$text["reference_volume"]}</a>
         </td>
         <td>{$writerHtml}</td>
         <td>{$text["date_display"]}</td>
