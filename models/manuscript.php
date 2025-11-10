@@ -537,7 +537,7 @@ XPATH;
 	}
 
 	private function _getDwelly($edil) {
-		$filepath = INPUT_FILEPATH . "804_mss/hwData.xml";
+		$filepath = INPUT_FILEPATH . "hwData.xml";
 		$xml = simplexml_load_file($filepath);
 		$xml->registerXPathNamespace('tei', 'https://dasg.ac.uk/corpus/');
 		$nodes = $xml->xpath("/tei:TEI/tei:text/tei:body/tei:entryFree[@corresp='{$edil}']/tei:w");

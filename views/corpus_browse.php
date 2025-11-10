@@ -264,7 +264,8 @@ HTML;
 	}
 
 	private function _writeRow($text) {
-		$writerHtml = $this->_formatWriters($text);
+//		$writerHtml = $this->_formatWriters($text);
+        $writerHtml = $text["author"];
 		$levelColours = array(1 => "gold", 2 => "silver", 3 => "bronze");
 		$levelHtml = $text["level"] == 0 ? "" : <<<HTML
 			<i class="fas fa-star {$levelColours[$text["level"]]}"></i>
@@ -282,7 +283,7 @@ HTML;
 HTML;
 	}
 
-	private function _formatWriters($text) {
+/*	private function _formatWriters($text) {
 		$writersInfo = $text["writers"];
 		if (empty($writersInfo)) {
 			return;
@@ -298,12 +299,15 @@ HTML;
 		}
 		return implode(", ", $writerList);
 	}
-
+*/
 	/**
 	 * Generates alist of existing writers and an input field for a new writer ID
 	 * @return string $html
 	 */
 	private function _getWritersFormHtml() {
+
+        return "<h2>Writers model deprecated. Please update accordingly</h2>";
+        /*
 		$html = "<ul>";
 		$writerIds = $this->_model->getWriterIds();
 		foreach($writerIds as $writerId) {
@@ -327,6 +331,7 @@ HTML;
 HTML;
 
 		return $html;
+        */
 	}
 
 	private function _showText() {
@@ -467,7 +472,15 @@ HTML;
 	}
 
 	private function _getWritersHtml() {
-		if (!count($this->_model->getWriters())) {
+        if (!$this->_model->getAuthor()) {
+            return "";
+        }
+        $html = '<tr><td>author</td><td>';
+        $html .= $this->_model->getAuthor();
+        $html .= '</td></tr>';
+        return $html;
+    /*
+		 if (!count($this->_model->getWriters())) {
 			return "";
 		}
 		$html = '<tr><td>writers</td><td>';
@@ -481,6 +494,7 @@ HTML;
 		$html = trim($html, ",");
 		$html .= '</td></tr>';
 		return $html;
+    */
 	}
 
 	private function _getChildTextsHtml() {

@@ -16,6 +16,7 @@ class corpus_browse // models a corpus text or subtext
   private $_transformedText; // simple texts only
   private $_writers = array();  //array of models\writer objects
 	private $_writerIds = array();  //array of writer IDs for quicker performance when required
+    private $_author;   //original author from corpus_text table
 
 	private $_db;   // an instance of models\database
 
@@ -32,7 +33,8 @@ class corpus_browse // models a corpus text or subtext
 	 */
 	private function _load() {
 		$sql = <<<SQL
-			SELECT title, partOf, filepath, date, date_display, date_publication, level, notes, type, reference
+			SELECT title, partOf, filepath, date, date_display, date_publication, level, notes, type, reference,
+			       author
 				FROM text
 				WHERE id = :id
 SQL;
@@ -69,6 +71,9 @@ SQL;
 		if ($reference = $textData["reference"]) {
 			$this->_setReferenceTemplate($reference);
 		}
+        if ($author = $textData["author"]) {
+            $this->_author = $author;
+        }
 		$this->_setWriters();
 	}
 
@@ -182,6 +187,10 @@ SQL;
     return $this->_writers;
   }
 
+  public function getAuthor() {
+      return $this->_author;
+  }
+
   public function getWriterIds() {
 		return $this->_writerIds;
   }
@@ -256,13 +265,15 @@ SQL;
 SQL;
     foreach ($this->_db->fetch($sql) as $textResult) {
       $textsInfo[$textResult["id"]] = $textResult;
+  /*
       $sql = <<<SQL
         SELECT * FROM writer w
           JOIN text_writer ON writer_id = w.id
           WHERE text_id = :textId
 SQL;
       $writerResults = $this->_db->fetch($sql, array(":textId" => $textResult["id"]));
-      $textsInfo[$textResult["id"]]["writers"] = $writerResults;
+  */
+      $textsInfo[$textResult["id"]]["writers"] = $textResult["author"];
     }
     return $textsInfo;
   }
