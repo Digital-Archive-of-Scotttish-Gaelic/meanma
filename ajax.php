@@ -474,7 +474,7 @@ case "editLemma":
 
         if (!empty($tids)) {
             $placeholders = implode(',', array_fill(0, count($tids), '?'));
-            $sql = "SELECT id AS tid, date, date_display, title FROM text WHERE id IN ($placeholders)";
+            $sql = "SELECT id AS tid, date, date_display, short_title FROM text WHERE id IN ($placeholders)";
             $textMeta = $db->fetchAssoc($sql, $tids);
         }
 

@@ -38,11 +38,22 @@ class corpus
                 $view->show();
                 break;
             case "xsearch":
-     //           $view = new views\xsearch();
                 if (isset($_GET["q"])) {    //query, so show the search results
                     $params["q"] = htmlspecialchars($_GET["q"]);
                     $params["mode"] = htmlspecialchars($_GET["mode"]);
-                    $params["text"] = $_GET["text"];
+                    $texts = "";
+                    if ($_GET["selectedDates"]) {
+                        $dates = explode("-", $_GET["selectedDates"]);
+
+                        $pdo = $this->_db->getDatabaseHandle();
+
+                        $sth = $pdo->prepare('SELECT id FROM text WHERE date >= ? AND date <= ?');
+                        $sth->execute(array($dates[0], $dates[1]));
+                        $results = $sth->fetchAll(\PDO::FETCH_ASSOC);
+                        $ids = array_column($results, 'id');
+                        $texts = implode(',', array_map(fn($id) => '_' . $id, $ids));
+                    }
+                    $params["text"] = $texts;
                     models\collection::writeSlipDiv();
                     require_once 'views/xsearch-results.php';
                 } else {                    //no query, so show the search form

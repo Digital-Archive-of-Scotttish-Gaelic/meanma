@@ -7,7 +7,7 @@ class xsearch
     public function getResults($params) {
         $rows = [];
         $count = 0;
-        $response = $this->_getCurlResponse($params);   //query exist/elemental and get the results
+        $response = $this->_getCurlResponse($params);   //query eXist/Elemental and get the results
         $data = json_decode($response, true);
 
         //check for server errors

@@ -71,7 +71,7 @@
                             { field: 'row', title: 'Row', formatter: (value, row, index) => `<strong>${index + 1}</strong>`, sortable: false },
                             { field: 'textid', title: "Reference", sortable: true, searchable: true },
                             { field: 'date_display', title: "Date", sortable: false, searchable: true },
-                            { field: 'title', title: "Title", sortable: true, searchable: true },
+                            { field: 'short_title', title: "Short Title", sortable: true, searchable: true },
                             { field: 'pre', title: 'Pre Context', align: 'right' },
                             { field: 'match', title: 'Match', align: 'center', sortable: true, searchable: true },
                             { field: 'post', title: 'Post Context' },
