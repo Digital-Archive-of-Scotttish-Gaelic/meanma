@@ -115,22 +115,28 @@ echo <<<HTML
 		            <label class="form-check-label" for="followingWordRadio">following word</label>
 		          </div-->
 		        </div>
-		        <div class="form-group">
-                    <p>Restrict by date range:</p>
-                    <div id="selectedDatesDisplay">{$minMaxDates["min"]}-{$minMaxDates["max"]}</div>
-                    <input type="hidden" class="form-control col-2" name="selectedDates" id="selectedDates">
-                    <div id="dateRangeSelector" class="col-6">
-                        <label id="dateRangeMin">{$minMaxDates["min"]}</label>
-                        <label id="dateRangeMax">{$minMaxDates["max"]}</label>
-                    </div>
-                </div>
-		        <br>
 HTML;
 
+//Date range
+if (!empty($minMaxDates)) {
+    ?>
+        <div class="form-group">
+            <p>Restrict by date range:</p>
+            <div id="selectedDatesDisplay"><?= $minMaxDates["min"] ?>-<?=$minMaxDates["max"]?></div>
+            <input type="hidden" class="form-control col-2" name="selectedDates" id="selectedDates">
+            <div id="dateRangeSelector" class="col-6 mb-5">
+                <label id="dateRangeMin"><?= $minMaxDates["min"] ?></label>
+                <label id="dateRangeMax"><?= $minMaxDates["max"] ?></label>
+            </div>
+        </div>
+<?php
+}
+
 //Districts (Geographical Origins)
-foreach ($districts as $district) {
-    $id = $district["id"];
-    $districtsHtml .= <<<HTML
+if (!empty($districts)) {
+    foreach ($districts as $district) {
+        $id = $district["id"];
+        $districtsHtml .= <<<HTML
         <div class="form-check form-check-inline">
             <input class="form-check-input district" type="checkbox" name="district[]" id="district{$id}Check" value="{$id}" checked>
             <label class="form-check-label" for="district{$id}Check">
@@ -138,8 +144,8 @@ foreach ($districts as $district) {
 						</label>
         </div>
 HTML;
-}
-echo <<<HTML
+    }
+    echo <<<HTML
 			<div class="form-group">
             <p>Restrict by location:</p>
             <div>
@@ -152,6 +158,7 @@ echo <<<HTML
             </div>
         </div>
 HTML;
+}
 
 echo <<<HTML
 		        <div class="form-group">
@@ -201,11 +208,13 @@ $posHtml = <<<HTML
 HTML;
 echo $posHtml;
 
+$id = $_GET["id"] != 0 ? "_" . $_GET["id"] : "";    //ignore the "root" 0 text
 echo <<<HTML
 		            <note><em>Select multiple options by using CTRL key (Windows) or Command key (Mac)</em></note>
 		        </div>
           </div> <!-- end col -->
         </div>  <!-- end row -->
+        <input type="hidden" name="text" value="{$id}">
       </form>
 
 

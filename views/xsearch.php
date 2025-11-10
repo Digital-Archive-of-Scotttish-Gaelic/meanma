@@ -5,6 +5,15 @@ namespace views;
 use models;
 
 
+/**
+ *
+ *
+ * This has been deprecated by new xsearch-form and xsearch-results views
+ *
+ *
+ * Note writeSubHeading() though ...
+ */
+
 class xsearch extends search
 {
     public function showSearchForm() {

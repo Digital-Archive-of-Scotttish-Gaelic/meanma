@@ -2,8 +2,6 @@
 
 namespace models;
 
-use PHPMailer\PHPMailer\Exception;
-
 class xsearch
 {
     public function getResults($params) {
@@ -77,7 +75,7 @@ class xsearch
 
         $baseUrl = 'http://localhost:8080/exist/restxq/word';
         $mode = ($params['mode'] != 'head-form') ? 'word-form' : 'head-form';
-        $texts = (isset($params['texts'])) ? $params['texts'] : '';
+        $texts = (isset($params['text'])) ? $params['text'] : '';
 
         $curlParams = http_build_query([
             $mode => $params['q'],

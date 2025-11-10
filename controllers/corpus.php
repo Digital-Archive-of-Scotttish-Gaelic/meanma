@@ -2,6 +2,7 @@
 
 namespace controllers;
 use models, views;
+use models\DynamicModel;
 
 class corpus
 {
@@ -37,21 +38,22 @@ class corpus
                 $view->show();
                 break;
             case "xsearch":
-                $view = new views\xsearch();
+     //           $view = new views\xsearch();
                 if (isset($_GET["q"])) {    //query, so show the search results
-           //         $view->showSearchResults($_GET);
                     $params["q"] = htmlspecialchars($_GET["q"]);
                     $params["mode"] = htmlspecialchars($_GET["mode"]);
-                    $params["text"] = $this->_assembleTextList($_GET);
-
+                    $params["text"] = $_GET["text"];
                     models\collection::writeSlipDiv();
-
                     require_once 'views/xsearch-results.php';
                 } else {                    //no query, so show the search form
-                    $minMaxDates = models\corpus_search::getMinMaxDates();
-                    $districts = models\districts::getAllDistrictsInfo();
+                    if ($_GET["id"]) {  //not whole corpus, so don't show dates or districts options
+                        $minMaxDates = $districts = array();
+                    } else {    //only add dates and districts if searching whole corpus
+                        $minMaxDates = models\corpus_search::getMinMaxDates();
+                        $districts = models\districts::getAllDistrictsInfo();
+                    }
                     $distinctPOS = models\partofspeech::getAllLabels();
-            //        $view->showSearchForm();
+                    $this->writeSubHeading();
                     require_once 'views/xsearch-form.php';
                 }
                 break;
@@ -85,5 +87,49 @@ class corpus
             $districts = $q["district"];    //an array of integers
 
         }
+
+        //$textModel = new models\text();
+        // $texts = DynamicModel::where($this->_db->getDatabaseHandle(), 'corpus_text', ['date of edition > 1990']);
+    }
+
+    protected function writeSubHeading() {
+        $user = models\users::getUser($_SESSION["user"]);
+        if ($_GET["id"]) {    //if this is a subtext don't write the date range block
+            $dateRangeBlock = $districtBlock = "";
+        }
+        echo <<<HTML
+	    	<ul class="nav nav-pills nav-justified" style="padding-bottom: 20px;">
+HTML;
+        if ($_GET["id"]=="0") {
+            echo <<<HTML
+			  <li class="nav-item"><a class="nav-link" href="?m=corpus&a=browse&id=0">view corpus</a></li>
+			  <li class="nav-item"><div class="nav-link active">searching corpus</div></li>
+HTML;
+            if ($user->getSuperuser()) {
+                echo <<<HTML
+				  <li class="nav-item"><a class="nav-link" href="?m=corpus&a=edit&id=0">add text</a></li>
+HTML;
+            }
+            echo <<<HTML
+				<li class="nav-item"><a class="nav-link" href="?m=corpus&a=generate&id=0">corpus wordlist</a></li>
+HTML;
+        } else {
+            echo <<<HTML
+			  <li class="nav-item"><a class="nav-link" href="?m=corpus&a=browse&id={$_GET["id"]}">view text #{$_GET["id"]}</a></li>
+			  <li class="nav-item"><div class="nav-link active">searching text #{$_GET["id"]}</div></li>
+HTML;
+            if ($user->getSuperuser()) {
+                echo <<<HTML
+			      <li class="nav-item"><a class="nav-link" href="?m=corpus&a=edit&id={$_GET["id"]}">edit text #{$_GET["id"]}</a></li>
+HTML;
+            }
+            echo <<<HTML
+				  <li class="nav-item"><a class="nav-link" href="?m=corpus&a=generate&id={$_GET["id"]}">text #{$_GET["id"]} wordlist</a></li>
+HTML;
+        }
+        echo <<<HTML
+		  </ul>
+			<hr/>
+HTML;
     }
 }

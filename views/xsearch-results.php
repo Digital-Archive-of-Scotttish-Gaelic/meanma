@@ -7,7 +7,7 @@
 </style>
 
 
-<p><a href="index.php?m=corpus&a=xsearch&id=0 title="Back to search">&lt; Back to search</a></p>
+<p><a href="index.php?m=corpus&a=xsearch&id=<?= $_GET["id"] ?>" title="Back to search">&lt; Back to search</a></p>
 
 <div id="loadingMessage" class="text-center my-3">
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...
@@ -25,7 +25,7 @@
 <!-- Search results Javascript -->
 <script>
     $(document).ready(function () {
-        $.getJSON('ajax.php?action=xsearch&q=<?= $params['q'] ?>&mode=<?= $params['mode'] ?>&texts= <?= $params['text'] ?>', function (rawData) {
+        $.getJSON('ajax.php?action=xsearch&q=<?= $params['q'] ?>&mode=<?= $params['mode'] ?>&text= <?= $params['text'] ?>', function (rawData) {
             if (!rawData || !rawData.rows || rawData.rows.length === 0) {
                 console.warn("No rows returned");
                 return;
