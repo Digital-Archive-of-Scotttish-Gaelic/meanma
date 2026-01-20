@@ -28,6 +28,7 @@
         $.getJSON('ajax.php?action=xsearch&q=<?= $params['q'] ?>&mode=<?= $params['mode'] ?>&text= <?= $params['text'] ?>', function (rawData) {
             if (!rawData || !rawData.rows || rawData.rows.length === 0) {
                 console.warn("No rows returned");
+                $('#loadingMessage').html('<h3>There were no results for <em><?= $params['q'] ?></em></h3>');
                 return;
             }
 
