@@ -17,7 +17,7 @@ class xsearch
 
 
         // Decode, restructure, and return
-/*
+
         //This code for new wordx without context
         foreach ($data['result'] as $i => $result) {
 
@@ -34,7 +34,7 @@ class xsearch
             $rows[$i]['lemma'] = $word['lemma'];
             $rows[$i]['id'] = $word['wid'];
         }
-*/
+/*
         //The following code for EB API with pre and post context
         if (is_array($data['result'])) {
             $count = count($data['result']);
@@ -63,7 +63,7 @@ class xsearch
                 }
             }
         }
-
+*/
 
         return json_encode([
             'total' => $count,
@@ -73,7 +73,7 @@ class xsearch
 
     private function _getCurlResponse($params) {
 
-        $baseUrl = 'http://localhost:8080/exist/restxq/word';
+        $baseUrl = 'http://localhost:8080/exist/restxq/wordx';          // !! Note the change to 'wordx' here for non-context search !!
         $mode = ($params['mode'] != 'head-form') ? 'word-form' : 'head-form';
         $texts = (isset($params['text'])) ? $params['text'] : '';
 

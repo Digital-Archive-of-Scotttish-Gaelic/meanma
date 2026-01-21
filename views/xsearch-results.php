@@ -23,7 +23,7 @@
 
 
 <!-- Search results Javascript -->
-<script>
+<!--script>
     $(document).ready(function () {
         $.getJSON('ajax.php?action=xsearch&q=<?= $params['q'] ?>&mode=<?= $params['mode'] ?>&text= <?= $params['text'] ?>', function (rawData) {
             if (!rawData || !rawData.rows || rawData.rows.length === 0) {
@@ -32,7 +32,11 @@
                 return;
             }
 
-            const tids = [...new Set(rawData.rows.map(row => row.textid))]; // unique textids
+            //  EB version !!
+            //const tids = [...new Set(rawData.rows.map(row => row.textid))]; // unique textids
+            //  SB version !!!
+            const tids = [...new Set(rawData.rows.map(row => row.tid))]; // unique textids
+
             const wids = [...new Set(rawData.rows.map(row => row.id))];     // unique word IDs
 
             $.ajax({
@@ -46,7 +50,7 @@
                     const slipMap = new Map(slipMeta.map(meta => [String(meta.id), meta]));
 
                     const enrichedData = rawData.rows.map((row, index) => {
-                        const text = textMap.get(String(row.textid)) || {};
+                        const text = textMap.get(String(row.tid)) || {};    //!! changed to `tid` from `textid` for SB vs EB search !!
                         const slip = slipMap.get(String(row.id)) || {};
 
                         return {
@@ -70,13 +74,14 @@
                         sidePagination: 'client',
                         columns: [
                             { field: 'row', title: 'Row', formatter: (value, row, index) => `<strong>${index + 1}</strong>`, sortable: false },
-                            { field: 'textid', title: "Reference", sortable: true, searchable: true },
+                            { field: 'tid', title: "Reference", sortable: true, searchable: true },          //!! changed to `tid` from `textid` for SB vs EB search !!
                             { field: 'date_display', title: "Date", sortable: false, searchable: true },
                             { field: 'short_title', title: "Short Title", sortable: true, searchable: true },
                             { field: 'pre', title: 'Pre Context', align: 'right' },
                             { field: 'match', title: 'Match', align: 'center', sortable: true, searchable: true },
                             { field: 'post', title: 'Post Context' },
-                            { field: 'slipHtml', title: 'Slip', escape: false, sortable: false }
+                            { field: 'slipHtml', title: 'Slip', escape: false, sortable: false },
+                            { field: 'context', title: 'Context', formatter: formatContext, escape: false }
                         ]
                     });
 
@@ -190,6 +195,228 @@
         return 'Loading...';
     }
 
+</script-->
+
+<script>
+    $(document).ready(function () {
+
+        // Build the xsearch URL safely (encode params)
+        const q = "<?= addslashes($params['q']) ?>";
+        const mode = "<?= addslashes($params['mode']) ?>";
+        const text = "<?= addslashes($params['text']) ?>";
+
+        const xsearchUrl =
+            'ajax.php?action=xsearch' +
+            '&q=' + encodeURIComponent(q) +
+            '&mode=' + encodeURIComponent(mode) +
+            '&text=' + encodeURIComponent(text);
+
+        $.getJSON(xsearchUrl, function (rawData) {
+
+            if (!rawData || !rawData.rows || rawData.rows.length === 0) {
+                console.warn("No rows returned");
+                $('#loadingMessage').html('<h3>There were no results for <em><?= htmlspecialchars($params['q'], ENT_QUOTES) ?></em></h3>');
+                return;
+            }
+
+            // SB version: unique tids + unique word ids
+            const tids = [...new Set(rawData.rows.map(row => row.tid))];
+            const wids = [...new Set(rawData.rows.map(row => row.id))];
+
+            $.ajax({
+                url: 'ajax.php?action=getCombinedMetadata',
+                method: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({tids, wids}),
+                success: function ({textMeta, slipMeta}) {
+
+                    const textMap = new Map((textMeta || []).map(meta => [String(meta.tid), meta]));
+                    const slipMap = new Map((slipMeta || []).map(meta => [String(meta.id), meta]));
+
+                    // Build enriched dataset (ensure filename exists for context lookup)
+                    const enrichedData = rawData.rows.map((row, index) => {
+                        const text = textMap.get(String(row.tid)) || {};
+                        const slip = slipMap.get(String(row.id)) || {};
+
+                        const filename = row.filename
+                            ? row.filename
+                            : (row.textid ? (row.textid + '.xml') : '');
+
+                        return {
+                            ...row,
+                            ...text,
+
+                            filename,                 // used by getResultContext
+                            _contextLoaded: false,     // cache flag
+
+                            // placeholders; will be replaced once context loads
+                            pre: '…',
+                            match: '…',
+                            post: '…',
+
+                            slipHtml: buildSlipHtml(slip, row, index)
+                        };
+                    });
+
+                    // Sort by date (as you had)
+                    enrichedData.sort((a, b) => {
+                        const dateA = a.date || 0;
+                        const dateB = b.date || 0;
+                        return dateA - dateB;
+                    });
+
+                    // Render table
+                    $('#searchResults').bootstrapTable('destroy').bootstrapTable({
+                        idField: 'id',
+                        uniqueId: 'id',
+                        data: enrichedData,
+                        pagination: true,
+                        pageSize: 10,
+                        search: true,
+                        sidePagination: 'client',
+
+                        columns: [
+                            {
+                                field: 'row',
+                                title: 'Row',
+                                formatter: (value, row, index) => `<strong>${index + 1}</strong>`,
+                                sortable: false
+                            },
+                            {field: 'tid', title: "Reference", sortable: true, searchable: true},
+                            {field: 'date_display', title: "Date", sortable: false, searchable: true},
+                            {field: 'short_title', title: "Short Title", sortable: true, searchable: true},
+
+                            {field: 'pre', title: 'Pre Context', align: 'right'},
+
+                            // ensure HTML is not escaped for the link we inject
+                            {
+                                field: 'match',
+                                title: 'Match',
+                                align: 'center',
+                                sortable: true,
+                                searchable: true,
+                                formatter: (v) => v
+                            },
+
+                            {field: 'post', title: 'Post Context'},
+                            {field: 'slipHtml', title: 'Slip', escape: false, sortable: false}
+                        ]
+                    });
+
+                    // Only load context for currently displayed rows (page/search/sort changes)
+                    $('#searchResults')
+                        .off('post-body.bs.table.lilctx')
+                        .on('post-body.bs.table.lilctx', function () {
+                            loadContextForVisibleRows();
+                        });
+
+                    $('#loadingMessage').hide();
+                    $('#searchResults').show();
+
+                    // kick off initial visible-page load
+                    loadContextForVisibleRows();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Metadata fetch error:", error);
+                }
+            });
+        });
+
+        // Loads context ONLY for the rows on the current visible page
+        function loadContextForVisibleRows() {
+            const $table = $('#searchResults');
+
+            const opts = $table.bootstrapTable('getOptions') || {};
+            const pageSize = Number(opts.pageSize) || 10;
+            const pageNumber = Number(opts.pageNumber) || 1;
+
+            // getData() here is the *current* client-side dataset (filtered/sorted)
+            const all = $table.bootstrapTable('getData') || [];
+
+            const start = (pageNumber - 1) * pageSize;
+            const end = start + pageSize;
+
+            const visibleRows = all.slice(start, end); // <= this guarantees "10 at a time"
+
+            visibleRows.forEach(row => {
+                if (!row || row._contextLoaded || row._contextLoading) return;
+                if (!row.filename || !row.id) return;
+
+                row._contextLoading = true;
+
+                const url =
+                    'ajax.php?action=getResultContext' +
+                    '&wid=' + encodeURIComponent(row.id) +
+                    '&filename=' + encodeURIComponent(row.filename);
+
+                $.getJSON(url, function (data) {
+                    row.pre = (data && data.pre && data.pre.output) ? data.pre.output : '';
+                    row.post = (data && data.post && data.post.output) ? data.post.output : '';
+
+                    const word = (data && data.word) ? data.word : '';
+                    const title = row.title ? String(row.title).replace(/"/g, '&quot;') : '';
+
+                    row.match =
+                        `<a target="_blank" ` +
+                        `href="?m=corpus&a=browse&id=${encodeURIComponent(row.tid)}&wid=${encodeURIComponent(row.id)}" ` +
+                        `data-toggle="tooltip" data-html="true" title="${title}">${word}</a>`;
+
+                    row._contextLoaded = true;
+                    row._contextLoading = false;
+
+                    // Update by unique ID (works if your build supports it)
+                    if (typeof $table.bootstrapTable === 'function' && opts.uniqueId) {
+                        $table.bootstrapTable('updateByUniqueId', {id: row.id, row});
+                    } else {
+                        // fallback: find index in current data and updateRow
+                        const idx = $table.bootstrapTable('getData').findIndex(r => r.id === row.id);
+                        if (idx !== -1) $table.bootstrapTable('updateRow', {index: idx, row});
+                    }
+                }).fail(function () {
+                    row._contextLoading = false;
+                });
+            });
+        }
+
+        function buildSlipHtml(slip, row, index) {
+            let url = `index.php?m=collection&a=add&filename=${row.textid}.xml&wid=${row.id}&headword=${encodeURIComponent(row.lemma)}&pos=${row.pos}&wordform=${encodeURIComponent(row.wordform)}`;
+            let modalCode = "";
+            let action = "add";
+            let auto_id = "";
+            let slipStyle = "createSlipLink";
+            let slipClass = "editSlipLink";
+
+            if (slip && slip.auto_id) {
+                action = "view";
+                url = "";
+                auto_id = slip.auto_id;
+                slipClass = 'slipLink2';
+                slipStyle = "editSlipLink";
+                modalCode = 'data-toggle="modal" data-target="#slipModal"';
+            }
+
+            let html = `
+                <a href="#"
+                   ${modalCode}
+                   data-url="${url}"
+                   class="${slipStyle} ${slipClass}"
+                   data-auto_id="${auto_id}"
+                   data-headword="${row.lemma}"
+                   data-wordform="${row.wordform}"
+                   data-pos="${row.pos}"
+                   data-id="${row.id}"
+                   data-filename="${row.textid}.xml"
+                   data-uri=""
+                   data-date=""
+                   data-page=""
+                   data-resultindex="${index}">
+                   ${action}
+                </a>
+            `;
+            return html;
+        }
+    });
 </script>
 
 
