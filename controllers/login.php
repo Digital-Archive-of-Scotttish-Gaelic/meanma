@@ -113,7 +113,7 @@ HTML;
     session_regenerate_id();  //prevent session fixation attack
     $_SESSION["loginTime"] = time();
     $_SESSION["user"] = $user->getEmail();
-    models\users::saveUser($user);   //update last login in DB
+    //models\users::saveUser($user);   //update last login in DB
     return true;
   }
 
