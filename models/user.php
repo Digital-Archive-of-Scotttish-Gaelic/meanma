@@ -36,6 +36,7 @@ class user
   }
 
   public function checkPassword($password) {
+      return $password == WORKSHOP_LOGIN;       // temporary testing password ONLY
     return md5($this->getSalt() . $password) == $this->getPassword() ? 1 : 0;
   }
 
