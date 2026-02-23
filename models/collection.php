@@ -545,6 +545,8 @@ HTML;
   }
 
   public static function getSlipLinkHtml($data, $index = null, $db) {
+
+
 	  $slipUrl = "#";
 	  $slipClass = "slipLink2";
 	  $modalCode = "";

@@ -380,7 +380,7 @@
         }
 
         function buildSlipHtml(slip, row, index) {
-            let url = `index.php?m=collection&a=add&filename=${row.textid}.xml&wid=${row.id}&headword=${encodeURIComponent(row.lemma)}&pos=${row.pos}&wordform=${encodeURIComponent(row.wordform)}`;
+            let url = `index.php?m=collection&a=add&filename=${row.filename}&wid=${row.id}&headword=${encodeURIComponent(row.lemma)}&pos=${row.pos}&wordform=${encodeURIComponent(row.wordform)}`;
             let modalCode = "";
             let action = "add";
             let auto_id = "";
@@ -406,7 +406,7 @@
                    data-wordform="${row.wordform}"
                    data-pos="${row.pos}"
                    data-id="${row.id}"
-                   data-filename="${row.textid}.xml"
+                   data-filename="${row.filename}"
                    data-uri=""
                    data-date=""
                    data-page=""
