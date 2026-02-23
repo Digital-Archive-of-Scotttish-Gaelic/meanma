@@ -563,12 +563,40 @@ HTML;
 		$scansFilepath = SCANS_FILEPATH;
 		echo <<<HTML
     <script>
+        
       $(function () {
+    
+        $(window).on('load', function () {
+        
+            var hi = '{$_GET["wid"]}';
+            var \$loader = $('#page-loading');
+            $('#page-loading').removeClass('hide');
+        
+            function hideLoader() {
+                \$loader.fadeOut(400);
+            }
+        
+            if (hi && $('#' + hi).length) {
+                var el = document.getElementById(hi);
+        
+                $('#' + hi).addClass('hi');
+        
+                el.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+        
+                // let the scroll begin, then fade out loader
+                setTimeout(hideLoader, 300);
+            } else {
+                // nothing to scroll to
+                hideLoader();
+            }
+        
+        });
+
         $('[data-toggle="tooltip"]').tooltip();
-        if (hi = '{$_GET["wid"]}') {
-          $('#'+hi).addClass('hi');
-          document.getElementById(hi).scrollIntoView({behavior: 'smooth', block: 'center'})
-        }
+        
         
         //populate the word panel on word click
         $('.word').on('click', function () {

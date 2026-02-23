@@ -95,7 +95,7 @@
         <xsl:value-of select="@lemma"/>
       </xsl:attribute>
       <xsl:attribute name="id">
-        <xsl:value-of select="@id"/>
+        <xsl:value-of select="@wid"/>
       </xsl:attribute>
       <xsl:attribute name="title">
         <xsl:if test="@lemma">
@@ -135,7 +135,7 @@
         <xsl:value-of select="@lemma"/>
       </xsl:attribute>
       <xsl:attribute name="id">
-        <xsl:value-of select="@id"/>
+        <xsl:value-of select="@wid"/>
       </xsl:attribute>
       <xsl:attribute name="title">
         <xsl:if test="@lemma">

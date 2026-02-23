@@ -85,6 +85,12 @@ echo <<<HTML
 	</script>
 </head>
 <body style="padding-top: 80px;">
+
+    <div id="page-loading" class="hide">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading…</div>
+    </div>
+    
   <div class="container-fluid container-fluid h-100 d-flex flex-column">
     <nav class="navbar navbar-dark fixed-top navbar-expand-lg" style="background-color: #{$groupTheme};">
       <a class="navbar-brand" href="index.php" style="font-size:x-large;">MEANⓂ️A</a>
