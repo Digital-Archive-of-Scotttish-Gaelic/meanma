@@ -561,39 +561,31 @@ HTML;
 
 	private function _writeJavascript() {
 		$scansFilepath = SCANS_FILEPATH;
+        $wid = json_encode($_GET["wid"]) ?? '';
+
 		echo <<<HTML
     <script>
+
+        // jump to selected word
+        $(window).on('load', function () {   
+            var hi = {$wid};
         
-      $(function () {
-    
-        $(window).on('load', function () {
+            if (!hi) return;
         
-            var hi = '{$_GET["wid"]}';
-            var \$loader = $('#page-loading');
-            $('#page-loading').removeClass('hide');
+            var el = hi ? document.getElementById(hi) : null;
+            var scroller = document.getElementById('lhs');
         
-            function hideLoader() {
-                \$loader.fadeOut(400);
+            if (!el || !scroller) {
+                return;
             }
-        
-            if (hi && $('#' + hi).length) {
-                var el = document.getElementById(hi);
-        
-                $('#' + hi).addClass('hi');
-        
-                el.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-        
-                // let the scroll begin, then fade out loader
-                setTimeout(hideLoader, 300);
-            } else {
-                // nothing to scroll to
-                hideLoader();
-            }
-        
+       
+            el.classList.add('hi');    
+            var top = el.offsetTop - scroller.offsetTop - (scroller.clientHeight / 2) + (el.offsetHeight / 2);
+            scroller.scrollTop = top;        
         });
+
+
+      $(function () {
 
         $('[data-toggle="tooltip"]').tooltip();
         
