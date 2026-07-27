@@ -25,27 +25,28 @@ class corpus_slip extends slip
     if (!$this->getId()) {  //create a new slip entry
       $this->_isNew = true;
 
-      /*
-      $lemmaData = lemmas::getData($this->getWid(), $this->getFilename());
-	    $this->_headword = $lemmaData["lemma"];
-	    $this->_wordform = $lemmaData["wordform"];
-      */
-
       $this->extractWordClass($this->getPOS());
       //get the entry
-	    $this->_entry = entries::getEntryByHeadwordAndWordclass($this->getHeadword(), $this->getWordClass(), $this->_db);
+      $this->_entry = entries::getEntryByHeadwordAndWordclass($this->getHeadword(), $this->getWordClass(), $this->_db);
       $sql = <<<SQL
         INSERT INTO slips (filename, text_id, id, wordform, entry_id, ownedBy) 
         	VALUES (?, ?, ?, ?, ?, ?);
 SQL;
       $this->_db->exec($sql, array($this->_filename, $this->getTextId(),  $this->getWid(), $this->getWordform(),
-	      $this->_entry->getId(), $_SESSION["user"]));
+      $this->_entry->getId(), $_SESSION["user"]));
       $this->setId($this->_db->getLastInsertId());  //sets the ID on the parent
       $this->saveSlipMorph();    //save the defaults to the DB
-	      //add a draft citation by default
-	      $citation = new citation($this->_db);
-	      $citation->attachToSlip($this->getId());
-	      $this->addCitation($citation);
+
+      //add a draft citation by default
+      $citation = new citation($this->_db);
+      $citation->attachToSlip($this->getId());
+      $this->addCitation($citation);
+
+      //get the page number of the citation
+      $this->_pagenum = $citation->getContext()["pagenum"];
+      $sql = "UPDATE slips SET pagenum = ? WHERE auto_id = ?";
+      $this->_db->exec($sql, array($this->_pagenum, $this->getId()));
+
     }
     $sql = <<<SQL
         SELECT * FROM slips 
@@ -53,8 +54,8 @@ SQL;
 SQL;
     $result = $this->_db->fetch($sql, array(":auto_id" => $this->getId()));
     $slipData = $result[0];
-		$slipData["text_id"] = $this->getTextId();
-	  $this->_entry = entries::getEntryById($slipData["entry_id"], $this->_db);
+    $slipData["text_id"] = $this->getTextId();
+    $this->_entry = entries::getEntryById($slipData["entry_id"], $this->_db);
     $this->populateClass($slipData);
     $this->loadSlipMorph();  //load the slipMorph data from the DB
     $this->loadPiles(); //load the sense objects

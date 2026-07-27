@@ -151,7 +151,7 @@ SQL;
 			}
 			$wordformHtml = ($emendations) ? $context["word"]["output"] : $context["word"];
 			$contextHtml .= <<<HTML
-        <mark class="hi slipWordInContext" data-headwordid="{$context["headwordId"]}">{$wordformHtml}</mark>
+                <mark class="hi slipWordInContext" data-headwordid="{$context["headwordId"]}">{$wordformHtml}</mark>
 HTML;
 			if ($context["post"]["startJoin"] != "left" && $context["post"]["startJoin"] != "both") {
 				$contextHtml .= ' ';
@@ -163,7 +163,8 @@ HTML;
 		}
 
 		return array("html" => $context["html"], "preIncrementDisable" => $context["preDisable"], "postIncrementDisable" =>
-			$context["postDisable"], "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"]);
+			$context["postDisable"], "prelimit" => $context["prelimit"], "postlimit" => $context["postlimit"],
+            "pagenum" => $context["pagenum"]);
 	}
 
 	/**

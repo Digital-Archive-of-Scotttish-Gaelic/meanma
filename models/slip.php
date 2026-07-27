@@ -12,6 +12,7 @@ class slip
 	protected $_textId = null;
 	protected $_text = null; //an instance of models\corpus_browse
 	protected $_reference = null; //used for lexicographers to manually store a reference as HTML
+    protected $_pagenum = null; //the page number of the citation used in the slip - required for some reference templates
 	protected $_filename = null;
 	protected $_wid = null;
 	protected $_pos, $_wordform;
@@ -54,8 +55,12 @@ class slip
 	 * @return string
 	 */
 	public function getReference() {
-		return $this->_reference;
+        return $this->_reference;
 	}
+
+    public function getPage() {
+        return (string)$this->_pagenum;
+    }
 
 	/**
 	 * Will refactor this once old manual references are deprecated
@@ -250,6 +255,7 @@ SQL;
 		$this->_notes = $params["notes"];
 		$this->_textId = $params["text_id"];
 		$this->_reference = $params["reference"];
+        $this->_pagenum = $params["pagenum"];
 		$this->_headword = $this->_entry->getHeadword();
 		$this->_wordClass = $this->_entry->getWordclass();
 		$this->_entryId = $params["entryId"];
@@ -449,19 +455,5 @@ SQL;
         </a>
 HTML;
 		return $html;
-	}
-
-	/*
-	 * TEMP SB
-	 * Convenience method until we code this properly using page numbers in the slips table
-	 */
-	public function getPage() {
-		$sql = <<<SQL
-			SELECT page FROM lemmas WHERE filename = ? AND id = ?
-SQL;
-		$result = $this->_db->fetch($sql, array($this->getFilename(), $this->getWid()));
-		if ($result) {
-			return $result[0]["page"];
-		}
 	}
 }

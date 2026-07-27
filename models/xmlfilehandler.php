@@ -66,7 +66,27 @@ class xmlfilehandler
 		$context = array();
 		$context["id"] = $id;   //now takes place of ["headwordId"] as well as ["id"]
 		$context["filename"] = $this->getFilename();
+
+        //
+        // fetch page number
+        //
+                $xpath = <<<XPATH
+                    //dasg:w[@wid='{$id}']/preceding::dasg:pb[1]
+        XPATH;
+
+                $pb = $this->_xml->xpath($xpath);
+
+                $context['pagenum'] = null;
+
+                if (!empty($pb) && isset($pb[0]['n'])) {
+                    $context['pagenum'] = (int) $pb[0]['n'];
+                }
+        //
+        // end page number code
+        //
+
 		// echo "<br>" . $this->_filename . " : {$id}";    // handy for debugging XML issues SB
+
 		// run xpath on p or lg or h or list element - possibly revert after MSS project
 		$xpath = <<<XPATH
 			//dasg:w[@wid='{$id}']/ancestor::*[name()='p' or name()='lg' or name()='h' or name()='list']

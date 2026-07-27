@@ -60,7 +60,7 @@ switch ($_REQUEST["action"]) {
 	    : new paper_slip($_GET["auto_id"], $_GET["entryId"], null, $db);
     $slip->updateResults($_GET["index"]); //ensure that "view slip" (and not "create slip") displays
     $textId = $slip->getTextId();
-    $referenceTemplate = $slip->getText()->getReferenceTemplate();
+    $referenceTemplate = $slip->getReferenceFromTemplate();
     $results = array("locked"=>$slip->getLocked(), "auto_id"=>$slip->getId(), "owner"=>$slip->getOwnedBy(),
 	    "starred"=>$slip->getStarred(), "notes"=>$slip->getNotes(), "type"=>$slip->getType(),
       "wordClass"=>$slip->getWordClass(), "senses"=>$slip->getPilesInfo(),
