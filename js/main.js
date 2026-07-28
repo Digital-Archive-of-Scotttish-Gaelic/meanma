@@ -155,13 +155,9 @@ $(function () {
         });
         body += '</div>';
       });
-      body += '<p class="text-muted">';
-        //<span data-toggle="tooltip" data-html="true" title="' + '<em>' + title + '</em> p.';
 
-      //temp work for page number placeholders - revisit
-      let pageHtml = page ? 'p.'+page : '';
-      let reference = data.referenceTemplate ? data.referenceTemplate.replace('%p', pageHtml) : '';
-      body +=  date + ' ' + reference + '</p>';
+      // add the text reference
+      body += '<p class="text-muted">' + data.referenceTemplate + '</p>';
 
       body += '<hr/>';
       body += '<ul class="list-inline">';

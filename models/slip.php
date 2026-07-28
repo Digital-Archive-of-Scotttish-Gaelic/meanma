@@ -75,8 +75,15 @@ class slip
 	 * Parses the reference template and returns a completed reference
 	 */
 	public function getReferenceFromTemplate() {
+        $text = $this->getText();
 		$template = $this->getReferenceTemplate();
-		$reference = str_ireplace("%p", "p.{$this->getPage()}", $template);
+        if ($template) {
+            //strip <p> tags
+            $template = str_ireplace(array("<p>", "</p>"), "", $template);
+            $reference = $text->getPublicationDate() . " " . str_ireplace("%p", "p.{$this->getPage()}", $template);
+        } else {    //use the short_title in lieu of template
+            $reference = $text->getPublicationDate() . " <em>{$text->getShortTitle()}</em>" . " p.{$this->getPage()}";
+        }
 		return $reference;
 	}
 

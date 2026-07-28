@@ -6,8 +6,9 @@ class corpus_browse // models a corpus text or subtext
 {
 
   private $_id; // the id number for the text in the corpus (obligatory)
-	private $_parentText; // the parent text of this text (optional) – an instance of models\corpus_browse
+  private $_parentText; // the parent text of this text (optional) – an instance of models\corpus_browse
   private $_title; // the title of the text (optional)
+  private $_shortTitle; // the short title of the text
   private $_date, $_displayDate, $_publicationDate;
 	private $_level, $_notes;
 	private $_referenceTemplate;  // the template used to generate a text reference
@@ -33,7 +34,7 @@ class corpus_browse // models a corpus text or subtext
 	 */
 	private function _load() {
 		$sql = <<<SQL
-			SELECT title, partOf, filepath, date, date_display, date_publication, level, notes, type, reference,
+			SELECT title, short_title, partOf, filepath, date, date_display, date_publication, level, notes, type, reference,
 			       author
 				FROM text
 				WHERE id = :id
@@ -41,6 +42,7 @@ SQL;
 		$results = $this->_db->fetch($sql, array(":id" => $this->getId()));
 		$textData = $results[0];
 		$this->_setTitle($textData["title"]);
+        $this->_setShortTitle($textData["short_title"]);
 		if ($parentTextId = $textData["partOf"]) {    // create a parent text
 			$this->_setParentText($parentTextId);
 		}
@@ -90,6 +92,10 @@ SQL;
 	private function _setTitle($title) {
 		$this->_title = $title;
 	}
+
+    private function _setShortTitle($title) {
+        $this->_shortTitle = $title;
+    }
 
 	private function _setFilepath($filepath) {
 		$this->_filepath = $filepath;
@@ -147,6 +153,10 @@ SQL;
 	public function getTitle() {
 		return $this->_title;
 	}
+
+    public function getShortTitle() {
+        return $this->_shortTitle;
+    }
 
 	public function getDate() {
 		return $this->_date;
