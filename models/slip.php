@@ -82,7 +82,10 @@ class slip
             $template = str_ireplace(array("<p>", "</p>"), "", $template);
             $reference = $text->getPublicationDate() . " " . str_ireplace("%p", "p.{$this->getPage()}", $template);
         } else {    //use the short_title in lieu of template
-            $reference = $text->getPublicationDate() . " <em>{$text->getShortTitle()}</em>" . " p.{$this->getPage()}";
+            $reference = $text->getPublicationDate() . " <em>{$text->getShortTitle()}</em>";
+            if ($this->getPage()) {
+                $reference .= " p.{$this->getPage()}";
+            }
         }
 		return $reference;
 	}
