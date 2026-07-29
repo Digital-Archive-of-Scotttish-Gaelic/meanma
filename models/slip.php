@@ -80,7 +80,10 @@ class slip
         if ($template) {
             //strip <p> tags
             $template = str_ireplace(array("<p>", "</p>"), "", $template);
-            $reference = $text->getPublicationDate() . " " . str_ireplace("%p", "p.{$this->getPage()}", $template);
+            //add the page number
+            $reference = $this->getPage() //there is a page number, so replace
+                ? $text->getPublicationDate() . " " . str_ireplace("%p", "p.{$this->getPage()}", $template)
+                : $text->getPublicationDate() . " " . str_ireplace("%p", "", $template); //no page number
         } else {    //use the short_title in lieu of template
             $reference = $text->getPublicationDate() . " <em>{$text->getShortTitle()}</em>";
             if ($this->getPage()) {
