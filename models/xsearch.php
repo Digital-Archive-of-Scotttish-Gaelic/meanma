@@ -4,17 +4,22 @@ namespace models;
 
 class xsearch
 {
-    public function getResults($params) {
+    public function getResults($params, $func='wordx') {
         $rows = [];
         $count = 0;
-        $response = $this->_getCurlResponse($params);   //query eXist/Elemental and get the results
+        $response = $this->_getCurlResponse($params, $func);   //query eXist/Elemental and get the results
+
         $data = json_decode($response, true);
+
+        // Dictionary view
+        if ($func == 'xforms') {
+            return $data;
+        }
 
         //check for server errors
         if ($data['error']) {
             return json_encode(["error:" => $data['error']]);
         }
-
 
         // Decode, restructure, and return
 
@@ -71,9 +76,9 @@ class xsearch
         ]);
     }
 
-    private function _getCurlResponse($params) {
+    private function _getCurlResponse($params, $func) {
 
-        $baseUrl = 'http://localhost:8080/exist/restxq/wordx';          // !! Note the change to 'wordx' here for non-context search !!
+        $baseUrl = 'http://localhost:8081/exist/restxq/' . $func;          // !! Note the change to 'wordx' here for non-context search !!
         $mode = ($params['mode'] != 'head-form') ? 'word-form' : 'head-form';
         $texts = (isset($params['text'])) ? $params['text'] : '';
 
