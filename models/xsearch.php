@@ -78,7 +78,7 @@ class xsearch
 
     private function _getCurlResponse($params, $func) {
 
-        $baseUrl = 'http://localhost:8081/exist/restxq/' . $func;          // !! Note the change to 'wordx' here for non-context search !!
+        $baseUrl = 'http://localhost:8080/exist/restxq/' . $func;          // !! Note the change to 'wordx' here for non-context search !!
         $mode = ($params['mode'] != 'head-form') ? 'word-form' : 'head-form';
         $texts = (isset($params['text'])) ? $params['text'] : '';
 
