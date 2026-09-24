@@ -16,15 +16,31 @@
 if ($_GET["view"] != 'dictionary') {    //i.e. standard search view
 
     echo <<<HTML
-        <div id="loadingMessage" class="text-center my-3">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...
-        </div>
+        
         
         <table id="searchResults" class="table-borderless" style="display: none;">
         </table>
         
         <div class="float-right"><small><a id="autoCreateRecords" href="#">Automatically create all records</a></small></div>
-        <ul id="pagination" class="pagination-sm"></ul>
+        <div class="row">
+            <div class="col-2">
+                <label for="pageSizeSelect">Results per page:</label>
+                <select id="pageSizeSelect" class="form-control" style="width:auto; display:inline-block;">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <div class="col-8">
+                <ul id="pagination" class="pagination-sm"></ul>
+            </div>
+            <div class="col-2">
+                <div id="loadingMessage" class="text-center my-3">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...
+                </div>
+            </div>
+        </div>
 HTML;
 
 } else {    // dictionary view
@@ -75,22 +91,6 @@ HTML;
                 $textId = $nextResult['text-id'] ?? '';
                 $wid = $nextResult['w']['wid'] ?? '';
 
-                /*
-                 * The old result contained:
-                 *
-                 * filename
-                 * id
-                 * date_of_lang
-                 * auto_id
-                 * title
-                 * page
-                 * tid
-                 *
-                 * xforms currently gives us text-id and wid instead.
-                 *
-                 * Keep both identifiers for the AJAX dictionary-results
-                 * request.
-                 */
                 if ($textId !== '' && $wid !== '') {
                     $locations[] = $textId . ' ' . $wid;
                 }
@@ -177,183 +177,272 @@ HTML;
 <script>
     $(document).ready(function () {
 
-        // Build the xsearch URL safely (encode params)
+        // load the results data into the paginated bootstrap table
+
         const q = "<?= addslashes($params['q']) ?>";
         const mode = "<?= addslashes($params['mode']) ?>";
         const text = "<?= addslashes($params['text']) ?>";
 
-        const xsearchUrl =
-            'ajax.php?action=xsearch' +
-            '&q=' + encodeURIComponent(q) +
-            '&mode=' + encodeURIComponent(mode) +
-            '&text=' + encodeURIComponent(text);
+        let pageSize = 10;
+        let totalResults = null;
+        let paginationInitialised = false;
 
-        $.getJSON(xsearchUrl, function (rawData) {
+        function loadPage(pageNumber, includeTotal = false) {
 
-            if (!rawData || !rawData.rows || rawData.rows.length === 0) {
-                console.warn("No rows returned");
-                $('#loadingMessage').html('<h3>There were no results for <em><?= htmlspecialchars($params['q'], ENT_QUOTES) ?></em></h3>');
+            const start = ((pageNumber - 1) * pageSize) + 1;
+
+            const xsearchUrl =
+                'ajax.php?action=xsearch' +
+                '&q=' + encodeURIComponent(q) +
+                '&mode=' + encodeURIComponent(mode) +
+                '&text=' + encodeURIComponent(text) +
+                '&start=' + start +
+                '&limit=' + pageSize +
+                '&include-total=' + (includeTotal ? 'true' : 'false');
+
+            $('#loadingMessage').show();
+
+            $.getJSON(xsearchUrl, function (rawData) {
+
+                if (!rawData || !rawData.rows || rawData.rows.length === 0) {
+
+                    if (pageNumber === 1) {
+                        $('#loadingMessage').html(
+                            '<h3>There were no results for <em><?= htmlspecialchars($params['q'], ENT_QUOTES) ?></em></h3>'
+                        );
+                    }
+
+                    return;
+                }
+
+                if (includeTotal && rawData.total !== undefined) {
+                    totalResults = Number(rawData.total);
+                }
+
+                const tids = [
+                    ...new Set(
+                        rawData.rows
+                            .map(row => row.tid || row.textid)
+                            .filter(Boolean)
+                    )
+                ];
+
+                const wids = [
+                    ...new Set(
+                        rawData.rows
+                            .map(row => row.id)
+                            .filter(Boolean)
+                    )
+                ];
+
+
+                console.log('rawData:', rawData);
+                console.log('tids:', tids);
+                console.log('wids:', wids);
+
+                $.ajax({
+                    url: 'ajax.php?action=getCombinedMetadata',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    data: JSON.stringify({tids, wids}),
+
+                    success: function ({textMeta, slipMeta}) {
+
+                        const textMap = new Map(
+                            (textMeta || []).map(meta => [String(meta.tid), meta])
+                        );
+
+                        const slipMap = new Map(
+                            (slipMeta || []).map(meta => [String(meta.id), meta])
+                        );
+
+                        const enrichedData = rawData.rows.map((row, index) => {
+
+                            const tid = String(row.tid || row.textid || '');
+
+                            const textMetaRow =
+                                textMap.get(tid) || {};
+
+                            const slip =
+                                slipMap.get(String(row.id)) || {};
+
+                            const filename =
+                                row.filename ||
+                                (tid ? tid + '.xml' : '');
+
+                            const title = textMetaRow.short_title
+                                ? String(textMetaRow.short_title).replace(/"/g, '&quot;')
+                                : '';
+
+                            const matchLink =
+                                `<a target="_blank" ` +
+                                `href="?m=corpus&a=browse&id=${encodeURIComponent(tid)}&wid=${encodeURIComponent(row.id)}" ` +
+                                `data-toggle="tooltip" data-html="true" title="${title}">` +
+                                `${row.match}` +
+                                `</a>`;
+
+                            console.log('textMeta:', textMeta);
+                            console.log('slipMeta:', slipMeta);
+
+                            return {
+                                ...row,
+                                ...textMetaRow,
+
+                                tid: tid,
+                                textid: tid,
+                                filename: filename,
+
+                                pre: row.pre || '',
+                                match: matchLink,
+                                post: row.post || '',
+
+                                row: start + index,
+
+                                slipHtml: buildSlipHtml(
+                                    slip,
+                                    {
+                                        ...row,
+                                        ...textMetaRow,
+                                        tid: tid,
+                                        textid: tid,
+                                        filename: filename
+                                    },
+                                    start + index - 1
+                                )
+                            };
+                        });
+
+                        renderTable(enrichedData);
+
+                        if (includeTotal && !paginationInitialised && totalResults !== null) {
+                            rebuildPagination();
+                        }
+
+                        $('#loadingMessage').hide();
+                        $('#searchResults').show();
+                    },
+
+                    error: function (xhr, status, error) {
+                        console.error("Metadata fetch error:", error);
+                        $('#loadingMessage').hide();
+                    }
+                });
+            });
+        }
+
+        function renderTable(rows) {
+
+            $('#searchResults')
+                .bootstrapTable('destroy')
+                .bootstrapTable({
+                    idField: 'id',
+                    uniqueId: 'id',
+
+                    data: rows,
+
+                    // Pagination is handled externally
+                    pagination: false,
+
+                    // Search/sort here only affect the current page
+                    search: false,
+
+                    columns: [
+                        {
+                            field: 'row',
+                            title: 'Row',
+                            formatter: value => `<strong>${value}</strong>`,
+                            sortable: false
+                        },
+                        {
+                            field: 'tid',
+                            title: 'Reference',
+                            sortable: false
+                        },
+                        {
+                            field: 'date_display',
+                            title: 'Date',
+                            sortable: false
+                        },
+                        {
+                            field: 'short_title',
+                            title: 'Short Title',
+                            sortable: false
+                        },
+                        {
+                            field: 'pre',
+                            title: 'Pre Context',
+                            align: 'right'
+                        },
+                        {
+                            field: 'match',
+                            title: 'Match',
+                            align: 'center',
+                            formatter: value => value
+                        },
+                        {
+                            field: 'post',
+                            title: 'Post Context'
+                        },
+                        {
+                            field: 'slipHtml',
+                            title: 'Slip',
+                            escape: false,
+                            sortable: false
+                        }
+                    ]
+                });
+        }
+
+        loadPage(1, true);
+
+        // number of results per page handler
+
+        $('#pageSizeSelect').on('change', function () {
+
+            pageSize = parseInt($(this).val(), 10);
+
+            // Destroy the existing paginator so it can be rebuilt
+            // using the new page size.
+            $('#pagination').pagination('destroy');
+
+            paginationInitialised = false;
+
+            // We already know the total, so don't ask Elemental
+            // to calculate it again.
+            rebuildPagination();
+
+            // Changing page size takes us back to page 1.
+            loadPage(1, false);
+        });
+
+        function rebuildPagination() {
+
+            if (totalResults === null) {
                 return;
             }
 
-            // SB version: unique tids + unique word ids
-            const tids = [...new Set(rawData.rows.map(row => row.tid))];
-            const wids = [...new Set(rawData.rows.map(row => row.id))];
+            let initialPaginationCallback = true;
 
-            $.ajax({
-                url: 'ajax.php?action=getCombinedMetadata',
-                method: 'POST',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({tids, wids}),
-                success: function ({textMeta, slipMeta}) {
+            $('#pagination').pagination({
+                dataSource: new Array(totalResults),
+                pageSize: pageSize,
+                pageNumber: 1,
 
-                    const textMap = new Map((textMeta || []).map(meta => [String(meta.tid), meta]));
-                    const slipMap = new Map((slipMeta || []).map(meta => [String(meta.id), meta]));
+                callback: function (data, pagination) {
 
-                    // Build enriched dataset (ensure filename exists for context lookup)
-                    const enrichedData = rawData.rows.map((row, index) => {
-                        const text = textMap.get(String(row.tid)) || {};
-                        const slip = slipMap.get(String(row.id)) || {};
+                    // Ignore the callback fired automatically when
+                    // the paginator is created.
+                    if (initialPaginationCallback) {
+                        initialPaginationCallback = false;
+                        return;
+                    }
 
-                        const filename = row.filename
-                            ? row.filename
-                            : (row.textid ? (row.textid + '.xml') : '');
-
-                        return {
-                            ...row,
-                            ...text,
-
-                            filename,                 // used by getResultContext
-                            _contextLoaded: false,     // cache flag
-
-                            // placeholders; will be replaced once context loads
-                            pre: '…',
-                            match: '…',
-                            post: '…',
-
-                            slipHtml: buildSlipHtml(slip, row, index)
-                        };
-                    });
-
-                    // Sort by date
-                    enrichedData.sort((a, b) => {
-                        const dateA = a.date || 0;
-                        const dateB = b.date || 0;
-                        return dateA - dateB;
-                    });
-
-                    // Render table
-                    $('#searchResults').bootstrapTable('destroy').bootstrapTable({
-                        idField: 'id',
-                        uniqueId: 'id',
-                        data: enrichedData,
-                        pagination: true,
-                        pageSize: 10,
-                        search: true,
-                        sidePagination: 'client',
-
-                        columns: [
-                            {
-                                field: 'row',
-                                title: 'Row',
-                                formatter: (value, row, index) => `<strong>${index + 1}</strong>`,
-                                sortable: false
-                            },
-                            {field: 'tid', title: "Reference", sortable: true, searchable: true},
-                            {field: 'date_display', title: "Date", sortable: false, searchable: true},
-                            {field: 'short_title', title: "Short Title", sortable: true, searchable: true},
-
-                            {field: 'pre', title: 'Pre Context', align: 'right'},
-
-                            // ensure HTML is not escaped for the link we inject
-                            {
-                                field: 'match',
-                                title: 'Match',
-                                align: 'center',
-                                sortable: true,
-                                searchable: true,
-                                formatter: (v) => v
-                            },
-
-                            {field: 'post', title: 'Post Context'},
-                            {field: 'slipHtml', title: 'Slip', escape: false, sortable: false}
-                        ]
-                    });
-
-                    // Only load context for currently displayed rows (page/search/sort changes)
-                    $('#searchResults')
-                        .off('post-body.bs.table.lilctx')
-                        .on('post-body.bs.table.lilctx', function () {
-                            loadContextForVisibleRows();
-                        });
-
-                    $('#loadingMessage').hide();
-                    $('#searchResults').show();
-
-                    // kick off initial visible-page load
-                    loadContextForVisibleRows();
-                },
-                error: function (xhr, status, error) {
-                    console.error("Metadata fetch error:", error);
+                    loadPage(pagination.pageNumber, false);
                 }
             });
-        });
 
-        // Loads context ONLY for the rows on the current visible page
-        function loadContextForVisibleRows() {
-            const $table = $('#searchResults');
-
-            const opts = $table.bootstrapTable('getOptions') || {};
-            const pageSize = Number(opts.pageSize) || 10;
-            const pageNumber = Number(opts.pageNumber) || 1;
-
-            // getData() here is the *current* client-side dataset (filtered/sorted)
-            const all = $table.bootstrapTable('getData') || [];
-
-            const start = (pageNumber - 1) * pageSize;
-            const end = start + pageSize;
-
-            const visibleRows = all.slice(start, end); // <= this guarantees "10 at a time"
-
-            visibleRows.forEach(row => {
-                if (!row || row._contextLoaded || row._contextLoading) return;
-                if (!row.filename || !row.id) return;
-
-                row._contextLoading = true;
-
-                const url =
-                    'ajax.php?action=getResultContext' +
-                    '&wid=' + encodeURIComponent(row.id) +
-                    '&filename=' + encodeURIComponent(row.filename);
-
-                $.getJSON(url, function (data) {
-                    row.pre = (data && data.pre && data.pre.output) ? data.pre.output : '';
-                    row.post = (data && data.post && data.post.output) ? data.post.output : '';
-
-                    const word = (data && data.word) ? data.word : '';
-                    const title = row.title ? String(row.title).replace(/"/g, '&quot;') : '';
-
-                    row.match =
-                        `<a target="_blank" ` +
-                        `href="?m=corpus&a=browse&id=${encodeURIComponent(row.tid)}&wid=${encodeURIComponent(row.id)}" ` +
-                        `data-toggle="tooltip" data-html="true" title="${title}">${word}</a>`;
-
-                    row._contextLoaded = true;
-                    row._contextLoading = false;
-
-                    // Update by unique ID (works if your build supports it)
-                    if (typeof $table.bootstrapTable === 'function' && opts.uniqueId) {
-                        $table.bootstrapTable('updateByUniqueId', {id: row.id, row});
-                    } else {
-                        // fallback: find index in current data and updateRow
-                        const idx = $table.bootstrapTable('getData').findIndex(r => r.id === row.id);
-                        if (idx !== -1) $table.bootstrapTable('updateRow', {index: idx, row});
-                    }
-                }).fail(function () {
-                    row._contextLoading = false;
-                });
-            });
+            paginationInitialised = true;
         }
 
         function buildSlipHtml(slip, row, index) {
