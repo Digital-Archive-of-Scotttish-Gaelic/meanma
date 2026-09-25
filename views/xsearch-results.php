@@ -1,21 +1,269 @@
 
 <style>
-    .table tr {
-        border: none; /* Remove all row borders */
-        border-top: 1px solid #ddd; /* Add a top border to each row */
+    /* Search results: deliberately scoped so the rest of DASG is unaffected. */
+    .xsearch-shell {
+        --xs-border: #d9dee5;
+        --xs-muted: #667085;
+        --xs-soft: #f7f8fa;
+        --xs-softer: #fbfcfd;
+        --xs-text: #25313c;
+        --xs-accent: #2f6388;
+        --xs-accent-soft: #edf4f8;
+        color: var(--xs-text);
+    }
+
+    .xsearch-back {
+        margin: 0 0 1rem;
+    }
+
+    .xsearch-back a {
+        color: var(--xs-accent);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .xsearch-back a:hover { text-decoration: underline; }
+
+    .xsearch-toolbar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: .75rem 1.25rem;
+        padding: .85rem 1rem;
+        margin: .5rem 0 1rem;
+        background: var(--xs-soft);
+        border: 1px solid var(--xs-border);
+        border-radius: .45rem;
+    }
+
+    .xsearch-toolbar label {
+        margin: 0 .35rem 0 0;
+        font-size: .875rem;
+        font-weight: 600;
+        color: #475467;
+    }
+
+    .xsearch-toolbar .form-control {
+        height: calc(1.5em + .65rem + 2px);
+        padding: .25rem 1.75rem .25rem .55rem;
+        font-size: .875rem;
+    }
+
+    .xsearch-summary {
+        margin-left: auto;
+        color: var(--xs-muted);
+        font-size: .9rem;
+        white-space: nowrap;
+    }
+
+    .xsearch-loading {
+        min-width: 7rem;
+        color: var(--xs-muted);
+        font-size: .9rem;
+    }
+
+    .xsearch-auto {
+        text-align: right;
+        margin: -.25rem 0 .4rem;
+    }
+
+    .xsearch-auto a { color: var(--xs-accent); }
+
+    #searchResults,
+    .dict-results-table {
+        width: 100%;
+        background: #fff;
+        border: 1px solid var(--xs-border);
+        border-radius: .45rem;
+        overflow: hidden;
+    }
+
+    #searchResults thead th,
+    .dict-results-table thead th {
+        border-top: 0;
+        border-bottom: 1px solid var(--xs-border);
+        background: var(--xs-soft);
+        color: #475467;
+        font-size: .76rem;
+        font-weight: 700;
+        letter-spacing: .025em;
+        text-transform: uppercase;
+        vertical-align: middle;
+    }
+
+    #searchResults tbody tr,
+    .dict-results-table tbody tr {
+        border: 0;
+        border-top: 1px solid #edf0f2;
+    }
+
+    #searchResults tbody tr:hover,
+    .dict-results-table tbody tr:hover {
+        background: var(--xs-softer);
+    }
+
+    #searchResults td,
+    .dict-results-table td {
+        padding-top: .7rem;
+        padding-bottom: .7rem;
+        vertical-align: middle;
+    }
+
+    /* Give the bibliographic metadata a very light visual grouping. */
+    #searchResults tbody td:nth-child(2),
+    #searchResults tbody td:nth-child(3),
+    #searchResults tbody td:nth-child(4),
+    .dict-results-table tbody td:nth-child(1),
+    .dict-results-table tbody td:nth-child(2),
+    .dict-results-table tbody td:nth-child(3) {
+        background: #f7f9fb;
+    }
+
+    #searchResults tbody tr:hover td:nth-child(2),
+    #searchResults tbody tr:hover td:nth-child(3),
+    #searchResults tbody tr:hover td:nth-child(4),
+    .dict-results-table tbody tr:hover td:nth-child(1),
+    .dict-results-table tbody tr:hover td:nth-child(2),
+    .dict-results-table tbody tr:hover td:nth-child(3) {
+        background: #f1f5f8;
+    }
+
+    #searchResults td:nth-child(5),
+    #searchResults td:nth-child(7),
+    .dict-results-table td:nth-child(4),
+    .dict-results-table td:nth-child(6) {
+        line-height: 1.45;
+    }
+
+    #searchResults td:nth-child(6) a,
+    .dict-results-table td:nth-child(5) a {
+        display: inline-block;
+        padding: .18rem .45rem;
+        border-radius: .25rem;
+        background: var(--xs-accent-soft);
+        color: #173f5a;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    #searchResults td:nth-child(6) a:hover,
+    .dict-results-table td:nth-child(5) a:hover {
+        background: #dfeef5;
+        text-decoration: underline;
+    }
+
+    .dictionary-heading {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: .45rem .8rem;
+        margin: .25rem 0 1rem;
+        padding-bottom: .75rem;
+        border-bottom: 1px solid var(--xs-border);
+    }
+
+    .dictionary-heading h4,
+    .dictionary-heading h5 { margin: 0; }
+
+    .dictionary-heading h5 {
+        color: var(--xs-muted);
+        font-size: .95rem;
+        font-weight: 400;
+    }
+
+    .dictionary-sort {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+    }
+
+    .dictionary-sort label {
+        margin: 0;
+        color: var(--xs-muted);
+        font-size: .82rem;
+        font-weight: 600;
+    }
+
+    .dictionary-sort .form-control {
+        width: auto;
+        height: calc(1.5em + .55rem + 2px);
+        padding: .2rem 1.7rem .2rem .5rem;
+        font-size: .82rem;
+    }
+
+    .dictionary-forms {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid var(--xs-border);
+        border-radius: .45rem;
+        overflow: hidden;
+    }
+
+    .dictionary-forms > tbody > tr > td {
+        padding: .85rem .9rem;
+        border-top: 1px solid #edf0f2;
+        vertical-align: top;
+    }
+
+    .dictionary-forms > tbody > tr:first-child > td { border-top: 0; }
+    .dictionary-forms > tbody > tr:hover { background: var(--xs-softer); }
+
+    .dictionary-forms > tbody > tr > td:first-child {
+        width: 18%;
+        font-weight: 700;
+        font-size: 1.02rem;
+    }
+
+    .dictionary-forms > tbody > tr > td:nth-child(2) {
+        width: 10%;
+        color: var(--xs-muted);
+        font-style: italic;
+    }
+
+    .loadDictResults {
+        color: var(--xs-accent);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .loadDictResults:hover { text-decoration: underline; }
+
+    .dictionary-results-panel {
+        margin-top: .75rem;
+        padding: .75rem;
+        background: var(--xs-soft);
+        border: 1px solid #e7ebef;
+        border-radius: .4rem;
+    }
+
+    .dictionary-results-panel table {
+        width: 100%;
+        background: #fff;
+    }
+
+    .paginationjs .paginationjs-pages li > a {
+        transition: background-color .12s ease, color .12s ease;
+    }
+
+    @media (max-width: 991.98px) {
+        .xsearch-summary { margin-left: 0; width: 100%; }
+        .xsearch-toolbar { align-items: flex-start; }
+        #searchResults { font-size: .9rem; }
     }
 </style>
 
 
-<p><a href="index.php?m=corpus&a=xsearch&id=<?= $_GET["id"] ?>" title="Back to search">&lt; Back to search</a></p>
+<div class="xsearch-shell"><p class="xsearch-back"><a href="index.php?m=corpus&a=xsearch&id=<?= $_GET["id"] ?>" title="Back to search">&larr; Back to search</a></p>
 
 
 
-<?php
+    <?php
 
-if ($_GET["view"] != 'dictionary') {    //i.e. standard search view
+    if ($_GET["view"] != 'dictionary') {    //i.e. standard search view
 
-    echo <<<HTML
+        echo <<<HTML
         
         
         <table id="searchResults" class="table-borderless" style="display: none;">
@@ -47,68 +295,94 @@ if ($_GET["view"] != 'dictionary') {    //i.e. standard search view
         </div>
 HTML;
 
-} else {    // dictionary view
+    } else {    // dictionary view
 
-    $_GET["pp"] = null; // don't limit the results - fetch them all
+        $_GET["pp"] = null; // don't limit the results - fetch them all
 
-    $model = new models\xsearch($_GET, true, $this->_db);
+        $model = new models\xsearch($_GET, true, $this->_db);
 
-    $params = $_GET;
-    $searchResults = $model->getResults($params, 'xforms');
+        $params = $_GET;
+        $searchResults = $model->getResults($params, 'xforms');
 
-    // No results
-    if (empty($searchResults) || empty($searchResults['form'])) {
-        echo '<h5>No results</h5>';
-        $this->_writeViewSwitch();
-        return;
-    }
+        // No results
+        if (empty($searchResults) || empty($searchResults['form'])) {
+            echo '<h5>No results</h5>';
+            $this->_writeViewSwitch();
+            return;
+        }
 
-    $headForm = $searchResults['head-form'] ?? '';
-    $totalResults = (int)($searchResults['count'] ?? 0);
+        $headForm = $searchResults['head-form'] ?? '';
+        $totalResults = (int)($searchResults['count'] ?? 0);
 
-    echo '<h4>' . htmlspecialchars($headForm) . '</h4>';
-    echo '<h5>' . $totalResults . ' results</h5>';
+        // Dictionary forms default to most frequent first.
+        // Preserve the API order for equal counts so the sort is stable/predictable.
+        $dictionaryForms = array_values($searchResults['form']);
+        foreach ($dictionaryForms as $i => &$dictionaryForm) {
+            $dictionaryForm['_original_order'] = $i;
+        }
+        unset($dictionaryForm);
 
-    echo <<<HTML
-    <table class="table">
+        usort($dictionaryForms, static function ($a, $b) {
+            $countA = (int)($a['count'] ?? 0);
+            $countB = (int)($b['count'] ?? 0);
+
+            if ($countA === $countB) {
+                return ($a['_original_order'] ?? 0) <=> ($b['_original_order'] ?? 0);
+            }
+
+            return $countB <=> $countA;
+        });
+
+        echo '<div class="dictionary-heading"><h4>' . htmlspecialchars($headForm) . '</h4>';
+        echo '<h5>' . number_format($totalResults) . ' results</h5>';
+        echo '<div class="dictionary-sort">';
+        echo '<label for="dictionaryFrequencySort">Order forms</label>';
+        echo '<select id="dictionaryFrequencySort" class="form-control">';
+        echo '<option value="desc" selected>Most frequent first</option>';
+        echo '<option value="asc">Least frequent first</option>';
+        echo '</select>';
+        echo '</div></div>';
+
+        echo <<<HTML
+    <table class="dictionary-forms">
         <tbody>
 HTML;
 
-    $formNum = 0;
+        $formNum = 0;
 
-    foreach ($searchResults['form'] as $nextForm) {
+        foreach ($dictionaryForms as $nextForm) {
 
-        $formNum++;
+            $formNum++;
 
-        $wordForm = $nextForm['word-form'] ?? '';
-        $pos = $nextForm['pos'] ?? '';
-        $count = (int)($nextForm['count'] ?? 0);
+            $wordForm = $nextForm['word-form'] ?? '';
+            $pos = $nextForm['pos'] ?? '';
+            $count = (int)($nextForm['count'] ?? 0);
 
-        /*
-         * /xforms now returns summary data only. Individual citations
-         * are fetched on demand from the paginated /word search.
-         */
+            /*
+             * /xforms now returns summary data only. Individual citations
+             * are fetched on demand from the paginated /word search.
+             */
 
-        $htmlWordForm = htmlspecialchars(
-                $wordForm,
-                ENT_QUOTES,
-                'UTF-8'
-        );
+            $htmlWordForm = htmlspecialchars(
+                    $wordForm,
+                    ENT_QUOTES,
+                    'UTF-8'
+            );
 
-        $htmlHeadForm = htmlspecialchars(
-                $headForm,
-                ENT_QUOTES,
-                'UTF-8'
-        );
+            $htmlHeadForm = htmlspecialchars(
+                    $headForm,
+                    ENT_QUOTES,
+                    'UTF-8'
+            );
 
-        $htmlPos = htmlspecialchars(
-                $pos,
-                ENT_QUOTES,
-                'UTF-8'
-        );
+            $htmlPos = htmlspecialchars(
+                    $pos,
+                    ENT_QUOTES,
+                    'UTF-8'
+            );
 
-        echo <<<HTML
-        <tr>
+            echo <<<HTML
+        <tr class="dictionary-form-row" data-count="{$count}" data-original-order="{$formNum}">
             <td>{$htmlWordForm}</td>
             <td>{$htmlPos}</td>
             <td>
@@ -124,7 +398,7 @@ HTML;
                     <span class="actionToggle">show</span> {$count} result(s)
                 </a>
 
-                <div id="results-{$formNum}" style="display:none;">
+                <div id="results-{$formNum}" class="dictionary-results-panel" style="display:none;">
                 
                    
                     <!--img
@@ -135,7 +409,7 @@ HTML;
                         alt="Loading"
                     -->
 
-                    <table id="form-{$formNum}"></table>
+                    <table id="form-{$formNum}" class="table table-borderless dict-results-table"></table>
                     <div class="row">
                         <div class="col-6">
                             <div id="pag-{$formNum}"></div>
@@ -153,24 +427,51 @@ HTML;
             </td>
         </tr>
 HTML;
-    }
+        }
 
-    echo <<<HTML
+        echo <<<HTML
         </tbody>
     </table>
 HTML;
 
-    models\collection::writeSlipDiv();
-    //     $this->_writeViewSwitch();
-    //     $this->_writeDictionaryResultsJavascript();
+        models\collection::writeSlipDiv();
+        //     $this->_writeViewSwitch();
+        //     $this->_writeDictionaryResultsJavascript();
 
 
 
 
-}
+    }
 
-?>
+    ?>
 
+    <script>
+        $(function () {
+            $('#dictionaryFrequencySort').on('change', function () {
+                var direction = $(this).val();
+                var $tbody = $('.dictionary-forms > tbody');
+                var rows = $tbody.children('tr.dictionary-form-row').get();
+
+                rows.sort(function (a, b) {
+                    var countA = parseInt(a.getAttribute('data-count'), 10) || 0;
+                    var countB = parseInt(b.getAttribute('data-count'), 10) || 0;
+
+                    if (countA === countB) {
+                        return (parseInt(a.getAttribute('data-original-order'), 10) || 0) -
+                            (parseInt(b.getAttribute('data-original-order'), 10) || 0);
+                    }
+
+                    return direction === 'asc' ? countA - countB : countB - countA;
+                });
+
+                $.each(rows, function (_, row) {
+                    $tbody.append(row);
+                });
+            });
+        });
+    </script>
+
+</div><!-- /.xsearch-shell -->
 
 <style>
     .paginationjs{line-height:1.6;font-family:Marmelad,"Lucida Grande",Arial,"Hiragino Sans GB",Georgia,sans-serif;font-size:14px;box-sizing:initial}.paginationjs:after{display:table;content:" ";clear:both}.paginationjs .paginationjs-pages{float:left}.paginationjs .paginationjs-pages ul{float:left;margin:0;padding:0}.paginationjs .paginationjs-go-button,.paginationjs .paginationjs-go-input,.paginationjs .paginationjs-nav{float:left;margin-left:10px;font-size:14px}.paginationjs .paginationjs-pages li{float:left;border:1px solid #aaa;border-right:none;list-style:none}.paginationjs .paginationjs-pages li>a{min-width:30px;height:28px;line-height:28px;display:block;background:#fff;font-size:14px;color:#333;text-decoration:none;text-align:center}.paginationjs .paginationjs-pages li>a:hover{background:#eee}.paginationjs .paginationjs-pages li.active{border:none}.paginationjs .paginationjs-pages li.active>a{height:30px;line-height:30px;background:#aaa;color:#fff}.paginationjs .paginationjs-pages li.disabled>a{opacity:.3}.paginationjs .paginationjs-pages li.disabled>a:hover{background:0 0}.paginationjs .paginationjs-pages li:first-child,.paginationjs .paginationjs-pages li:first-child>a{border-radius:3px 0 0 3px}.paginationjs .paginationjs-pages li:last-child{border-right:1px solid #aaa;border-radius:0 3px 3px 0}.paginationjs .paginationjs-pages li:last-child>a{border-radius:0 3px 3px 0}.paginationjs .paginationjs-go-input>input[type=text]{width:30px;height:28px;background:#fff;border-radius:3px;border:1px solid #aaa;padding:0;font-size:14px;text-align:center;vertical-align:baseline;outline:0;box-shadow:none;box-sizing:initial}.paginationjs .paginationjs-go-button>input[type=button]{min-width:40px;height:30px;line-height:28px;background:#fff;border-radius:3px;border:1px solid #aaa;text-align:center;padding:0 8px;font-size:14px;vertical-align:baseline;outline:0;box-shadow:none;color:#333;cursor:pointer;vertical-align:middle\9}.paginationjs.paginationjs-theme-blue .paginationjs-go-input>input[type=text],.paginationjs.paginationjs-theme-blue .paginationjs-pages li{border-color:#289de9}.paginationjs .paginationjs-go-button>input[type=button]:hover{background-color:#f8f8f8}.paginationjs .paginationjs-nav{height:30px;line-height:30px}.paginationjs .paginationjs-go-button,.paginationjs .paginationjs-go-input{margin-left:5px\9}.paginationjs.paginationjs-small{font-size:12px}.paginationjs.paginationjs-small .paginationjs-pages li>a{min-width:26px;height:24px;line-height:24px;font-size:12px}.paginationjs.paginationjs-small .paginationjs-pages li.active>a{height:26px;line-height:26px}.paginationjs.paginationjs-small .paginationjs-go-input{font-size:12px}.paginationjs.paginationjs-small .paginationjs-go-input>input[type=text]{width:26px;height:24px;font-size:12px}.paginationjs.paginationjs-small .paginationjs-go-button{font-size:12px}.paginationjs.paginationjs-small .paginationjs-go-button>input[type=button]{min-width:30px;height:26px;line-height:24px;padding:0 6px;font-size:12px}.paginationjs.paginationjs-small .paginationjs-nav{height:26px;line-height:26px;font-size:12px}.paginationjs.paginationjs-big{font-size:16px}.paginationjs.paginationjs-big .paginationjs-pages li>a{min-width:36px;height:34px;line-height:34px;font-size:16px}.paginationjs.paginationjs-big .paginationjs-pages li.active>a{height:36px;line-height:36px}.paginationjs.paginationjs-big .paginationjs-go-input{font-size:16px}.paginationjs.paginationjs-big .paginationjs-go-input>input[type=text]{width:36px;height:34px;font-size:16px}.paginationjs.paginationjs-big .paginationjs-go-button{font-size:16px}.paginationjs.paginationjs-big .paginationjs-go-button>input[type=button]{min-width:50px;height:36px;line-height:34px;padding:0 12px;font-size:16px}.paginationjs.paginationjs-big .paginationjs-nav{height:36px;line-height:36px;font-size:16px}.paginationjs.paginationjs-theme-blue .paginationjs-pages li>a{color:#289de9}.paginationjs.paginationjs-theme-blue .paginationjs-pages li>a:hover{background:#e9f4fc}.paginationjs.paginationjs-theme-blue .paginationjs-pages li.active>a{background:#289de9;color:#fff}.paginationjs.paginationjs-theme-blue .paginationjs-pages li.disabled>a:hover{background:0 0}.paginationjs.paginationjs-theme-blue .paginationjs-go-button>input[type=button]{background:#289de9;border-color:#289de9;color:#fff}.paginationjs.paginationjs-theme-green .paginationjs-go-input>input[type=text],.paginationjs.paginationjs-theme-green .paginationjs-pages li{border-color:#449d44}.paginationjs.paginationjs-theme-blue .paginationjs-go-button>input[type=button]:hover{background-color:#3ca5ea}.paginationjs.paginationjs-theme-green .paginationjs-pages li>a{color:#449d44}.paginationjs.paginationjs-theme-green .paginationjs-pages li>a:hover{background:#ebf4eb}.paginationjs.paginationjs-theme-green .paginationjs-pages li.active>a{background:#449d44;color:#fff}.paginationjs.paginationjs-theme-green .paginationjs-pages li.disabled>a:hover{background:0 0}.paginationjs.paginationjs-theme-green .paginationjs-go-button>input[type=button]{background:#449d44;border-color:#449d44;color:#fff}.paginationjs.paginationjs-theme-yellow .paginationjs-go-input>input[type=text],.paginationjs.paginationjs-theme-yellow .paginationjs-pages li{border-color:#ec971f}.paginationjs.paginationjs-theme-green .paginationjs-go-button>input[type=button]:hover{background-color:#55a555}.paginationjs.paginationjs-theme-yellow .paginationjs-pages li>a{color:#ec971f}.paginationjs.paginationjs-theme-yellow .paginationjs-pages li>a:hover{background:#fdf5e9}.paginationjs.paginationjs-theme-yellow .paginationjs-pages li.active>a{background:#ec971f;color:#fff}.paginationjs.paginationjs-theme-yellow .paginationjs-pages li.disabled>a:hover{background:0 0}.paginationjs.paginationjs-theme-yellow .paginationjs-go-button>input[type=button]{background:#ec971f;border-color:#ec971f;color:#fff}.paginationjs.paginationjs-theme-red .paginationjs-go-input>input[type=text],.paginationjs.paginationjs-theme-red .paginationjs-pages li{border-color:#c9302c}.paginationjs.paginationjs-theme-yellow .paginationjs-go-button>input[type=button]:hover{background-color:#eea135}.paginationjs.paginationjs-theme-red .paginationjs-pages li>a{color:#c9302c}.paginationjs.paginationjs-theme-red .paginationjs-pages li>a:hover{background:#faeaea}.paginationjs.paginationjs-theme-red .paginationjs-pages li.active>a{background:#c9302c;color:#fff}.paginationjs.paginationjs-theme-red .paginationjs-pages li.disabled>a:hover{background:0 0}.paginationjs.paginationjs-theme-red .paginationjs-go-button>input[type=button]{background:#c9302c;border-color:#c9302c;color:#fff}.paginationjs.paginationjs-theme-red .paginationjs-go-button>input[type=button]:hover{background-color:#ce4541}.paginationjs .paginationjs-pages li.paginationjs-next{border-right:1px solid #aaa\9}.paginationjs .paginationjs-go-input>input[type=text]{line-height:28px\9;vertical-align:middle\9}.paginationjs.paginationjs-big .paginationjs-pages li>a{line-height:36px\9}.paginationjs.paginationjs-big .paginationjs-go-input>input[type=text]{height:36px\9;line-height:36px\9}
