@@ -288,15 +288,15 @@
                     <option value="100">100</option>
                 </select>
             </div>
-            <div class="col-3">
+            <div class="col-5">
                 <ul id="pagination" class="pagination-sm"></ul>
             </div>
-            <div class="col-2">
+            <div class="col-1">
                 <div id="loadingMessage" class="text-center my-3">
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...
                 </div>
             </div>
-            <div class="col-4">
+            <div class="col-3">
                 <span id="resultsSummary" style="margin-left: 15px;"></span>
             </div>
             
@@ -407,16 +407,6 @@ HTML;
                 </a>
 
                 <div id="results-{$formNum}" class="dictionary-results-panel" style="display:none;">
-                
-                   
-                    <!--img
-                        id="loadingImage-{$formNum}"
-                        src="https://dasg.ac.uk/images/loading.gif"
-                        width="400"
-                        style="display: none;"
-                        alt="Loading"
-                    -->
-
                     <table id="form-{$formNum}" class="table table-borderless dict-results-table"></table>
                     <div class="row">
                         <div class="col-6">

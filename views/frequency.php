@@ -306,7 +306,7 @@
     </div>
 
     <p class="frequency-intro">
-        Browse lemmas by frequency.
+        Browse lemmas or word forms by frequency
     </p>
 
     <form id="frequencyFilters" class="frequency-toolbar" autocomplete="off">
