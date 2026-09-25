@@ -211,15 +211,23 @@
     .dictionary-forms > tbody > tr:hover { background: var(--xs-softer); }
 
     .dictionary-forms > tbody > tr > td:first-child {
-        width: 18%;
+        width: 1%;
+        white-space: nowrap;
+        padding-right: 1.25rem;
         font-weight: 700;
         font-size: 1.02rem;
     }
 
     .dictionary-forms > tbody > tr > td:nth-child(2) {
-        width: 10%;
+        width: 1%;
+        white-space: nowrap;
+        padding-right: 1.25rem;
         color: var(--xs-muted);
         font-style: italic;
+    }
+
+    .dictionary-forms > tbody > tr > td:nth-child(3) {
+        width: 98%;
     }
 
     .loadDictResults {
