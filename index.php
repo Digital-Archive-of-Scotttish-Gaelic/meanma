@@ -19,6 +19,9 @@ switch ($module) {
 	case "collection":
 		$controller = new collection(); // START HERE
 		break;
+    case "frequency":
+		$controller = new frequency();
+		break;
   /*
 	case "dictionary":
 		$controller = new dictionary();

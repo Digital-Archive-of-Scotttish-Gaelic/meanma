@@ -494,6 +494,28 @@ case "editLemma":
         $id = $_GET["wid"];
         echo json_encode($fh->getContext($id, 12, 12));
         break;
+    case "getFrequencies":
+
+        $frequency = new frequency();
+
+        $params = [
+            "type"  => $_GET["type"] ?? "lemma",
+            "pos"   => $_GET["pos"] ?? "",
+            "min"   => $_GET["min"] ?? "1",
+            "max"   => $_GET["max"] ?? "",
+            "start" => $_GET["start"] ?? "1",
+            "limit" => $_GET["limit"] ?? "50",
+            "order" => $_GET["order"] ?? "desc"
+        ];
+
+        header("Content-Type: application/json; charset=utf-8");
+
+        echo json_encode(
+            $frequency->getResults($params),
+            JSON_UNESCAPED_UNICODE
+        );
+
+        break;
     default:
 		echo json_encode(array("error"=>"undefined action"));
 }
