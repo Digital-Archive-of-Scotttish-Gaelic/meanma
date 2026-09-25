@@ -30,23 +30,23 @@ class xsearch
         // Decode, restructure, and return
 
         //This code for new wordx without context
-/*
-        foreach ($data['result'] as $i => $result) {
+        /*
+                foreach ($data['result'] as $i => $result) {
 
-            $word = $result['w'];
+                    $word = $result['w'];
 
-            preg_match('/_(\d+(?:-\d+)?)_/', $word['wid'], $matches);
-            $textId = $matches[1];;
+                    preg_match('/_(\d+(?:-\d+)?)_/', $word['wid'], $matches);
+                    $textId = $matches[1];;
 
-            $rows[$i]['tid'] = $textId;
-            $rows[$i]['filename'] = $textId . ".xml";
+                    $rows[$i]['tid'] = $textId;
+                    $rows[$i]['filename'] = $textId . ".xml";
 
-            $rows[$i]['match'] = $rows[$i]['wordform'] = $word['#text'];
-            $rows[$i]['pos'] = $word['pos'];
-            $rows[$i]['lemma'] = $word['lemma'];
-            $rows[$i]['id'] = $word['wid'];
-        }
-*/
+                    $rows[$i]['match'] = $rows[$i]['wordform'] = $word['#text'];
+                    $rows[$i]['pos'] = $word['pos'];
+                    $rows[$i]['lemma'] = $word['lemma'];
+                    $rows[$i]['id'] = $word['wid'];
+                }
+        */
 
         //The following code for EB API with pre and post context
         /*if (is_array($data['result'])) {
@@ -174,13 +174,25 @@ class xsearch
             !empty($params['include-total']) &&
             $params['include-total'] === 'true';
 
-        $curlParams = http_build_query([
+        $curlData = [
             $mode => $params['q'],
             'text' => $texts,
             'start' => $start,
             'limit' => $limit,
             'include-total' => $includeTotal ? 'true' : 'false'
-        ]);
+        ];
+
+        // Dictionary-view citation requests need to retain both the
+        // head-form and POS restriction in addition to the surface form.
+        if (!empty($params['head-form'])) {
+            $curlData['head-form'] = $params['head-form'];
+        }
+
+        if (isset($params['pos']) && $params['pos'] !== '') {
+            $curlData['pos'] = $params['pos'];
+        }
+
+        $curlParams = http_build_query($curlData);
 
         $url = $baseUrl . '?' . $curlParams;
 

@@ -23,7 +23,7 @@ if ($_GET["view"] != 'dictionary') {    //i.e. standard search view
         
         <div class="float-right"><small><a id="autoCreateRecords" href="#">Automatically create all records</a></small></div>
         <div class="row">
-            <div class="col-2">
+            <div class="col-3">
                 <label for="pageSizeSelect">Results per page:</label>
                 <select id="pageSizeSelect" class="form-control" style="width:auto; display:inline-block;">
                     <option value="10" selected>10</option>
@@ -32,7 +32,7 @@ if ($_GET["view"] != 'dictionary') {    //i.e. standard search view
                     <option value="100">100</option>
                 </select>
             </div>
-            <div class="col-8">
+            <div class="col-3">
                 <ul id="pagination" class="pagination-sm"></ul>
             </div>
             <div class="col-2">
@@ -40,125 +40,129 @@ if ($_GET["view"] != 'dictionary') {    //i.e. standard search view
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...
                 </div>
             </div>
+            <div class="col-4">
+                <span id="resultsSummary" style="margin-left: 15px;"></span>
+            </div>
+            
         </div>
 HTML;
 
 } else {    // dictionary view
 
-        $_GET["pp"] = null; // don't limit the results - fetch them all
+    $_GET["pp"] = null; // don't limit the results - fetch them all
 
-        $model = new models\xsearch($_GET, true, $this->_db);
+    $model = new models\xsearch($_GET, true, $this->_db);
 
-        $params = $_GET;
-        $searchResults = $model->getResults($params, 'xforms');
+    $params = $_GET;
+    $searchResults = $model->getResults($params, 'xforms');
 
-        // No results
-        if (empty($searchResults) || empty($searchResults['form'])) {
-            echo '<h5>No results</h5>';
-            $this->_writeViewSwitch();
-            return;
-        }
+    // No results
+    if (empty($searchResults) || empty($searchResults['form'])) {
+        echo '<h5>No results</h5>';
+        $this->_writeViewSwitch();
+        return;
+    }
 
-        $headForm = $searchResults['head-form'] ?? '';
-        $totalResults = (int)($searchResults['count'] ?? 0);
+    $headForm = $searchResults['head-form'] ?? '';
+    $totalResults = (int)($searchResults['count'] ?? 0);
 
-        echo '<h4>' . htmlspecialchars($headForm) . '</h4>';
-        echo '<h5>' . $totalResults . ' results</h5>';
+    echo '<h4>' . htmlspecialchars($headForm) . '</h4>';
+    echo '<h5>' . $totalResults . ' results</h5>';
 
-        echo <<<HTML
+    echo <<<HTML
     <table class="table">
         <tbody>
 HTML;
 
-        $formNum = 0;
+    $formNum = 0;
 
-        foreach ($searchResults['form'] as $nextForm) {
+    foreach ($searchResults['form'] as $nextForm) {
 
-            $formNum++;
+        $formNum++;
 
-            $wordForm = $nextForm['word-form'] ?? '';
-            $pos = $nextForm['pos'] ?? '';
-            $count = (int)($nextForm['count'] ?? 0);
+        $wordForm = $nextForm['word-form'] ?? '';
+        $pos = $nextForm['pos'] ?? '';
+        $count = (int)($nextForm['count'] ?? 0);
 
-            /*
-             * xforms has already grouped the individual results belonging
-             * to this word-form/POS combination.
-             */
-            $locations = [];
+        /*
+         * /xforms now returns summary data only. Individual citations
+         * are fetched on demand from the paginated /word search.
+         */
 
-            foreach ($nextForm['result'] ?? [] as $nextResult) {
+        $htmlWordForm = htmlspecialchars(
+                $wordForm,
+                ENT_QUOTES,
+                'UTF-8'
+        );
 
-                $textId = $nextResult['text-id'] ?? '';
-                $wid = $nextResult['w']['wid'] ?? '';
+        $htmlHeadForm = htmlspecialchars(
+                $headForm,
+                ENT_QUOTES,
+                'UTF-8'
+        );
 
-                if ($textId !== '' && $wid !== '') {
-                    $locations[] = $textId . ' ' . $wid;
-                }
-            }
+        $htmlPos = htmlspecialchars(
+                $pos,
+                ENT_QUOTES,
+                'UTF-8'
+        );
 
-            $locs = implode('|', $locations);
-
-            /*
-             * Escape values going into HTML attributes.
-             */
-            $htmlWordForm = htmlspecialchars(
-                    $wordForm,
-                    ENT_QUOTES,
-                    'UTF-8'
-            );
-
-            $htmlPos = htmlspecialchars(
-                    $pos,
-                    ENT_QUOTES,
-                    'UTF-8'
-            );
-
-            $htmlLocs = htmlspecialchars(
-                    $locs,
-                    ENT_QUOTES,
-                    'UTF-8'
-            );
-
-            echo <<<HTML
+        echo <<<HTML
         <tr>
             <td>{$htmlWordForm}</td>
             <td>{$htmlPos}</td>
             <td>
                 <a href="#"
                    id="show-{$formNum}"
-                   data-formNum="{$formNum}"
-                   data-locs="{$htmlLocs}"
+                   data-formnum="{$formNum}"
+                   data-word-form="{$htmlWordForm}"
+                   data-head-form="{$htmlHeadForm}"
                    data-pos="{$htmlPos}"
-                   data-lemma="{$htmlWordForm}"
+                   data-count="{$count}"
                    data-action="show"
                    class="loadDictResults">
                     <span class="actionToggle">show</span> {$count} result(s)
                 </a>
 
-                <div id="results-{$formNum}">
-                    <img
+                <div id="results-{$formNum}" style="display:none;">
+                
+                   
+                    <!--img
                         id="loadingImage-{$formNum}"
                         src="https://dasg.ac.uk/images/loading.gif"
                         width="400"
                         style="display: none;"
                         alt="Loading"
-                    >
+                    -->
+
                     <table id="form-{$formNum}"></table>
-                    <div id="pag-{$formNum}"></div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div id="pag-{$formNum}"></div>
+                        </div>
+                        <div class="col-1">
+                            <div id="loadingMessage" class="text-center my-3">
+                                <span id="loadingImage-{$formNum}" class="spinner-border spinner-border-sm" style="display: none;" aria-hidden="true"></span> 
+                            </div>
+                        </div>
+                        <div class="col-5" id="dict-controls-{$formNum}" style="display:none; margin:10px 0;">    
+                            <span id="dict-summary-{$formNum}" style="margin-left:15px;"></span>
+                        </div>
+                    </div>
                 </div>
             </td>
         </tr>
 HTML;
-        }
+    }
 
-        echo <<<HTML
+    echo <<<HTML
         </tbody>
     </table>
 HTML;
 
-        models\collection::writeSlipDiv();
-   //     $this->_writeViewSwitch();
-   //     $this->_writeDictionaryResultsJavascript();
+    models\collection::writeSlipDiv();
+    //     $this->_writeViewSwitch();
+    //     $this->_writeDictionaryResultsJavascript();
 
 
 
@@ -314,6 +318,7 @@ HTML;
                         });
 
                         renderTable(enrichedData);
+                        updateResultsSummary(pageNumber, enrichedData.length);
 
                         if (includeTotal && !paginationInitialised && totalResults !== null) {
                             rebuildPagination();
@@ -443,6 +448,25 @@ HTML;
             });
 
             paginationInitialised = true;
+        }
+
+        function updateResultsSummary(pageNumber, resultCount) {
+
+            if (totalResults === null) {
+                return;
+            }
+
+            if (totalResults === 0) {
+                $('#resultsSummary').text('0 results');
+                return;
+            }
+
+            const first = ((pageNumber - 1) * pageSize) + 1;
+            const last = first + resultCount - 1;
+
+            $('#resultsSummary').html(
+                `Showing <strong>${first.toLocaleString()}–${last.toLocaleString()}</strong> of <strong>${totalResults.toLocaleString()}</strong> results`
+            );
         }
 
         function buildSlipHtml(slip, row, index) {
@@ -581,125 +605,194 @@ HTML;
     }
 
     $(function () {
-        $('.loadDictResults').on('click', function () {
-            var formNum = $(this).attr('data-formnum');
-            var action = $(this).attr('data-action');
-            if (action == 'hide') {
-                $('#results-'+formNum).hide();
-                $(this).attr('data-action', 'show');
-                $(this).find('.actionToggle').text('show'); //switch the toggle text to "show"
+        const dictionaryStates = {};
+        const dictionaryTextFilter = "<?= addslashes($params['text'] ?? '') ?>";
+
+        function updateDictionarySummary(formNum, pageNumber, resultCount) {
+            const state = dictionaryStates[formNum];
+            if (!state) return;
+
+            if (state.total === 0) {
+                $('#dict-summary-' + formNum).text('0 results');
                 return;
             }
-            $('#results-'+formNum).show();
-            $(this).find('.actionToggle').text('hide'); //switch the toggle text to "hide"
-            $('#loadingImage-'+formNum).show();
-            var locations = $(this).attr('data-locs');
-            var headword = $(this).attr('data-lemma');
-            var pos = $(this).attr('data-pos');
-            var table = $('#form-'+formNum);
-            var params = {headword: headword, pos: pos}
-            $(this).attr('data-action', 'hide');  //link to hide the results
-            $('#pag-'+formNum).pagination({
 
-                dataSource: 'ajax.php',
-                locator: 'results',
-                totalNumberLocator: function(response) {
-                    return response.hits;
-                },
-                pageSize: 10,
-                ajax: {
-                    type: "POST",
-                    data: {action: "getDictionaryResults", locs: locations},
-                    //do something else here
-                    /* beforeSend: function() {
-                         table.html('Loading data from DASG ...');
-                     }*/
-                },
-                callback: function(data, pagination) {
+            const first = ((pageNumber - 1) * state.pageSize) + 1;
+            const last = first + resultCount - 1;
 
-                    // getDictionaryResults gives us filename/id/context,
-                    // but not the current text metadata.
-                    const rows = data.map(row => {
+            $('#dict-summary-' + formNum).html(
+                `Showing <strong>${first.toLocaleString()}–${last.toLocaleString()}</strong> ` +
+                `of <strong>${state.total.toLocaleString()}</strong> results`
+            );
+        }
 
-                        // e.g. "54.xml" -> "54"
-                        const tid = row.tid ??
-                            String(row.filename || '').replace(/\.xml$/i, '');
+        function loadDictionaryPage(formNum, pageNumber) {
+            const state = dictionaryStates[formNum];
+            if (!state) return;
 
-                        return {
-                            ...row,
-                            tid: tid
-                        };
-                    });
+            const start = ((pageNumber - 1) * state.pageSize) + 1;
+            const table = $('#form-' + formNum);
 
-                    const tids = [...new Set(
-                        rows
-                            .map(row => row.tid)
-                            .filter(Boolean)
-                    )];
+            $('#loadingImage-' + formNum).show();
 
-                    const wids = [...new Set(
-                        rows
-                            .map(row => row.id)
-                            .filter(Boolean)
-                    )];
+            const url =
+                'ajax.php?action=xsearch' +
+                '&q=' + encodeURIComponent(state.wordForm) +
+                '&mode=word-form' +
+                '&head-form=' + encodeURIComponent(state.headForm) +
+                '&pos=' + encodeURIComponent(state.pos) +
+                '&text=' + encodeURIComponent(dictionaryTextFilter) +
+                '&start=' + start +
+                '&limit=' + state.pageSize +
+                '&include-total=false';
 
-                    $.ajax({
-                        url: 'ajax.php?action=getCombinedMetadata',
-                        method: 'POST',
-                        contentType: 'application/json',
-                        dataType: 'json',
-                        data: JSON.stringify({tids, wids}),
+            $.getJSON(url, function (rawData) {
+                const rows = (rawData && rawData.rows) ? rawData.rows : [];
 
-                        success: function ({textMeta, slipMeta}) {
-
-                            const textMap = new Map(
-                                (textMeta || []).map(meta => [
-                                    String(meta.tid),
-                                    meta
-                                ])
-                            );
-
-                            const slipMap = new Map(
-                                (slipMeta || []).map(meta => [
-                                    String(meta.id),
-                                    meta
-                                ])
-                            );
-
-                            const enrichedData = rows.map(row => {
-
-                                const text =
-                                    textMap.get(String(row.tid)) || {};
-
-                                const slip =
-                                    slipMap.get(String(row.id)) || {};
-
-                                return {
-                                    ...row,
-                                    ...text,
-                                    ...slip
-                                };
-                            });
-
-                            const html = template(enrichedData, params);
-
-                            $('#loadingImage-' + formNum).hide();
-                            table.html(html);
-                        },
-
-                        error: function(xhr, status, error) {
-                            console.error(
-                                'Dictionary metadata lookup failed:',
-                                status,
-                                error
-                            );
-
-                            $('#loadingImage-' + formNum).hide();
-                        }
-                    });
+                if (rows.length === 0) {
+                    $('#loadingImage-' + formNum).hide();
+                    table.html('<tbody><tr><td>No results</td></tr></tbody>');
+                    updateDictionarySummary(formNum, pageNumber, 0);
+                    return;
                 }
-            })
-        })
+
+                const normalisedRows = rows.map(row => {
+                    const tid = row.tid || row.textid ||
+                        String(row.filename || '').replace(/\.xml$/i, '');
+
+                    return {
+                        ...row,
+                        tid: String(tid || ''),
+                        filename: row.filename || (tid ? tid + '.xml' : '')
+                    };
+                });
+
+                const tids = [...new Set(
+                    normalisedRows.map(row => row.tid).filter(Boolean)
+                )];
+
+                const wids = [...new Set(
+                    normalisedRows.map(row => row.id).filter(Boolean)
+                )];
+
+                $.ajax({
+                    url: 'ajax.php?action=getCombinedMetadata',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    data: JSON.stringify({tids, wids}),
+
+                    success: function ({textMeta, slipMeta}) {
+                        const textMap = new Map(
+                            (textMeta || []).map(meta => [String(meta.tid), meta])
+                        );
+
+                        const slipMap = new Map(
+                            (slipMeta || []).map(meta => [String(meta.id), meta])
+                        );
+
+                        const enrichedData = normalisedRows.map(row => ({
+                            ...row,
+                            ...(textMap.get(String(row.tid)) || {}),
+                            ...(slipMap.get(String(row.id)) || {})
+                        }));
+
+                        table.html(template(enrichedData, {
+                            headword: state.headForm,
+                            pos: state.pos
+                        }));
+
+                        updateDictionarySummary(
+                            formNum,
+                            pageNumber,
+                            enrichedData.length
+                        );
+
+                        $('#dict-controls-' + formNum).show();
+                        $('#loadingImage-' + formNum).hide();
+                    },
+
+                    error: function (xhr, status, error) {
+                        console.error('Dictionary metadata lookup failed:', status, error);
+                        $('#loadingImage-' + formNum).hide();
+                    }
+                });
+            }).fail(function (xhr, status, error) {
+                console.error('Dictionary search failed:', status, error);
+                $('#loadingImage-' + formNum).hide();
+            });
+        }
+
+        function rebuildDictionaryPagination(formNum) {
+            const state = dictionaryStates[formNum];
+            if (!state) return;
+
+            const paginator = $('#pag-' + formNum);
+            paginator.empty();
+
+            let initialPaginationCallback = true;
+
+            paginator.pagination({
+                dataSource: new Array(state.total),
+                pageSize: state.pageSize,
+                pageNumber: 1,
+
+                callback: function (data, pagination) {
+                    if (initialPaginationCallback) {
+                        initialPaginationCallback = false;
+                        return;
+                    }
+
+                    loadDictionaryPage(formNum, pagination.pageNumber);
+                }
+            });
+        }
+
+        $('.loadDictResults').on('click', function (event) {
+            event.preventDefault();
+
+            const link = $(this);
+            const formNum = link.attr('data-formnum');
+            const action = link.attr('data-action');
+
+            if (action === 'hide') {
+                $('#results-' + formNum).hide();
+                link.attr('data-action', 'show');
+                link.find('.actionToggle').text('show');
+                return;
+            }
+
+            $('#results-' + formNum).show();
+            link.attr('data-action', 'hide');
+            link.find('.actionToggle').text('hide');
+
+            // If this form has already been loaded, simply reveal it again.
+            if (dictionaryStates[formNum]) {
+                return;
+            }
+
+            dictionaryStates[formNum] = {
+                wordForm: link.attr('data-word-form') || '',
+                headForm: link.attr('data-head-form') || '',
+                pos: link.attr('data-pos') || '',
+                total: Number(link.attr('data-count') || 0),
+                pageSize: 10
+            };
+
+            loadDictionaryPage(formNum, 1);
+            rebuildDictionaryPagination(formNum);
+        });
+
+        $('.dict-page-size').on('change', function () {
+            const formNum = $(this).attr('data-formnum');
+            const state = dictionaryStates[formNum];
+            if (!state) return;
+
+            state.pageSize = parseInt($(this).val(), 10) || 10;
+
+            rebuildDictionaryPagination(formNum);
+            loadDictionaryPage(formNum, 1);
+        });
     });
 
 </script>
