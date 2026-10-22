@@ -4,6 +4,17 @@ namespace models;
 
 class frequency
 {
+    private string $apiOrigin;
+
+    public function __construct(?string $apiOrigin = null)
+    {
+        $configuredOrigin = $apiOrigin ?? getenv('MEANMA_FREQUENCY_API_ORIGIN');
+        $this->apiOrigin = rtrim(
+            $configuredOrigin ?: 'http://localhost:8080/exist/restxq',
+            '/'
+        );
+    }
+
     /**
      * Normalise the existing frequency-list request without contacting eXist.
      *
@@ -39,13 +50,14 @@ class frequency
     public function getResults($params = [])
 
     {
+        $includePosCounts = !empty($params['include_pos_counts']);
         $request = self::normalizeRequestParameters($params);
         $type = $request['type'];
         $curlData = $request['query'];
 
         $url =
 
-            'http://localhost:8080/exist/restxq/frequency/' . $type . '?' .
+            $this->apiOrigin . '/frequency/' . $type . '?' .
 
             http_build_query($curlData);
 
@@ -115,10 +127,19 @@ class frequency
                 ? (string)$entry['word-form']
                 : (string)$entry['lemma'];
 
-            $rows[] = [
+            $posCounts = [];
+            foreach ($entry->pos as $pos) {
+                $posCounts[(string)$pos['value']] = (int)$pos['count'];
+            }
+
+            $row = [
                 'term'      => $term,
-                'frequency' => (int)$entry['frequency']
+                'frequency' => (int)$entry['frequency'],
             ];
+            if ($includePosCounts) {
+                $row['pos_counts'] = $posCounts;
+            }
+            $rows[] = $row;
         }
 
         return [

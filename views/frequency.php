@@ -374,6 +374,7 @@
         <div class="frequency-toolbar-actions">
             <button type="submit" class="btn btn-primary">Apply filters</button>
             <button type="button" id="frequencyReset" class="btn btn-outline-secondary">Reset</button>
+            <a id="frequencyExport" class="btn btn-success" href="index.php?m=frequency&amp;a=export">Export to Excel</a>
         </div>
     </form>
 
@@ -496,6 +497,25 @@ $(function () {
         params.set('limit', filters.limit);
 
         return frequencyApi + '?' + params.toString();
+    }
+
+    function updateExportUrl() {
+        const filters = getFilters();
+        const params = new URLSearchParams();
+        params.set('m', 'frequency');
+        params.set('a', 'export');
+        params.set('type', filters.type);
+        if (filters.pos !== '') {
+            params.set('pos', filters.pos);
+        }
+        if (filters.min !== '') {
+            params.set('min', filters.min);
+        }
+        if (filters.max !== '') {
+            params.set('max', filters.max);
+        }
+        params.set('order', filters.order);
+        $('#frequencyExport').attr('href', 'index.php?' + params.toString());
     }
 
     function normaliseEntries(data) {
@@ -732,6 +752,7 @@ $(function () {
             return;
         }
 
+        updateExportUrl();
         loadFrequencyPage(1);
     });
 
@@ -743,10 +764,12 @@ $(function () {
         $('#frequencyOrder').val('desc');
         $('#frequencyLimit').val('50');
 
+        updateExportUrl();
         loadFrequencyPage(1);
     });
 
     $('#frequencyType').on('change', function () {
+        updateExportUrl();
         loadFrequencyPage(1);
     });
 
@@ -755,7 +778,12 @@ $(function () {
     });
 
     $('#frequencyOrder').on('change', function () {
+        updateExportUrl();
         loadFrequencyPage(1);
+    });
+
+    $('#frequencyExport').on('click', function () {
+        updateExportUrl();
     });
 
     $('#frequencyFirst').on('click', function () {
@@ -803,6 +831,7 @@ $(function () {
         }
     });
 
+    updateExportUrl();
     loadFrequencyPage(1);
 });
 </script>

@@ -3,7 +3,8 @@
     "description": "Historical Lexicographty Manager",
     "type": "project",
     "require": {
-        "phpmailer/phpmailer": "^6.9"
+        "phpmailer/phpmailer": "^6.9",
+        "phpoffice/phpspreadsheet": "^5.10"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.6"
@@ -16,7 +17,8 @@
             "MEANMA_TEST_DATABASE=1 zsh tests/security/http.sh",
             "MEANMA_TEST_DATABASE=1 zsh tests/security/csrf_http.sh",
             "MEANMA_TEST_DATABASE=1 zsh tests/security/login_http.sh",
-            "MEANMA_TEST_DATABASE=1 zsh tests/security/phase5_http.sh"
+            "MEANMA_TEST_DATABASE=1 zsh tests/security/phase5_http.sh",
+            "MEANMA_TEST_DATABASE=1 zsh tests/security/frequency_export_http.sh"
         ],
         "test": [
             "@test:unit",
@@ -26,7 +28,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.0.0"
+            "php": "8.3.6"
         }
     },
     "authors": [

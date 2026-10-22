@@ -36,6 +36,13 @@ if ($module === 'users') {
 	ob_start();
 }
 
+// XLSX responses must be sent before the shared HTML header emits output.
+if ($module === 'frequency' && $action === 'export') {
+	$controller = new frequency();
+	$controller->run($action);
+	exit;
+}
+
 require_once "includes/htmlHeader.php";
 
 switch ($module) {
