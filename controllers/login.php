@@ -15,6 +15,11 @@ class login
       $this->_authenticationResult = $this->_authenticateUser($_POST);
       if ($this->_authenticationResult) {
         $destination = models\security::safeInternalDestination($_POST['next'] ?? null) ?? 'index.php';
+        if ($this->_user->getMustChangePassword()) {
+          $_SESSION['postPasswordChangeDestination'] = $destination;
+          header('Location: index.php?loginAction=changePassword', true, 303);
+          exit;
+        }
         header('Location: ' . $destination, true, 303);
         exit;
       }
@@ -106,6 +111,46 @@ class login
           exit;
         }
         break;
+      case "changePassword":
+        models\security::requireMethod('GET');
+        if (!$this->isLoggedIn() || empty($_SESSION['mustChangePassword'])) {
+          header('Location: index.php', true, 302);
+          exit;
+        }
+        $this->_view->writePage('requiredPassword');
+        break;
+      case "saveRequiredPassword":
+        models\security::requireMethod('POST');
+        if (!$this->isLoggedIn() || empty($_SESSION['mustChangePassword'])) {
+          http_response_code(403);
+          exit('Invalid request');
+        }
+        $pass1 = (string) ($_POST['pass1'] ?? '');
+        $pass2 = (string) ($_POST['pass2'] ?? '');
+        $validCsrf = models\security::validateCsrf('requiredPassword', models\security::requestCsrfToken(), true);
+        if (!$validCsrf || $pass1 === '' || strlen($pass1) > 1024 || !hash_equals($pass1, $pass2)) {
+          http_response_code($validCsrf ? 400 : 403);
+          $this->_view->writePage('requiredPassword', 'The password could not be changed. Please try again.');
+          break;
+        }
+        $newVersion = models\users::completeRequiredPassword(
+          (string) $_SESSION['user'],
+          models\passwordhasher::hash($pass1),
+          (int) $_SESSION['authVersion']
+        );
+        if ($newVersion === null) {
+          http_response_code(409);
+          $this->_view->writePage('requiredPassword', 'The account changed. Please sign in again.');
+          break;
+        }
+        $_SESSION['authVersion'] = $newVersion;
+        $_SESSION['mustChangePassword'] = false;
+        $destination = models\security::safeInternalDestination($_SESSION['postPasswordChangeDestination'] ?? null) ?? 'index.php';
+        unset($_SESSION['postPasswordChangeDestination'], $_SESSION['adminReauthenticatedAt'], $_SESSION['adminReauthenticatedUser']);
+        session_regenerate_id(true);
+        models\security::resetCsrfTokens();
+        header('Location: ' . $destination, true, 303);
+        exit;
       default:
         header('Location: ' . ($this->isLoggedIn() ? 'index.php' : models\security::loginUrl()), true, 302);
         exit;
@@ -145,6 +190,8 @@ class login
     models\security::resetCsrfTokens();
     $_SESSION["loginTime"] = time();
     $_SESSION["user"] = $user->getEmail();
+    $_SESSION['authVersion'] = $user->getAuthVersion();
+    $_SESSION['mustChangePassword'] = $user->getMustChangePassword();
     unset($_SESSION["email"]);
     return true;
   }

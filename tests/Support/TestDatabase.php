@@ -11,11 +11,14 @@ final class TestDatabase
     private PDO $admin;
     private ?PDO $connection;
     private string $name;
+    private string $rateLimitDirectory;
 
     public function __construct()
     {
         $credentials = TestEnvironment::databaseCredentials();
         $this->name = 'meanma_phpunit_test_' . bin2hex(random_bytes(6));
+        $this->rateLimitDirectory = sys_get_temp_dir() . '/meanma-phpunit-rates-' . bin2hex(random_bytes(6));
+        mkdir($this->rateLimitDirectory, 0700, true);
         TestEnvironment::assertGeneratedDatabaseName($this->name);
 
         $this->admin = new PDO(
@@ -41,6 +44,7 @@ final class TestDatabase
             putenv('MEANMA_DB_PASSWORD=' . $credentials['password']);
             putenv('MEANMA_APP_ORIGIN=https://meanma.example.test');
             putenv('MEANMA_DISABLE_EMAIL=1');
+            putenv('MEANMA_RATE_LIMIT_DIR=' . $this->rateLimitDirectory);
 
             $this->createSchema();
             $this->seedAccounts();
@@ -67,6 +71,13 @@ final class TestDatabase
         foreach (['MEANMA_DB_NAME', 'MEANMA_DB_HOST', 'MEANMA_DB_USER', 'MEANMA_DB_PASSWORD'] as $name) {
             putenv($name);
         }
+        putenv('MEANMA_RATE_LIMIT_DIR');
+        foreach (glob($this->rateLimitDirectory . '/*') ?: [] as $file) {
+            unlink($file);
+        }
+        if (is_dir($this->rateLimitDirectory)) {
+            rmdir($this->rateLimitDirectory);
+        }
     }
 
     private function createSchema(): void
@@ -82,6 +93,8 @@ final class TestDatabase
                 passwordAuth varchar(255) NULL,
                 isActive tinyint NOT NULL DEFAULT 1,
                 superuser tinyint(1) NOT NULL DEFAULT 0,
+                must_change_password tinyint(1) NOT NULL DEFAULT 0,
+                auth_version bigint unsigned NOT NULL DEFAULT 1,
                 last_logged_in timestamp NULL,
                 updated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             );
@@ -95,6 +108,15 @@ final class TestDatabase
                 groupId int NOT NULL,
                 userEmail varchar(255) NOT NULL,
                 lastUsed timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            );
+            CREATE TABLE security_audit (
+                id bigint unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                actor_email varchar(255) NOT NULL,
+                target_email varchar(255) NULL,
+                action varchar(64) NOT NULL,
+                outcome varchar(32) NOT NULL,
+                details_json text NULL,
+                created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
         SQL);
     }

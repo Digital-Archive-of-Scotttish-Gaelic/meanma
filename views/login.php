@@ -109,6 +109,36 @@ HTML;
 HTML;
         break;
 
+      case 'requiredPassword':
+        $title = 'Change your temporary password';
+        $csrfToken = models\security::escape(models\security::csrfToken('requiredPassword'));
+        $message = $safeMessage === ''
+          ? '<p>Your administrator-assigned password must be changed before continuing.</p>'
+          : '<p class="auth-message" role="alert" aria-live="polite">' . $safeMessage . '</p>';
+        $body = <<<HTML
+          {$message}
+          <form method="post" action="index.php" class="auth-form" data-password-match>
+            <input type="hidden" name="loginAction" value="saveRequiredPassword">
+            <input type="hidden" name="_csrf" value="{$csrfToken}">
+            <div class="auth-field">
+              <label for="pass1">New password</label>
+              <div class="auth-password">
+                <input type="password" name="pass1" id="pass1" class="form-control" required autocomplete="new-password" autofocus>
+                <button type="button" class="auth-password-toggle" data-password-toggle="pass1" aria-controls="pass1" aria-pressed="false">Show</button>
+              </div>
+            </div>
+            <div class="auth-field">
+              <label for="pass2">Confirm new password</label>
+              <div class="auth-password">
+                <input type="password" name="pass2" id="pass2" class="form-control" required autocomplete="new-password">
+                <button type="button" class="auth-password-toggle" data-password-toggle="pass2" aria-controls="pass2" aria-pressed="false">Show</button>
+              </div>
+            </div>
+            <div class="auth-actions"><button type="submit" class="btn btn-primary">Change password</button></div>
+          </form>
+HTML;
+        break;
+
       default:
         $body = '<p class="auth-message" role="alert">The requested authentication page is unavailable.</p><p><a href="' . $loginUrl . '">Return to sign in</a></p>';
     }

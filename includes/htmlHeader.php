@@ -47,6 +47,9 @@ $ajaxMutationActions = json_encode(
 	models\security::ajaxMutationActions(),
 	JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
 );
+$adminNavigation = models\users::checkSuperuserAuth()
+	? '<a class="nav-item nav-link" title="manage users" href="?m=users">users</a>'
+	: '';
 
 echo <<<HTML
 
@@ -113,6 +116,7 @@ echo <<<HTML
 			    <a class="nav-item nav-link" title="browse collection" href="?m=collection&a=browse">collection</a>
 			    <a class="nav-item nav-link" title="browse entries" href="?m=entries&a=browse">entries</a>
 			    <a class="nav-item nav-link" title="RTFM" href="?m=docs&action=view">docs</a>
+				{$adminNavigation}
           <span class="loggedIn {$loggedInHide}">
 	            <form method="post" action="index.php">
 	              <input type="hidden" name="loginAction" value="logout">

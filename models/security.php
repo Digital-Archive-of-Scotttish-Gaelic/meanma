@@ -170,6 +170,28 @@ class security
             || $requestedWith === 'xmlhttprequest';
     }
 
+    public static function isMandatoryPasswordChangeRequest(): bool
+    {
+        $script = basename((string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+        if ($script !== 'index.php' || !empty($_GET['m']) || !empty($_GET['a'])) {
+            return false;
+        }
+        $action = (string) ($_POST['loginAction'] ?? $_GET['loginAction'] ?? '');
+        return in_array($action, ['changePassword', 'saveRequiredPassword', 'logout'], true);
+    }
+
+    public static function denyMandatoryPasswordChangeBypass(): void
+    {
+        if (self::wantsJson()) {
+            http_response_code(403);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'password_change_required']);
+            exit;
+        }
+        header('Location: index.php?loginAction=changePassword', true, 302);
+        exit;
+    }
+
     public static function csrfToken(string $context): string
     {
         if (empty($_SESSION['_csrf'][$context])) {

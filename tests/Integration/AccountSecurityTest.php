@@ -47,13 +47,13 @@ final class AccountSecurityTest extends TestCase
         self::assertFalse(users::verifyPasswordAndMigrate($inactive, 'fixture-password'));
         self::assertTrue(passwordhasher::isLegacyHash($inactive->getPassword(), $inactive->getStoredSalt()));
 
-        $_SESSION = ['user' => 'active@example.test', 'loginTime' => time()];
+        $_SESSION = ['user' => 'active@example.test', 'loginTime' => time(), 'authVersion' => 1];
         self::assertTrue(users::isAuthenticated());
-        $_SESSION = ['user' => 'inactive@example.test', 'loginTime' => time()];
+        $_SESSION = ['user' => 'inactive@example.test', 'loginTime' => time(), 'authVersion' => 1];
         self::assertFalse(users::isAuthenticated());
         self::assertArrayNotHasKey('user', $_SESSION);
 
-        $_SESSION = ['user' => 'active@example.test', 'loginTime' => time() - (60 * 60 * 10) - 1];
+        $_SESSION = ['user' => 'active@example.test', 'loginTime' => time() - (60 * 60 * 10) - 1, 'authVersion' => 1];
         self::assertFalse(users::isAuthenticated());
         self::assertArrayNotHasKey('user', $_SESSION);
     }

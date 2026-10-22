@@ -54,6 +54,8 @@ try {
             passwordAuth varchar(255) NULL,
             isActive tinyint NOT NULL DEFAULT 1,
             superuser tinyint(1) NOT NULL DEFAULT 0,
+            must_change_password tinyint(1) NOT NULL DEFAULT 0,
+            auth_version bigint unsigned NOT NULL DEFAULT 1,
             last_logged_in timestamp NULL,
             updated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         );
@@ -67,6 +69,15 @@ try {
             groupId int NOT NULL,
             userEmail varchar(255) NOT NULL,
             lastUsed timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        );
+        CREATE TABLE security_audit (
+            id bigint unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            actor_email varchar(255) NOT NULL,
+            target_email varchar(255) NULL,
+            action varchar(64) NOT NULL,
+            outcome varchar(32) NOT NULL,
+            details_json text NULL,
+            created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 SQL);
 
@@ -111,6 +122,7 @@ SQL);
     $_SESSION['user'] = 'active@example.test';
     $_SESSION['email'] = 'admin@example.test';
     $_SESSION['loginTime'] = time();
+    $_SESSION['authVersion'] = 1;
     $assert(users::isAuthenticated(), 'Active authenticated session was rejected');
     $assert(!users::checkSuperuserAuth(), 'Pre-authentication email influenced superuser authorization');
 
@@ -126,6 +138,7 @@ SQL);
     $assert(!users::verifyPasswordAndMigrate($migratedEditor, 'wrong-password'), 'Incorrect modern password was accepted');
     $_SESSION['user'] = 'inactive@example.test';
     $_SESSION['loginTime'] = time();
+    $_SESSION['authVersion'] = 1;
     $assert(!users::isAuthenticated(), 'Inactive account retained an authenticated session');
     $assert(!users::verifyPasswordAndMigrate($inactive, 'old-password'), 'Inactive account triggered password migration');
 

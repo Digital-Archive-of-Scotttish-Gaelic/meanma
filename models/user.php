@@ -8,7 +8,8 @@ class user
 	const EDITOR = 2;
 
   private $email, $password, $salt, $firstName, $lastName,
-    $isSlipAdmin, $passwordAuth, $userFlag, $isActive, $lastLoggedIn, $updated;
+    $isSlipAdmin, $passwordAuth, $userFlag, $isActive, $lastLoggedIn, $updated,
+    $mustChangePassword, $authVersion;
   private $_lastUsedGroup;  //an instance of UserGroup
   private $_groups = array(); //an array of UserGroup objects
 
@@ -102,6 +103,22 @@ class user
 
   public function setIsActive($flag) {
     $this->isActive = (bool) $flag;
+  }
+
+  public function getMustChangePassword() {
+    return (bool) $this->mustChangePassword;
+  }
+
+  public function setMustChangePassword($flag) {
+    $this->mustChangePassword = (bool) $flag;
+  }
+
+  public function getAuthVersion() {
+    return (int) $this->authVersion;
+  }
+
+  public function setAuthVersion($version) {
+    $this->authVersion = (int) $version;
   }
 
   public function getSuperuser() {

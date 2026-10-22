@@ -45,7 +45,8 @@ composer test
 `composer test` is the complete regression command. It runs PHPUnit unit
 tests, isolated MySQL integration tests, the extended Phase 2/3B database suite,
 the 12-check Phase 2 live HTTP suite, the Phase 3A CSRF/HTTP-method suite, and
-the Phase 4 dedicated-login and safe-return-path HTTP suite.
+the Phase 4 dedicated-login and safe-return-path HTTP suite, and the Phase 5
+administrator account-management HTTP suite.
 
 All database suites use generated fixtures and drop their databases in cleanup
 handlers. HTTP suites use temporary cookie jars, rate-limit storage, and PHP
@@ -64,6 +65,10 @@ in the test processes. The suites do not seed or query corpus tables.
 - Phase 4 dedicated login markup, absence of account enumeration and modal
   remnants, protected-page return paths, open-redirect rejection, AJAX 401
   semantics, and continued availability of password recovery.
+- Phase 5 superuser-only account administration, creation and validation,
+  Argon2id administrator resets, mandatory password changes, session-version
+  revocation, sensitive-operation reauthentication, superuser safeguards, and
+  audit records that exclude authentication secrets.
 - Corpus-search request parameter and pagination characterization without
   executing corpus queries.
 - Frequency-list parameter defaults, filtering, and bounds without contacting
@@ -82,5 +87,7 @@ Representative authenticated AJAX and issue creation are covered. Slip,
 citation, translation, entry, and corpus editing need broader fixture schemas
 before their successful write paths can be tested safely. Responsive rendering,
 keyboard-only interaction, password-manager behavior, and the JavaScript
-session-expiry alert remain manual browser acceptance checks. These are
+session-expiry alert remain manual browser acceptance checks. The Phase 5
+account list, responsive forms, second-browser session revocation, and
+administrator reauthentication should also receive manual acceptance. These are
 coverage gaps, not claims of verified behavior.

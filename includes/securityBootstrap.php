@@ -8,4 +8,8 @@ if (PHP_SAPI !== 'cli' && !models\security::isPublicAuthenticationRequest()) {
     if (!models\users::isAuthenticated()) {
         models\security::denyUnauthenticatedRequest($hadAuthentication);
     }
+    if (!empty($_SESSION['mustChangePassword'])
+        && !models\security::isMandatoryPasswordChangeRequest()) {
+        models\security::denyMandatoryPasswordChangeBypass();
+    }
 }

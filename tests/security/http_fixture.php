@@ -79,6 +79,8 @@ $database->exec(<<<SQL
         passwordAuth varchar(255) NULL,
         isActive tinyint NOT NULL DEFAULT 1,
         superuser tinyint(1) NOT NULL DEFAULT 0,
+        must_change_password tinyint(1) NOT NULL DEFAULT 0,
+        auth_version bigint unsigned NOT NULL DEFAULT 1,
         last_logged_in timestamp NULL,
         updated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
@@ -100,6 +102,15 @@ $database->exec(<<<SQL
         status varchar(50) NOT NULL,
         updated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
+    CREATE TABLE security_audit (
+        id bigint unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        actor_email varchar(255) NOT NULL,
+        target_email varchar(255) NULL,
+        action varchar(64) NOT NULL,
+        outcome varchar(32) NOT NULL,
+        details_json text NULL,
+        created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 SQL);
 
 $insert = $database->prepare(
@@ -107,11 +118,14 @@ $insert = $database->prepare(
      VALUES(?,?,?,?,?,?,?,?)'
 );
 foreach ([
-    ['active@example.test', true],
-    ['inactive@example.test', false],
-] as [$email, $active]) {
+    ['active@example.test', true, 0],
+    ['inactive@example.test', false, 0],
+    ['admin@example.test', true, 1],
+    ['editor@example.test', true, 2],
+] as [$email, $active, $role]) {
     $salt = 'http-test-salt-' . (int) $active;
-    $insert->execute([$email, md5($salt . 'test-password'), $salt, 'HTTP', 'Tester', 1, (int) $active, 0]);
+    $insert->execute([$email, md5($salt . 'test-password'), $salt, 'HTTP', 'Tester', 1, (int) $active, $role]);
 }
 $database->exec("INSERT INTO userGroup(name,theme) VALUES ('Test group','123456')");
 $database->exec("INSERT INTO userGroupMembers(groupId,userEmail,lastUsed) VALUES (1,'active@example.test','2000-01-01 00:00:00')");
+$database->exec("INSERT INTO userGroupMembers(groupId,userEmail,lastUsed) VALUES (1,'admin@example.test','2000-01-01 00:00:00'),(1,'editor@example.test','2000-01-01 00:00:00')");

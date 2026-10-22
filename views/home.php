@@ -8,7 +8,7 @@ class home
 
 	public function show() {
 		$issueHtml = models\users::checkSuperuserAuth()
-			? '<a class="list-group-item list-group-item-action" href="?m=issues&a=browse">issues</a>'
+			? '<a class="list-group-item list-group-item-action" href="?m=issues&a=browse">issues</a><a class="list-group-item list-group-item-action" href="?m=users">user management</a>'
 			: '';
 		$html = <<<HTML
 			<div class="list-group list-group-flush">

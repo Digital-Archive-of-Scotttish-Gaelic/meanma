@@ -9,7 +9,7 @@ class users
     $dbh = $db->getDatabaseHandle();
     try {
       $sth = $dbh->prepare("SELECT `password`, `salt`, `firstname`, `lastname`, `slip_admin`, 
-        `passwordAuth`, `isActive`, `superuser`, UNIX_TIMESTAMP(`last_logged_in`) AS last_logged_in,
+        `passwordAuth`, `isActive`, `superuser`, `must_change_password`, `auth_version`, UNIX_TIMESTAMP(`last_logged_in`) AS last_logged_in,
 				UNIX_TIMESTAMP(`updated`) AS updated FROM user WHERE email = :email;");
       $sth->execute(array(":email"=>$email));
       $row = $sth->fetch();
@@ -25,6 +25,8 @@ class users
       $user->setPasswordAuth($row['passwordAuth']);
 	      $user->setIsActive($row['isActive']);
       $user->setUserFlag($row["superuser"]);
+      $user->setMustChangePassword($row["must_change_password"]);
+      $user->setAuthVersion($row["auth_version"]);
       $user->setUpdated($row["updated"]);
       self::_setGroups($user);  //set the user's groups
       return $user;
@@ -114,6 +116,28 @@ SQL;
     }
   }
 
+  public static function getAllAccounts(): array {
+    $db = new database();
+    $sth = $db->getDatabaseHandle()->query("SELECT email FROM user ORDER BY lastname, firstname, email");
+    $accounts = [];
+    while ($row = $sth->fetch()) {
+      $account = self::getUser($row['email']);
+      if ($account) {
+        $accounts[] = $account;
+      }
+    }
+    return $accounts;
+  }
+
+  public static function getAllGroups(): array {
+    $db = new database();
+    $groups = [];
+    foreach ($db->getDatabaseHandle()->query("SELECT id,name,theme FROM userGroup ORDER BY name,id") as $row) {
+      $groups[] = new usergroup($row['id'], $row['name'], $row['theme'], null);
+    }
+    return $groups;
+  }
+
   public static function getAllSuperusers() {
 	  $users = array();
 	  $db = new database();
@@ -146,16 +170,30 @@ SQL;
     }
 
     $user = self::getUser($_SESSION["user"]);
-    if (!$user || !$user->getIsActive()) {
+    if (!$user || !$user->getIsActive()
+        || !isset($_SESSION['authVersion'])
+        || (int) $_SESSION['authVersion'] !== $user->getAuthVersion()) {
       self::clearAuthenticationSession();
       return false;
     }
+
+    $_SESSION['mustChangePassword'] = $user->getMustChangePassword();
 
     return true;
   }
 
   public static function clearAuthenticationSession(): void {
-    unset($_SESSION["loginTime"], $_SESSION["user"], $_SESSION["email"], $_SESSION["groupId"]);
+    unset(
+      $_SESSION["loginTime"],
+      $_SESSION["user"],
+      $_SESSION["email"],
+      $_SESSION["groupId"],
+      $_SESSION['authVersion'],
+      $_SESSION['mustChangePassword'],
+      $_SESSION['adminReauthenticatedAt'],
+      $_SESSION['adminReauthenticatedUser'],
+      $_SESSION['postPasswordChangeDestination']
+    );
   }
 
   public static function verifyPasswordAndMigrate(user $user, string $password): bool {
@@ -221,7 +259,8 @@ SQL;
     $db = new database();
     $dbh = $db->getDatabaseHandle();
     $sth = $dbh->prepare(
-      "UPDATE user SET password = :password, salt = :salt, passwordAuth = NULL
+      "UPDATE user SET password = :password, salt = :salt, passwordAuth = NULL,
+       must_change_password = 0, auth_version = auth_version + 1
        WHERE email = :email AND passwordAuth = :authorization AND isActive = 1"
     );
     $sth->execute([
@@ -232,5 +271,29 @@ SQL;
     ]);
 
     return $sth->rowCount() === 1;
+  }
+
+  public static function completeRequiredPassword(string $email, string $password, int $authVersion): ?int {
+    $db = new database();
+    $pdo = $db->getDatabaseHandle();
+    $pdo->beginTransaction();
+    try {
+      $sth = $pdo->prepare(
+        "UPDATE user SET password = :password, salt = '', must_change_password = 0,
+         passwordAuth = NULL, auth_version = auth_version + 1
+         WHERE email = :email AND isActive = 1 AND must_change_password = 1 AND auth_version = :authVersion"
+      );
+      $sth->execute([':password' => $password, ':email' => $email, ':authVersion' => $authVersion]);
+      if ($sth->rowCount() !== 1) {
+        $pdo->rollBack();
+        return null;
+      }
+      securityaudit::record($email, $email, 'mandatory_password_change_completed', 'success', [], $pdo);
+      $pdo->commit();
+      return $authVersion + 1;
+    } catch (\Throwable $exception) {
+      if ($pdo->inTransaction()) { $pdo->rollBack(); }
+      throw $exception;
+    }
   }
 }

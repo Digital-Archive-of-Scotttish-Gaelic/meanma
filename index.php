@@ -19,9 +19,21 @@ $stateChangingRoutes = [
 	'writers:save',
 	'collection:add',
 	'slips:add',
+	'users:create',
+	'users:save',
+	'users:resetPassword',
 ];
 if (in_array($module . ':' . $action, $stateChangingRoutes, true)) {
 	\models\security::requireStateChangingRequest();
+}
+
+if ($module === 'users' && !\models\users::checkSuperuserAuth()) {
+	http_response_code(403);
+	exit('Access denied');
+}
+
+if ($module === 'users') {
+	ob_start();
 }
 
 require_once "includes/htmlHeader.php";
@@ -67,6 +79,9 @@ switch ($module) {
 	case "issues":
 		$controller = new issue();
 		break;
+	case "users":
+		$controller = new usermanagement();
+		break;
 	/**
 	**/
 	default:
@@ -76,3 +91,7 @@ switch ($module) {
 $controller->run($action);
 
 require_once "includes/htmlFooter.php";
+
+if ($module === 'users' && ob_get_level() > 0) {
+	ob_end_flush();
+}

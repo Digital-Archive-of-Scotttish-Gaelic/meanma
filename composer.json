@@ -15,7 +15,8 @@
             "MEANMA_TEST_DATABASE=1 php tests/security/run.php",
             "MEANMA_TEST_DATABASE=1 zsh tests/security/http.sh",
             "MEANMA_TEST_DATABASE=1 zsh tests/security/csrf_http.sh",
-            "MEANMA_TEST_DATABASE=1 zsh tests/security/login_http.sh"
+            "MEANMA_TEST_DATABASE=1 zsh tests/security/login_http.sh",
+            "MEANMA_TEST_DATABASE=1 zsh tests/security/phase5_http.sh"
         ],
         "test": [
             "@test:unit",

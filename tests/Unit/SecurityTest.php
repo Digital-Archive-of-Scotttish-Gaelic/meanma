@@ -162,4 +162,18 @@ final class SecurityTest extends TestCase
         $_POST['_csrf'] = 'token';
         self::assertSame('token', security::requestCsrfToken());
     }
+
+    public function testOnlyPasswordChangeAndLogoutRoutesCanPassMandatoryChangeGate(): void
+    {
+        $_SERVER['SCRIPT_NAME'] = '/index.php';
+        foreach (['changePassword', 'saveRequiredPassword', 'logout'] as $action) {
+            $_GET = ['loginAction' => $action];
+            self::assertTrue(security::isMandatoryPasswordChangeRequest(), $action);
+        }
+        $_GET = ['m' => 'corpus', 'a' => 'xsearch'];
+        self::assertFalse(security::isMandatoryPasswordChangeRequest());
+        $_SERVER['SCRIPT_NAME'] = '/ajax.php';
+        $_GET = ['action' => 'search'];
+        self::assertFalse(security::isMandatoryPasswordChangeRequest());
+    }
 }

@@ -32,6 +32,11 @@ final class UserTest extends TestCase
         $user->setUserFlag(user::EDITOR);
         self::assertFalse($user->getSuperuser());
         self::assertTrue($user->getEditor());
+
+        $user->setMustChangePassword(true);
+        $user->setAuthVersion(7);
+        self::assertTrue($user->getMustChangePassword());
+        self::assertSame(7, $user->getAuthVersion());
     }
 
     public function testGroupObjectsArePreservedOnTheUser(): void
