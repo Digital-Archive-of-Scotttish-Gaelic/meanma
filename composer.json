@@ -5,6 +5,28 @@
     "require": {
         "phpmailer/phpmailer": "^6.9"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
+    },
+    "scripts": {
+        "test:unit": "phpunit --testsuite unit",
+        "test:integration": "MEANMA_TEST_DATABASE=1 phpunit --testsuite integration",
+        "test:security": [
+            "MEANMA_TEST_DATABASE=1 php tests/security/run.php",
+            "MEANMA_TEST_DATABASE=1 zsh tests/security/http.sh",
+            "MEANMA_TEST_DATABASE=1 zsh tests/security/csrf_http.sh"
+        ],
+        "test": [
+            "@test:unit",
+            "@test:integration",
+            "@test:security"
+        ]
+    },
+    "config": {
+        "platform": {
+            "php": "8.0.0"
+        }
+    },
     "authors": [
         {
             "name": "steviebarrett",

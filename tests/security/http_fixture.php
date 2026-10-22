@@ -2,19 +2,26 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../includes/passwords.php';
+use Tests\Support\TestEnvironment;
+
+require_once __DIR__ . '/../Support/TestEnvironment.php';
+
+TestEnvironment::assertDatabaseOptIn();
+$credentials = TestEnvironment::databaseCredentials();
 
 $action = $argv[1] ?? '';
 $databaseName = $argv[2] ?? '';
-if (!preg_match('/^meanma_security_http_test_[a-f0-9]{12}$/', $databaseName)) {
+try {
+    TestEnvironment::assertGeneratedDatabaseName($databaseName);
+} catch (RuntimeException $exception) {
     fwrite(STDERR, "Invalid test database name\n");
     exit(2);
 }
 
 $admin = new PDO(
-    'mysql:host=' . DB_HOST . ';charset=utf8mb4',
-    DB_USER,
-    DB_PASSWORD,
+    'mysql:host=' . $credentials['host'] . ';charset=utf8mb4',
+    $credentials['user'],
+    $credentials['password'],
     [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
 );
 
@@ -25,9 +32,9 @@ if ($action === 'drop') {
 
 if ($action === 'last-used' || $action === 'issue-count') {
     $database = new PDO(
-        'mysql:host=' . DB_HOST . ';dbname=' . $databaseName . ';charset=utf8mb4',
-        DB_USER,
-        DB_PASSWORD,
+        'mysql:host=' . $credentials['host'] . ';dbname=' . $databaseName . ';charset=utf8mb4',
+        $credentials['user'],
+        $credentials['password'],
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
     if ($action === 'last-used') {
@@ -47,9 +54,9 @@ if ($action !== 'create') {
 
 $admin->exec("CREATE DATABASE `{$databaseName}` CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci");
 $database = new PDO(
-    'mysql:host=' . DB_HOST . ';dbname=' . $databaseName . ';charset=utf8mb4',
-    DB_USER,
-    DB_PASSWORD,
+    'mysql:host=' . $credentials['host'] . ';dbname=' . $databaseName . ';charset=utf8mb4',
+    $credentials['user'],
+    $credentials['password'],
     [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
 );
 $database->exec(<<<SQL

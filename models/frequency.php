@@ -4,53 +4,44 @@ namespace models;
 
 class frequency
 {
-    public function getResults($params = [])
-
+    /**
+     * Normalise the existing frequency-list request without contacting eXist.
+     *
+     * @return array{type:string,query:array<string, int|string>}
+     */
+    public static function normalizeRequestParameters(array $params = []): array
     {
-
         $type = (($params['type'] ?? '') === 'word-form')
             ? 'word-form'
             : 'lemma';
 
-        $curlData = [];
-
+        $query = [];
         if (!empty($params['pos'])) {
-
-            $curlData['pos'] = $params['pos'];
-
+            $query['pos'] = $params['pos'];
         }
-
         if (isset($params['min']) && $params['min'] !== '') {
-
-            $curlData['min'] = max(1, (int)$params['min']);
-
+            $query['min'] = max(1, (int) $params['min']);
         }
-
         if (isset($params['max']) && $params['max'] !== '') {
-
-            $curlData['max'] = max(1, (int)$params['max']);
-
+            $query['max'] = max(1, (int) $params['max']);
         }
-
-        $curlData['start'] = isset($params['start'])
-
-            ? max(1, (int)$params['start'])
-
+        $query['start'] = isset($params['start'])
+            ? max(1, (int) $params['start'])
             : 1;
-
-        $curlData['limit'] = isset($params['limit'])
-
-            ? max(1, min(500, (int)$params['limit']))
-
+        $query['limit'] = isset($params['limit'])
+            ? max(1, min(500, (int) $params['limit']))
             : 50;
+        $query['order'] = (($params['order'] ?? '') === 'asc') ? 'asc' : 'desc';
 
-        $curlData['order'] =
+        return ['type' => $type, 'query' => $query];
+    }
 
-            (($params['order'] ?? '') === 'asc')
+    public function getResults($params = [])
 
-                ? 'asc'
-
-                : 'desc';
+    {
+        $request = self::normalizeRequestParameters($params);
+        $type = $request['type'];
+        $curlData = $request['query'];
 
         $url =
 

@@ -8,6 +8,10 @@ test_tmp=$(mktemp -d /tmp/meanma-security-csrf.XXXXXX)
 server_pid=''
 port=18766
 checks=0
+typeset -a database_env
+[[ -n "${MEANMA_TEST_DB_HOST:-}" ]] && database_env+=("MEANMA_DB_HOST=$MEANMA_TEST_DB_HOST")
+[[ -n "${MEANMA_TEST_DB_USER:-}" ]] && database_env+=("MEANMA_DB_USER=$MEANMA_TEST_DB_USER")
+[[ -n "${MEANMA_TEST_DB_PASSWORD+x}" ]] && database_env+=("MEANMA_DB_PASSWORD=$MEANMA_TEST_DB_PASSWORD")
 
 cleanup() {
   local exit_status=$?
@@ -61,10 +65,11 @@ login_session() {
 
 php "$repo_dir/tests/security/http_fixture.php" create "$test_db"
 
-MEANMA_DB_NAME="$test_db" \
+env "${database_env[@]}" MEANMA_DB_NAME="$test_db" \
 MEANMA_APP_ORIGIN="http://127.0.0.1:$port" \
 MEANMA_ALLOW_INSECURE_ORIGIN=1 \
 MEANMA_COOKIE_SECURE=0 \
+MEANMA_DISABLE_EMAIL=1 \
 MEANMA_RATE_LIMIT_DIR="$test_tmp/rates" \
 php -S "127.0.0.1:$port" -t "$repo_dir" >"$test_tmp/server.log" 2>&1 &
 server_pid=$!

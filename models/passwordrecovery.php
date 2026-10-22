@@ -86,6 +86,10 @@ class passwordrecovery
 
     private static function sendEmail(user $user, string $url): void
     {
+        if (getenv('MEANMA_DISABLE_EMAIL') === '1') {
+            return;
+        }
+
         $firstName = security::escape($user->getFirstName());
         $safeUrl = security::escape($url);
         $emailText = <<<HTML

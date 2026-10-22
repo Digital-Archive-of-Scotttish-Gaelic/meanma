@@ -18,7 +18,7 @@ class corpus_search
 	 * @param $params
 	 * @param bool $fullSearch : a flag for switching to result set required for auto slip creation
 	 */
-	public function __construct($params, $fullSearch=true, $db) {
+	public function __construct($params, $fullSearch=true, $db=null) {
 		$this->_db = $db;
 		$this->_params = $params;
         $this->_fullsearch = $fullSearch;

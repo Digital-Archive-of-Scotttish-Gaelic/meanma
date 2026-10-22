@@ -6,15 +6,20 @@ use models\authratelimiter;
 use models\passwordrecovery;
 use models\security;
 use models\users;
+use Tests\Support\TestEnvironment;
 
 require_once __DIR__ . '/../../includes/passwords.php';
+require_once __DIR__ . '/../Support/TestEnvironment.php';
+
+TestEnvironment::assertDatabaseOptIn();
+$credentials = TestEnvironment::databaseCredentials();
 
 $databaseName = 'meanma_security_test_' . bin2hex(random_bytes(6));
 $rateLimitDirectory = sys_get_temp_dir() . '/meanma-security-test-' . bin2hex(random_bytes(6));
 $admin = new PDO(
-    'mysql:host=' . DB_HOST . ';charset=utf8mb4',
-    DB_USER,
-    DB_PASSWORD,
+    'mysql:host=' . $credentials['host'] . ';charset=utf8mb4',
+    $credentials['user'],
+    $credentials['password'],
     [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
 );
 
@@ -31,9 +36,9 @@ $assert = static function (bool $condition, string $message) use (&$failures, &$
 try {
     $admin->exec("CREATE DATABASE `{$databaseName}` CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci");
     $database = new PDO(
-        'mysql:host=' . DB_HOST . ';dbname=' . $databaseName . ';charset=utf8mb4',
-        DB_USER,
-        DB_PASSWORD,
+        'mysql:host=' . $credentials['host'] . ';dbname=' . $databaseName . ';charset=utf8mb4',
+        $credentials['user'],
+        $credentials['password'],
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
@@ -87,12 +92,13 @@ SQL);
         (1,'active@example.test'),(1,'admin@example.test'),(1,'editor@example.test')");
 
     putenv('MEANMA_DB_NAME=' . $databaseName);
-    putenv('MEANMA_DB_HOST=' . DB_HOST);
-    putenv('MEANMA_DB_USER=' . DB_USER);
-    putenv('MEANMA_DB_PASSWORD=' . DB_PASSWORD);
+    putenv('MEANMA_DB_HOST=' . $credentials['host']);
+    putenv('MEANMA_DB_USER=' . $credentials['user']);
+    putenv('MEANMA_DB_PASSWORD=' . $credentials['password']);
     putenv('MEANMA_APP_ORIGIN=https://meanma.example.test');
     putenv('MEANMA_RATE_LIMIT_DIR=' . $rateLimitDirectory);
     putenv('MEANMA_COOKIE_SECURE=0');
+    putenv('MEANMA_DISABLE_EMAIL=1');
     require_once __DIR__ . '/../../includes/include.php';
 
     $active = users::getUser('active@example.test');
