@@ -1,4 +1,10 @@
 <?php
+
+if (PHP_SAPI !== 'cli') {
+  http_response_code(404);
+  exit;
+}
+
 /* converts the corpus into a csv file for import to lemma database */
 
 error_reporting(E_ERROR);

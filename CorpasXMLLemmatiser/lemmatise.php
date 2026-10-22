@@ -1,5 +1,10 @@
 <?php
 
+if (PHP_SAPI !== 'cli') {
+  http_response_code(404);
+  exit;
+}
+
 require_once 'includes.php';
 
 error_reporting(E_ERROR && ~E_NOTICE);  //suppress notice warnings

@@ -3,8 +3,25 @@
 namespace models;
 
 require_once 'includes/include.php';
+require_once 'includes/securityBootstrap.php';
 
 $db = new database(); //TODO: consider remodelling SB
+
+// A request-supplied workspace may only name one of the authenticated user's
+// existing groups. Most actions continue to use the session's current group.
+if (isset($_REQUEST['groupId'])) {
+	$authenticatedUser = users::getUser($_SESSION['user']);
+	$allowedGroupIds = array_map(
+		fn($group) => (string) $group->getId(),
+		$authenticatedUser->getGroups()
+	);
+	if (!in_array((string) $_REQUEST['groupId'], $allowedGroupIds, true)) {
+		http_response_code(403);
+		header('Content-Type: application/json; charset=utf-8');
+		echo json_encode(['error' => 'forbidden']);
+		exit;
+	}
+}
 
 switch ($_REQUEST["action"]) {
 	case "msPopulateModal":
@@ -23,11 +40,8 @@ switch ($_REQUEST["action"]) {
 		echo $proc->transformToXML($xml);
 		break;
 	case "getUsername":
-		$user = users::getUser($_GET["email"]);
-		if ($user) {
-			$_SESSION["email"] = $_GET["email"];
-		}
-		echo json_encode(array("firstname"=>$user->getFirstName(), "lastname"=>$user->getLastName()));
+			http_response_code(404);
+			echo json_encode(array("error" => "not_found"));
 		break;
     case "getContext":
   	    $citation = new citation($db, $_GET["citationId"]);
@@ -146,7 +160,7 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "deleteCitation":
 		//! only superusers can do this
-		/*$user = users::getUser($_SESSION["email"]);
+			/*$user = users::getUser($_SESSION["user"]);
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
 		}*/
@@ -172,7 +186,7 @@ switch ($_REQUEST["action"]) {
 	case "deleteTranslation":
 		//! only superusers can do this
 		/*
-		$user = users::getUser($_SESSION["email"]);
+			$user = users::getUser($_SESSION["user"]);
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
 		} */
@@ -180,7 +194,7 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "deleteSlips":
 				//! only superusers can do this
-		$user = users::getUser($_SESSION["email"]);
+			$user = users::getUser($_SESSION["user"]);
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
 		}
@@ -188,7 +202,7 @@ switch ($_REQUEST["action"]) {
 		break;
 	case "deleteEntries":
 		//! only superusers can do this
-		$user = users::getUser($_SESSION["email"]);
+			$user = users::getUser($_SESSION["user"]);
 		if (!$user->getSuperuser()) {
 			return json_encode(array("message" => "not authorised"));
 		}

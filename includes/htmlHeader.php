@@ -5,6 +5,7 @@ session_cache_limiter('nocache');
 /**  */
 
 require_once "include.php";
+require_once "securityBootstrap.php";
 
 $name = "";
 //check login state
@@ -13,17 +14,17 @@ $loggedInHide = "hide";
 $groupTheme = "007bff"; //default colour scheme (Faclair theme)
 
 $loginControl = new controllers\login();
-if ($loginControl->isLoggedIn() || ($_SESSION["email"] && $_POST["loginAction"] == "savePassword")) {
-	//check for session timeout and logout if necessary to minimise session fixation attack
-	if (time() - $_SESSION["loginTime"] > (60 * 60 * 10)) { //expire after 10 hours
-		$loginControl->logout();
-	} else {
-		$email = $_SESSION["user"] ? $_SESSION["user"] : $_SESSION["email"];
+if ($loginControl->isLoggedIn()) {
+		$email = $_SESSION["user"];
 		$user = models\users::getUser($email);
 		$userGroups = $user->getGroups();
 		$lastUsedGroup = $user->getLastUsedGroup();
-		$groupTheme = $lastUsedGroup->getTheme();
-		$_SESSION["groupId"] = $lastUsedGroup->getId() ? $lastUsedGroup->getId() : 1;
+		if ($lastUsedGroup) {
+			$groupTheme = $lastUsedGroup->getTheme();
+			$_SESSION["groupId"] = $lastUsedGroup->getId();
+		} else {
+			$_SESSION["groupId"] = 0;
+		}
 		$groupHtml = "";
 		if (count($userGroups) > 1) {
 			$groupHtml = <<<HTML
@@ -37,10 +38,11 @@ HTML;
 			}
 			$groupHtml .= "</select>";
 		}
-		$name = $user->getFirstName() . ' ' . $user->getLastName();
+		$name = models\security::escape($user->getFirstName() . ' ' . $user->getLastName());
 		$loggedInHide = "";
-	}
 }
+
+$logoutCsrf = models\security::csrfToken('logout');
 
 echo <<<HTML
 
@@ -106,8 +108,10 @@ echo <<<HTML
 			    <a class="nav-item nav-link" title="browse entries" href="?m=entries&a=browse">entries</a>
 			    <a class="nav-item nav-link" title="RTFM" href="?m=docs&action=view">docs</a>
           <span class="loggedIn {$loggedInHide}">
-            <form method="post">
-              <a id="logoutLink" href="index.php?loginAction=logout" class="btn btn-link nav-link nav-item">logout</a>
+	            <form method="post" action="index.php">
+	              <input type="hidden" name="loginAction" value="logout">
+	              <input type="hidden" name="_csrf" value="{$logoutCsrf}">
+	              <button id="logoutLink" type="submit" class="btn btn-link nav-link nav-item">logout</button>
             </form>
 					</span>
 					<div class="navbar-nav>">

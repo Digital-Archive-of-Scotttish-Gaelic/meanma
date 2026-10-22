@@ -8,7 +8,7 @@ class user
 	const EDITOR = 2;
 
   private $email, $password, $salt, $firstName, $lastName,
-    $isSlipAdmin, $passwordAuth, $userFlag, $lastLoggedIn, $updated;
+    $isSlipAdmin, $passwordAuth, $userFlag, $isActive, $lastLoggedIn, $updated;
   private $_lastUsedGroup;  //an instance of UserGroup
   private $_groups = array(); //an array of UserGroup objects
 
@@ -86,6 +86,14 @@ class user
 	public function setUserFlag($flag) {
 		$this->userFlag = $flag;
 	}
+
+  public function getIsActive() {
+    return (bool) $this->isActive;
+  }
+
+  public function setIsActive($flag) {
+    $this->isActive = (bool) $flag;
+  }
 
   public function getSuperuser() {
   	return $this->userFlag == self::SUPERUSER;

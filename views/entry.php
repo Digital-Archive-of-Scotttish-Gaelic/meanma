@@ -52,7 +52,7 @@ HTML;
 		/**
 		 * Debug code for admin
 		 */
-		$user = models\users::getUser($_SESSION["email"]);
+			$user = models\users::getUser($_SESSION["user"]);
 		if ($user->getSuperuser()) {
 			$endtime = microtime(true);
 			$pageLoadTime = $endtime - $starttime;

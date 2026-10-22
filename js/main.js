@@ -11,17 +11,16 @@ $(function () {
    */
   $('#email').change(function () {
     var email = $(this).children("option:selected").val();
-    $.getJSON('ajax.php?action=getUsername&email='+email, function (data) {
-      $('#selectedUser').text(data.firstname + ' ' + data.lastname);
-    })
-      .done(function () {
+    var selectedUser = $(this).children("option:selected").text();
+    $('#selectedUser').text(selectedUser);
+    if (email) {
         $('#passwordLabel').show();
         $('#emailSelectContainer').hide();
         $('#passwordContainer').removeClass('hide');
         $('#password').focus();
         $('#login').removeClass('loginButton');
         $('#loginCancel').removeClass('loginButton');
-      });
+    }
   });
 
   $('#loginCancel').on('click', function () {

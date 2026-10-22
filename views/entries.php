@@ -12,7 +12,7 @@ class entries
 	}
 
   public function writeBrowseTable($entryIds) {
-	  $user = models\users::getUser($_SESSION["email"]);
+		  $user = models\users::getUser($_SESSION["user"]);
 	  $deleteHeading = $deleteHtml = $deleteCell = "";
 	  if ($user->getSuperuser()) {
 		  $deleteHeading = '<th class="bg-danger" data-field="deleteEntry"><span class="text-white">Delete</span></th>';

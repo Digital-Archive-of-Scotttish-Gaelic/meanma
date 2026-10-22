@@ -5,62 +5,76 @@ use views, models;
 
 class login
 {
-  private $_user, $_view;
+  private $_user, $_view, $_authenticationResult;
 
   public function __construct() {
     $this->_view = new views\login();
-    if (!isset($_REQUEST["loginAction"])) {
-      $_REQUEST["loginAction"] = "";
-    } else if ($_REQUEST["loginAction"] == "login") {
-      $this->_authenticateUser($_POST); //need to run this twice to show the logout button!
+    $_REQUEST["loginAction"] = $_POST["loginAction"] ?? $_GET["loginAction"] ?? "";
+    if ($_REQUEST["loginAction"] == "login") {
+      $this->_authenticationResult = $this->_authenticateUser($_POST);
     } else if ($_REQUEST["loginAction"] == "logout") {
+      if ($_SERVER['REQUEST_METHOD'] !== 'POST'
+          || !models\security::validateCsrf('logout', $_POST['_csrf'] ?? null, true)) {
+        http_response_code(403);
+        exit('Invalid request');
+      }
       $this->logout();
+      header('Location: index.php', true, 303);
+      exit;
     }
   }
 
   public function runAction() {
     switch ($_REQUEST["loginAction"]) {
       case "login":
-        if (!$this->_authenticateUser($_POST)) {
-	        $user = models\users::getUser($_SESSION["email"]);
-        	$error = <<<HTML
-						Password not recognised for {$user->getFirstname()} {$user->getLastname()}. Try again.
-HTML;
-          $this->_view->writeModal("login", $error);
+        if (!$this->_authenticationResult) {
+          $this->_view->writeModal("login", "Login was unsuccessful. Check your details and try again.");
         }
-        break;
-      case "logout":
-        $this->logout();
         break;
       case "forgotPassword":
-	      $user = models\users::getUser($_SESSION["email"]);
-	      $name = $user->getFirstName() . ' ' . $user->getLastName();
-        $this->_view->writeModal("forgotPassword", $name);
+        $this->_view->writeModal("forgotPassword");
         break;
       case "sendEmail":
-        if ($this->_user = models\users::getUser($_SESSION["email"])) {
-          $this->_sendEmail();
-          $this->_view->writeModal("emailSent");
-        } else {
-          $this->_view->writeModal("emailAddressError");
+        $recoveryStarted = microtime(true);
+        if (!models\security::validateCsrf('forgotPassword', $_POST['_csrf'] ?? null, true)) {
+          http_response_code(403);
+          $this->_view->writeModal("forgotPassword", "The request expired. Please try again.");
+          break;
         }
+        $email = trim((string) ($_POST['email'] ?? ''));
+        $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        if (models\authratelimiter::consume('recovery-ip', $ip, 5, 3600)
+            && models\authratelimiter::consume('recovery-account', strtolower($email), 3, 3600)) {
+          models\passwordrecovery::request($email);
+        }
+        $remainingDelay = 0.5 - (microtime(true) - $recoveryStarted);
+        if ($remainingDelay > 0) {
+          usleep((int) ($remainingDelay * 1000000));
+        }
+        $this->_view->writeModal("emailSent");
         break;
       case "resetPassword":
-        $params 	= explode('|', base64_decode($_GET["p"]));
-        $email 		= $params[0];
-        $passAuth	= $params[1];
-        $user = models\users::getUser($email);
-        if ($passAuth != $user->getPasswordAuth() || time() > $passAuth+300) {  //set a limit of five mins on auth
-          $this->_view->writeModal("login", "This link has expired");
+        $email = (string) ($_GET['email'] ?? '');
+        $token = (string) ($_GET['token'] ?? '');
+        if (!models\passwordrecovery::isValid($email, $token)) {
+          $this->_view->writeModal("login", "This password recovery link is invalid or has expired.");
         } else {
-          $_SESSION["email"] = $email;
-          $this->_view->writeModal("resetPassword");
+          $this->_view->writeModal("resetPassword", "", ['email' => $email, 'token' => $token]);
         }
         break;
       case "savePassword":
-      	$_SESSION["email"] = $_REQUEST["email"];
-      	$this->_savePassword();
-          //do not write modal
+        $email = (string) ($_POST['email'] ?? '');
+        $token = (string) ($_POST['token'] ?? '');
+        $pass1 = (string) ($_POST['pass1'] ?? '');
+        $pass2 = (string) ($_POST['pass2'] ?? '');
+        $validCsrf = models\security::validateCsrf('resetPassword', $_POST['_csrf'] ?? null, true);
+        if (!$validCsrf || $pass1 === '' || !hash_equals($pass1, $pass2)
+            || !models\passwordrecovery::replacePassword($email, $token, $pass1)) {
+          http_response_code(400);
+          $this->_view->writeModal("login", "The password could not be changed. Request a new recovery link.");
+        } else {
+          $this->_view->writeModal("login", "Your password has been changed. You can now log in.");
+        }
         break;
       default:
         if (!$this->isLoggedIn()) {
@@ -70,50 +84,36 @@ HTML;
     }
   }
 
-  private function _savePassword() {
-    $user = models\users::getUser($_SESSION["email"]);
-    $user->setPassword($_POST["pass1"]);
-    $user->encryptPassword();
-    $user->setPasswordAuth(null);	//remove password auth
-	  models\users::saveUser($user);
-	  $this->_authenticateUser(array("password" => $_POST["pass1"])); //login the user
-  }
-
-  private function _sendEmail() {
-    //set password change authorisation in the DB
-    $passwordAuth = time();
-    $this->_user->setPasswordAuth($passwordAuth);
-    models\users::saveUser($this->_user);
-    $changeParams = array($this->_user->getEmail(), $passwordAuth);
-    $changeParams = base64_encode(implode('|', $changeParams));
-    $url = "https://" . $_SERVER["HTTP_HOST"] . "/meanma/?loginAction=resetPassword&p=" . $changeParams;
-
-    $emailText = <<<HTML
-			<p>Dear {$this->_user->getFirstName()},</p>
-			<p>Please reset your password by clicking <a title="password reset" href="{$url}">here</a>.</p>
-			<p>If you have received this email in error or have any other queries please contact <a title="Email DASG" href="mailto:mail@dasg.ac.uk">mail@dasg.ac.uk</a>.</p>	
-			<p>Kind regards</p>
-			<p>The DASG team</p>
-HTML;
-    $email = new models\email($this->_user->getEmail(), "MEANMA Password Reset", $emailText, "mail@meanma.net");
-    $email->send();
-  }
-
   /**
    * @param $params : the POST array
    * @return bool : true on authentic user, otherwise false
    */
   private function _authenticateUser($params) {
-  	$_SESSION["email"] = $params["email"] ? $params["email"] : $_SESSION["email"];
-    $user = models\users::getUser($_SESSION["email"]);
-    if (empty($user) || !$user->checkPassword($params["password"])) {
+    if (!models\security::validateCsrf('login', $params['_csrf'] ?? null, true)) {
+      return false;
+    }
+
+    $email = trim((string) ($params['email'] ?? ''));
+    $password = (string) ($params['password'] ?? '');
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    if (!models\authratelimiter::consume('login-ip', $ip, 30, 900)
+        || !models\authratelimiter::consume('login-account', $ip . "\0" . strtolower($email), 5, 900)) {
+      return false;
+    }
+
+    $user = models\users::getUser($email);
+    if (!$user || !$user->getIsActive()) {
+      md5('invalid-user' . $password);
+      return false;
+    }
+    if (!$user->checkPassword($password)) {
       return false;
     }
     $this->_user = $user;
-    session_regenerate_id();  //prevent session fixation attack
+    session_regenerate_id(true);
     $_SESSION["loginTime"] = time();
     $_SESSION["user"] = $user->getEmail();
-    //models\users::saveUser($user);   //update last login in DB
+    unset($_SESSION["email"]);
     return true;
   }
 
@@ -123,15 +123,25 @@ HTML;
   }
 
   public function isLoggedIn() {
-    return isset($_SESSION["user"]);
+    return models\users::isAuthenticated();
   }
 
   public function logout() {
     unset($this->_user);
-    unset($_SESSION["loginTime"]);
-    unset($_SESSION["user"]);
-    unset($_SESSION["email"]);
-    $this->_view->writeModal("login");
+    models\users::clearAuthenticationSession();
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+      $params = session_get_cookie_params();
+      setcookie(session_name(), '', [
+        'expires' => time() - 42000,
+        'path' => $params['path'],
+        'domain' => $params['domain'],
+        'secure' => $params['secure'],
+        'httponly' => $params['httponly'],
+        'samesite' => $params['samesite'] ?? 'Lax',
+      ]);
+    }
+    session_destroy();
   }
 
   public function writeLoginModal() {

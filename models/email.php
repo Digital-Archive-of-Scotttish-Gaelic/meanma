@@ -88,11 +88,12 @@ class email
     return implode("\r\n", $headers);
   }
 */
-  public function send() {
+  public function send(): bool {
     if (!$this->mail->send()) {
-		echo 'Mail send error : ' . $this->mail->ErrorInfo;
-    } else {
-		echo 'Email sent successfully';
+			error_log('MEANMA mail delivery failed: ' . $this->mail->ErrorInfo);
+			return false;
     }
+
+	  return true;
   }
 }

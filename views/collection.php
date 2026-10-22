@@ -39,7 +39,7 @@ HTML;
 	}
 
   private function _writeBrowseTable() {
-		$user = models\users::getUser($_SESSION["email"]);
+			$user = models\users::getUser($_SESSION["user"]);
 		$deleteHeading = $deleteHtml = "";
 		if ($user->getSuperuser()) {
 			$deleteHeading = '<th class="bg-danger" data-field="deleteSlip"><span class="text-white">Delete</span></th>';

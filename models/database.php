@@ -11,11 +11,16 @@ class database {
   /**
    * Creates and initialises a new Database object
    */
-  public function __construct($dbName = DB) {
-  	$this->_queryCount = 0;
-  	try {
+  public function __construct($dbName = null) {
+    $this->_queryCount = 0;
+    $dbName = $dbName ?? (getenv('MEANMA_DB_NAME') ?: DB);
+    $dbHost = getenv('MEANMA_DB_HOST') ?: DB_HOST;
+    $dbUser = getenv('MEANMA_DB_USER') ?: DB_USER;
+    $dbPassword = getenv('MEANMA_DB_PASSWORD');
+    $dbPassword = $dbPassword === false ? DB_PASSWORD : $dbPassword;
+    try {
       $this->_dbh = new \PDO(
-        "mysql:host=" . DB_HOST . ";dbname=" . $dbName . ";charset=utf8;", DB_USER, DB_PASSWORD, array(
+        "mysql:host=" . $dbHost . ";dbname=" . $dbName . ";charset=utf8;", $dbUser, $dbPassword, array(
         \PDO::MYSQL_ATTR_LOCAL_INFILE => true,
       ));
       $this->_dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);

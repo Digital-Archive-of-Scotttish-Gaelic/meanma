@@ -5,20 +5,20 @@ use models;
 
 class login
 {
-  public function writeModal($type, $msg = "") {
+  public function writeModal($type, $msg = "", array $params = []) {
     $title = $body = $footer = $js = $formId = "";
+    $safeMessage = models\security::escape($msg);
     switch ($type) {
       case "login":
+	        $csrfToken = models\security::escape(models\security::csrfToken('login'));
         $dropdownHtml = $this->_getUserSelectHtml();
         $title = "Login to MEANMA";
         $emailHide = "";
         $passwordHide = "hide";
         $loginButton = "loginButton";
         if ($msg) {
-        	$emailHide = "hide";
-        	$passwordHide = $loginButton = "";
-          $body = <<<HTML
-            <p class="loginMessage">{$msg}</p>
+	          $body = <<<HTML
+	            <p class="loginMessage">{$safeMessage}</p>
 HTML;
         }
         $body .= <<<HTML
@@ -35,30 +35,35 @@ HTML;
 HTML;
         $footer = <<<HTML
             <input type="hidden" name="loginAction" value="login">
+	            <input type="hidden" name="_csrf" value="{$csrfToken}">
 						<button type="submit" id="login" class="{$loginButton} btn btn-primary">login</button>
 						<button type="button" id="loginCancel" class="{$loginButton} btn btn-secondary">cancel</button>
 HTML;
       break;
       case "forgotPassword":
+	        $csrfToken = models\security::escape(models\security::csrfToken('forgotPassword'));
         $title = "Forgot Password";
         $body = <<<HTML
             <div>
-                <p>Send password reset to {$msg}'s email address?</p>
-                <input type="hidden" name="email" id="email" value="{$_POST["email"]}">
+                <p>Enter your account email address. If the account is eligible, a recovery link will be sent.</p>
+                <label for="recoveryEmail">Email address</label>
+                <input type="email" name="email" id="recoveryEmail" class="form-control" required autocomplete="email">
+                <p class="loginMessage">{$safeMessage}</p>
             </div>
 HTML;
         $footer = <<<HTML
             <input type="hidden" name="loginAction" value="sendEmail">
+	            <input type="hidden" name="_csrf" value="{$csrfToken}">
             <a href="?" class="btn btn btn-secondary">cancel</a>
             <button type="submit" class="btn btn-primary">send</button>
 HTML;
         break;
       case "emailSent":
-        $title = "Email Sent";
+        $title = "Password Recovery";
         $body = <<<HTML
             <div>
-                <p>An email has been sent to your email address.</p>
-                <p>Please click the link in the email to reset your password.</p>
+                <p>If an eligible account matches that address, a password recovery email will be sent.</p>
+                <p>Please follow the link in the email to reset the password.</p>
             </div>
 HTML;
         break;
@@ -76,6 +81,9 @@ HTML;
       case "resetPassword":
         $formId = ' id="savePassword"';
         $title = "Reset Password";
+	        $safeEmail = models\security::escape($params['email'] ?? '');
+	        $safeToken = models\security::escape($params['token'] ?? '');
+	        $csrfToken = models\security::escape(models\security::csrfToken('resetPassword'));
         $body = <<<HTML
             <div>
                 <label for="pass1">password</label>
@@ -87,7 +95,9 @@ HTML;
             </div>
 HTML;
         $footer = <<<HTML
-						<input type="hidden" name="email" id="email" value="{$_SESSION["email"]}">
+							<input type="hidden" name="email" value="{$safeEmail}">
+							<input type="hidden" name="token" value="{$safeToken}">
+							<input type="hidden" name="_csrf" value="{$csrfToken}">
             <input type="hidden" name="loginAction" value="savePassword">
             <button type="submit" class="btn btn-primary">submit</button>
 HTML;
@@ -134,8 +144,10 @@ HTML;
     $users = models\users::getAllUsers();
     $dropdownHtml = '<option value="">-- select a user --</option>';
     foreach ($users as $user) {
+	    $email = models\security::escape($user->getEmail());
+	    $name = models\security::escape($user->getFirstname() . ' ' . $user->getLastname());
       $dropdownHtml .= <<<HTML
-         <option value="{$user->getEmail()}">{$user->getFirstname()} {$user->getLastname()}</option>
+	         <option value="{$email}">{$name}</option>
 HTML;
     }
     $html = <<<HTML

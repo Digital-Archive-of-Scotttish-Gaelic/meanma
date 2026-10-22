@@ -1,6 +1,7 @@
 <?php
 
 require_once "includes/include.php";
+require_once "includes/securityBootstrap.php";
 
 $db = new models\database();
 $db2 = new models\database(DB2);

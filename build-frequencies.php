@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+if (PHP_SAPI !== 'cli') {
+    http_response_code(404);
+    exit;
+}
+
 $apiBase   = 'http://localhost:8080/exist/restxq';
 $outputFile = __DIR__ . '/frequencies.xml';
 

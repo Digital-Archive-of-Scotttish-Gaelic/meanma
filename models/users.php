@@ -9,10 +9,13 @@ class users
     $dbh = $db->getDatabaseHandle();
     try {
       $sth = $dbh->prepare("SELECT `password`, `salt`, `firstname`, `lastname`, `slip_admin`, 
-        `passwordAuth`, `superuser`, UNIX_TIMESTAMP(`last_logged_in`) AS last_logged_in, 
+        `passwordAuth`, `isActive`, `superuser`, UNIX_TIMESTAMP(`last_logged_in`) AS last_logged_in,
 				UNIX_TIMESTAMP(`updated`) AS updated FROM user WHERE email = :email;");
       $sth->execute(array(":email"=>$email));
       $row = $sth->fetch();
+	      if (!$row) {
+	        return null;
+	      }
       $user = new user($email);
       $user->setPassword($row['password']);
       $user->setSalt($row['salt']);
@@ -20,6 +23,7 @@ class users
       $user->setLastName($row['lastname']);
       $user->setIsSlipAdmin($row['slip_admin']);
       $user->setPasswordAuth($row['passwordAuth']);
+	      $user->setIsActive($row['isActive']);
       $user->setUserFlag($row["superuser"]);
       $user->setUpdated($row["updated"]);
       self::_setGroups($user);  //set the user's groups
@@ -127,7 +131,60 @@ SQL;
   }
 
   public static function checkSuperuserAuth() {
-  	$user = self::getUser($_SESSION["email"]);
-  	return $user->getSuperuser();
+    $user = self::getUser($_SESSION["user"] ?? '');
+    return $user && $user->getIsActive() && $user->getSuperuser();
+  }
+
+  public static function isAuthenticated(): bool {
+    if (empty($_SESSION["user"]) || empty($_SESSION["loginTime"])) {
+      return false;
+    }
+
+    if (time() - (int) $_SESSION["loginTime"] > (60 * 60 * 10)) {
+      self::clearAuthenticationSession();
+      return false;
+    }
+
+    $user = self::getUser($_SESSION["user"]);
+    if (!$user || !$user->getIsActive()) {
+      self::clearAuthenticationSession();
+      return false;
+    }
+
+    return true;
+  }
+
+  public static function clearAuthenticationSession(): void {
+    unset($_SESSION["loginTime"], $_SESSION["user"], $_SESSION["email"], $_SESSION["groupId"]);
+  }
+
+  public static function setPasswordRecoveryAuthorization(string $email, string $authorization): void {
+    $db = new database();
+    $db->exec(
+      "UPDATE user SET passwordAuth = :authorization WHERE email = :email AND isActive = 1",
+      [":authorization" => $authorization, ":email" => $email]
+    );
+  }
+
+  public static function replacePasswordWithAuthorization(
+    string $email,
+    string $password,
+    string $salt,
+    string $authorization
+  ): bool {
+    $db = new database();
+    $dbh = $db->getDatabaseHandle();
+    $sth = $dbh->prepare(
+      "UPDATE user SET password = :password, salt = :salt, passwordAuth = NULL
+       WHERE email = :email AND passwordAuth = :authorization AND isActive = 1"
+    );
+    $sth->execute([
+      ":password" => $password,
+      ":salt" => $salt,
+      ":email" => $email,
+      ":authorization" => $authorization,
+    ]);
+
+    return $sth->rowCount() === 1;
   }
 }

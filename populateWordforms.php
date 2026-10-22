@@ -3,6 +3,7 @@
 use models;
 
 require_once "includes/include.php";
+require_once "includes/securityBootstrap.php";
 
 if (!models\users::checkSuperuserAuth()) {
 	die ("not authorised");

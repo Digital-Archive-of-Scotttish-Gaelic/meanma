@@ -1,0 +1,19 @@
+Options -Indexes
+
+# These repository files are not public application assets. Authentication is
+# enforced in PHP for application entry points; static files need a web-server
+# rule because they never pass through the PHP session gate.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(?:controllers|models|views|includes|tests|docs|vendor|TCPDF|xsl|utilities|CorpasXMLParser|CorpasXMLLemmatiser)(?:/|$) - [F,L,NC]
+</IfModule>
+
+<FilesMatch "^(?:composer\.(?:json|lock)|README\.md|frequencies\.xml)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
