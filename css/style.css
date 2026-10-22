@@ -353,22 +353,19 @@ a.updateContext:hover {
 }
 
 /* Standalone authentication pages */
-.auth-page { min-height: 100vh; background: #f3f5f7; color: #212529; }
-.auth-layout { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
-.auth-card { width: 100%; max-width: 28rem; padding: 2rem; border: 1px solid #d7dce1; border-radius: .4rem; background: #fff; box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .08); }
-.auth-brand { margin-bottom: .5rem; color: #555f69; font-size: .85rem; font-weight: 700; letter-spacing: .12em; }
-.auth-card h1 { margin-bottom: 1.5rem; font-size: 1.65rem; }
-.auth-message { padding: .75rem; border-left: .25rem solid #b02a37; background: #f8d7da; }
-.auth-field { margin-bottom: 1rem; }
-.auth-field label { font-weight: 600; }
-.auth-password { display: flex; }
-.auth-password .form-control { border-radius: .25rem 0 0 .25rem; }
-.auth-password-toggle { min-width: 4.5rem; border: 1px solid #6c757d; border-left: 0; border-radius: 0 .25rem .25rem 0; background: #fff; color: #343a40; }
-.auth-password-toggle:focus { outline: .2rem solid rgba(0, 123, 255, .35); outline-offset: .1rem; }
+.auth-page { min-height: 100vh; padding-top: 5rem; background: #f3f5f7; color: #212529; }
+.auth-navbar { min-height: 4rem; background-color: #007bff; }
+.auth-navbar .navbar-brand { font-size: x-large; }
+.auth-layout { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+.auth-card { border-color: #d7dce1; box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .08); }
+.auth-card .card-body { padding: 2rem; }
+.auth-card h1 { margin-bottom: 1.5rem; }
+.auth-password-toggle { min-width: 4.5rem; }
+.auth-password-toggle:focus { box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25); }
 .auth-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
 
 @media (max-width: 30rem) {
-    .auth-layout { align-items: flex-start; padding: 0; }
-    .auth-card { min-height: 100vh; padding: 1.5rem; border: 0; border-radius: 0; box-shadow: none; }
+    .auth-layout { padding-top: 1rem; padding-bottom: 1rem; }
+    .auth-card .card-body { padding: 1.5rem; }
     .auth-actions { align-items: stretch; flex-direction: column; }
 }

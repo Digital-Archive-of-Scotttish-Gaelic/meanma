@@ -82,9 +82,17 @@ for attempt in {1..20}; do
 done
 
 assert_contains '<form method="post" action="index.php" class="auth-form">' "$test_tmp/login.html" 'Dedicated login form is missing'
+assert_contains '<nav class="navbar navbar-dark fixed-top auth-navbar"' "$test_tmp/login.html" 'Authentication header is missing'
+assert_contains '<a class="navbar-brand" href="index.php">MEANⓂ️A</a>' "$test_tmp/login.html" 'MEANMA branding is missing from the authentication header'
+assert_contains 'bootstrap/4\.4\.1/css/bootstrap\.min\.css' "$test_tmp/login.html" 'Authentication page is not using the application Bootstrap version'
+assert_contains 'class="container auth-layout"' "$test_tmp/login.html" 'Authentication page is missing the standard content container'
+assert_contains 'class="card auth-card"' "$test_tmp/login.html" 'Authentication form is not presented in a Bootstrap card'
+assert_contains 'class="form-group"' "$test_tmp/login.html" 'Login form is missing Bootstrap form spacing'
+assert_contains 'class="input-group auth-password"' "$test_tmp/login.html" 'Password field is missing Bootstrap input grouping'
 assert_contains 'type="email"[^>]+autocomplete="username"' "$test_tmp/login.html" 'Email field semantics are missing'
 assert_contains 'type="password"[^>]+autocomplete="current-password"' "$test_tmp/login.html" 'Password field semantics are missing'
 assert_contains 'data-password-toggle="password"' "$test_tmp/login.html" 'Password visibility control is missing'
+assert_not_contains 'title="browse corpus"|title="search corpus"|title="frequency lists"|id="logoutLink"|id="loggedInAs"' "$test_tmp/login.html" 'Login page exposed authenticated application navigation'
 assert_not_contains 'loginModal|<select|active@example\.test|inactive@example\.test|HTTP Tester' "$test_tmp/login.html" 'Login page exposes modal or account data'
 
 http_status=$(curl -sS -D "$test_tmp/root.headers" -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/index.php")
@@ -121,11 +129,16 @@ http_status=$(curl -sS -b "$test_tmp/invalid.cookies" -o "$test_tmp/invalid-resu
   "http://127.0.0.1:$port/index.php")
 assert_status 200 "$http_status" 'Invalid login'
 assert_contains 'Login was unsuccessful\. Check your details and try again\.' "$test_tmp/invalid-result.html" 'Invalid login did not use the generic error'
+assert_contains 'class="alert alert-danger" role="alert"' "$test_tmp/invalid-result.html" 'Invalid login error is not presented accessibly'
 assert_not_contains 'unknown@example\.test|not found|does not exist' "$test_tmp/invalid-result.html" 'Invalid login disclosed account existence'
 
 http_status=$(curl -sS -o "$test_tmp/recovery.html" -w '%{http_code}' "http://127.0.0.1:$port/index.php?loginAction=forgotPassword")
 assert_status 200 "$http_status" 'Password recovery form'
 assert_contains 'name="loginAction" value="sendEmail"' "$test_tmp/recovery.html" 'Password recovery flow is unavailable'
+assert_contains '<a class="navbar-brand" href="index.php">MEANⓂ️A</a>' "$test_tmp/recovery.html" 'Recovery page is missing MEANMA branding'
+assert_contains 'class="container auth-layout"' "$test_tmp/recovery.html" 'Recovery page is missing the standard content container'
+assert_contains 'class="form-group"' "$test_tmp/recovery.html" 'Recovery form is missing Bootstrap form spacing'
+assert_not_contains 'title="browse corpus"|title="search corpus"|title="frequency lists"|id="logoutLink"' "$test_tmp/recovery.html" 'Recovery page exposed authenticated application navigation'
 assert_not_contains 'active@example\.test|inactive@example\.test|HTTP Tester' "$test_tmp/recovery.html" 'Recovery page exposes account data'
 
 recovery_token=$(php "$repo_dir/tests/security/http_fixture.php" set-recovery "$test_db")
@@ -133,6 +146,9 @@ http_status=$(curl -sS -c "$test_tmp/recovery.cookies" -o "$test_tmp/reset.html"
   --get --data-urlencode 'loginAction=resetPassword' --data-urlencode 'email=active@example.test' \
   --data-urlencode "token=$recovery_token" "http://127.0.0.1:$port/index.php")
 assert_status 200 "$http_status" 'Valid password recovery link'
+assert_contains '<a class="navbar-brand" href="index.php">MEANⓂ️A</a>' "$test_tmp/reset.html" 'Password-reset page is missing MEANMA branding'
+assert_contains 'class="input-group auth-password"' "$test_tmp/reset.html" 'Password-reset fields are missing Bootstrap input grouping'
+assert_not_contains 'title="browse corpus"|title="search corpus"|title="frequency lists"|id="logoutLink"' "$test_tmp/reset.html" 'Password-reset page exposed authenticated application navigation'
 reset_csrf=$(perl -ne 'print $1 if /name="_csrf" value="([^"]+)"/' "$test_tmp/reset.html")
 [[ -n "$reset_csrf" ]]
 http_status=$(curl -sS -b "$test_tmp/recovery.cookies" -D "$test_tmp/recovery-complete.headers" -o /dev/null -w '%{http_code}' \

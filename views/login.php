@@ -18,22 +18,22 @@ class login
         $csrfToken = models\security::escape(models\security::csrfToken('login'));
         $next = models\security::safeInternalDestination($params['next'] ?? null);
         $nextInput = $next === null ? '' : '<input type="hidden" name="next" value="' . models\security::escape($next) . '">';
-        $message = $safeMessage === '' ? '' : '<p class="auth-message" role="alert" aria-live="polite">' . $safeMessage . '</p>';
+        $message = $safeMessage === '' ? '' : '<div class="alert alert-danger" role="alert" aria-live="polite">' . $safeMessage . '</div>';
         $body = <<<HTML
           {$message}
           <form method="post" action="index.php" class="auth-form">
             <input type="hidden" name="loginAction" value="login">
             <input type="hidden" name="_csrf" value="{$csrfToken}">
             {$nextInput}
-            <div class="auth-field">
+            <div class="form-group">
               <label for="email">Email address</label>
               <input type="email" id="email" name="email" class="form-control" required autocomplete="username" inputmode="email" autofocus>
             </div>
-            <div class="auth-field">
+            <div class="form-group">
               <label for="password">Password</label>
-              <div class="auth-password">
+              <div class="input-group auth-password">
                 <input type="password" id="password" name="password" class="form-control" required autocomplete="current-password">
-                <button type="button" class="auth-password-toggle" data-password-toggle="password" aria-controls="password" aria-pressed="false">Show</button>
+                <div class="input-group-append"><button type="button" class="btn btn-outline-secondary auth-password-toggle" data-password-toggle="password" aria-controls="password" aria-pressed="false">Show</button></div>
               </div>
             </div>
             <div class="auth-actions">
@@ -47,14 +47,14 @@ HTML;
       case 'forgotPassword':
         $title = 'Reset your password';
         $csrfToken = models\security::escape(models\security::csrfToken('forgotPassword'));
-        $message = $safeMessage === '' ? '' : '<p class="auth-message" role="alert" aria-live="polite">' . $safeMessage . '</p>';
+        $message = $safeMessage === '' ? '' : '<div class="alert alert-danger" role="alert" aria-live="polite">' . $safeMessage . '</div>';
         $body = <<<HTML
           <p>Enter your account email address. If the account is eligible, a recovery link will be sent.</p>
           {$message}
           <form method="post" action="index.php" class="auth-form">
             <input type="hidden" name="loginAction" value="sendEmail">
             <input type="hidden" name="_csrf" value="{$csrfToken}">
-            <div class="auth-field">
+            <div class="form-group">
               <label for="recoveryEmail">Email address</label>
               <input type="email" name="email" id="recoveryEmail" class="form-control" required autocomplete="email" inputmode="email" autofocus>
             </div>
@@ -80,7 +80,7 @@ HTML;
         $safeEmail = models\security::escape($params['email'] ?? '');
         $safeToken = models\security::escape($params['token'] ?? '');
         $csrfToken = models\security::escape(models\security::csrfToken('resetPassword'));
-        $message = $safeMessage === '' ? '' : '<p class="auth-message" role="alert" aria-live="polite">' . $safeMessage . '</p>';
+        $message = $safeMessage === '' ? '' : '<div class="alert alert-danger" role="alert" aria-live="polite">' . $safeMessage . '</div>';
         $body = <<<HTML
           {$message}
           <form method="post" action="index.php" class="auth-form" data-password-match>
@@ -88,18 +88,18 @@ HTML;
             <input type="hidden" name="token" value="{$safeToken}">
             <input type="hidden" name="_csrf" value="{$csrfToken}">
             <input type="hidden" name="loginAction" value="savePassword">
-            <div class="auth-field">
+            <div class="form-group">
               <label for="pass1">New password</label>
-              <div class="auth-password">
+              <div class="input-group auth-password">
                 <input type="password" name="pass1" id="pass1" class="form-control" required autocomplete="new-password" autofocus>
-                <button type="button" class="auth-password-toggle" data-password-toggle="pass1" aria-controls="pass1" aria-pressed="false">Show</button>
+                <div class="input-group-append"><button type="button" class="btn btn-outline-secondary auth-password-toggle" data-password-toggle="pass1" aria-controls="pass1" aria-pressed="false">Show</button></div>
               </div>
             </div>
-            <div class="auth-field">
+            <div class="form-group">
               <label for="pass2">Confirm new password</label>
-              <div class="auth-password">
+              <div class="input-group auth-password">
                 <input type="password" name="pass2" id="pass2" class="form-control" required autocomplete="new-password">
-                <button type="button" class="auth-password-toggle" data-password-toggle="pass2" aria-controls="pass2" aria-pressed="false">Show</button>
+                <div class="input-group-append"><button type="button" class="btn btn-outline-secondary auth-password-toggle" data-password-toggle="pass2" aria-controls="pass2" aria-pressed="false">Show</button></div>
               </div>
             </div>
             <div class="auth-actions">
@@ -114,24 +114,24 @@ HTML;
         $csrfToken = models\security::escape(models\security::csrfToken('requiredPassword'));
         $message = $safeMessage === ''
           ? '<p>Your administrator-assigned password must be changed before continuing.</p>'
-          : '<p class="auth-message" role="alert" aria-live="polite">' . $safeMessage . '</p>';
+          : '<div class="alert alert-danger" role="alert" aria-live="polite">' . $safeMessage . '</div>';
         $body = <<<HTML
           {$message}
           <form method="post" action="index.php" class="auth-form" data-password-match>
             <input type="hidden" name="loginAction" value="saveRequiredPassword">
             <input type="hidden" name="_csrf" value="{$csrfToken}">
-            <div class="auth-field">
+            <div class="form-group">
               <label for="pass1">New password</label>
-              <div class="auth-password">
+              <div class="input-group auth-password">
                 <input type="password" name="pass1" id="pass1" class="form-control" required autocomplete="new-password" autofocus>
-                <button type="button" class="auth-password-toggle" data-password-toggle="pass1" aria-controls="pass1" aria-pressed="false">Show</button>
+                <div class="input-group-append"><button type="button" class="btn btn-outline-secondary auth-password-toggle" data-password-toggle="pass1" aria-controls="pass1" aria-pressed="false">Show</button></div>
               </div>
             </div>
-            <div class="auth-field">
+            <div class="form-group">
               <label for="pass2">Confirm new password</label>
-              <div class="auth-password">
+              <div class="input-group auth-password">
                 <input type="password" name="pass2" id="pass2" class="form-control" required autocomplete="new-password">
-                <button type="button" class="auth-password-toggle" data-password-toggle="pass2" aria-controls="pass2" aria-pressed="false">Show</button>
+                <div class="input-group-append"><button type="button" class="btn btn-outline-secondary auth-password-toggle" data-password-toggle="pass2" aria-controls="pass2" aria-pressed="false">Show</button></div>
               </div>
             </div>
             <div class="auth-actions"><button type="submit" class="btn btn-primary">Change password</button></div>
@@ -140,7 +140,7 @@ HTML;
         break;
 
       default:
-        $body = '<p class="auth-message" role="alert">The requested authentication page is unavailable.</p><p><a href="' . $loginUrl . '">Return to sign in</a></p>';
+        $body = '<div class="alert alert-danger" role="alert">The requested authentication page is unavailable.</div><p><a href="' . $loginUrl . '">Return to sign in</a></p>';
     }
 
     $safeTitle = models\security::escape($title);
@@ -151,17 +151,27 @@ HTML;
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>{$safeTitle}</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <link rel="stylesheet" href="css/style.css">
   <script src="js/login.js" defer></script>
 </head>
 <body class="auth-page">
-  <main class="auth-layout">
-    <section class="auth-card" aria-labelledby="auth-title">
-      <div class="auth-brand">MEANMA</div>
-      <h1 id="auth-title">{$safeTitle}</h1>
-      {$body}
-    </section>
+  <header>
+    <nav class="navbar navbar-dark fixed-top auth-navbar" aria-label="Authentication">
+      <a class="navbar-brand" href="index.php">MEANⓂ️A</a>
+    </nav>
+  </header>
+  <main class="container auth-layout">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <section class="card auth-card" aria-labelledby="auth-title">
+          <div class="card-body">
+            <h1 id="auth-title" class="h3 card-title">{$safeTitle}</h1>
+            {$body}
+          </div>
+        </section>
+      </div>
+    </div>
   </main>
 </body>
 </html>

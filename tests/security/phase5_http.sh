@@ -106,6 +106,10 @@ assert_file '^Location: index.php\?loginAction=changePassword' "$test_tmp/bypass
 curl -sS -b "$test_tmp/managed.cookies" "http://127.0.0.1:$port/index.php?loginAction=changePassword" -o "$test_tmp/change.html"
 change_csrf=$(perl -ne 'print $1 if /name="_csrf" value="([^"]+)"/' "$test_tmp/change.html")
 assert_file 'name="loginAction" value="saveRequiredPassword"' "$test_tmp/change.html" 'Mandatory password form did not render'
+assert_file '<a class="navbar-brand" href="index.php">MEANⓂ️A</a>' "$test_tmp/change.html" 'Mandatory password page is missing MEANMA branding'
+assert_file 'class="container auth-layout"' "$test_tmp/change.html" 'Mandatory password page is missing the standard content container'
+assert_file 'class="input-group auth-password"' "$test_tmp/change.html" 'Mandatory password fields are missing Bootstrap input grouping'
+assert_absent 'title="browse corpus"|title="search corpus"|title="frequency lists"|id="logoutLink"' "$test_tmp/change.html" 'Mandatory password page exposed application navigation'
 http_status=$(curl -sS -b "$test_tmp/managed.cookies" -o /dev/null -w '%{http_code}' \
   --data-urlencode 'loginAction=saveRequiredPassword' --data-urlencode 'pass1=chosen-password' --data-urlencode 'pass2=chosen-password' \
   "http://127.0.0.1:$port/index.php")
