@@ -13,6 +13,11 @@ class login
     if ($_REQUEST["loginAction"] == "login") {
       models\security::requireMethod('POST');
       $this->_authenticationResult = $this->_authenticateUser($_POST);
+      if ($this->_authenticationResult) {
+        $destination = models\security::safeInternalDestination($_POST['next'] ?? null) ?? 'index.php';
+        header('Location: ' . $destination, true, 303);
+        exit;
+      }
     } else if ($_REQUEST["loginAction"] == "logout") {
       models\security::requireMethod('POST');
       if (!models\security::validateCsrf('logout', models\security::requestCsrfToken(), true)) {
@@ -20,28 +25,44 @@ class login
         exit('Invalid request');
       }
       $this->logout();
-      header('Location: index.php', true, 303);
+      header('Location: ' . models\security::loginUrl(), true, 303);
       exit;
     }
   }
 
   public function runAction() {
     switch ($_REQUEST["loginAction"]) {
+      case "loginPage":
+        models\security::requireMethod('GET');
+        if ($this->isLoggedIn()) {
+          $destination = models\security::safeInternalDestination($_GET['next'] ?? null) ?? 'index.php';
+          header('Location: ' . $destination, true, 302);
+          exit;
+        }
+        $message = !empty($_GET['passwordChanged'])
+          ? 'Your password has been changed. You can now sign in.'
+          : (!empty($_GET['reauth']) ? 'Your session expired. Please sign in again.' : '');
+        $this->_view->writePage("login", $message, ['next' => $_GET['next'] ?? '']);
+        break;
       case "login":
         if (!$this->_authenticationResult) {
-          $this->_view->writeModal("login", "Login was unsuccessful. Check your details and try again.");
+          $this->_view->writePage(
+            "login",
+            "Login was unsuccessful. Check your details and try again.",
+            ['next' => $_POST['next'] ?? '']
+          );
         }
         break;
       case "forgotPassword":
         models\security::requireMethod('GET');
-        $this->_view->writeModal("forgotPassword");
+        $this->_view->writePage("forgotPassword");
         break;
       case "sendEmail":
         models\security::requireMethod('POST');
         $recoveryStarted = microtime(true);
         if (!models\security::validateCsrf('forgotPassword', models\security::requestCsrfToken(), true)) {
           http_response_code(403);
-          $this->_view->writeModal("forgotPassword", "The request expired. Please try again.");
+          $this->_view->writePage("forgotPassword", "The request expired. Please try again.");
           break;
         }
         $email = trim((string) ($_POST['email'] ?? ''));
@@ -54,16 +75,16 @@ class login
         if ($remainingDelay > 0) {
           usleep((int) ($remainingDelay * 1000000));
         }
-        $this->_view->writeModal("emailSent");
+        $this->_view->writePage("emailSent");
         break;
       case "resetPassword":
         models\security::requireMethod('GET');
         $email = (string) ($_GET['email'] ?? '');
         $token = (string) ($_GET['token'] ?? '');
         if (!models\passwordrecovery::isValid($email, $token)) {
-          $this->_view->writeModal("login", "This password recovery link is invalid or has expired.");
+          $this->_view->writePage("login", "This password recovery link is invalid or has expired.");
         } else {
-          $this->_view->writeModal("resetPassword", "", ['email' => $email, 'token' => $token]);
+          $this->_view->writePage("resetPassword", "", ['email' => $email, 'token' => $token]);
         }
         break;
       case "savePassword":
@@ -75,19 +96,19 @@ class login
         $validCsrf = models\security::validateCsrf('resetPassword', models\security::requestCsrfToken(), true);
         if (!$validCsrf) {
           http_response_code(403);
-          $this->_view->writeModal("login", "The password could not be changed. Request a new recovery link.");
+          $this->_view->writePage("login", "The password could not be changed. Request a new recovery link.");
         } else if ($pass1 === '' || !hash_equals($pass1, $pass2)
             || !models\passwordrecovery::replacePassword($email, $token, $pass1)) {
           http_response_code(400);
-          $this->_view->writeModal("login", "The password could not be changed. Request a new recovery link.");
+          $this->_view->writePage("login", "The password could not be changed. Request a new recovery link.");
         } else {
-          $this->_view->writeModal("login", "Your password has been changed. You can now log in.");
+          header('Location: index.php?loginAction=loginPage&passwordChanged=1', true, 303);
+          exit;
         }
         break;
       default:
-        if (!$this->isLoggedIn()) {
-          $this->_view->writeModal("login");
-        }
+        header('Location: ' . ($this->isLoggedIn() ? 'index.php' : models\security::loginUrl()), true, 302);
+        exit;
         break;
     }
   }
@@ -155,11 +176,4 @@ class login
     session_destroy();
   }
 
-  public function writeLoginModal() {
-    $this->_view->writeModal("login");
-  }
-
-  public function getLoginTime() {
-  	return $this->_loggedInTime;
-  }
 }

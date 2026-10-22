@@ -13,8 +13,7 @@ $loggedInHide = "hide";
 
 $groupTheme = "007bff"; //default colour scheme (Faclair theme)
 
-$loginControl = new controllers\login();
-if ($loginControl->isLoggedIn()) {
+if (models\users::isAuthenticated()) {
 		$email = $_SESSION["user"];
 		$user = models\users::getUser($email);
 		$userGroups = $user->getGroups();
@@ -133,5 +132,3 @@ echo <<<HTML
       </div>
     </nav>
 HTML;
-
-$loginControl->runAction();

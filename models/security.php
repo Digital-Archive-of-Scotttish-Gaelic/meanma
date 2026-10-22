@@ -44,7 +44,7 @@ class security
     ];
 
     private const PUBLIC_AUTH_ACTIONS = [
-        '' => 'GET',
+        'loginPage' => 'GET',
         'login' => 'POST',
         'forgotPassword' => 'GET',
         'sendEmail' => 'POST',
@@ -93,17 +93,70 @@ class security
         self::requireMethod($expected);
     }
 
-    public static function denyUnauthenticatedRequest(): void
+    public static function denyUnauthenticatedRequest(bool $sessionExpired = false): void
     {
         if (self::wantsJson()) {
             http_response_code(401);
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['error' => 'authentication_required']);
+            echo json_encode([
+                'error' => 'authentication_required',
+                'reason' => $sessionExpired ? 'session_expired' : 'login_required',
+                'login_url' => self::loginUrl(null, $sessionExpired),
+            ]);
             exit;
         }
 
-        header('Location: index.php', true, 302);
+        $destination = null;
+        $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+        if ($method === 'GET' || $method === 'HEAD') {
+            $destination = self::safeInternalDestination((string) ($_SERVER['REQUEST_URI'] ?? ''));
+        }
+        header('Location: ' . self::loginUrl($destination, $sessionExpired), true, 302);
         exit;
+    }
+
+    public static function loginUrl(?string $destination = null, bool $sessionExpired = false): string
+    {
+        $query = ['loginAction' => 'loginPage'];
+        $destination = self::safeInternalDestination($destination);
+        if ($destination !== null) {
+            $query['next'] = $destination;
+        }
+        if ($sessionExpired) {
+            $query['reauth'] = '1';
+        }
+
+        return 'index.php?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+    }
+
+    public static function safeInternalDestination(?string $candidate): ?string
+    {
+        if (!is_string($candidate)) {
+            return null;
+        }
+        $candidate = trim($candidate);
+        if ($candidate === ''
+            || str_starts_with($candidate, '//')
+            || str_contains($candidate, '\\')
+            || preg_match('/[\x00-\x1F\x7F]/', $candidate)) {
+            return null;
+        }
+
+        $parts = parse_url($candidate);
+        if (!is_array($parts)
+            || isset($parts['scheme'])
+            || isset($parts['host'])
+            || isset($parts['user'])
+            || isset($parts['pass'])) {
+            return null;
+        }
+
+        $path = (string) ($parts['path'] ?? '');
+        if ($path === '' || ($path[0] !== '/' && $path !== 'index.php')) {
+            return null;
+        }
+
+        return $candidate;
     }
 
     public static function wantsJson(): bool

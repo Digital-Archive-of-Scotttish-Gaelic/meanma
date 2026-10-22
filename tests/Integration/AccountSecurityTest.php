@@ -52,6 +52,10 @@ final class AccountSecurityTest extends TestCase
         $_SESSION = ['user' => 'inactive@example.test', 'loginTime' => time()];
         self::assertFalse(users::isAuthenticated());
         self::assertArrayNotHasKey('user', $_SESSION);
+
+        $_SESSION = ['user' => 'active@example.test', 'loginTime' => time() - (60 * 60 * 10) - 1];
+        self::assertFalse(users::isAuthenticated());
+        self::assertArrayNotHasKey('user', $_SESSION);
     }
 
     public function testRolesAndGroupMembershipsRetainTheirMeaning(): void

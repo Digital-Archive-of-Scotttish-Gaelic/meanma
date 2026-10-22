@@ -204,8 +204,11 @@ SQL);
 
     $_SERVER['SCRIPT_NAME'] = '/index.php';
     $_SERVER['REQUEST_METHOD'] = 'GET';
-    $_GET = $_POST = $_REQUEST = [];
+    $_GET = $_REQUEST = ['loginAction' => 'loginPage'];
+    $_POST = [];
     $assert(security::isPublicAuthenticationRequest(), 'Login page was not recognized as public');
+    $_GET = $_REQUEST = [];
+    $assert(!security::isPublicAuthenticationRequest(), 'Application root was treated as public');
     $_GET = ['m' => 'corpus', 'a' => 'xsearch'];
     $_REQUEST = $_GET;
     $assert(!security::isPublicAuthenticationRequest(), 'Corpus search was treated as public');

@@ -51,16 +51,19 @@ assert_equal() {
 login_session() {
   local cookie_file=$1
   local prefix=$2
-  curl -sS -b "$cookie_file" -c "$cookie_file" "http://127.0.0.1:$port/index.php" -o "$test_tmp/$prefix-login.html"
+  curl -sS -b "$cookie_file" -c "$cookie_file" "http://127.0.0.1:$port/index.php?loginAction=loginPage" -o "$test_tmp/$prefix-login.html"
   local login_csrf
   login_csrf=$(perl -0777 -ne 'print $1 if /name="loginAction" value="login".*?name="_csrf" value="([^"]+)"/s' "$test_tmp/$prefix-login.html")
   [[ -n "$login_csrf" ]]
-  curl -sS -b "$cookie_file" -c "$cookie_file" -o "$test_tmp/$prefix-home.html" \
+  local login_status
+  login_status=$(curl -sS -b "$cookie_file" -c "$cookie_file" -o /dev/null -w '%{http_code}' \
     --data-urlencode 'loginAction=login' \
     --data-urlencode 'email=active@example.test' \
     --data-urlencode 'password=test-password' \
     --data-urlencode "_csrf=$login_csrf" \
-    "http://127.0.0.1:$port/index.php"
+    "http://127.0.0.1:$port/index.php")
+  [[ "$login_status" == '303' ]]
+  curl -sS -b "$cookie_file" "http://127.0.0.1:$port/index.php" -o "$test_tmp/$prefix-home.html"
 }
 
 php "$repo_dir/tests/security/http_fixture.php" create "$test_db"
@@ -75,15 +78,14 @@ php -S "127.0.0.1:$port" -t "$repo_dir" >"$test_tmp/server.log" 2>&1 &
 server_pid=$!
 
 for attempt in {1..20}; do
-  if curl -sS "http://127.0.0.1:$port/index.php" -o "$test_tmp/anonymous.html" 2>/dev/null; then
+  if curl -sS "http://127.0.0.1:$port/index.php?loginAction=loginPage" -o "$test_tmp/anonymous.html" 2>/dev/null; then
     break
   fi
   sleep 0.1
 done
 
-anonymous_app_csrf=$(perl -ne 'print $1 if /name="csrf-token" content="([^"]+)"/' "$test_tmp/anonymous.html")
 login_csrf=$(perl -0777 -ne 'print $1 if /name="loginAction" value="login".*?name="_csrf" value="([^"]+)"/s' "$test_tmp/anonymous.html")
-[[ -n "$anonymous_app_csrf" && -n "$login_csrf" ]]
+[[ -n "$login_csrf" ]]
 
 http_status=$(curl -sS -o "$test_tmp/login-get.html" -w '%{http_code}' \
   "http://127.0.0.1:$port/index.php?loginAction=login")
@@ -109,9 +111,9 @@ http_status=$(curl -sS -b "$test_tmp/anonymous.cookies" -c "$test_tmp/anonymous.
   "http://127.0.0.1:$port/index.php")
 assert_status 403 "$http_status" 'Login without CSRF token'
 
-curl -sS -c "$test_tmp/first.cookies" "http://127.0.0.1:$port/index.php" -o "$test_tmp/first-login.html"
+curl -sS -c "$test_tmp/first.cookies" "http://127.0.0.1:$port/index.php?loginAction=loginPage" -o "$test_tmp/first-login.html"
 session_before=$(awk '$6 == "MEANMASESSID" {print $7}' "$test_tmp/first.cookies")
-first_pre_login_csrf=$(perl -ne 'print $1 if /name="csrf-token" content="([^"]+)"/' "$test_tmp/first-login.html")
+first_pre_login_csrf=$(perl -0777 -ne 'print $1 if /name="loginAction" value="login".*?name="_csrf" value="([^"]+)"/s' "$test_tmp/first-login.html")
 login_session "$test_tmp/first.cookies" first
 session_after=$(awk '$6 == "MEANMASESSID" {print $7}' "$test_tmp/first.cookies")
 post_login_csrf=$(perl -ne 'print $1 if /name="csrf-token" content="([^"]+)"/' "$test_tmp/first-home.html")

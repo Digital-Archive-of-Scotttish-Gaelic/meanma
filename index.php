@@ -4,6 +4,13 @@ namespace controllers;
 require_once "includes/include.php";
 require_once "includes/securityBootstrap.php";
 
+$loginControl = new login();
+$loginAction = (string) ($_POST['loginAction'] ?? $_GET['loginAction'] ?? '');
+if ($loginAction !== '') {
+	$loginControl->runAction();
+	exit;
+}
+
 $module = isset($_GET["m"]) ? $_GET["m"] : "";
 $action = isset($_GET["a"]) ? $_GET["a"] : "";
 
@@ -18,13 +25,6 @@ if (in_array($module . ':' . $action, $stateChangingRoutes, true)) {
 }
 
 require_once "includes/htmlHeader.php";
-
-// Anonymous requests may render only the existing authentication/recovery UI.
-// Do not dispatch an application controller underneath the login modal.
-if (!\models\users::isAuthenticated()) {
-	require_once "includes/htmlFooter.php";
-	exit;
-}
 
 switch ($module) {
 	case "corpus":

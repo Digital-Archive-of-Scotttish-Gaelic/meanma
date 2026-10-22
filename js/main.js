@@ -34,6 +34,13 @@
   });
 
   $(document).ajaxError(function (_event, xhr) {
+    if (xhr.status === 401 && xhr.responseJSON && xhr.responseJSON.error === 'authentication_required') {
+      var message = xhr.responseJSON.reason === 'session_expired'
+        ? 'Your session has expired. Copy any unsaved work before signing in again.'
+        : 'You must sign in before continuing. Copy any unsaved work before leaving this page.';
+      window.alert(message);
+      return;
+    }
     if (xhr.status === 403 && xhr.responseJSON && xhr.responseJSON.error === 'invalid_csrf_token') {
       window.alert('This request could not be verified. Reload the page and try again.');
     }
@@ -65,33 +72,6 @@ $(function () {
   $('body').tooltip({
     selector: '[data-toggle=tooltip]'
   });
-
-  /**
-   * Login handlers
-   */
-  $('#email').change(function () {
-    var email = $(this).children("option:selected").val();
-    var selectedUser = $(this).children("option:selected").text();
-    $('#selectedUser').text(selectedUser);
-    if (email) {
-        $('#passwordLabel').show();
-        $('#emailSelectContainer').hide();
-        $('#passwordContainer').removeClass('hide');
-        $('#password').focus();
-        $('#login').removeClass('loginButton');
-        $('#loginCancel').removeClass('loginButton');
-    }
-  });
-
-  $('#loginCancel').on('click', function () {
-    $('#email option:first').prop('selected',true);
-    $('#emailSelectContainer').show();
-    $('#passwordContainer').addClass('hide');
-    $('#login').addClass('loginButton');
-    $('#loginCancel').addClass('loginButton');
-    $('.loginMessage').text('');
-  });
-  /** -- **/
 
   /**
    * Send email to request slip unlock

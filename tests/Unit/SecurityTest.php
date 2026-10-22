@@ -38,7 +38,7 @@ final class SecurityTest extends TestCase
     public function publicAuthenticationRequestProvider(): array
     {
         return [
-            'login form' => ['GET', '', true],
+            'login form' => ['GET', 'loginPage', true],
             'login submit' => ['POST', 'login', true],
             'recovery form' => ['GET', 'forgotPassword', true],
             'recovery request' => ['POST', 'sendEmail', true],
@@ -47,7 +47,38 @@ final class SecurityTest extends TestCase
             'login cannot use GET' => ['GET', 'login', false],
             'password save cannot use GET' => ['GET', 'savePassword', false],
             'unknown action' => ['GET', 'unknown', false],
+            'application root' => ['GET', '', false],
         ];
+    }
+
+    public function testSafeInternalDestinationAllowsOnlyLocalApplicationTargets(): void
+    {
+        self::assertSame('/index.php?m=corpus&a=xsearch', security::safeInternalDestination('/index.php?m=corpus&a=xsearch'));
+        self::assertSame('index.php', security::safeInternalDestination('index.php'));
+        self::assertSame('/printSlip.php?id=1', security::safeInternalDestination('/printSlip.php?id=1'));
+
+        foreach ([
+            'https://evil.example/',
+            '//evil.example/',
+            'javascript:alert(1)',
+            '/\\evil.example/',
+            "index.php\r\nLocation: https://evil.example/",
+            'another-relative-page.php',
+        ] as $unsafe) {
+            self::assertNull(security::safeInternalDestination($unsafe), $unsafe);
+        }
+    }
+
+    public function testLoginUrlIncludesOnlyValidatedDestination(): void
+    {
+        self::assertSame(
+            'index.php?loginAction=loginPage&next=%2Findex.php%3Fm%3Dfrequency&reauth=1',
+            security::loginUrl('/index.php?m=frequency', true)
+        );
+        self::assertSame(
+            'index.php?loginAction=loginPage',
+            security::loginUrl('https://evil.example/')
+        );
     }
 
     public function testApplicationAndAjaxRoutesAreNeverPublic(): void

@@ -30,7 +30,7 @@ if ($action === 'drop') {
     exit;
 }
 
-if ($action === 'last-used' || $action === 'issue-count') {
+if ($action === 'last-used' || $action === 'issue-count' || $action === 'set-recovery') {
     $database = new PDO(
         'mysql:host=' . $credentials['host'] . ';dbname=' . $databaseName . ';charset=utf8mb4',
         $credentials['user'],
@@ -41,14 +41,23 @@ if ($action === 'last-used' || $action === 'issue-count') {
         echo $database->query(
             "SELECT UNIX_TIMESTAMP(lastUsed) FROM userGroupMembers WHERE userEmail='active@example.test' AND groupId=1"
         )->fetchColumn(), PHP_EOL;
-    } else {
+    } elseif ($action === 'issue-count') {
         echo $database->query('SELECT COUNT(*) FROM issue')->fetchColumn(), PHP_EOL;
+    } else {
+        $token = 'isolated-http-recovery-token';
+        $created = time();
+        $authorization = 'v2:' . $created . ':' . ($created + 1800) . ':' . hash('sha256', $token);
+        $statement = $database->prepare(
+            "UPDATE user SET passwordAuth = :authorization WHERE email = 'active@example.test'"
+        );
+        $statement->execute(['authorization' => $authorization]);
+        echo $token, PHP_EOL;
     }
     exit;
 }
 
 if ($action !== 'create') {
-    fwrite(STDERR, "Expected create or drop\n");
+    fwrite(STDERR, "Expected a supported fixture action\n");
     exit(2);
 }
 

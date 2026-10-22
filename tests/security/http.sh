@@ -34,7 +34,7 @@ php -S "127.0.0.1:$port" -t "$repo_dir" >"$test_tmp/server.log" 2>&1 &
 server_pid=$!
 
 for attempt in {1..20}; do
-  if curl -sS "http://127.0.0.1:$port/index.php" -o "$test_tmp/login.html" 2>/dev/null; then
+  if curl -sS "http://127.0.0.1:$port/index.php?loginAction=loginPage" -o "$test_tmp/login.html" 2>/dev/null; then
     break
   fi
   sleep 0.1
@@ -59,7 +59,7 @@ assert_status() {
 http_status=$(curl -sS -o "$test_tmp/corpus.html" -D "$test_tmp/corpus.headers" -w '%{http_code}' \
   "http://127.0.0.1:$port/index.php?m=corpus&a=xsearch")
 assert_status 302 "$http_status" 'Anonymous corpus search'
-grep -qi '^Location: index.php' "$test_tmp/corpus.headers"
+grep -qi '^Location: index.php?loginAction=loginPage&next=%2Findex.php%3Fm%3Dcorpus%26a%3Dxsearch' "$test_tmp/corpus.headers"
 
 http_status=$(curl -sS -o "$test_tmp/frequency.html" -w '%{http_code}' \
   "http://127.0.0.1:$port/index.php?m=frequency")
@@ -79,18 +79,19 @@ http_status=$(curl -sS -o "$test_tmp/builder.html" -w '%{http_code}' \
 assert_status 404 "$http_status" 'Web access to CLI corpus utility'
 
 curl -sS -c "$test_tmp/active.cookies" \
-  "http://127.0.0.1:$port/index.php" -o "$test_tmp/active-login.html"
+  "http://127.0.0.1:$port/index.php?loginAction=loginPage" -o "$test_tmp/active-login.html"
 csrf=$(perl -0777 -ne 'print $1 if /name="loginAction" value="login".*?name="_csrf" value="([^"]+)"/s' \
   "$test_tmp/active-login.html")
 [[ -n "$csrf" ]]
 http_status=$(curl -sS -b "$test_tmp/active.cookies" -c "$test_tmp/active.cookies" \
-  -o "$test_tmp/active-home.html" -w '%{http_code}' \
+  -o /dev/null -w '%{http_code}' \
   --data-urlencode 'loginAction=login' \
   --data-urlencode 'email=active@example.test' \
   --data-urlencode 'password=test-password' \
   --data-urlencode "_csrf=$csrf" \
   "http://127.0.0.1:$port/index.php")
-assert_status 200 "$http_status" 'Existing active account login'
+assert_status 303 "$http_status" 'Existing active account login'
+curl -sS -b "$test_tmp/active.cookies" "http://127.0.0.1:$port/index.php" -o "$test_tmp/active-home.html"
 grep -q 'logged in as HTTP Tester' "$test_tmp/active-home.html"
 application_csrf=$(perl -ne 'print $1 if /name="csrf-token" content="([^"]+)"/' "$test_tmp/active-home.html")
 [[ -n "$application_csrf" ]]
@@ -107,7 +108,7 @@ http_status=$(curl -sS -b "$test_tmp/active.cookies" -o "$test_tmp/allowed-group
 assert_status 200 "$http_status" 'Authenticated existing-group request'
 
 curl -sS -c "$test_tmp/inactive.cookies" \
-  "http://127.0.0.1:$port/index.php" -o "$test_tmp/inactive-login.html"
+  "http://127.0.0.1:$port/index.php?loginAction=loginPage" -o "$test_tmp/inactive-login.html"
 csrf=$(perl -0777 -ne 'print $1 if /name="loginAction" value="login".*?name="_csrf" value="([^"]+)"/s' \
   "$test_tmp/inactive-login.html")
 http_status=$(curl -sS -b "$test_tmp/inactive.cookies" -c "$test_tmp/inactive.cookies" \
@@ -130,21 +131,22 @@ http_status=$(curl -sS -o "$test_tmp/unsafe-reset.html" -w '%{http_code}' \
   --data-urlencode 'pass1=attacker-password' \
   --data-urlencode 'pass2=attacker-password' \
   "http://127.0.0.1:$port/index.php")
-assert_status 200 "$http_status" 'Unauthorised password replacement rejection page'
+assert_status 403 "$http_status" 'Unauthorised password replacement rejection page'
 grep -q 'password could not be changed' "$test_tmp/unsafe-reset.html"
 
 curl -sS -c "$test_tmp/post-attack.cookies" \
-  "http://127.0.0.1:$port/index.php" -o "$test_tmp/post-attack-login.html"
+  "http://127.0.0.1:$port/index.php?loginAction=loginPage" -o "$test_tmp/post-attack-login.html"
 csrf=$(perl -0777 -ne 'print $1 if /name="loginAction" value="login".*?name="_csrf" value="([^"]+)"/s' \
   "$test_tmp/post-attack-login.html")
 http_status=$(curl -sS -b "$test_tmp/post-attack.cookies" -c "$test_tmp/post-attack.cookies" \
-  -o "$test_tmp/post-attack-home.html" -w '%{http_code}' \
+  -o /dev/null -w '%{http_code}' \
   --data-urlencode 'loginAction=login' \
   --data-urlencode 'email=active@example.test' \
   --data-urlencode 'password=test-password' \
   --data-urlencode "_csrf=$csrf" \
   "http://127.0.0.1:$port/index.php")
-assert_status 200 "$http_status" 'Original password after rejected takeover attempt'
+assert_status 303 "$http_status" 'Original password after rejected takeover attempt'
+curl -sS -b "$test_tmp/post-attack.cookies" "http://127.0.0.1:$port/index.php" -o "$test_tmp/post-attack-home.html"
 grep -q 'logged in as HTTP Tester' "$test_tmp/post-attack-home.html"
 
 print 'HTTP security checks: 12'
