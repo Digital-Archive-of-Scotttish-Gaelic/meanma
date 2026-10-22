@@ -87,6 +87,8 @@ http_status=$(curl -sS -b "$test_tmp/active.cookies" -c "$test_tmp/active.cookie
   "http://127.0.0.1:$port/index.php")
 assert_status 200 "$http_status" 'Existing active account login'
 grep -q 'logged in as HTTP Tester' "$test_tmp/active-home.html"
+application_csrf=$(perl -ne 'print $1 if /name="csrf-token" content="([^"]+)"/' "$test_tmp/active-home.html")
+[[ -n "$application_csrf" ]]
 
 http_status=$(curl -sS -b "$test_tmp/active.cookies" -o "$test_tmp/forbidden-group.json" \
   -w '%{http_code}' -H 'Accept: application/json' \
@@ -94,7 +96,8 @@ http_status=$(curl -sS -b "$test_tmp/active.cookies" -o "$test_tmp/forbidden-gro
 assert_status 403 "$http_status" 'Authenticated cross-group request'
 
 http_status=$(curl -sS -b "$test_tmp/active.cookies" -o "$test_tmp/allowed-group.json" \
-  -w '%{http_code}' -H 'Accept: application/json' \
+  -w '%{http_code}' -H 'Accept: application/json' -X POST \
+  --data-urlencode "_csrf=$application_csrf" \
   "http://127.0.0.1:$port/ajax.php?action=setGroup&groupId=1")
 assert_status 200 "$http_status" 'Authenticated existing-group request'
 

@@ -11,10 +11,11 @@ class login
     $this->_view = new views\login();
     $_REQUEST["loginAction"] = $_POST["loginAction"] ?? $_GET["loginAction"] ?? "";
     if ($_REQUEST["loginAction"] == "login") {
+      models\security::requireMethod('POST');
       $this->_authenticationResult = $this->_authenticateUser($_POST);
     } else if ($_REQUEST["loginAction"] == "logout") {
-      if ($_SERVER['REQUEST_METHOD'] !== 'POST'
-          || !models\security::validateCsrf('logout', $_POST['_csrf'] ?? null, true)) {
+      models\security::requireMethod('POST');
+      if (!models\security::validateCsrf('logout', models\security::requestCsrfToken(), true)) {
         http_response_code(403);
         exit('Invalid request');
       }
@@ -32,11 +33,13 @@ class login
         }
         break;
       case "forgotPassword":
+        models\security::requireMethod('GET');
         $this->_view->writeModal("forgotPassword");
         break;
       case "sendEmail":
+        models\security::requireMethod('POST');
         $recoveryStarted = microtime(true);
-        if (!models\security::validateCsrf('forgotPassword', $_POST['_csrf'] ?? null, true)) {
+        if (!models\security::validateCsrf('forgotPassword', models\security::requestCsrfToken(), true)) {
           http_response_code(403);
           $this->_view->writeModal("forgotPassword", "The request expired. Please try again.");
           break;
@@ -54,6 +57,7 @@ class login
         $this->_view->writeModal("emailSent");
         break;
       case "resetPassword":
+        models\security::requireMethod('GET');
         $email = (string) ($_GET['email'] ?? '');
         $token = (string) ($_GET['token'] ?? '');
         if (!models\passwordrecovery::isValid($email, $token)) {
@@ -63,12 +67,16 @@ class login
         }
         break;
       case "savePassword":
+        models\security::requireMethod('POST');
         $email = (string) ($_POST['email'] ?? '');
         $token = (string) ($_POST['token'] ?? '');
         $pass1 = (string) ($_POST['pass1'] ?? '');
         $pass2 = (string) ($_POST['pass2'] ?? '');
-        $validCsrf = models\security::validateCsrf('resetPassword', $_POST['_csrf'] ?? null, true);
-        if (!$validCsrf || $pass1 === '' || !hash_equals($pass1, $pass2)
+        $validCsrf = models\security::validateCsrf('resetPassword', models\security::requestCsrfToken(), true);
+        if (!$validCsrf) {
+          http_response_code(403);
+          $this->_view->writeModal("login", "The password could not be changed. Request a new recovery link.");
+        } else if ($pass1 === '' || !hash_equals($pass1, $pass2)
             || !models\passwordrecovery::replacePassword($email, $token, $pass1)) {
           http_response_code(400);
           $this->_view->writeModal("login", "The password could not be changed. Request a new recovery link.");
@@ -89,7 +97,9 @@ class login
    * @return bool : true on authentic user, otherwise false
    */
   private function _authenticateUser($params) {
-    if (!models\security::validateCsrf('login', $params['_csrf'] ?? null, true)) {
+    $csrfToken = $params['_csrf'] ?? null;
+    if (!models\security::validateCsrf('login', is_string($csrfToken) ? $csrfToken : null, true)) {
+      http_response_code(403);
       return false;
     }
 
@@ -111,6 +121,7 @@ class login
     }
     $this->_user = $user;
     session_regenerate_id(true);
+    models\security::resetCsrfTokens();
     $_SESSION["loginTime"] = time();
     $_SESSION["user"] = $user->getEmail();
     unset($_SESSION["email"]);

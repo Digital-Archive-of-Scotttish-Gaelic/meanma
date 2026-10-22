@@ -54,6 +54,7 @@ HTML;
 	}
 
 	private function _showEdit() {
+		$csrfToken = models\security::escape(models\security::csrfToken('application'));
 		$user = models\users::getUser($_SESSION["user"]);
 		if (!$user->getSuperuser()) {
       if (!$this->_model->getId()) {
@@ -93,6 +94,7 @@ HTML;
 		  </ul>
 			<hr/>
 			<form action="index.php?m=writers&a=save&id={$writer->getId()}" method="post">
+				<input type="hidden" name="_csrf" value="{$csrfToken}">
 				<div class="form-group row">
 					<label for="surname_gd" class="col-sm-2 col-form-label">Gaelic surname</label>
 					<input type="text" class="form-control col-sm-4" name="surname_gd" id="surname_gd" value="{$writer->getSurnameGD()}">

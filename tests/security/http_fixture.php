@@ -23,6 +23,23 @@ if ($action === 'drop') {
     exit;
 }
 
+if ($action === 'last-used' || $action === 'issue-count') {
+    $database = new PDO(
+        'mysql:host=' . DB_HOST . ';dbname=' . $databaseName . ';charset=utf8mb4',
+        DB_USER,
+        DB_PASSWORD,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+    if ($action === 'last-used') {
+        echo $database->query(
+            "SELECT UNIX_TIMESTAMP(lastUsed) FROM userGroupMembers WHERE userEmail='active@example.test' AND groupId=1"
+        )->fetchColumn(), PHP_EOL;
+    } else {
+        echo $database->query('SELECT COUNT(*) FROM issue')->fetchColumn(), PHP_EOL;
+    }
+    exit;
+}
+
 if ($action !== 'create') {
     fwrite(STDERR, "Expected create or drop\n");
     exit(2);
@@ -60,6 +77,13 @@ $database->exec(<<<SQL
         userEmail varchar(255) NOT NULL,
         lastUsed timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
+    CREATE TABLE issue (
+        id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        description text NOT NULL,
+        userEmail varchar(255) NOT NULL,
+        status varchar(50) NOT NULL,
+        updated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
 SQL);
 
 $insert = $database->prepare(
@@ -74,4 +98,4 @@ foreach ([
     $insert->execute([$email, md5($salt . 'test-password'), $salt, 'HTTP', 'Tester', 1, (int) $active, 0]);
 }
 $database->exec("INSERT INTO userGroup(name,theme) VALUES ('Test group','123456')");
-$database->exec("INSERT INTO userGroupMembers(groupId,userEmail) VALUES (1,'active@example.test')");
+$database->exec("INSERT INTO userGroupMembers(groupId,userEmail,lastUsed) VALUES (1,'active@example.test','2000-01-01 00:00:00')");

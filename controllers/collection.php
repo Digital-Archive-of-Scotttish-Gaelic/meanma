@@ -24,6 +24,11 @@ class collection
 		    $view->show($action, $type);  //corpus or paper
 		    break;
 	    case "edit":
+		    if (!$id) {
+			    http_response_code(400);
+			    echo 'A slip identifier is required';
+			    break;
+		    }
 		    $slip = ($_GET["filename"])
 		      ? new models\corpus_slip($_GET["filename"], $_GET["wid"], $id, $_GET["pos"], $this->_db)
 			    : new models\paper_slip($id, $_GET["entryId"], $_GET["wordform"], $this->_db);

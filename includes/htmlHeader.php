@@ -43,6 +43,11 @@ HTML;
 }
 
 $logoutCsrf = models\security::csrfToken('logout');
+$applicationCsrf = models\security::escape(models\security::csrfToken('application'));
+$ajaxMutationActions = json_encode(
+	models\security::ajaxMutationActions(),
+	JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+);
 
 echo <<<HTML
 
@@ -60,6 +65,7 @@ echo <<<HTML
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/zoomio@2.0.2/zoomio.css">
   <title>MEANⓂ️A</title>
+  <meta name="csrf-token" content="{$applicationCsrf}">
   <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
@@ -72,6 +78,7 @@ echo <<<HTML
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/zoomio@2.0.2/zoomio.min.js"></script>
+	<script>window.MEANMA_MUTATION_ACTIONS = {$ajaxMutationActions};</script>
 	<script type="text/javascript" src="js/main.js"></script>
 	<script>
 		$(function () {

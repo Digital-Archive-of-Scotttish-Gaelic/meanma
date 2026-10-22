@@ -1,3 +1,63 @@
+(function ($) {
+  function csrfToken() {
+    return $('meta[name="csrf-token"]').attr('content') || '';
+  }
+
+  function requestAction(options) {
+    var url = new URL(options.url || window.location.href, window.location.href);
+    var action = url.searchParams.get('action');
+    if (!action && typeof options.data === 'string') {
+      action = new URLSearchParams(options.data).get('action');
+    } else if (!action && options.data && typeof options.data === 'object') {
+      action = options.data.action;
+    }
+    return { action: action, path: url.pathname };
+  }
+
+  $.ajaxPrefilter(function (options) {
+    var request = requestAction(options);
+    var mutations = window.MEANMA_MUTATION_ACTIONS || [];
+    if (!request.path.endsWith('/ajax.php') || mutations.indexOf(request.action) === -1) {
+      return;
+    }
+
+    options.type = 'POST';
+    options.method = 'POST';
+    var tokenData = '_csrf=' + encodeURIComponent(csrfToken());
+    if (!options.data) {
+      options.data = tokenData;
+    } else if (typeof options.data === 'string') {
+      options.data += '&' + tokenData;
+    } else {
+      options.data._csrf = csrfToken();
+    }
+  });
+
+  $(document).ajaxError(function (_event, xhr) {
+    if (xhr.status === 403 && xhr.responseJSON && xhr.responseJSON.error === 'invalid_csrf_token') {
+      window.alert('This request could not be verified. Reload the page and try again.');
+    }
+  });
+
+  window.meanmaPostNavigation = function (url, target) {
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = url;
+    form.target = target || '_self';
+    form.style.display = 'none';
+
+    var token = document.createElement('input');
+    token.type = 'hidden';
+    token.name = '_csrf';
+    token.value = csrfToken();
+    form.appendChild(token);
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+  };
+})(jQuery);
+
 $(function () {
 
   $('[data-toggle="tooltip"]').tooltip();
@@ -229,11 +289,13 @@ $(function () {
   /*
     Open the add new slip form in a new tab
   */
-  $(document).on('click', '.createSlipLink', function() {
+  $(document).on('click', '.createSlipLink', function(event) {
+    event.preventDefault();
     var url = $(this).attr('data-url');
-    var win = window.open(url, '_blank');
+    var target = 'meanma-slip-' + Date.now();
+    var win = window.open('', target);
     if (win) {
-      //Browser has allowed it to be opened
+      meanmaPostNavigation(url, target);
       win.focus();
     } else {
       //Browser has blocked it

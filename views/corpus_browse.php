@@ -70,6 +70,7 @@ HTML;
 	}
 
 	private function _writeEditForm() {
+		$csrfToken = models\security::escape(models\security::csrfToken('application'));
 		$user = models\users::getUser($_SESSION["user"]);
 		if (!($user->getSuperuser() || $user->getEditor())) {
 			$this->show();
@@ -110,6 +111,7 @@ HTML;
 		}
 		echo <<<HTML
 			<form id="corpusEdit" action="index.php?m=corpus&a=save&id={$this->_model->getID()}" method="post">
+				<input type="hidden" name="_csrf" value="{$csrfToken}">
 				{$formHtml}
 				<button type="submit" class="btn btn-primary">save</button>
 				<a href="?m=corpus&a=browse&id={$_GET["id"]}"><button type="button" class="btn btn-secondary">cancel</button></a>

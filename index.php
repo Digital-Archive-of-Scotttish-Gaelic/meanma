@@ -1,6 +1,22 @@
 <?php
 namespace controllers;
 
+require_once "includes/include.php";
+require_once "includes/securityBootstrap.php";
+
+$module = isset($_GET["m"]) ? $_GET["m"] : "";
+$action = isset($_GET["a"]) ? $_GET["a"] : "";
+
+$stateChangingRoutes = [
+	'corpus:save',
+	'writers:save',
+	'collection:add',
+	'slips:add',
+];
+if (in_array($module . ':' . $action, $stateChangingRoutes, true)) {
+	\models\security::requireStateChangingRequest();
+}
+
 require_once "includes/htmlHeader.php";
 
 // Anonymous requests may render only the existing authentication/recovery UI.
@@ -9,9 +25,6 @@ if (!\models\users::isAuthenticated()) {
 	require_once "includes/htmlFooter.php";
 	exit;
 }
-
-$module = isset($_GET["m"]) ? $_GET["m"] : "";
-$action = isset($_GET["a"]) ? $_GET["a"] : "";
 
 switch ($module) {
 	case "corpus":
@@ -42,6 +55,10 @@ switch ($module) {
 		break;
 	case "slip":
 		$slipId = !empty($_GET["auto_id"]) ? $_GET["auto_id"] : false;
+		if (!$slipId) {
+			http_response_code(400);
+			exit('A slip identifier is required');
+		}
 		$controller = new slip($slipId);
 		break;
 	case "entries":

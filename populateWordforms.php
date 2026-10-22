@@ -5,6 +5,8 @@ use models;
 require_once "includes/include.php";
 require_once "includes/securityBootstrap.php";
 
+models\security::requireStateChangingRequest();
+
 if (!models\users::checkSuperuserAuth()) {
 	die ("not authorised");
 }

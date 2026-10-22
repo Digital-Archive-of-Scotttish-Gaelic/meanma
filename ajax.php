@@ -5,6 +5,11 @@ namespace models;
 require_once 'includes/include.php';
 require_once 'includes/securityBootstrap.php';
 
+$action = (string) ($_POST['action'] ?? $_GET['action'] ?? '');
+if (security::isAjaxMutation($action)) {
+	security::requireStateChangingRequest();
+}
+
 $db = new database(); //TODO: consider remodelling SB
 
 // A request-supplied workspace may only name one of the authenticated user's
@@ -23,7 +28,7 @@ if (isset($_REQUEST['groupId'])) {
 	}
 }
 
-switch ($_REQUEST["action"]) {
+switch ($action) {
 	case "msPopulateModal":
 		$ms = manuscripts::getMSById($_GET["id"]);
 		$data = $ms->getModalData($_GET["chunkId"]);
