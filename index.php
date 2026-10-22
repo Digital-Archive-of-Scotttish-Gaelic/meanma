@@ -1,6 +1,9 @@
 <?php
 namespace controllers;
 
+// Composer dependencies must be bootstrapped by tracked application code.
+// includes/include.php is deployment-specific and is not stored in Git.
+require_once __DIR__ . "/vendor/autoload.php";
 require_once "includes/include.php";
 require_once "includes/securityBootstrap.php";
 

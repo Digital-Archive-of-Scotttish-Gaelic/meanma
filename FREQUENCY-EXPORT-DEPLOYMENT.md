@@ -8,6 +8,12 @@ git pull
 composer install --no-dev --prefer-dist --optimize-autoloader
 ```
 
+The tracked web entry point loads `vendor/autoload.php` directly. Do not move
+Composer bootstrapping into `includes/include.php`: that file is
+deployment-specific and excluded from Git, so doing so makes local and server
+behavior diverge. After deployment, confirm that `vendor/autoload.php` and the
+installed packages are readable by the web-server user.
+
 PhpSpreadsheet 5.10 supports the server's PHP 8.3 runtime and local PHP 8.4.
 The existing `gd`, `zip`, `xml`, and `mbstring` extensions must remain enabled.
 
