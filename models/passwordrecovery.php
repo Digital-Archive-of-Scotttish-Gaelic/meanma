@@ -40,46 +40,57 @@ class passwordrecovery
 
     public static function isValid(string $email, string $token): bool
     {
+        return self::authorizationForToken($email, $token) !== null;
+    }
+
+    private static function authorizationForToken(string $email, string $token): ?string
+    {
         $user = users::getUser(trim($email));
         if (!$user || !$user->getIsActive()) {
-            return false;
+            return null;
         }
 
         $authorization = (string) $user->getPasswordAuth();
         $parts = explode(':', $authorization, 4);
         if (count($parts) !== 4 || $parts[0] !== 'v2') {
-            return false;
+            return null;
         }
 
         [, $created, $expires, $storedHash] = $parts;
         if (!ctype_digit($created) || !ctype_digit($expires)) {
-            return false;
+            return null;
         }
 
         $now = time();
         if ((int) $created > $now || (int) $expires < $now) {
-            return false;
+            return null;
         }
 
-        return hash_equals($storedHash, hash('sha256', $token));
+        return hash_equals($storedHash, hash('sha256', $token)) ? $authorization : null;
     }
 
     public static function replacePassword(string $email, string $token, string $password): bool
     {
-        if ($password === '' || strlen($password) > 1024 || !self::isValid($email, $token)) {
+        if ($password === '' || strlen($password) > 1024) {
             return false;
         }
 
-        $user = users::getUser(trim($email));
-        $authorization = $user->getPasswordAuth();
-        $user->setPassword($password);
-        $user->setSalt(bin2hex(random_bytes(16)));
-        $user->encryptPassword();
+        $email = trim($email);
+        $authorization = self::authorizationForToken($email, $token);
+        if ($authorization === null) {
+            return false;
+        }
+        try {
+            $passwordHash = passwordhasher::hash($password);
+        } catch (\Throwable $exception) {
+            error_log('MEANMA password recovery hashing failed: ' . $exception->getMessage());
+            return false;
+        }
 
         return users::replacePasswordWithAuthorization(
-            $user->getEmail(),
-            $user->getPassword(),
-            $user->getSalt(),
+            $email,
+            $passwordHash,
+            '',
             $authorization
         );
     }

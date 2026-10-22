@@ -43,7 +43,7 @@ composer test
 ```
 
 `composer test` is the complete regression command. It runs PHPUnit unit
-tests, isolated MySQL integration tests, the 30-check Phase 2 database suite,
+tests, isolated MySQL integration tests, the extended Phase 2/3B database suite,
 the 12-check Phase 2 live HTTP suite, and the Phase 3A CSRF/HTTP-method suite.
 
 All database suites use generated fixtures and drop their databases in cleanup
@@ -57,6 +57,9 @@ in the test processes. The suites do not seed or query corpus tables.
   group authorization, recovery-token binding and single use, and rate limits.
 - Phase 3A CSRF generation/validation/rotation, method restrictions, session-ID
   regeneration, logout, controller mutations, and AJAX mutations.
+- Phase 3B strict legacy-hash recognition, Argon2id hashing and verification,
+  transparent conditional migration, concurrent-change protection, inactive
+  account handling, and Argon2id recovery writes.
 - Corpus-search request parameter and pagination characterization without
   executing corpus queries.
 - Frequency-list parameter defaults, filtering, and bounds without contacting

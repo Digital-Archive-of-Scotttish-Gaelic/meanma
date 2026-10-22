@@ -113,10 +113,10 @@ class login
 
     $user = models\users::getUser($email);
     if (!$user || !$user->getIsActive()) {
-      md5('invalid-user' . $password);
+      models\passwordhasher::consumeVerificationTime($password);
       return false;
     }
-    if (!$user->checkPassword($password)) {
+    if (!models\users::verifyPasswordAndMigrate($user, $password)) {
       return false;
     }
     $this->_user = $user;

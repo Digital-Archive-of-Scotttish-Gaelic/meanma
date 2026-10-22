@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use models\authratelimiter;
+use models\passwordhasher;
 use models\passwordrecovery;
 use models\security;
 use models\users;
@@ -117,9 +118,16 @@ SQL);
     $assert(users::checkSuperuserAuth(), 'Existing superuser role was not preserved');
     $_SESSION['user'] = 'editor@example.test';
     $assert(users::getUser($_SESSION['user'])->getEditor(), 'Existing editor role was not preserved');
+    $editor = users::getUser('editor@example.test');
+    $assert(users::verifyPasswordAndMigrate($editor, 'old-password'), 'Legacy authentication failed during migration');
+    $migratedEditor = users::getUser('editor@example.test');
+    $assert(passwordhasher::isModernHash($migratedEditor->getPassword()), 'Legacy password was not migrated');
+    $assert($migratedEditor->getStoredSalt() === '', 'Legacy salt was retained after migration');
+    $assert(!users::verifyPasswordAndMigrate($migratedEditor, 'wrong-password'), 'Incorrect modern password was accepted');
     $_SESSION['user'] = 'inactive@example.test';
     $_SESSION['loginTime'] = time();
     $assert(!users::isAuthenticated(), 'Inactive account retained an authenticated session');
+    $assert(!users::verifyPasswordAndMigrate($inactive, 'old-password'), 'Inactive account triggered password migration');
 
     $before = $database->query(
         "SELECT email,firstname,lastname,slip_admin,isActive,superuser FROM user
@@ -158,6 +166,10 @@ SQL);
         'Single-use recovery token was reused'
     );
     $assert(users::getUser('active@example.test')->checkPassword('new-password') === 1, 'Reset password cannot authenticate');
+    $assert(
+        passwordhasher::isModernHash(users::getUser('active@example.test')->getPassword()),
+        'Password recovery did not create a modern password hash'
+    );
 
     $after = $database->query(
         "SELECT email,firstname,lastname,slip_admin,isActive,superuser FROM user

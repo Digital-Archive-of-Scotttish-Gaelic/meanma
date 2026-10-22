@@ -31,12 +31,20 @@ class user
     return $this->salt;
   }
 
+  public function getStoredSalt() {
+    return isset($this->salt) ? (string) $this->salt : null;
+  }
+
   public function setSalt($salt) {
     $this->salt = $salt;
   }
 
   public function checkPassword($password) {
-    return md5($this->getSalt() . $password) == $this->getPassword() ? 1 : 0;
+    return passwordhasher::verify(
+      (string) $password,
+      (string) $this->getPassword(),
+      $this->getStoredSalt()
+    ) ? 1 : 0;
   }
 
   public function setPassword($password) {
@@ -44,7 +52,8 @@ class user
   }
 
   public function encryptPassword() {
-    $this->password = md5($this->getSalt() . $this->getPassword());
+    $this->password = passwordhasher::hash((string) $this->getPassword());
+    $this->salt = '';
   }
 
   public function getFirstName() {

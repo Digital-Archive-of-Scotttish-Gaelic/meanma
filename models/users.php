@@ -158,6 +158,52 @@ SQL;
     unset($_SESSION["loginTime"], $_SESSION["user"], $_SESSION["email"], $_SESSION["groupId"]);
   }
 
+  public static function verifyPasswordAndMigrate(user $user, string $password): bool {
+    if (!$user->getIsActive()) {
+      passwordhasher::consumeVerificationTime($password);
+      return false;
+    }
+
+    if (!$user->checkPassword($password)) {
+      if (!passwordhasher::isModernHash($user->getPassword())) {
+        passwordhasher::consumeVerificationTime($password);
+      }
+      return false;
+    }
+
+    try {
+      if (passwordhasher::needsRehash($user->getPassword(), $user->getStoredSalt())) {
+        self::rehashPasswordIfCurrent($user, $password);
+      }
+    } catch (\Throwable $exception) {
+      error_log('MEANMA password rehash failed for an authenticated account: ' . $exception->getMessage());
+    }
+
+    return true;
+  }
+
+  public static function rehashPasswordIfCurrent(user $user, string $password): bool {
+    if (!$user->getIsActive() || !$user->checkPassword($password)) {
+      return false;
+    }
+
+    $newHash = passwordhasher::hash($password);
+    $db = new database();
+    $dbh = $db->getDatabaseHandle();
+    $sth = $dbh->prepare(
+      "UPDATE user SET password = :newPassword, salt = ''
+       WHERE email = :email AND password = :oldPassword AND salt = :oldSalt AND isActive = 1"
+    );
+    $sth->execute([
+      ':newPassword' => $newHash,
+      ':email' => $user->getEmail(),
+      ':oldPassword' => $user->getPassword(),
+      ':oldSalt' => $user->getStoredSalt(),
+    ]);
+
+    return $sth->rowCount() === 1;
+  }
+
   public static function setPasswordRecoveryAuthorization(string $email, string $authorization): void {
     $db = new database();
     $db->exec(
